@@ -61,6 +61,7 @@ endif()
 
 add_subdirectory(controllers)
 add_subdirectory(examples)
+add_subdirectory(math)
 
 emil_clangformat_directories(usb_host DIRECTORIES .)
 

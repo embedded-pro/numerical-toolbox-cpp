@@ -1,107 +1,39 @@
-// doc: https://arm-software.github.io/CMSIS_5/Core/html/group__intrinsic__SIMD__gr.html#gabb5bcba694bf17b141c32e6a8474f60e
+#ifndef MATH_SIMD_HPP
+#define MATH_SIMD_HPP
 
-uint32_t __PKHBT 	( 	uint32_t  	val1,
-		uint32_t  	val2,
-		uint32_t  	val3 
-	)
+#include <cstdint>
 
-uint32_t __PKHTB 	( 	uint32_t  	val1,
-		uint32_t  	val2,
-		uint32_t  	val3 
-	)
+namespace dsp
+{
+    class SingleInstructionMultipltData
+    {
+    public:
+        virtual uint32_t Pkhbt(uint32_t value1, uint32_t value2, uint32_t value3) = 0;
+        virtual uint32_t Pkhtb(uint32_t value1, uint32_t value2, uint32_t value3) = 0;
+        virtual uint32_t Qadd(uint32_t value1, uint32_t value2) = 0;
+        virtual uint32_t Qadd16(uint32_t value1, uint32_t value2) = 0;
+        virtual uint32_t Qadd8(uint32_t value1, uint32_t value2) = 0;
+        virtual uint32_t Qasx(uint32_t value1, uint32_t value2) = 0;
+        virtual uint32_t Qsax(uint32_t value1, uint32_t value2) = 0;
+        virtual uint32_t Qsub(uint32_t value1, uint32_t value2) = 0;
+        virtual uint32_t Qsub16(uint32_t value1, uint32_t value2) = 0;
+        virtual uint32_t Qsub8(uint32_t value1, uint32_t value2) = 0;
+        virtual uint32_t Shadd16(uint32_t value1, uint32_t value2) = 0;
+        virtual uint32_t Shasx(uint32_t value1, uint32_t value2) = 0;
+        virtual uint32_t Shsax(uint32_t value1, uint32_t value2) = 0;
+        virtual uint32_t Shsub16(uint32_t value1, uint32_t value2) = 0;
+        virtual uint32_t Smlad(uint32_t value1, uint32_t value2, uint32_t value3) = 0;
+        virtual uint32_t Smladx(uint32_t value1, uint32_t value2, uint32_t value3) = 0;
+        virtual uint64_t Smlald(uint32_t value1, uint32_t value2, uint64_t value3) = 0;
+        virtual unsigned long long Smlaldx(uint32_t value1, uint32_t value2, unsigned long long value3) = 0;
+        virtual uint32_t Smlsdx(uint32_t value1, uint32_t value2, uint32_t value3) = 0;
+        virtual uint32_t Smmla(int32_t value1, int32_t value2, int32_t value3) = 0;
+        virtual uint32_t Smuad(uint32_t value1, uint32_t value2) = 0;
+        virtual uint32_t Smuadx(uint32_t value1, uint32_t value2) = 0;
+        virtual uint32_t Smusd(uint32_t value1, uint32_t value2) = 0;
+        virtual uint32_t Smusdx(uint32_t value1, uint32_t value2) = 0;
+        virtual uint32_t Sxtb16(uint32_t value) = 0;
+    };
+}
 
-uint32_t __QADD 	( 	uint32_t  	val1,
-		uint32_t  	val2 
-	)
-    
-uint32_t __QADD16 	( 	uint32_t  	val1,
-		uint32_t  	val2 
-	)
-
-uint32_t __QADD8 	( 	uint32_t  	val1,
-		uint32_t  	val2 
-	) 	
-
-uint32_t __QASX 	( 	uint32_t  	val1,
-		uint32_t  	val2 
-	) 	
-
-uint32_t __QSAX 	( 	uint32_t  	val1,
-		uint32_t  	val2 
-	) 	
-
-uint32_t __QSUB 	( 	uint32_t  	val1,
-		uint32_t  	val2 
-	) 	
-
-uint32_t __QSUB16 	( 	uint32_t  	val1,
-		uint32_t  	val2 
-	) 	
-
-uint32_t __QSUB8 	( 	uint32_t  	val1,
-		uint32_t  	val2 
-	) 	
-
-uint32_t __SHADD16 	( 	uint32_t  	val1,
-		uint32_t  	val2 
-	) 	
-
-uint32_t __SHASX 	( 	uint32_t  	val1,
-		uint32_t  	val2 
-	) 	
-
-uint32_t __SHSAX 	( 	uint32_t  	val1,
-		uint32_t  	val2 
-	) 	
-
-uint32_t __SHSUB16 	( 	uint32_t  	val1,
-		uint32_t  	val2 
-	) 	
-
-uint32_t __SMLAD 	( 	uint32_t  	val1,
-		uint32_t  	val2,
-		uint32_t  	val3 
-	) 	
-
-uint32_t __SMLADX 	( 	uint32_t  	val1,
-		uint32_t  	val2,
-		uint32_t  	val3 
-	)
-
-uint64_t __SMLALD 	( 	uint32_t  	val1,
-		uint32_t  	val2,
-		uint64_t  	val3 
-	)
-
-unsigned long long __SMLALDX 	( 	uint32_t  	val1,
-		uint32_t  	val2,
-		unsigned long long  	val3 
-	)
-
-uint32_t __SMLSDX 	( 	uint32_t  	val1,
-		uint32_t  	val2,
-		uint32_t  	val3 
-	) 	
-
-uint32_t __SMMLA 	( 	int32_t  	val1,
-		int32_t  	val2,
-		int32_t  	val3 
-	) 	
-
-uint32_t __SMUAD 	( 	uint32_t  	val1,
-		uint32_t  	val2 
-	) 	
-
-uint32_t __SMUADX 	( 	uint32_t  	val1,
-		uint32_t  	val2 
-	) 	
-
-uint32_t __SMUSD 	( 	uint32_t  	val1,
-		uint32_t  	val2 
-	) 	
-
-uint32_t __SMUSDX 	( 	uint32_t  	val1,
-		uint32_t  	val2 
-	) 	
-
-uint32_t __SXTB16 	( 	uint32_t  	val	) 	
+#endif
