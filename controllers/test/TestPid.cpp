@@ -53,6 +53,7 @@ TYPED_TEST(TestPid, no_variation_input_results_in_no_action_control)
         std::chrono::microseconds(10000),
         CreateLimits<TypeParam>()
     );
+    this->controller->SetPoint(CreateValue<TypeParam>(0));
     EXPECT_NEAR(ToFloat(this->controller->Process(CreateValue<TypeParam>(0))), 0, 1e-3f);
 }
 

@@ -59,7 +59,7 @@ namespace controllers
             static T FromDuration(std::chrono::microseconds duration) 
             {
                 if constexpr (math::is_qnumber<T>::value)
-                    return T::FromDuration(duration);
+                    return T(static_cast<float>(duration.count()) * 1e-6f);
                 else
                     return static_cast<T>(duration.count()) / static_cast<T>(1000000); // from microseconds to seconds
             }
