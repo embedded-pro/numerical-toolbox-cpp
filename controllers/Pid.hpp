@@ -10,7 +10,9 @@ namespace controllers
     template<typename QNumberType>
     class Pid
     {
-        static_assert(math::is_qnumber<QNumberType>::value, "Pid can only be instantiated with math::QNumber types.");
+        static_assert(math::is_qnumber<QNumberType>::value ||
+                      std::is_floating_point<QNumberType>::value, 
+                      "Pid can only be instantiated with math::QNumber types.");
 
     public:
         struct Tunnings
@@ -49,6 +51,19 @@ namespace controllers
         void CalculateDerivative(QNumberType& derivativeInput, QNumberType& derivativeError);
 
         void UpdateLasts(QNumberType& controllerOutput, QNumberType& error, QNumberType& measuredProcessVariable);
+
+    private:
+        template<typename T>
+        struct DurationConverter 
+        {
+            static T FromDuration(std::chrono::microseconds duration) 
+            {
+                if constexpr (math::is_qnumber<T>::value)
+                    return T::FromDuration(duration);
+                else
+                    return static_cast<T>(duration.count()) / static_cast<T>(1000000); // from microseconds to seconds
+            }
+        };
 
     private:
         Tunnings tunnings;
@@ -179,7 +194,7 @@ namespace controllers
     template<class QNumberType>
     void Pid<QNumberType>::CalculateIntegral(QNumberType& error)
     {
-        integral += tunnings.ki * error * QNumberType::FromDuration(sampleTime);
+        integral += tunnings.ki * error * DurationConverter<QNumberType>::FromDuration(sampleTime);
         integral = Clamp(integral);
     }
 
@@ -187,9 +202,9 @@ namespace controllers
     void Pid<QNumberType>::CalculateDerivative(QNumberType& derivativeInput, QNumberType& derivativeError)
     {
         if (differentialOnMeasurement)
-            derivative = -tunnings.kd * derivativeInput / QNumberType::FromDuration(sampleTime);
+            derivative = -tunnings.kd * derivativeInput / DurationConverter<QNumberType>::FromDuration(sampleTime);
         else
-            derivative -= tunnings.kd * derivativeError / QNumberType::FromDuration(sampleTime);
+            derivative -= tunnings.kd * derivativeError / DurationConverter<QNumberType>::FromDuration(sampleTime);
     }
 
     template<class QNumberType>
