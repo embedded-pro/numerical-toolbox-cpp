@@ -9,4 +9,5 @@ target_link_libraries(dsp.controllers_test PUBLIC
 
 target_sources(dsp.controllers_test PRIVATE
     TestPid.cpp
+    TestTransformsClarkePark.cpp
 )
