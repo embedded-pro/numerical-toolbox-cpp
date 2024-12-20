@@ -44,6 +44,28 @@ project(control_toolbox LANGUAGES C CXX ASM VERSION 0.0.1) # x-release-please-ve
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
 
+if (CONTROL_TOOLBOX_STANDALONE)
+    FetchContent_Declare(
+        sciplot
+        GIT_REPOSITORY https://github.com/sciplot/sciplot.git
+        GIT_TAG v0.2.2
+    )
+    
+    FetchContent_GetProperties(sciplot)
+    if(NOT sciplot_POPULATED)
+        FetchContent_Populate(sciplot)
+    endif()
+
+    add_library(sciplot INTERFACE)
+    target_include_directories(sciplot INTERFACE 
+        ${sciplot_SOURCE_DIR}
+        OPTIONS 
+        -Wno-error           # Disable -Werror for sciplot headers
+        -Wno-unused-variable # Disable specific warning
+        -Wno-sign-compare    # Disable specific warning
+    )
+endif()
+
 set_directory_properties(PROPERTY USE_FOLDERS ON)
 
 # When building usb-host by itself do not exclude any targets from all
