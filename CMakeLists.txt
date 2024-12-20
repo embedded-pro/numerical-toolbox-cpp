@@ -47,8 +47,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED On)
 if (CONTROL_TOOLBOX_STANDALONE)
     FetchContent_Declare(
         sciplot
-        GIT_REPOSITORY https://github.com/sciplot/sciplot.git
-        GIT_TAG v0.2.2
+        GIT_REPOSITORY  https://github.com/sciplot/sciplot.git
+        GIT_TAG         v0.2.2
     )
     
     FetchContent_GetProperties(sciplot)
