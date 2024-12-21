@@ -246,3 +246,156 @@ TYPED_TEST(TestTransforms, clarke_park_multiple_angles)
         EXPECT_NEAR(ToFloat(result.c), ToFloat(input.c), tolerance);
     }
 }
+
+TYPED_TEST(TestTransforms, clarke_unbalanced_system)
+{
+    auto input = CreateThreePhase<TypeParam>(0.8f, -0.1f, -0.4f);
+    auto result = this->clarke->Forward(input);
+
+    float scale = std::is_same_v<TypeParam, float> ? 1.0f : 0.2f;
+    float tolerance = GetTolerance<TypeParam>();
+
+    // Expected values calculated using the Clarke transform equations:
+    // α = 2/3 * (a - 0.5*(b + c))
+    // β = (1/√3) * (b - c)
+    float expected_alpha = scale * 2.0f / 3.0f * (0.8f - 0.5f * (-0.1f - 0.4f));
+    float expected_beta = scale * 0.866f * (-0.1f - (-0.4f));
+
+    EXPECT_NEAR(ToFloat(result.alpha), expected_alpha, tolerance);
+    EXPECT_NEAR(ToFloat(result.beta), expected_beta, tolerance);
+}
+
+TYPED_TEST(TestTransforms, park_negative_angles)
+{
+    auto input = CreateTwoPhase<TypeParam>(0.3f, 0.2f);
+    auto result = this->park->Forward(input, CreateValue<TypeParam>(-M_PI_4));
+
+    float tolerance = GetTolerance<TypeParam>();
+
+    float cos45 = std::cos(-M_PI_4); // ≈ 0.707
+    float sin45 = std::sin(-M_PI_4); // ≈ -0.707
+
+    float scale = std::is_same_v<TypeParam, float> ? 1.0f : 0.2f;
+    float expected_d = scale * (0.3f * cos45 + 0.2f * sin45);
+    float expected_q = scale * (-0.3f * sin45 + 0.2f * cos45);
+
+    EXPECT_NEAR(ToFloat(result.d), expected_d, tolerance);
+    EXPECT_NEAR(ToFloat(result.q), expected_q, tolerance);
+}
+
+TYPED_TEST(TestTransforms, clarke_park_near_limits)
+{
+    float max_val = std::is_same_v<TypeParam, float> ? 0.9f : 0.18f;
+    auto input = CreateThreePhase<TypeParam>(max_val, -max_val / 2, -max_val / 2);
+    auto angle = CreateValue<TypeParam>(M_PI / 3); // 60 degrees
+
+    auto dq = this->clarkePark->Forward(input, angle);
+    auto result = this->clarkePark->Inverse(dq, angle);
+
+    float tolerance = GetTolerance<TypeParam>();
+
+    EXPECT_NEAR(ToFloat(result.a), ToFloat(input.a), tolerance);
+    EXPECT_NEAR(ToFloat(result.b), ToFloat(input.b), tolerance);
+    EXPECT_NEAR(ToFloat(result.c), ToFloat(input.c), tolerance);
+}
+
+TYPED_TEST(TestTransforms, clarke_dc_offset)
+{
+    auto input = CreateThreePhase<TypeParam>(0.6f, 0.1f, 0.1f); // All phases shifted up by 0.1
+    auto result = this->clarke->Forward(input);
+
+    float scale = std::is_same_v<TypeParam, float> ? 1.0f : 0.2f;
+    float tolerance = GetTolerance<TypeParam>();
+
+    // Clarke transform should reject common mode
+    // Expected alpha = 2/3 * (0.6 - 0.5*(0.1 + 0.1)) = 2/3 * (0.6 - 0.1) = 0.333
+    // Expected beta = 1/√3 * (0.1 - 0.1) = 0
+    float expected_alpha = scale * 2.0f / 3.0f * (0.6f - 0.1f);
+    float expected_beta = 0.0f;
+
+    EXPECT_NEAR(ToFloat(result.alpha), expected_alpha, tolerance);
+    EXPECT_NEAR(ToFloat(result.beta), expected_beta, tolerance);
+}
+
+TYPED_TEST(TestTransforms, park_harmonic_angle)
+{
+    auto input = CreateTwoPhase<TypeParam>(0.2f, 0.3f);
+    float base_rads = M_PI / 6;
+    float scale = 1.0f;
+    float tolerance = GetTolerance<TypeParam>();
+
+    if constexpr (std::is_same_v<TypeParam, math::Q31>)
+    {
+        scale = 0.2f;
+        base_rads = M_PI / 12;
+        tolerance = 0.03f;
+    }
+
+    input = CreateTwoPhase<TypeParam>(scale * 0.2f, scale * 0.3f);
+    auto base_angle = CreateValue<TypeParam>(base_rads);
+
+    float harmonic_rads = std::fmod(base_rads + 2 * M_PI, 2 * M_PI);
+    auto harmonic_angle = CreateValue<TypeParam>(harmonic_rads);
+
+    auto result1 = this->park->Forward(input, base_angle);
+    auto result2 = this->park->Forward(input, harmonic_angle);
+
+    EXPECT_NEAR(ToFloat(result1.d), ToFloat(result2.d), tolerance);
+    EXPECT_NEAR(ToFloat(result1.q), ToFloat(result2.q), tolerance);
+}
+
+TYPED_TEST(TestTransforms, clarke_park_small_values)
+{
+    float scale = std::is_same_v<TypeParam, float> ? 1.0f : 0.2f;
+    float small_val;
+    float rel_tolerance;
+
+    if constexpr (std::is_same_v<TypeParam, math::Q15>)
+    {
+        small_val = scale * 0.01f;
+        rel_tolerance = 0.15f; // 15% tolerance for Q15
+    }
+    else if constexpr (std::is_same_v<TypeParam, math::Q31>)
+    {
+        small_val = scale * 0.001f;
+        rel_tolerance = 0.1f; // 10% tolerance for Q31
+    }
+    else
+    {
+        small_val = scale * 0.001f;
+        rel_tolerance = 0.05f; // 5% tolerance for float
+    }
+
+    auto input = CreateThreePhase<TypeParam>(small_val, -small_val / 2, -small_val / 2);
+    auto angle = CreateValue<TypeParam>(M_PI / 4);
+
+    auto dq = this->clarkePark->Forward(input, angle);
+    auto result = this->clarkePark->Inverse(dq, angle);
+
+    auto check_error = [rel_tolerance](float expected, float actual, const char* label) -> bool
+    {
+        float abs_diff = std::abs(actual - expected);
+        float abs_expected = std::abs(expected);
+
+        if constexpr (std::is_same_v<TypeParam, math::Q15>)
+        {
+            // Q15 step size is 2^-15 ≈ 3.0517578125e-5
+            constexpr float q15_step = 1.0f / 32768.0f;
+
+            // For very small values (less than 256 quantization steps),
+            // allow up to 2 quantization steps of error
+            if (abs_expected < 256 * q15_step)
+                return abs_diff <= 2 * q15_step;
+        }
+
+        if (abs_expected < 1e-4f)
+            return abs_diff < 1e-4f;
+
+        float rel_error = abs_diff / abs_expected;
+        return rel_error <= rel_tolerance;
+    };
+
+    EXPECT_TRUE(check_error(ToFloat(input.a), ToFloat(result.a), "a value"));
+    EXPECT_TRUE(check_error(ToFloat(input.b), ToFloat(result.b), "b value"));
+    EXPECT_TRUE(check_error(ToFloat(input.c), ToFloat(result.c), "c value"));
+}
