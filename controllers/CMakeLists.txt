@@ -11,7 +11,9 @@ target_link_libraries(dsp.controllers INTERFACE
 )
 
 target_sources(dsp.controllers PRIVATE
+    FieldOrientedController.hpp
     Pid.hpp
+    SpaceVectorModulation.hpp
     TransformsClarkePark.hpp
 )
 

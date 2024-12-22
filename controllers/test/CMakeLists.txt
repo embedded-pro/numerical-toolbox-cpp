@@ -8,6 +8,7 @@ target_link_libraries(dsp.controllers_test PUBLIC
 )
 
 target_sources(dsp.controllers_test PRIVATE
+    TestFieldOrientedController.cpp
     TestPid.cpp
     TestSpaceVectorModulation.cpp
     TestTransformsClarkePark.cpp
