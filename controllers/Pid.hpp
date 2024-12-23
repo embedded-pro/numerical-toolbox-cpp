@@ -11,8 +11,8 @@ namespace controllers
     class Pid
     {
         static_assert(math::is_qnumber<QNumberType>::value ||
-                      std::is_floating_point<QNumberType>::value, 
-                      "Pid can only be instantiated with math::QNumber types.");
+                          std::is_floating_point<QNumberType>::value,
+            "Pid can only be instantiated with math::QNumber types.");
 
     public:
         struct Tunnings
@@ -54,9 +54,9 @@ namespace controllers
 
     private:
         template<typename T>
-        struct DurationConverter 
+        struct DurationConverter
         {
-            static T FromDuration(std::chrono::microseconds duration) 
+            static T FromDuration(std::chrono::microseconds duration)
             {
                 if constexpr (math::is_qnumber<T>::value)
                     return T(static_cast<float>(duration.count()) * 1e-6f);
@@ -213,6 +213,11 @@ namespace controllers
         this->lastControllerOutput.emplace(controllerOutput);
         this->lastError.emplace(error);
         this->lastMeasuredProcessVariable.emplace(measuredProcessVariable);
+    }
+
+    template<class QNumberType>
+    void Pid<QNumberType>::Reset()
+    {
     }
 }
 

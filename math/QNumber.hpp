@@ -2,13 +2,49 @@
 #define MATH_Q_NUMBER_H
 
 #include "infra/util/ReallyAssert.hpp"
-#include <cmath>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <limits>
 
 namespace math
 {
+    template<typename T>
+    float ToFloat(T value)
+    {
+        if constexpr (std::is_same_v<T, float>)
+            return value;
+        else
+            return value.ToFloat();
+    }
+
+    template<typename T>
+    float Min()
+    {
+        if constexpr (std::is_same_v<T, float>)
+            return std::numeric_limits<float>::min();
+        else
+            return 0.0f;
+    }
+
+    template<typename T>
+    float Max()
+    {
+        if constexpr (std::is_same_v<T, float>)
+            return std::numeric_limits<float>::max();
+        else
+            return 0.9999f;
+    }
+
+    template<typename T>
+    float Lowest()
+    {
+        if constexpr (std::is_same_v<T, float>)
+            return std::numeric_limits<float>::lowest();
+        else
+            return -0.9999f;
+    }
+
     template<typename IntType, int FractionalBits>
     class QNumber
     {
@@ -102,7 +138,7 @@ namespace math
     QNumber<IntType, FractionalBits>::operator-(const QNumber& other) const
     {
         really_assert((other.value >= 0 || value <= std::numeric_limits<IntType>::max() + other.value) &&
-                    (other.value <= 0 || value >= std::numeric_limits<IntType>::min() + other.value));
+                      (other.value <= 0 || value >= std::numeric_limits<IntType>::min() + other.value));
 
         return QNumber(static_cast<IntType>(value - other.value));
     }
@@ -115,7 +151,7 @@ namespace math
         temp >>= FractionalBits;
 
         really_assert(temp <= std::numeric_limits<IntType>::max() &&
-                    temp >= std::numeric_limits<IntType>::min());
+                      temp >= std::numeric_limits<IntType>::min());
         return QNumber(static_cast<IntType>(temp));
     }
 
@@ -129,7 +165,7 @@ namespace math
         int64_t result = numerator / other.value;
 
         really_assert(result <= std::numeric_limits<IntType>::max() &&
-                    result >= std::numeric_limits<IntType>::min());
+                      result >= std::numeric_limits<IntType>::min());
         return QNumber(static_cast<IntType>(result));
     }
 
@@ -138,7 +174,7 @@ namespace math
     QNumber<IntType, FractionalBits>::operator+=(const QNumber& other)
     {
         really_assert((other.value <= 0 || value <= std::numeric_limits<IntType>::max() - other.value) &&
-                    (other.value >= 0 || value >= std::numeric_limits<IntType>::min() - other.value));
+                      (other.value >= 0 || value >= std::numeric_limits<IntType>::min() - other.value));
 
         value += other.value;
         return *this;
@@ -149,7 +185,7 @@ namespace math
     QNumber<IntType, FractionalBits>::operator-=(const QNumber& other)
     {
         really_assert((other.value >= 0 || value <= std::numeric_limits<IntType>::max() + other.value) &&
-                    (other.value <= 0 || value >= std::numeric_limits<IntType>::min() + other.value));
+                      (other.value <= 0 || value >= std::numeric_limits<IntType>::min() + other.value));
         value -= other.value;
         return *this;
     }
@@ -162,7 +198,7 @@ namespace math
         temp >>= FractionalBits;
 
         really_assert(temp <= std::numeric_limits<IntType>::max() &&
-                    temp >= std::numeric_limits<IntType>::min());
+                      temp >= std::numeric_limits<IntType>::min());
         value = static_cast<IntType>(temp);
         return *this;
     }
@@ -177,7 +213,7 @@ namespace math
         int64_t result = numerator / other.value;
 
         really_assert(result <= std::numeric_limits<IntType>::max() &&
-                    result >= std::numeric_limits<IntType>::min());
+                      result >= std::numeric_limits<IntType>::min());
         value = static_cast<IntType>(result);
         return *this;
     }
