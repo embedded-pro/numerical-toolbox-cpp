@@ -1,22 +1,13 @@
 #include "controllers/Pid.hpp"
-#include <sciplot/sciplot.hpp>
 #include <chrono>
+#include <sciplot/sciplot.hpp>
 #include <vector>
 
 using namespace sciplot;
 
 namespace
 {
-    template<typename T>
-    float ToFloat(T value)
-    {
-        if constexpr (std::is_same_v<T, float>)
-            return value;
-        else
-            return value.ToFloat();
-    }
-
-    class ThermalSystem 
+    class ThermalSystem
     {
     public:
         ThermalSystem(float initialTemp = 25.0f)
@@ -26,10 +17,10 @@ namespace
             , coolingCoefficient(0.02f)
         {}
 
-        float Update(float heatingPower) 
+        float Update(float heatingPower)
         {
-            float deltaT = heatingPower * heatingCoefficient - 
-                        (currentTemperature - ambientTemperature) * coolingCoefficient;
+            float deltaT = heatingPower * heatingCoefficient -
+                           (currentTemperature - ambientTemperature) * coolingCoefficient;
             currentTemperature += deltaT;
             return currentTemperature;
         }
@@ -42,10 +33,10 @@ namespace
     };
 
     template<typename T>
-    class TemperatureController 
+    class TemperatureController
     {
     public:
-        struct Config 
+        struct Config
         {
             T kp;
             T ki;
@@ -55,26 +46,26 @@ namespace
         };
 
         explicit TemperatureController(const Config& config)
-            : pidController({config.kp, config.ki, config.kd}, 
-                        config.sampleTime,
-                        {T(-0.9f), T(0.9f)})
+            : pidController({ config.kp, config.ki, config.kd },
+                  config.sampleTime,
+                  { T(-0.9f), T(0.9f) })
         {
             SetTargetTemperature(config.targetTemperature);
         }
 
-        void SetTargetTemperature(float temperatureCelsius) 
+        void SetTargetTemperature(float temperatureCelsius)
         {
             float normalizedTemp = (temperatureCelsius - minTemperature) / (maxTemperature - minTemperature);
             normalizedTemp = 2.0f * normalizedTemp - 1.0f;
             pidController.SetPoint(T(normalizedTemp));
         }
 
-        float Process(float temperature) 
+        float Process(float temperature)
         {
             float normalizedTemp = (temperature - minTemperature) / (maxTemperature - minTemperature);
             normalizedTemp = 2.0f * normalizedTemp - 1.0f;
 
-            float pidOutput = ToFloat(pidController.Process(T(normalizedTemp)));
+            float pidOutput = math::ToFloat(pidController.Process(T(normalizedTemp)));
             return (pidOutput + 0.9f) / 1.8f; // Convert to 0-1 range for heating power
         }
 
@@ -84,7 +75,7 @@ namespace
         static constexpr float maxTemperature = 120.0f;
     };
 
-    struct SimulationResults 
+    struct SimulationResults
     {
         std::vector<float> times;
         std::vector<float> temperatures;
@@ -93,55 +84,53 @@ namespace
     };
 
     template<typename T>
-    SimulationResults RunSimulation(const typename TemperatureController<T>::Config& config, 
-                                float simulationTime, 
-                                float timeStep,
-                                const std::string& label) 
+    SimulationResults RunSimulation(const typename TemperatureController<T>::Config& config,
+        float simulationTime,
+        float timeStep,
+        const std::string& label)
     {
         TemperatureController<T> controller(config);
-        ThermalSystem system(25.0f);  // Start at 25°C
-        
+        ThermalSystem system(25.0f); // Start at 25°C
+
         SimulationResults results;
         results.label = label;
         float currentTime = 0.0f;
-        
-        while (currentTime < simulationTime) 
+
+        while (currentTime < simulationTime)
         {
             // Get current temperature
             float currentTemp = system.Update(results.controlActions.empty() ? 0.0f : results.controlActions.back());
-            
+
             // Calculate control action
             float controlAction = controller.Process(currentTemp);
-            
+
             // Store results
             results.times.push_back(currentTime);
             results.temperatures.push_back(currentTemp);
             results.controlActions.push_back(controlAction);
-            
+
             currentTime += timeStep;
         }
-        
+
         return results;
     }
 }
 
-int main() 
+int main()
 {
     float simulationTime = 60.0f;
     float timeStep = 0.1f;
 
     // Configure controllers
-    TemperatureController<float>::Config floatConfig
-    {
+    TemperatureController<float>::Config floatConfig{
         2.0f,
         0.5f,
         0.1f,
-        0.0f,  // Target 60°C
-        std::chrono::microseconds(100000)  // 100ms
+        0.0f,                             // Target 60°C
+        std::chrono::microseconds(100000) // 100ms
     };
 
-    TemperatureController<math::Q31>::Config q31Config
-    {
+    TemperatureController<math::Q31>::Config q31Config{
         math::Q31(0.5f),
         math::Q31(0.1f),
         math::Q31(0.05f),
@@ -149,8 +138,7 @@ int main()
         std::chrono::microseconds(100000)
     };
 
-    TemperatureController<math::Q15>::Config q15Config
-    {
+    TemperatureController<math::Q15>::Config q15Config{
         math::Q15(0.5f),
         math::Q15(0.1f),
         math::Q15(0.05f),
@@ -172,12 +160,12 @@ int main()
         .displayHorizontal()
         .fontSize(10);
     tempPlot.grid().show();
-    
+
     // Plot temperature response
     tempPlot.drawCurve(floatResults.times, floatResults.temperatures)
         .label("System Temperature")
         .lineWidth(2);
-    
+
     // Draw target temperature line
     std::vector<double> target_line(floatResults.times.size(), 60.0);
     tempPlot.drawCurve(floatResults.times, target_line)
@@ -186,7 +174,7 @@ int main()
 
     // Set temperature plot range
     tempPlot.yrange(20, 70);
-    
+
     // Create control actions plot
     Plot controlPlot;
     controlPlot.xlabel("Time (s)");
@@ -196,33 +184,33 @@ int main()
         .displayHorizontal()
         .fontSize(10);
     controlPlot.grid().show();
-    
+
     // Plot control actions
     controlPlot.drawCurve(floatResults.times, floatResults.controlActions)
         .label("Float Control")
-        .lineWidth(1.5);
-        
+        .lineWidth(1);
+
     controlPlot.drawCurve(q31Results.times, q31Results.controlActions)
         .label("Q31 Control")
-        .lineWidth(1.5);
-        
+        .lineWidth(1);
+
     controlPlot.drawCurve(q15Results.times, q15Results.controlActions)
         .label("Q15 Control")
-        .lineWidth(1.5);
+        .lineWidth(1);
 
     // Set control plot range
     controlPlot.yrange(0, 1);
 
     // Create a 2D array of plots (2 rows, 1 column)
     std::vector<std::vector<Plot>> plotMatrix = {
-        {tempPlot},     // First row
-        {controlPlot}   // Second row
+        { tempPlot },   // First row
+        { controlPlot } // Second row
     };
 
     // Create figure with the plot matrix
     Figure figure(plotMatrix);
     figure.size(1200, 800);
-    
+
     // Save the plot
     figure.save("pid_simulation.pdf");
 

@@ -1,4 +1,5 @@
 #ifndef MATH_TRIGONOMETRIC_FUNCTIONS_HPP
+#define MATH_TRIGONOMETRIC_FUNCTIONS_HPP
 
 #include "math/QNumber.hpp"
 

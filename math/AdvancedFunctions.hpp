@@ -1,4 +1,5 @@
 #ifndef MATH_ADVANCED_FUNCTIONS_HPP
+#define MATH_ADVANCED_FUNCTIONS_HPP
 
 #include "math/QNumber.hpp"
 

@@ -3,7 +3,6 @@
 
 #include "controllers/TransformsClarkePark.hpp"
 #include "math/QNumber.hpp"
-#include <algorithm>
 
 namespace controllers
 {
@@ -28,13 +27,18 @@ namespace controllers
             InitializeConstants();
         }
 
-        Output Generate(const RotatingFrame<QNumberType>& dqVoltage, QNumberType theta)
+        Output Generate(const RotatingFrame<QNumberType>& dqVoltage, QNumberType scaledTheta)
         {
-            QNumberType cosTheta = trigFunctions.Cosine(theta);
-            QNumberType sinTheta = trigFunctions.Sine(theta);
+            really_assert(scaledTheta >= math::Lowest<QNumberType>() && scaledTheta <= math::Max<QNumberType>());
 
-            QNumberType valpha = dqVoltage.d * cosTheta - dqVoltage.q * sinTheta;
-            QNumberType vbeta = dqVoltage.d * sinTheta + dqVoltage.q * cosTheta;
+            QNumberType d = dqVoltage.d * outputScale;
+            QNumberType q = dqVoltage.q * outputScale;
+
+            QNumberType cosTheta = trigFunctions.Cosine(scaledTheta);
+            QNumberType sinTheta = trigFunctions.Sine(scaledTheta);
+
+            QNumberType valpha = d * cosTheta - q * sinTheta;
+            QNumberType vbeta = d * sinTheta + q * cosTheta;
 
             auto pattern = CalculateSwitchingTimes(valpha, vbeta);
 
@@ -52,7 +56,7 @@ namespace controllers
             {
                 zero = QNumberType(0.0f);
                 one = QNumberType(1.0f);
-                oneHalf = QNumberType(0.5f);
+                half = QNumberType(0.5f);
                 invSqrt3 = QNumberType(0.577350269189625f);
                 sqrt3Div2 = QNumberType(0.866025403784438f);
                 twoDivSqrt3 = QNumberType(1.154700538379252f);
@@ -60,46 +64,24 @@ namespace controllers
             }
             else
             {
-                // Scale = 0.2f
                 zero = QNumberType(0.0f);
                 one = QNumberType(0.2f);
-                oneHalf = QNumberType(0.1f);
+                half = QNumberType(0.1f);
                 invSqrt3 = QNumberType(0.115470053837925f);
                 sqrt3Div2 = QNumberType(0.1732050807568876f);
                 twoDivSqrt3 = QNumberType(0.2309401076758504f);
-                outputScale = QNumberType(0.04f);
+                outputScale = QNumberType(0.2f);
             }
-        }
-
-        QNumberType CreateValue(float value)
-        {
-            if constexpr (std::is_floating_point<QNumberType>::value)
-                return value;
-            else
-                return QNumberType(std::clamp(value, -0.9f, 0.9f));
-        }
-
-        template<typename T>
-        float ToFloat(T value)
-        {
-            if constexpr (std::is_same_v<T, float>)
-                return value;
-            else
-                return value.ToFloat();
         }
 
         QNumberType ClampDutyCycle(QNumberType duty)
         {
-            if constexpr (std::is_floating_point<QNumberType>::value)
-                return std::clamp(duty, zero, one);
-            else
-            {
-                if (ToFloat(duty) < ToFloat(zero))
-                    return zero;
-                if (ToFloat(duty) > ToFloat(one))
-                    return one / outputScale;
-                return duty / outputScale;
-            }
+            if (duty < zero)
+                return zero;
+            if (duty > one)
+                return one / outputScale;
+
+            return duty / outputScale;
         }
 
         struct SwitchingPattern
@@ -111,8 +93,10 @@ namespace controllers
 
         SwitchingPattern AddCommonInjection(SwitchingPattern pattern)
         {
+            static const QNumberType _half = QNumberType(0.5f);
+
             QNumberType t0 = one - pattern.ta - pattern.tb - pattern.tc;
-            QNumberType t_com = t0 * oneHalf;
+            QNumberType t_com = t0 * _half;
 
             pattern.ta += t_com;
             pattern.tb += t_com;
@@ -165,21 +149,18 @@ namespace controllers
 
         SwitchingPattern CalculateSwitchingTimes(QNumberType valpha, QNumberType vbeta)
         {
-            QNumberType v_ref_60 = (valpha * oneHalf - vbeta * sqrt3Div2);
-            QNumberType v_ref_120 = (-valpha * oneHalf - vbeta * sqrt3Div2);
+            QNumberType v_ref_60 = (valpha * half - vbeta * sqrt3Div2);
+            QNumberType v_ref_120 = (-valpha * half - vbeta * sqrt3Div2);
 
-            QNumberType valphaAbs = ToFloat(valpha) >= 0 ? valpha : QNumberType(-ToFloat(valpha));
-            QNumberType compareThreshold = valphaAbs * QNumberType(0.1f);
-
-            if (ToFloat(v_ref_60) >= ToFloat(compareThreshold))
+            if (v_ref_60 >= zero)
                 return Calculate60To120Degrees(valpha, vbeta);
-            if (ToFloat(v_ref_120) >= ToFloat(compareThreshold))
+            if (v_ref_120 >= zero)
                 return Calculate120To180Degrees(valpha, vbeta);
-            if (ToFloat(-valpha) >= ToFloat(compareThreshold))
+            if (-valpha >= zero)
                 return Calculate180To240Degrees(valpha, vbeta);
-            if (ToFloat(-v_ref_60) >= ToFloat(compareThreshold))
+            if (-v_ref_60 >= zero)
                 return Calculate240To300Degrees(valpha, vbeta);
-            if (ToFloat(-v_ref_120) >= ToFloat(compareThreshold))
+            if (-v_ref_120 >= zero)
                 return Calculate300To360Degrees(valpha, vbeta);
 
             return Calculate0To60Degrees(valpha, vbeta);
@@ -188,7 +169,7 @@ namespace controllers
         const dsp::TrigonometricFunctions<QNumberType>& trigFunctions;
         QNumberType zero;
         QNumberType one;
-        QNumberType oneHalf;
+        QNumberType half;
         QNumberType invSqrt3;
         QNumberType sqrt3Div2;
         QNumberType twoDivSqrt3;

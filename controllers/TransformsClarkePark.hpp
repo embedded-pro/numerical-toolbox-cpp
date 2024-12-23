@@ -39,59 +39,28 @@ namespace controllers
     public:
         explicit Clarke(const dsp::AdvancedFunctions<QNumberType>& advancedFunctions)
             : advancedFunctions(advancedFunctions)
-        {
-            InitializeConstants();
-        }
+        {}
 
-        // Forward Clarke transform (abc -> αβ)
         TwoPhase<QNumberType> Forward(const ThreePhase<QNumberType>& input)
         {
-            // Pre-compute b+c term
             const QNumberType bc_sum = input.b + input.c;
 
-            return TwoPhase<QNumberType>{
-                // α = 2/3 * (a - 0.5*(b + c))
-                twoThirds * (input.a - oneHalf * bc_sum),
-                // β = (1/√3) * (b - c)
-                sqrt3Div2 * (input.b - input.c)
-            };
+            return TwoPhase<QNumberType>{ twoThirds * (input.a - oneHalf * bc_sum), invSqrt3 * (input.b - input.c) };
         }
 
-        // Inverse Clarke transform (αβ -> abc)
         ThreePhase<QNumberType> Inverse(const TwoPhase<QNumberType>& input)
         {
-            // Pre-compute shared terms
             const QNumberType alpha_half = oneHalf * input.alpha;
             const QNumberType beta_sqrt3_half = sqrt3Div2 * input.beta;
-
-            return ThreePhase<QNumberType>{
-                input.alpha,
-                -alpha_half + beta_sqrt3_half,
-                -alpha_half - beta_sqrt3_half
-            };
+            return ThreePhase<QNumberType>{ input.alpha, -alpha_half + beta_sqrt3_half, -alpha_half - beta_sqrt3_half };
         }
 
     private:
-        void InitializeConstants()
-        {
-            if constexpr (std::is_floating_point<QNumberType>::value)
-            {
-                oneHalf = QNumberType(0.5);
-                twoThirds = QNumberType(0.6667);
-                sqrt3Div2 = QNumberType(0.866);
-            }
-            else
-            {
-                oneHalf = QNumberType(0.5f);
-                twoThirds = QNumberType(0.6667f);
-                sqrt3Div2 = QNumberType(0.866f);
-            }
-        }
-
         const dsp::AdvancedFunctions<QNumberType>& advancedFunctions;
-        QNumberType oneHalf;
-        QNumberType twoThirds;
-        QNumberType sqrt3Div2;
+        QNumberType oneHalf = QNumberType(0.5f);
+        QNumberType twoThirds = QNumberType(0.666666667f);
+        QNumberType invSqrt3 = QNumberType(0.577350269f);
+        QNumberType sqrt3Div2 = QNumberType(0.8660254037f);
     };
 
     template<typename QNumberType>
@@ -106,40 +75,34 @@ namespace controllers
             : trigFunctions(trigFunctions)
         {}
 
-        // Forward Park transform (αβ -> dq)
-        RotatingFrame<QNumberType> Forward(const TwoPhase<QNumberType>& input, QNumberType theta)
+        RotatingFrame<QNumberType> Forward(const TwoPhase<QNumberType>& input, QNumberType scaledTheta)
         {
-            const QNumberType cosTheta = trigFunctions.Cosine(theta);
-            const QNumberType sinTheta = trigFunctions.Sine(theta);
+            really_assert(scaledTheta >= math::Lowest<QNumberType>() && scaledTheta <= math::Max<QNumberType>());
 
-            // Pre-compute shared terms
+            const QNumberType cosTheta = trigFunctions.Cosine(scaledTheta);
+            const QNumberType sinTheta = trigFunctions.Sine(scaledTheta);
+
             const QNumberType alpha_cos = input.alpha * cosTheta;
             const QNumberType beta_sin = input.beta * sinTheta;
             const QNumberType alpha_sin = input.alpha * sinTheta;
             const QNumberType beta_cos = input.beta * cosTheta;
 
-            return RotatingFrame<QNumberType>{
-                alpha_cos + beta_sin,
-                -alpha_sin + beta_cos
-            };
+            return RotatingFrame<QNumberType>{ alpha_cos + beta_sin, -alpha_sin + beta_cos };
         }
 
-        // Inverse Park transform (dq -> αβ)
-        TwoPhase<QNumberType> Inverse(const RotatingFrame<QNumberType>& input, QNumberType theta)
+        TwoPhase<QNumberType> Inverse(const RotatingFrame<QNumberType>& input, QNumberType scaledTheta)
         {
-            const QNumberType cosTheta = trigFunctions.Cosine(theta);
-            const QNumberType sinTheta = trigFunctions.Sine(theta);
+            really_assert(scaledTheta >= math::Lowest<QNumberType>() && scaledTheta <= math::Max<QNumberType>());
 
-            // Pre-compute shared terms
+            const QNumberType cosTheta = trigFunctions.Cosine(scaledTheta);
+            const QNumberType sinTheta = trigFunctions.Sine(scaledTheta);
+
             const QNumberType d_cos = input.d * cosTheta;
             const QNumberType q_sin = input.q * sinTheta;
             const QNumberType d_sin = input.d * sinTheta;
             const QNumberType q_cos = input.q * cosTheta;
 
-            return TwoPhase<QNumberType>{
-                d_cos - q_sin,
-                d_sin + q_cos
-            };
+            return TwoPhase<QNumberType>{ d_cos - q_sin, d_sin + q_cos };
         }
 
     private:
@@ -160,13 +123,11 @@ namespace controllers
             , park(trigFunctions)
         {}
 
-        // Forward transform (abc -> dq)
         RotatingFrame<QNumberType> Forward(const ThreePhase<QNumberType>& input, QNumberType theta)
         {
             return park.Forward(clarke.Forward(input), theta);
         }
 
-        // Inverse transform (dq -> abc)
         ThreePhase<QNumberType> Inverse(const RotatingFrame<QNumberType>& input, QNumberType theta)
         {
             return clarke.Inverse(park.Inverse(input, theta));

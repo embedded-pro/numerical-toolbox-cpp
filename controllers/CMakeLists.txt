@@ -18,3 +18,4 @@ target_sources(dsp.controllers PRIVATE
 )
 
 add_subdirectory(test)
+add_subdirectory(test_doubles)
