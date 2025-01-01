@@ -3,7 +3,6 @@
 
 #include "QNumber.hpp"
 #include <array>
-#include <optional>
 #include <type_traits>
 
 namespace math
