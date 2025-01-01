@@ -3,7 +3,7 @@
 
 #include "math/HyperbolicFunctions.hpp"
 
-namespace dsp
+namespace math
 {
     template<typename QNumberType>
     class HyperbolicFunctionsStub

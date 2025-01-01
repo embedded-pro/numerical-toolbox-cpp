@@ -27,8 +27,8 @@ namespace
         std::optional<controllers::Clarke<T>> clarke;
         std::optional<controllers::Park<T>> park;
         std::optional<controllers::ClarkePark<T>> clarkePark;
-        dsp::AdvancedFunctionsStub<T> advancedFunctions;
-        dsp::TrigonometricFunctionsStub<T> trigFunctions;
+        math::AdvancedFunctionsStub<T> advancedFunctions;
+        math::TrigonometricFunctionsStub<T> trigFunctions;
 
         void SetUp() override
         {

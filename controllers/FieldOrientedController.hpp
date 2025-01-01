@@ -37,8 +37,8 @@ namespace controllers
         };
 
         FieldOrientedController(const Configuration& config,
-            const dsp::TrigonometricFunctions<QNumberType>& trigFunctions,
-            const dsp::AdvancedFunctions<QNumberType>& advancedFunctions)
+            const math::TrigonometricFunctions<QNumberType>& trigFunctions,
+            const math::AdvancedFunctions<QNumberType>& advancedFunctions)
             : clarkePark(trigFunctions, advancedFunctions)
             , svm(trigFunctions)
             , dAxisCurrentController(config.currentTunnings, config.sampleTime, config.currentLimits)

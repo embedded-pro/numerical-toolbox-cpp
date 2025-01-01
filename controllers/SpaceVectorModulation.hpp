@@ -21,7 +21,7 @@ namespace controllers
             QNumberType c;
         };
 
-        explicit SpaceVectorModulation(const dsp::TrigonometricFunctions<QNumberType>& trigFunctions)
+        explicit SpaceVectorModulation(const math::TrigonometricFunctions<QNumberType>& trigFunctions)
             : trigFunctions(trigFunctions)
         {
             InitializeConstants();
@@ -166,7 +166,7 @@ namespace controllers
             return Calculate0To60Degrees(valpha, vbeta);
         }
 
-        const dsp::TrigonometricFunctions<QNumberType>& trigFunctions;
+        const math::TrigonometricFunctions<QNumberType>& trigFunctions;
         QNumberType zero;
         QNumberType one;
         QNumberType half;

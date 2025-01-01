@@ -9,4 +9,5 @@ target_link_libraries(dsp.math_test PUBLIC
 
 target_sources(dsp.math_test PRIVATE
     TestQNumber.cpp
+    TestMatrix.cpp
 )
