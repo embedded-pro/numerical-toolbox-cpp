@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace dsp
+namespace math
 {
     template<typename QNumberType>
     class TrigonometricFunctionsStub

@@ -12,6 +12,7 @@ target_link_libraries(dsp.math INTERFACE
 target_sources(dsp.math PRIVATE
     AdvancedFunctions.hpp
     HyperbolicFunctions.hpp
+    Matrix.hpp
     QNumber.hpp
     SingleInstructionMultipleData.hpp
     TrigonometricFunctions.hpp

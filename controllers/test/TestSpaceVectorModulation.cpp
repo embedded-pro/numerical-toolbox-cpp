@@ -21,7 +21,7 @@ namespace
     {
     public:
         std::optional<controllers::SpaceVectorModulation<T>> spaceVectorModulation;
-        dsp::TrigonometricFunctionsStub<T> trigFunctions;
+        math::TrigonometricFunctionsStub<T> trigFunctions;
 
         void SetUp() override
         {

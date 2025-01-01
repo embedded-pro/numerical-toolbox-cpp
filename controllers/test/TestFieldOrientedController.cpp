@@ -28,8 +28,8 @@ namespace
         : public ::testing::Test
     {
     protected:
-        dsp::AdvancedFunctionsStub<T> advancedFunctions;
-        dsp::TrigonometricFunctionsStub<T> trigFunctions;
+        math::AdvancedFunctionsStub<T> advancedFunctions;
+        math::TrigonometricFunctionsStub<T> trigFunctions;
 
         void SetUp() override
         {

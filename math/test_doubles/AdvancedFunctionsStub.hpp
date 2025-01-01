@@ -3,7 +3,7 @@
 
 #include "math/AdvancedFunctions.hpp"
 
-namespace dsp
+namespace math
 {
     template<typename QNumberType>
     class AdvancedFunctionsStub

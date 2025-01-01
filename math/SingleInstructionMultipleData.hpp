@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace dsp
+namespace math
 {
     class SingleInstructionMultipltData
     {

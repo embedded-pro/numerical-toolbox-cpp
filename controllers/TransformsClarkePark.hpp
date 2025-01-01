@@ -37,7 +37,7 @@ namespace controllers
             "Clarke can only be instantiated with math::QNumber or floating point types.");
 
     public:
-        explicit Clarke(const dsp::AdvancedFunctions<QNumberType>& advancedFunctions)
+        explicit Clarke(const math::AdvancedFunctions<QNumberType>& advancedFunctions)
             : advancedFunctions(advancedFunctions)
         {}
 
@@ -56,7 +56,7 @@ namespace controllers
         }
 
     private:
-        const dsp::AdvancedFunctions<QNumberType>& advancedFunctions;
+        const math::AdvancedFunctions<QNumberType>& advancedFunctions;
         QNumberType oneHalf = QNumberType(0.5f);
         QNumberType twoThirds = QNumberType(0.666666667f);
         QNumberType invSqrt3 = QNumberType(0.577350269f);
@@ -71,7 +71,7 @@ namespace controllers
             "Park can only be instantiated with math::QNumber or floating point types.");
 
     public:
-        explicit Park(const dsp::TrigonometricFunctions<QNumberType>& trigFunctions)
+        explicit Park(const math::TrigonometricFunctions<QNumberType>& trigFunctions)
             : trigFunctions(trigFunctions)
         {}
 
@@ -106,7 +106,7 @@ namespace controllers
         }
 
     private:
-        const dsp::TrigonometricFunctions<QNumberType>& trigFunctions;
+        const math::TrigonometricFunctions<QNumberType>& trigFunctions;
     };
 
     template<typename QNumberType>
@@ -117,8 +117,8 @@ namespace controllers
             "ClarkePark can only be instantiated with math::QNumber or floating point types.");
 
     public:
-        ClarkePark(const dsp::TrigonometricFunctions<QNumberType>& trigFunctions,
-            const dsp::AdvancedFunctions<QNumberType>& advancedFunctions)
+        ClarkePark(const math::TrigonometricFunctions<QNumberType>& trigFunctions,
+            const math::AdvancedFunctions<QNumberType>& advancedFunctions)
             : clarke(advancedFunctions)
             , park(trigFunctions)
         {}

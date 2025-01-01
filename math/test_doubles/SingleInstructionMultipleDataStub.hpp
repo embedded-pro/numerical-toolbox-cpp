@@ -3,7 +3,7 @@
 
 #include "math/SingleInstructionMultipleData.hpp"
 
-namespace dsp
+namespace math
 {
     class SingleInstructionMultipltDataStub
         : public SingleInstructionMultipltData
