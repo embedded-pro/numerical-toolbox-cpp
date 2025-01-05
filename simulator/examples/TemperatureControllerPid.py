@@ -1,11 +1,36 @@
 from simulator.controllers.Pid import Pid, PidTunings, PidLimits
 from simulator.examples.TemperaturePlant import TemperaturePlant
+from simulator.math.QNumber import QNumber
 import numpy as np
 import matplotlib.pyplot as plt
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, TypeVar
+import logging
+
+T = TypeVar('T', float, QNumber)
+
+class ScaledPid(Pid):
+    def __init__(self, 
+                scale_factor: float,
+                tunnings: PidTunings[T],
+                limits: PidLimits[T],
+                auto_mode: bool = True):
+        super().__init__(tunnings=tunnings, limits=limits, auto_mode=auto_mode)
+        
+        if scale_factor <= 0:
+            raise ValueError("Scale factor must be positive")
+        
+        self.scale_factor = scale_factor
+        self.squared_scale_factor = self.scale_factor * self.scale_factor
+
+    def set_point(self, value: T):
+        super().set_point(value / self.scale_factor)
+    
+    def process(self, measured_process_variable: T) -> T:
+        return  super().process(measured_process_variable / self.scale_factor) * self.squared_scale_factor
 
 def run_simulation(pid_controller: Pid, 
                   plant: TemperaturePlant,
+                  sample_time: float,
                   setpoint_schedule: List[Tuple[int, float]],
                   simulation_steps: int) -> dict:
     """
@@ -21,13 +46,13 @@ def run_simulation(pid_controller: Pid,
         dict: Simulation results
     """
     # Initialize arrays for storing results
-    time_points = np.arange(simulation_steps) * plant.sample_time
+    time_points = np.arange(simulation_steps) * sample_time
     setpoints = np.zeros(simulation_steps)
     temperatures = np.zeros(simulation_steps)
     control_signals = np.zeros(simulation_steps)
     
     # Initialize first temperature
-    temperatures[0] = plant.prev_output
+    temperatures[0] = plant.last_output()
     
     # Create setpoint array from schedule
     current_setpoint = setpoint_schedule[0][1]
@@ -85,17 +110,22 @@ def plot_results(results: dict, title: str = 'Temperature Control Simulation'):
     plt.show()
 
 if __name__ == "__main__":
-    # Initialize controller
-    tunnings = PidTunings(kp=1.0, ki=0.1, kd=0.35)
-    limits = PidLimits(min=-100.0, max=100.0)
+    logging.basicConfig(level=logging.DEBUG)
+
+    scale = 100.0
+
+    tunnings = PidTunings(kp=1.0 / scale, ki=0.1 / scale, kd=0.35 / scale)
+    limits = PidLimits(min=-100.0 / scale, max=100.0 / scale)
     
-    controller = Pid(
+    controller = ScaledPid(
+        scale_factor=scale,
         tunnings=tunnings,
         limits=limits
     )
     
-    # Initialize plant
-    plant = TemperaturePlant(sample_time=0.1)
+    plant = TemperaturePlant(
+        sample_time=0.1
+    )
     
     # Define setpoint schedule: (time_step, temperature)
     setpoint_schedule = [
@@ -105,13 +135,12 @@ if __name__ == "__main__":
         (500, 50)   # Final setpoint 50°C
     ]
     
-    # Run simulation
     results = run_simulation(
         pid_controller=controller,
         plant=plant,
+        sample_time=plant.sample_time,
         setpoint_schedule=setpoint_schedule,
         simulation_steps=700
     )
     
-    # Plot results
     plot_results(results)

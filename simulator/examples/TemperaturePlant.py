@@ -2,7 +2,7 @@ class TemperaturePlant:
     def __init__(self, sample_time: float = 0.1):
         """
         Initialize temperature plant model.
-        Transfer function: G(z) = (0.1z^-1)/(1 - 0.9z^-1)
+        Transfer function: G(z) = (b1 * z^-1)/(1 - a1 * z^-1)
         
         Args:
             sample_time: Sampling time in seconds
@@ -33,3 +33,6 @@ class TemperaturePlant:
         self.prev_input = control_input
         
         return output
+
+    def last_output(self) -> float:
+        return self.prev_output

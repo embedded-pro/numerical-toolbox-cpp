@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Generic, TypeVar, Optional
 import sys
 from collections import deque
+import logging
 
 # Type variable for number types (float or QNumber)
 T = TypeVar('T', float, QNumber)
@@ -52,6 +53,9 @@ class Pid(Generic[T]):
         self._prev_output = self._create_zero()
         self._error_history = deque([self._create_zero()] * 3, maxlen=3)  # x[n], x[n-1], x[n-2]
         self._set_point: Optional[T] = None
+
+        logging.debug('Tunings: kp: %f, ki: %f and kd: %f', tunnings.kp, tunnings.ki, tunnings.kd)
+        logging.debug('Limits: min: %f, max: %f', limits.min, limits.max)
         
     def _create_zero(self) -> T:
         """Create a zero value of the appropriate numeric type."""
@@ -60,6 +64,7 @@ class Pid(Generic[T]):
     def set_point(self, set_point: T):
         """Set the desired target value."""
         self._set_point = set_point
+        logging.debug('Set point: %f', self._set_point)
         
     def enable(self):
         """Enable automatic mode."""
@@ -108,6 +113,7 @@ class Pid(Generic[T]):
             
         # Calculate error
         error = self._set_point - measured_process_variable
+        logging.debug('Error: %f, MPV: %f', error, measured_process_variable)
         
         # Update error history (x[n] values)
         self._error_history.appendleft(error)
@@ -118,6 +124,8 @@ class Pid(Generic[T]):
                  self._A0 * self._error_history[0] +  # x[n]
                  self._A1 * self._error_history[1] +  # x[n-1]
                  self._A2 * self._error_history[2])   # x[n-2]
+
+        logging.debug('output: %f', output)
         
         # Apply anti-windup through output clamping
         output = self.clamp(output)
