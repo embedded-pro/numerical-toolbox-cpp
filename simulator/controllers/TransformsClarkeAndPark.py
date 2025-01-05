@@ -25,56 +25,59 @@ class RotatingFrame(Generic[T]):
     d: T
     q: T
 
+def create_const(value: float, example_type: T) -> Union[float, QNumber]:
+    """Create a constant of the appropriate numeric type."""
+    if isinstance(example_type, QNumber):
+        return QNumber(value, example_type.fractional_bits)  # Scale constants for QNumber
+    return value
+
 class TrigonometricFunctions(Generic[T]):
     """
     Provides trigonometric functions for the supported number types.
-    For QNumber, input angle must be normalized between 0 and 1,
-    where 0 represents 0 radians and 1 represents 2π radians.
+    All angles are normalized between 0 and 1 (0 = 0 rad, 1 = 2π rad).
     """
     
     @staticmethod
     def sine(theta: T) -> T:
+        """Compute sine for normalized angle [0,1]."""
+        angle_rad = 2.0 * math.pi * (theta.to_float() if isinstance(theta, QNumber) else theta)
         if isinstance(theta, QNumber):
-            # Convert normalized angle [0,1] to radians [0,2π]
-            angle_rad = theta.to_float() * 2.0 * math.pi
             return QNumber(math.sin(angle_rad) * 0.99, theta.fractional_bits)
-        return math.sin(theta)
+        return math.sin(angle_rad)
     
     @staticmethod
     def cosine(theta: T) -> T:
+        """Compute cosine for normalized angle [0,1]."""
+        angle_rad = 2.0 * math.pi * (theta.to_float() if isinstance(theta, QNumber) else theta)
         if isinstance(theta, QNumber):
-            # Convert normalized angle [0,1] to radians [0,2π]
-            angle_rad = theta.to_float() * 2.0 * math.pi
             return QNumber(math.cos(angle_rad) * 0.99, theta.fractional_bits)
-        return math.cos(theta)
+        return math.cos(angle_rad)
 
 class Clarke(Generic[T]):
     """Clarke transform implementation."""
     
     def forward(self, input_phases: ThreePhase[T]) -> TwoPhase[T]:
         """Forward Clarke transform."""
+        # Create constants based on input type
+        two_thirds = create_const(2/3, input_phases.a)
+        one_half = create_const(0.5, input_phases.a)
+        inv_sqrt3 = create_const(1/math.sqrt(3), input_phases.a)
+        
         bc_sum = input_phases.b + input_phases.c
         
-        if isinstance(input_phases.a, QNumber):
-            return TwoPhase(
-                alpha=QNumber(2/3, input_phases.a.fractional_bits) * (input_phases.a - QNumber(0.5, input_phases.a.fractional_bits) * bc_sum),
-                beta=QNumber(1/math.sqrt(3), input_phases.a.fractional_bits) * (input_phases.b - input_phases.c)
-            )
-        else:
-            return TwoPhase(
-                alpha=(2/3) * (input_phases.a - (0.5) * bc_sum),
-                beta=(1/math.sqrt(3)) * (input_phases.b - input_phases.c)
-            )
+        return TwoPhase(
+            alpha=two_thirds * (input_phases.a - one_half * bc_sum),
+            beta=inv_sqrt3 * (input_phases.b - input_phases.c)
+        )
     
     def inverse(self, input_phases: TwoPhase[T]) -> ThreePhase[T]:
-        """Inverse Clarke transform."""      
-        if isinstance(input_phases.alpha, QNumber):  
-            alpha_half = QNumber(0.5, input_phases.alpha.fractional_bits) * input_phases.alpha
-            beta_sqrt3_half = QNumber(math.sqrt(3)/2, input_phases.alpha.fractional_bits) * input_phases.beta
-        else:
-            alpha_half = (0.5) * input_phases.alpha
-            beta_sqrt3_half = (math.sqrt(3)/2) * input_phases.beta
-
+        """Inverse Clarke transform."""
+        one_half = create_const(0.5, input_phases.alpha)
+        sqrt3_div2 = create_const(math.sqrt(3)/2, input_phases.alpha)
+        
+        alpha_half = one_half * input_phases.alpha
+        beta_sqrt3_half = sqrt3_div2 * input_phases.beta
+        
         return ThreePhase(
             a=input_phases.alpha,
             b=-alpha_half + beta_sqrt3_half,
@@ -91,7 +94,7 @@ class Park(Generic[T]):
     def forward(self, input_phases: TwoPhase[T], theta: T) -> RotatingFrame[T]:
         """
         Forward Park transform.
-        For QNumber, theta must be normalized between 0 and 1 (0 = 0 rad, 1 = 2π rad)
+        theta must be normalized between 0 and 1 (0 = 0 rad, 1 = 2π rad)
         """
         cos_theta = self.trig.cosine(theta)
         sin_theta = self.trig.sine(theta)
@@ -109,7 +112,7 @@ class Park(Generic[T]):
     def inverse(self, input_frame: RotatingFrame[T], theta: T) -> TwoPhase[T]:
         """
         Inverse Park transform.
-        For QNumber, theta must be normalized between 0 and 1 (0 = 0 rad, 1 = 2π rad)
+        theta must be normalized between 0 and 1 (0 = 0 rad, 1 = 2π rad)
         """
         cos_theta = self.trig.cosine(theta)
         sin_theta = self.trig.sine(theta)
@@ -135,13 +138,13 @@ class ClarkePark(Generic[T]):
     def forward(self, input_phases: ThreePhase[T], theta: T) -> RotatingFrame[T]:
         """
         Forward Clarke-Park transform.
-        For QNumber, theta must be normalized between 0 and 1 (0 = 0 rad, 1 = 2π rad)
+        theta must be normalized between 0 and 1 (0 = 0 rad, 1 = 2π rad)
         """
         return self.park.forward(self.clarke.forward(input_phases), theta)
     
     def inverse(self, input_frame: RotatingFrame[T], theta: T) -> ThreePhase[T]:
         """
         Inverse Clarke-Park transform.
-        For QNumber, theta must be normalized between 0 and 1 (0 = 0 rad, 1 = 2π rad)
+        theta must be normalized between 0 and 1 (0 = 0 rad, 1 = 2π rad)
         """
         return self.clarke.inverse(self.park.inverse(input_frame, theta))
