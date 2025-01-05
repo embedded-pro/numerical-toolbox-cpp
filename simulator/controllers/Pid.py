@@ -44,9 +44,8 @@ class Pid(Generic[T]):
         self._limits = limits
         self._auto_mode = auto_mode
         
-        # Calculate coefficients
         self._A0 = tunnings.kp + tunnings.ki + tunnings.kd
-        self._A1 = -tunnings.kp - (2 * tunnings.kd)
+        self._A1 = -tunnings.kp - (tunnings.kd + tunnings.kd)
         self._A2 = tunnings.kd
         
         # Initialize state variables
@@ -54,17 +53,30 @@ class Pid(Generic[T]):
         self._error_history = deque([self._create_zero()] * 3, maxlen=3)  # x[n], x[n-1], x[n-2]
         self._set_point: Optional[T] = None
 
-        logging.debug('Tunings: kp: %f, ki: %f and kd: %f', tunnings.kp, tunnings.ki, tunnings.kd)
-        logging.debug('Limits: min: %f, max: %f', limits.min, limits.max)
+        logging.debug('Tunings: kp: %f, ki: %f and kd: %f', 
+                     tunnings.kp.to_float() if isinstance(tunnings.kp, QNumber) else tunnings.kp,
+                     tunnings.ki.to_float() if isinstance(tunnings.ki, QNumber) else tunnings.ki,
+                     tunnings.kd.to_float() if isinstance(tunnings.kd, QNumber) else tunnings.kd)
+        logging.debug('Limits: min: %f, max: %f', 
+                     limits.min.to_float() if isinstance(limits.min, QNumber) else limits.min,
+                     limits.max.to_float() if isinstance(limits.max, QNumber) else limits.max)
         
     def _create_zero(self) -> T:
         """Create a zero value of the appropriate numeric type."""
+        if isinstance(self._tunnings.kp, QNumber):
+            return QNumber(0.0, self._tunnings.kp.fractional_bits)
         return 0.0
         
     def set_point(self, set_point: T):
         """Set the desired target value."""
-        self._set_point = set_point
-        logging.debug('Set point: %f', self._set_point)
+        # Ensure setpoint is of the correct numeric type
+        if isinstance(self._tunnings.kp, QNumber) and not isinstance(set_point, QNumber):
+            self._set_point = QNumber(min(max(float(set_point), -0.99), 0.99), 
+                                    self._tunnings.kp.fractional_bits)
+        else:
+            self._set_point = set_point
+        logging.debug('Set point: %f', 
+                     self._set_point.to_float() if isinstance(self._set_point, QNumber) else self._set_point)
         
     def enable(self):
         """Enable automatic mode."""
@@ -85,9 +97,9 @@ class Pid(Generic[T]):
     def set_tunnings(self, tunnings: PidTunings[T]):
         """Set new tuning parameters and recalculate coefficients."""
         self._tunnings = tunnings
-        # Recalculate coefficients
+    
         self._A0 = tunnings.kp + tunnings.ki + tunnings.kd
-        self._A1 = -tunnings.kp - (2 * tunnings.kd)
+        self._A1 = -tunnings.kp - (tunnings.kd + tunnings.kd)
         self._A2 = tunnings.kd
         
     def clamp(self, input_value: T) -> T:
@@ -113,7 +125,9 @@ class Pid(Generic[T]):
             
         # Calculate error
         error = self._set_point - measured_process_variable
-        logging.debug('Error: %f, MPV: %f', error, measured_process_variable)
+        logging.debug('Error: %f, MPV: %f', 
+                     error.to_float() if isinstance(error, QNumber) else error,
+                     measured_process_variable.to_float() if isinstance(measured_process_variable, QNumber) else measured_process_variable)
         
         # Update error history (x[n] values)
         self._error_history.appendleft(error)
@@ -125,7 +139,8 @@ class Pid(Generic[T]):
                  self._A1 * self._error_history[1] +  # x[n-1]
                  self._A2 * self._error_history[2])   # x[n-2]
 
-        logging.debug('output: %f', output)
+        logging.debug('output: %f', 
+                     output.to_float() if isinstance(output, QNumber) else output)
         
         # Apply anti-windup through output clamping
         output = self.clamp(output)
