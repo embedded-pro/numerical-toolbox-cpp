@@ -33,7 +33,6 @@ TYPED_TEST(TestPid, no_variation_input_results_in_no_action_control)
             TypeParam(0.1f),
             TypeParam(0.1f),
             TypeParam(0.1f) },
-        std::chrono::microseconds(10000),
         CreateLimits<TypeParam>());
     this->controller->SetPoint(TypeParam(0.0f));
     EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.0f))), 0, tolerance);
@@ -47,13 +46,13 @@ TYPED_TEST(TestPid, proportional_action)
             TypeParam(0.5f),
             TypeParam(0.0f),
             TypeParam(0.0f) },
-        std::chrono::microseconds(10000),
         CreateLimits<TypeParam>());
 
     this->controller->SetPoint(TypeParam(0.2f));
-    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.0f))), 0, tolerance);
+
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.0f))), 0.1f, tolerance);
     EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.1f))), -0.05f, tolerance);
-    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(-0.1f))), 0.05f, tolerance);
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(-0.1f))), 0.2f, tolerance);
 }
 
 TYPED_TEST(TestPid, integrative_action)
@@ -64,15 +63,12 @@ TYPED_TEST(TestPid, integrative_action)
             TypeParam(0.0f),
             TypeParam(0.1f),
             TypeParam(0.0f) },
-        std::chrono::microseconds(100000), // 0.1 seconds
         CreateLimits<TypeParam>());
 
     this->controller->SetPoint(TypeParam(0.2f));
-    auto result1 = math::ToFloat(this->controller->Process(TypeParam(0.0f)));
-    auto result2 = math::ToFloat(this->controller->Process(TypeParam(0.0f)));
 
-    EXPECT_NEAR(result1, 0.002f, tolerance);
-    EXPECT_NEAR(result2, 0.004f, tolerance);
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.0f))), 0.02f, tolerance);
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.0f))), 0.02f, tolerance);
 }
 
 TYPED_TEST(TestPid, derivative_action)
@@ -83,12 +79,12 @@ TYPED_TEST(TestPid, derivative_action)
             TypeParam(0.0f),
             TypeParam(0.0f),
             TypeParam(0.1f) },
-        std::chrono::microseconds(100000),
         CreateLimits<TypeParam>());
 
     this->controller->SetPoint(TypeParam(0.2f));
-    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.0f))), 0, tolerance);
-    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.1f))), -0.1f, tolerance);
+
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.0f))), 0.02f, tolerance);
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.1f))), -0.03f, tolerance);
 }
 
 TYPED_TEST(TestPid, check_output_limits)
@@ -97,10 +93,9 @@ TYPED_TEST(TestPid, check_output_limits)
     auto limits = CreateLimits<TypeParam>();
     this->controller.emplace(
         typename controllers::Pid<TypeParam>::Tunnings{
-            TypeParam(0.5f),
-            TypeParam(0.5f),
-            TypeParam(0.1f) },
-        std::chrono::microseconds(100000),
+            TypeParam(0.05f),
+            TypeParam(0.05f),
+            TypeParam(0.01f) },
         limits);
 
     this->controller->SetPoint(TypeParam(0.8f));
@@ -121,7 +116,6 @@ TYPED_TEST(TestPid, process_reaches_set_point)
             TypeParam(0.1f),
             TypeParam(0.05f),
             TypeParam(0.02f) },
-        std::chrono::microseconds(100000),
         CreateLimits<TypeParam>());
 
     auto setpoint = TypeParam(0.2f);

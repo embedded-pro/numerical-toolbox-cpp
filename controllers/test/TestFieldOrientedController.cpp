@@ -19,7 +19,6 @@ namespace
         config.currentLimits.min = T(-0.9999f);
         config.currentLimits.max = T(0.9999f);
 
-        config.sampleTime = std::chrono::microseconds(100000);
         return config;
     }
 

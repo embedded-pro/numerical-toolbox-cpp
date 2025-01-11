@@ -42,12 +42,10 @@ namespace
             T ki;
             T kd;
             float targetTemperature;
-            std::chrono::microseconds sampleTime;
         };
 
         explicit TemperatureController(const Config& config)
             : pidController({ config.kp, config.ki, config.kd },
-                  config.sampleTime,
                   { T(-0.9f), T(0.9f) })
         {
             SetTargetTemperature(config.targetTemperature);
@@ -126,8 +124,7 @@ int main()
         2.0f,
         0.5f,
         0.1f,
-        0.0f,                             // Target 60°C
-        std::chrono::microseconds(100000) // 100ms
+        0.0f, // Target 60°C
     };
 
     TemperatureController<math::Q31>::Config q31Config{
@@ -135,7 +132,6 @@ int main()
         math::Q31(0.1f),
         math::Q31(0.05f),
         60.0f,
-        std::chrono::microseconds(100000)
     };
 
     TemperatureController<math::Q15>::Config q15Config{
@@ -143,7 +139,6 @@ int main()
         math::Q15(0.1f),
         math::Q15(0.05f),
         60.0f,
-        std::chrono::microseconds(100000)
     };
 
     // Run simulations
