@@ -1,5 +1,4 @@
 #include "controllers/Pid.hpp"
-#include <chrono>
 #include <sciplot/sciplot.hpp>
 #include <vector>
 
@@ -64,7 +63,7 @@ namespace
             normalizedTemp = 2.0f * normalizedTemp - 1.0f;
 
             float pidOutput = math::ToFloat(pidController.Process(T(normalizedTemp)));
-            return (pidOutput + 0.9f) / 1.8f; // Convert to 0-1 range for heating power
+            return (pidOutput + 0.9f) / 1.8f;
         }
 
     private:
@@ -88,7 +87,7 @@ namespace
         const std::string& label)
     {
         TemperatureController<T> controller(config);
-        ThermalSystem system(25.0f); // Start at 25°C
+        ThermalSystem system(25.0f);
 
         SimulationResults results;
         results.label = label;
@@ -96,13 +95,10 @@ namespace
 
         while (currentTime < simulationTime)
         {
-            // Get current temperature
             float currentTemp = system.Update(results.controlActions.empty() ? 0.0f : results.controlActions.back());
 
-            // Calculate control action
             float controlAction = controller.Process(currentTemp);
 
-            // Store results
             results.times.push_back(currentTime);
             results.temperatures.push_back(currentTemp);
             results.controlActions.push_back(controlAction);
@@ -119,12 +115,11 @@ int main()
     float simulationTime = 60.0f;
     float timeStep = 0.1f;
 
-    // Configure controllers
     TemperatureController<float>::Config floatConfig{
         2.0f,
         0.5f,
         0.1f,
-        0.0f, // Target 60°C
+        60.0f,
     };
 
     TemperatureController<math::Q31>::Config q31Config{
@@ -141,12 +136,10 @@ int main()
         60.0f,
     };
 
-    // Run simulations
     auto floatResults = RunSimulation<float>(floatConfig, simulationTime, timeStep, "Float");
     auto q31Results = RunSimulation<math::Q31>(q31Config, simulationTime, timeStep, "Q31");
     auto q15Results = RunSimulation<math::Q15>(q15Config, simulationTime, timeStep, "Q15");
 
-    // Create temperature plot
     Plot tempPlot;
     tempPlot.xlabel("Time (s)");
     tempPlot.ylabel("Temperature (°C)");
@@ -156,21 +149,17 @@ int main()
         .fontSize(10);
     tempPlot.grid().show();
 
-    // Plot temperature response
     tempPlot.drawCurve(floatResults.times, floatResults.temperatures)
         .label("System Temperature")
         .lineWidth(2);
 
-    // Draw target temperature line
     std::vector<double> target_line(floatResults.times.size(), 60.0);
     tempPlot.drawCurve(floatResults.times, target_line)
         .label("Target")
         .lineStyle(2);
 
-    // Set temperature plot range
     tempPlot.yrange(20, 70);
 
-    // Create control actions plot
     Plot controlPlot;
     controlPlot.xlabel("Time (s)");
     controlPlot.ylabel("Control Action");
@@ -180,7 +169,6 @@ int main()
         .fontSize(10);
     controlPlot.grid().show();
 
-    // Plot control actions
     controlPlot.drawCurve(floatResults.times, floatResults.controlActions)
         .label("Float Control")
         .lineWidth(1);
@@ -193,20 +181,16 @@ int main()
         .label("Q15 Control")
         .lineWidth(1);
 
-    // Set control plot range
     controlPlot.yrange(0, 1);
 
-    // Create a 2D array of plots (2 rows, 1 column)
     std::vector<std::vector<Plot>> plotMatrix = {
-        { tempPlot },   // First row
-        { controlPlot } // Second row
+        { tempPlot },
+        { controlPlot }
     };
 
-    // Create figure with the plot matrix
     Figure figure(plotMatrix);
     figure.size(1200, 800);
 
-    // Save the plot
     figure.save("pid_simulation.pdf");
 
     return 0;
