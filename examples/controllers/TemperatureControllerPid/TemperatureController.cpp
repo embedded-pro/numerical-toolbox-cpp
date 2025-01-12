@@ -1,6 +1,7 @@
 #include "controllers/Pid.hpp"
 #include <queue>
 #include <sciplot/sciplot.hpp>
+#include <variant>
 #include <vector>
 
 using namespace sciplot;
@@ -98,89 +99,93 @@ namespace
         float targetTemperature;
     };
 
-    struct SimulationResults
+    template<typename QNumberType>
+    class Simulator
     {
-        std::vector<float> times;
-        std::vector<float> temperatures;
-        std::vector<float> controlActions;
-        std::string label;
-    };
-
-    SetPointSchedule GetSetPointAndTime(std::queue<SetPointSchedule>& setPointSchedule)
-    {
-        auto setPointAndTime = setPointSchedule.front();
-        setPointSchedule.pop();
-        return setPointAndTime;
-    }
-
-    template<typename T>
-    SimulationResults RunSimulation(float scale,
-        const typename TemperatureController<T>::Config& config,
-        std::queue<SetPointSchedule> setPointSchedule,
-        float simulationTime,
-        float timeStep,
-        const std::string& label)
-    {
-        auto setPoint = GetSetPointAndTime(setPointSchedule);
-        TemperatureController<T> controller(scale, config, setPoint.targetTemperature);
-        TemperaturePlant system(25.0f);
-        SimulationResults results;
-        results.label = label;
-        float currentTime = 0.0f;
-
-        while (currentTime < simulationTime)
+    public:
+        struct SimulationResults
         {
-            controller.SetTargetTemperature(setPoint.targetTemperature);
-            auto currentTemp = system.Update(results.controlActions.empty() ? 0.0f : results.controlActions.back());
-            auto controlAction = controller.Process(currentTemp);
+            std::vector<float> times;
+            std::vector<float> temperatures;
+            std::vector<float> controlActions;
+        };
 
-            results.times.push_back(currentTime);
-            results.temperatures.push_back(currentTemp);
-            results.controlActions.push_back(controlAction);
+        Simulator(const std::string& label, const std::string& colour)
+            : setPointSchedule({ { 0, 20 },
+                  { 100, 60 },
+                  { 300, 40 },
+                  { 500, 50 },
+                  { 650, 25 } })
+            , label(label)
+            , colour(colour)
+        {
+            auto setPoint = GetSetPointAndTime(setPointSchedule);
+            TemperatureController<QNumberType> controller(scale, config, setPoint.targetTemperature);
+            TemperaturePlant system(25.0f);
+            float currentTime = 0.0f;
 
-            currentTime += timeStep;
+            while (currentTime < simulationTime)
+            {
+                controller.SetTargetTemperature(setPoint.targetTemperature);
+                auto currentTemp = system.Update(results.controlActions.empty() ? 0.0f : results.controlActions.back());
+                auto controlAction = controller.Process(currentTemp);
 
-            if (currentTime >= setPoint.time && !setPointSchedule.empty())
-                setPoint = GetSetPointAndTime(setPointSchedule);
+                results.times.push_back(currentTime);
+                results.temperatures.push_back(currentTemp);
+                results.controlActions.push_back(controlAction);
+
+                currentTime += timeStep;
+
+                if (currentTime >= setPoint.time && !setPointSchedule.empty())
+                    setPoint = GetSetPointAndTime(setPointSchedule);
+            }
         }
 
-        return results;
-    }
+        SetPointSchedule GetSetPointAndTime(std::queue<SetPointSchedule>& setPointSchedule)
+        {
+            auto setPointAndTime = setPointSchedule.front();
+            setPointSchedule.pop();
+            return setPointAndTime;
+        }
+
+        void PlotTarget(Plot& plot)
+        {
+            plot.drawCurve(results.times, results.temperatures)
+                .label("Target: " + label)
+                .lineStyle(2)
+                .lineColor(colour);
+        }
+
+        void PlotControlAction(Plot& plot)
+        {
+            plot.drawCurve(results.times, results.controlActions)
+                .label("Control action: " + label)
+                .lineWidth(2)
+                .lineColor(colour);
+        }
+
+    private:
+        const float scale = 0.01f;
+        const typename TemperatureController<QNumberType>::Config config{
+            QNumberType(1.0f * scale),
+            QNumberType(0.1f * scale),
+            QNumberType(0.35f * scale)
+        };
+
+        std::queue<SetPointSchedule> setPointSchedule;
+        const float simulationTime = 700.0f;
+        const float timeStep = 0.1f;
+        std::string label;
+        std::string colour;
+        SimulationResults results;
+    };
 }
 
 int main()
 {
-    float simulationTime = 700.0f;
-    float timeStep = 0.1f;
-    const float scale = 0.01f;
-
-    std::queue<SetPointSchedule> setPointSchedule({ { 0, 20 },
-        { 100, 60 },
-        { 300, 40 },
-        { 500, 50 },
-        { 650, 25 } });
-
-    TemperatureController<float>::Config floatConfig{
-        1.0f * scale,
-        0.1f * scale,
-        0.35f * scale
-    };
-
-    TemperatureController<math::Q31>::Config q31Config{
-        math::Q31(1.0f * scale),
-        math::Q31(0.1f * scale),
-        math::Q31(0.35f * scale)
-    };
-
-    TemperatureController<math::Q15>::Config q15Config{
-        math::Q15(1.0f * scale),
-        math::Q15(0.1f * scale),
-        math::Q15(0.35f * scale)
-    };
-
-    auto floatResults = RunSimulation<float>(scale, floatConfig, setPointSchedule, simulationTime, timeStep, "Float");
-    auto q31Results = RunSimulation<math::Q31>(scale, q31Config, setPointSchedule, simulationTime, timeStep, "Q31");
-    auto q15Results = RunSimulation<math::Q15>(scale, q15Config, setPointSchedule, simulationTime, timeStep, "Q15");
+    Simulator<float> simulatorFloat{ "Float", "red" };
+    Simulator<math::Q31> simulatorQ31{ "Q31", "green" };
+    Simulator<math::Q15> simulatorQ15{ "Q15", "blue" };
 
     Plot tempPlot;
     tempPlot.xlabel("Time (s)");
@@ -191,20 +196,9 @@ int main()
         .fontSize(10);
     tempPlot.grid().show();
 
-    tempPlot.drawCurve(floatResults.times, floatResults.temperatures)
-        .label("Target - float")
-        .lineStyle(2)
-        .lineColor("red");
-
-    tempPlot.drawCurve(q31Results.times, q31Results.temperatures)
-        .label("Target - Q31")
-        .lineStyle(2)
-        .lineColor("green");
-
-    tempPlot.drawCurve(q15Results.times, q15Results.temperatures)
-        .label("Target - Q15")
-        .lineStyle(2)
-        .lineColor("blue");
+    simulatorFloat.PlotTarget(tempPlot);
+    simulatorQ31.PlotTarget(tempPlot);
+    simulatorQ15.PlotTarget(tempPlot);
 
     tempPlot.yrange(0, 70);
 
@@ -217,20 +211,9 @@ int main()
         .fontSize(10);
     controlPlot.grid().show();
 
-    controlPlot.drawCurve(floatResults.times, floatResults.controlActions)
-        .label("Float Control")
-        .lineWidth(2)
-        .lineColor("red");
-
-    controlPlot.drawCurve(q31Results.times, q31Results.controlActions)
-        .label("Q31 Control")
-        .lineWidth(2)
-        .lineColor("green");
-
-    controlPlot.drawCurve(q15Results.times, q15Results.controlActions)
-        .label("Q15 Control")
-        .lineWidth(2)
-        .lineColor("blue");
+    simulatorFloat.PlotControlAction(controlPlot);
+    simulatorQ31.PlotControlAction(controlPlot);
+    simulatorQ15.PlotControlAction(controlPlot);
 
     controlPlot.yrange(-10, 80);
 
@@ -241,7 +224,7 @@ int main()
 
     Figure figure(plotMatrix);
     figure.size(1200, 800);
-    figure.save("plot.pdf");
+    figure.save("build/plot.pdf");
 
     return 0;
 }
