@@ -6,6 +6,7 @@ target_link_libraries(dsp.filters.passive_test PUBLIC
     gmock_main
     dsp.filters.passive
     dsp.math_test_helper
+    dsp.controllers_test_helper
 )
 
 target_sources(dsp.filters.passive_test PRIVATE

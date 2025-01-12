@@ -15,7 +15,7 @@ namespace filters::passive
             "Iir can only be instantiated with math::QNumber types.");
 
     public:
-        Iir(infra::MemoryRange<QNumberType> b, infra::MemoryRange<QNumberType> a);
+        Iir(math::RecursiveBuffer<QNumberType, P> b, math::RecursiveBuffer<QNumberType, Q> a);
 
         QNumberType Filter(QNumberType input);
         void Enable();
@@ -26,8 +26,8 @@ namespace filters::passive
         bool enabled = true;
 
         math::Index n;
-        infra::MemoryRange<QNumberType> a;
-        infra::MemoryRange<QNumberType> b;
+        math::RecursiveBuffer<QNumberType, Q> a;
+        math::RecursiveBuffer<QNumberType, P> b;
         math::RecursiveBuffer<QNumberType, Q> y;
         math::RecursiveBuffer<QNumberType, P> x;
     };
@@ -35,11 +35,10 @@ namespace filters::passive
     ////    Implementation    ////
 
     template<typename QNumberType, std::size_t P, std::size_t Q>
-    Iir<QNumberType, P, Q>::Iir(infra::MemoryRange<QNumberType> b, infra::MemoryRange<QNumberType> a)
+    Iir<QNumberType, P, Q>::Iir(math::RecursiveBuffer<QNumberType, P> b, math::RecursiveBuffer<QNumberType, Q> a)
         : b(b)
         , a(a)
     {
-        really_assert(b.size() == x.Size() && a.size() == y.Size());
         Reset();
     }
 
@@ -54,10 +53,10 @@ namespace filters::passive
 
         x.Update(input);
 
-        for (auto i = 0; i < b.size(); i++)
+        for (auto i = 0; i < b.Size(); i++)
             feedforward += b[n - i] * x[n - i];
 
-        for (auto i = 0; i < a.size(); i++)
+        for (auto i = 0; i < a.Size(); i++)
             feedback += a[n - i] * y[n - i];
 
         auto output = feedback + feedforward;

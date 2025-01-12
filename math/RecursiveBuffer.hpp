@@ -43,6 +43,7 @@ namespace math
 
     public:
         RecursiveBuffer();
+        RecursiveBuffer& operator=(std::initializer_list<QNumberType> init);
 
         void Update(QNumberType value);
         void Reset();
@@ -59,6 +60,18 @@ namespace math
     RecursiveBuffer<QNumberType, Length>::RecursiveBuffer()
     {
         buffer.fill(0);
+    }
+
+    template<typename QNumberType, std::size_t Length>
+    RecursiveBuffer<QNumberType, Length>& RecursiveBuffer<QNumberType, Length>::operator=(std::initializer_list<QNumberType> init)
+    {
+        really_assert(init.size() <= Length);
+        std::copy(init.begin(), init.end(), buffer.begin());
+
+        if (init.size() < Length)
+            std::fill(buffer.begin() + init.size(), buffer.end(), QNumberType(0.0f));
+
+        return *this;
     }
 
     template<typename QNumberType, std::size_t Length>
