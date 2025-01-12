@@ -1,94 +1,124 @@
-#include "control_toolbox/include/pid.hpp"
+#include "controllers/Pid.hpp"
+#include "controllers/test_doubles/Tolerance.hpp"
 #include "gtest/gtest.h"
 
-TEST(Pid, no_variation_input_results_in_no_action_control)
+namespace
 {
-    control_toolbox::Pid<int32_t> controller({1, 1, 1}, std::chrono::microseconds(10000), {-1000, 1000});
+    template<typename T>
+    class TestPid
+        : public ::testing::Test
+    {
+    public:
+        std::optional<controllers::Pid<T>> controller;
+    };
 
-    EXPECT_EQ(controller.Process(0), 0);
+    using TestedTypes = ::testing::Types<float, math::Q15, math::Q31>;
+    TYPED_TEST_SUITE(TestPid, TestedTypes);
+
+    template<typename T>
+    typename controllers::Pid<T>::Limits CreateLimits()
+    {
+        if constexpr (std::is_same_v<T, float>)
+            return { -1000, 1000 };
+        else
+            return { T(-0.9f), T(0.9f) };
+    }
 }
 
-TEST(Pid, proportional_action)
+TYPED_TEST(TestPid, no_variation_input_results_in_no_action_control)
 {
-    control_toolbox::Pid<int32_t> controller({1, 0, 0}, std::chrono::microseconds(10000), {-1000, 1000});
-
-    controller.SetPoint(10);
-    EXPECT_EQ(controller.Process(0), 0);
-    EXPECT_EQ(controller.Process(5), 5);
-    EXPECT_EQ(controller.Process(-5), 15);
+    float tolerance = controllers::GetTolerance<TypeParam>();
+    this->controller.emplace(
+        typename controllers::Pid<TypeParam>::Tunnings{
+            TypeParam(0.1f),
+            TypeParam(0.1f),
+            TypeParam(0.1f) },
+        CreateLimits<TypeParam>());
+    this->controller->SetPoint(TypeParam(0.0f));
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.0f))), 0, tolerance);
 }
 
-TEST(Pid, proportional_action_with_negative_set_point)
+TYPED_TEST(TestPid, proportional_action)
 {
-    control_toolbox::Pid<int32_t> controller({1, 0, 0}, std::chrono::microseconds(10000), {-1000, 1000});
+    float tolerance = controllers::GetTolerance<TypeParam>();
+    this->controller.emplace(
+        typename controllers::Pid<TypeParam>::Tunnings{
+            TypeParam(0.5f),
+            TypeParam(0.0f),
+            TypeParam(0.0f) },
+        CreateLimits<TypeParam>());
 
-    controller.SetPoint(-10);
-    EXPECT_EQ(controller.Process(0), -10);
-    EXPECT_EQ(controller.Process(5), -15);
-    EXPECT_EQ(controller.Process(-5), -5);
-    EXPECT_EQ(controller.Process(-15), 5);
+    this->controller->SetPoint(TypeParam(0.2f));
+
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.0f))), 0.1f, tolerance);
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.1f))), -0.05f, tolerance);
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(-0.1f))), 0.2f, tolerance);
 }
 
-TEST(Pid, integrative_action)
+TYPED_TEST(TestPid, integrative_action)
 {
-    control_toolbox::Pid<int32_t> controller({0, 10, 0}, std::chrono::microseconds(100000), {-1000, 1000});
+    float tolerance = controllers::GetTolerance<TypeParam>();
+    this->controller.emplace(
+        typename controllers::Pid<TypeParam>::Tunnings{
+            TypeParam(0.0f),
+            TypeParam(0.1f),
+            TypeParam(0.0f) },
+        CreateLimits<TypeParam>());
 
-    controller.SetPoint(10);
-    EXPECT_EQ(controller.Process(0), 10);
-    EXPECT_EQ(controller.Process(0), 20);
+    this->controller->SetPoint(TypeParam(0.2f));
+
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.0f))), 0.02f, tolerance);
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.0f))), 0.02f, tolerance);
 }
 
-TEST(Pid, integrative_action_with_negative_set_point)
+TYPED_TEST(TestPid, derivative_action)
 {
-    control_toolbox::Pid<int32_t> controller({0, 10, 0}, std::chrono::microseconds(100000), {-1000, 1000});
+    float tolerance = controllers::GetTolerance<TypeParam>();
+    this->controller.emplace(
+        typename controllers::Pid<TypeParam>::Tunnings{
+            TypeParam(0.0f),
+            TypeParam(0.0f),
+            TypeParam(0.1f) },
+        CreateLimits<TypeParam>());
 
-    controller.SetPoint(-10);
-    EXPECT_EQ(controller.Process(0), -10);
-    EXPECT_EQ(controller.Process(0), -20);
+    this->controller->SetPoint(TypeParam(0.2f));
+
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.0f))), 0.02f, tolerance);
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.1f))), -0.03f, tolerance);
 }
 
-TEST(Pid, derivative_action)
+TYPED_TEST(TestPid, check_output_limits)
 {
-    control_toolbox::Pid<float> controller({0, 0, 0.1f}, std::chrono::microseconds(100000), {-1000, 1000});
+    float tolerance = controllers::GetTolerance<TypeParam>();
+    auto limits = CreateLimits<TypeParam>();
+    this->controller.emplace(
+        typename controllers::Pid<TypeParam>::Tunnings{
+            TypeParam(0.05f),
+            TypeParam(0.05f),
+            TypeParam(0.01f) },
+        limits);
 
-    controller.SetPoint(10);
-    EXPECT_EQ(controller.Process(0), 0);
-    EXPECT_EQ(controller.Process(0), 0);
-    EXPECT_EQ(controller.Process(0), 0);
+    this->controller->SetPoint(TypeParam(0.8f));
 
-    EXPECT_EQ(controller.Process(5), -5);
-    EXPECT_EQ(controller.Process(15), -10);
+    for (int i = 0; i < 10; ++i)
+    {
+        auto output = this->controller->Process(TypeParam(0.0f));
+        EXPECT_LE(math::ToFloat(output), math::ToFloat(limits.max));
+        EXPECT_GE(math::ToFloat(output), math::ToFloat(limits.min));
+    }
 }
 
-TEST(Pid, derivative_action_with_negative_set_point)
+TYPED_TEST(TestPid, process_reaches_set_point)
 {
-    control_toolbox::Pid<float> controller({0, 0, 0.1f}, std::chrono::microseconds(100000), {-1000, 1000});
+    float tolerance = controllers::GetTolerance<TypeParam>();
+    this->controller.emplace(
+        typename controllers::Pid<TypeParam>::Tunnings{
+            TypeParam(0.1f),
+            TypeParam(0.05f),
+            TypeParam(0.02f) },
+        CreateLimits<TypeParam>());
 
-    controller.SetPoint(-10);
-    EXPECT_EQ(controller.Process(0), 0);
-    EXPECT_EQ(controller.Process(0), 0);
-    EXPECT_EQ(controller.Process(0), 0);
-
-    EXPECT_EQ(controller.Process(5), -5);
-    EXPECT_EQ(controller.Process(-5), 10);
-    EXPECT_EQ(controller.Process(-15), 10);
-}
-
-TEST(Pid, process_reaches_set_point_results_in_no_action)
-{
-    control_toolbox::Pid<int32_t> controller({10, 5, 2}, std::chrono::microseconds(100000), {-1000, 1000});
-
-    controller.SetPoint(10);
-    EXPECT_EQ(controller.Process(10), 0);
-}
-
-TEST(Pid, check_output_limits)
-{
-    control_toolbox::Pid<int32_t> controller({100, 200, 40}, std::chrono::microseconds(100000), {0, 100});
-
-    controller.SetPoint(10);
-    auto controlAction = controller.Process(10);
-
-    EXPECT_LE(controlAction, 100);
-    EXPECT_GE(controlAction, 0);
+    auto setpoint = TypeParam(0.2f);
+    this->controller->SetPoint(setpoint);
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(setpoint)), 0, tolerance);
 }

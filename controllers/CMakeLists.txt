@@ -1,17 +1,21 @@
-add_library(toolbox.controllers ${EMIL_EXCLUDE_FROM_ALL} STATIC)
+add_library(dsp.controllers ${EMIL_EXCLUDE_FROM_ALL} INTERFACE)
 
-target_include_directories(toolbox.controllers PUBLIC
+target_include_directories(dsp.controllers INTERFACE
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-target_link_libraries(toolbox.controllers PUBLIC
+target_link_libraries(dsp.controllers INTERFACE
     infra.util
+    dsp.math
 )
 
-target_sources(toolbox.controllers PRIVATE
+target_sources(dsp.controllers PRIVATE
+    FieldOrientedController.hpp
     Pid.hpp
-    Pid.cpp
+    SpaceVectorModulation.hpp
+    TransformsClarkePark.hpp
 )
 
 add_subdirectory(test)
+add_subdirectory(test_doubles)

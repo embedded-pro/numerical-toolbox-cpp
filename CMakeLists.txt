@@ -22,27 +22,39 @@ if (CONTROL_TOOLBOX_STANDALONE)
 
     FetchContent_Declare(
         emil
-        GIT_REPOSITORY https://gitlab.com/embedded-library/infrastructure/embedded-infra-lib.git
-        GIT_TAG        dc2b87ee100366b4141012d0c86680cf2c7a311b # Unreleased
+        GIT_REPOSITORY https://github.com/embedded-pro/embedded-infra-lib.git
+        GIT_TAG        3a172983dcfe206c6d4c7109175022597966dbdd # Unreleased
     )
 
     FetchContent_MakeAvailable(emil)
-
-    if (TARGET_MCU_VENDOR STREQUAL st)
-        FetchContent_Declare(
-            halst
-            GIT_REPOSITORY https://gitlab.com/embedded-library/infrastructure/hal-st.git
-            GIT_TAG        6563a5806afc5a593a96a2be53329b59ab40b5c3 # unreleased
-        )
-
-        FetchContent_MakeAvailable(halst)
-    endif()
 endif()
 
 project(control_toolbox LANGUAGES C CXX ASM VERSION 0.0.1) # x-release-please-version
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
+
+if (CONTROL_TOOLBOX_STANDALONE)
+    FetchContent_Declare(
+        sciplot
+        GIT_REPOSITORY  https://github.com/sciplot/sciplot.git
+        GIT_TAG         v0.2.2
+    )
+    
+    FetchContent_GetProperties(sciplot)
+    if(NOT sciplot_POPULATED)
+        FetchContent_Populate(sciplot)
+    endif()
+
+    add_library(sciplot INTERFACE)
+    target_include_directories(sciplot INTERFACE 
+        ${sciplot_SOURCE_DIR}
+        OPTIONS 
+        -Wno-error           # Disable -Werror for sciplot headers
+        -Wno-unused-variable # Disable specific warning
+        -Wno-sign-compare    # Disable specific warning
+    )
+endif()
 
 set_directory_properties(PROPERTY USE_FOLDERS ON)
 
@@ -59,10 +71,17 @@ if (CONTROL_TOOLBOX_BUILD_TESTS)
     emil_enable_testing()
 endif()
 
+add_subdirectory(analysis)
 add_subdirectory(controllers)
 add_subdirectory(examples)
+add_subdirectory(filters)
+add_subdirectory(math)
 
-emil_clangformat_directories(usb_host DIRECTORIES .)
+emil_clangformat_directories(analysis DIRECTORIES .)
+emil_clangformat_directories(controllers DIRECTORIES .)
+emil_clangformat_directories(examples DIRECTORIES .)
+emil_clangformat_directories(filters DIRECTORIES .)
+emil_clangformat_directories(math DIRECTORIES .)
 
 if (CONTROL_TOOLBOX_STANDALONE)
     emil_folderize_all_targets()
