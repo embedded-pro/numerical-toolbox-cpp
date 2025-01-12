@@ -1,7 +1,6 @@
 #ifndef FILTERS_PASSIVE_FIR_HPP
 #define FILTERS_PASSIVE_FIR_HPP
 
-#include "infra/util/MemoryRange.hpp"
 #include "math/QNumber.hpp"
 #include "math/RecursiveBuffer.hpp"
 
@@ -15,7 +14,7 @@ namespace filters::passive
             "Fir can only be instantiated with math::QNumber types.");
 
     public:
-        Fir(infra::MemoryRange<QNumberType> b);
+        Fir(math::RecursiveBuffer<QNumberType, N> b);
 
         QNumberType Filter(QNumberType input);
         void Enable();
@@ -26,17 +25,16 @@ namespace filters::passive
         bool enabled = true;
 
         math::Index n;
-        infra::MemoryRange<QNumberType> b;
+        math::RecursiveBuffer<QNumberType, N> b;
         math::RecursiveBuffer<QNumberType, N> x;
     };
 
     ////    Implementation    ////
 
     template<typename QNumberType, std::size_t N>
-    Fir<QNumberType, N>::Fir(infra::MemoryRange<QNumberType> b)
+    Fir<QNumberType, N>::Fir(math::RecursiveBuffer<QNumberType, N> b)
         : b(b)
     {
-        really_assert(b.size() == x.Size());
         Reset();
     }
 
@@ -50,7 +48,7 @@ namespace filters::passive
 
         x.Update(input);
 
-        for (auto i = 0; i < b.size(); i++)
+        for (auto i = 0; i < b.Size(); i++)
             output += b[n - i] * x[n - i];
 
         return output;

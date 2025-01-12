@@ -10,5 +10,6 @@ target_link_libraries(dsp.filters.passive_test PUBLIC
 )
 
 target_sources(dsp.filters.passive_test PRIVATE
+    TestFir.cpp
     TestIir.cpp
 )
