@@ -61,6 +61,9 @@ namespace analysis
             for (size_t i = 0; i < a.size(); ++i)
                 denominator += math::ToFloat(a[i]) * std::polar<float>(1.0f, -omega * i); // z = e^(jω)
 
+            if (denominator == 0.0f)
+                denominator.real(1.0f);
+
             auto h = numerator / denominator;
 
             frequencies.emplace_back(f);

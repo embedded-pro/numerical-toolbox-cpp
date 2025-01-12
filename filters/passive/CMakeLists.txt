@@ -11,6 +11,7 @@ target_link_libraries(dsp.filters.passive INTERFACE
 )
 
 target_sources(dsp.filters.passive PRIVATE
+    Fir.hpp
     Iir.hpp
 )
 
