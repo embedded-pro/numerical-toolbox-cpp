@@ -1,145 +1,115 @@
-#ifndef EMBEDDED_PID_HPP
-#define EMBEDDED_PID_HPP
+#ifndef CONTROLLERS_PID_HPP
+#define CONTROLLERS_PID_HPP
 
-#include "infra/util/Optional.hpp"
-#include "infra/util/ReallyAssert.hpp"
-#include <chrono>
-#include <cstdlib>
+#include "math/QNumber.hpp"
+#include "math/RecursiveBuffer.hpp"
+#include <optional>
 
-namespace control_toolbox
+namespace controllers
 {
-    template<class T>
-    class Pid;
-
-    using PidI32 = Pid<int32_t>;
-    using PidFloat = Pid<float>;
-
-    template<class T>
+    template<typename QNumberType>
     class Pid
     {
+        static_assert(math::is_qnumber<QNumberType>::value ||
+                          std::is_floating_point<QNumberType>::value,
+            "Pid can only be instantiated with math::QNumber types.");
+
     public:
         struct Tunnings
         {
-            T kp;
-            T ki;
-            T kd;
+            QNumberType kp;
+            QNumberType ki;
+            QNumberType kd;
         };
 
         struct Limits
         {
-            T min;
-            T max;
+            QNumberType min;
+            QNumberType max;
         };
 
-        Pid(Tunnings tunnings, std::chrono::microseconds sampleTime, Limits limits, bool autoMode = true, bool proportionalOnMeasurement = false, bool differentialOnMeasurement = true);
+        Pid(Tunnings tunnings, Limits limits, bool autoMode = true);
 
-        void SetPoint(T setPoint);
-
-        T Process(T measuredProcessVariable);
-
+        void SetPoint(QNumberType setPoint);
+        QNumberType Process(QNumberType measuredProcessVariable);
         void Enable();
         void Disable();
-
         void SetLimits(Limits limits);
         void SetTunnings(Tunnings tunnings);
-        void SetSampleTime(std::chrono::microseconds sampleTime);
-
         void Reset();
 
     private:
-        T Clamp(T input);
-
-        void CalculateProportional(T& error, T& derivativeInput);
-        void CalculateIntegral(T& error);
-        void CalculateDerivative(T& derivativeInput, T& derivativeError);
-
-        void UpdateLasts(T& controllerOutput, T& error, T& measuredProcessVariable);
+        QNumberType Clamp(QNumberType input);
+        void UpdateLasts(QNumberType& controllerOutput, QNumberType& error, QNumberType& measuredProcessVariable);
 
     private:
-        Tunnings tunnings;
-        std::chrono::microseconds sampleTime;
-        Limits limits; 
+        Limits limits;
         bool autoMode;
-        bool proportionalOnMeasurement;
-        bool differentialOnMeasurement;
 
-        infra::Optional<T> setPoint = infra::none;
-        T proportional = 0;
-        T integral = 0;
-        T derivative = 0;
+        std::optional<QNumberType> setPoint;
+        QNumberType a0 = 0;
+        QNumberType a1 = 0;
+        QNumberType a2 = 0;
 
-        infra::Optional<T> lastControllerOutput = infra::none;
-        infra::Optional<T> lastError = infra::none;
-        infra::Optional<T> lastMeasuredProcessVariable = infra::none;
+        math::Index n;
+        math::RecursiveBuffer<QNumberType, 2> y;
+        math::RecursiveBuffer<QNumberType, 3> x;
     };
 
     ////    Implementation    ////
 
-    template<class T>
-    Pid<T>::Pid(Tunnings tunnings, std::chrono::microseconds sampleTime, Limits limits, bool autoMode, bool proportionalOnMeasurement, bool differentialOnMeasurement)
-        : tunnings(tunnings)
-        , sampleTime(sampleTime)
-        , limits(limits)
+    template<typename QNumberType>
+    Pid<QNumberType>::Pid(Tunnings tunnings, Limits limits, bool autoMode)
+        : limits(limits)
         , autoMode(autoMode)
-        , proportionalOnMeasurement(proportionalOnMeasurement)
-        , differentialOnMeasurement(differentialOnMeasurement)
     {
-        integral = Clamp(0);
+        really_assert(limits.min < limits.max);
 
-        really_assert(limits.max >= limits.min);
+        a0 = tunnings.kp + tunnings.ki + tunnings.kd;
+        a1 = -tunnings.kp - (tunnings.kd + tunnings.kd);
+        a2 = tunnings.kd;
     }
 
-    template<class T>
-    void Pid<T>::SetPoint(T setPoint)
+    template<class QNumberType>
+    void Pid<QNumberType>::SetPoint(QNumberType setPoint)
     {
-        this->setPoint.Emplace(setPoint);
+        this->setPoint.emplace(setPoint);
     }
 
-    template<class T>
-    void Pid<T>::Enable()
+    template<class QNumberType>
+    void Pid<QNumberType>::Enable()
     {
         if (autoMode)
-        {
             Reset();
-
-            integral = Clamp(lastControllerOutput.ValueOr(0));
-        }
 
         autoMode = true;
     }
 
-    template<class T>
-    void Pid<T>::Disable()
+    template<typename QNumberType>
+    void Pid<QNumberType>::Disable()
     {
         autoMode = false;
     }
 
-    template<class T>
-    void Pid<T>::SetLimits(Limits limits)
+    template<class QNumberType>
+    void Pid<QNumberType>::SetLimits(Limits limits)
     {
+        if (limits.max >= limits.min)
+            std::abort();
+
         this->limits = limits;
-
-        really_assert(limits.max >= limits.min);
     }
 
-    template<class T>
-    void Pid<T>::SetTunnings(Tunnings tunnings)
+    template<class QNumberType>
+    void Pid<QNumberType>::SetTunnings(Tunnings tunnings)
     {
-        this->tunnings = tunnings;
+        a0 = tunnings.kp + tunnings.ki + tunnings.kd;
+        a1 = -tunnings.kp - (tunnings.kd + tunnings.kd);
+        a2 = tunnings.kd;
     }
 
-    template<class T>
-    void Pid<T>::SetSampleTime(std::chrono::microseconds sampleTime)
-    {
-        this->sampleTime = sampleTime;
-
-        Reset();
-
-        integral = Clamp(lastControllerOutput.ValueOr(0));
-    }
-
-    template<class T>
-    T Pid<T>::Clamp(T input)
+    template<class QNumberType>
+    QNumberType Pid<QNumberType>::Clamp(QNumberType input)
     {
         if (input > limits.max)
             return limits.max;
@@ -150,58 +120,22 @@ namespace control_toolbox
         return input;
     }
 
-    template<class T>
-    T Pid<T>::Process(T measuredProcessVariable)
+    template<class QNumberType>
+    QNumberType Pid<QNumberType>::Process(QNumberType measuredProcessVariable)
     {
         if (!setPoint || !autoMode)
-            return lastControllerOutput.ValueOr(*setPoint);
+            return measuredProcessVariable;
 
-        T error = *setPoint - measuredProcessVariable;
-        T derivativeInput = measuredProcessVariable - lastMeasuredProcessVariable.ValueOr(measuredProcessVariable);
-        T derivativeError = error - lastError.ValueOr(error);
+        x.Update(*setPoint - measuredProcessVariable);
+        auto output = Clamp(y[n - 1] + a0 * x[n - 0] + a1 * x[n - 1] + a2 * x[n - 2]);
+        y.Update(output);
 
-        CalculateProportional(error, derivativeInput);
-        CalculateIntegral(error);
-        CalculateDerivative(derivativeInput, derivativeError);
-
-        T controllerOutput = Clamp(proportional + integral + derivative);
-
-        UpdateLasts(controllerOutput, error, measuredProcessVariable);
-
-        return controllerOutput;
+        return output;
     }
 
-    template<class T>
-    void Pid<T>::CalculateProportional(T& error, T& derivativeInput)
+    template<class QNumberType>
+    void Pid<QNumberType>::Reset()
     {
-        if (proportionalOnMeasurement)
-            proportional = tunnings.kp * error;
-        else
-            proportional -= tunnings.kp * derivativeInput;
-    }
-
-    template<class T>
-    void Pid<T>::CalculateIntegral(T& error)
-    {
-        integral += tunnings.ki * error * static_cast<T>(std::chrono::duration_cast<std::chrono::microseconds>(sampleTime).count());
-        integral = Clamp(integral);
-    }
-
-    template<class T>
-    void Pid<T>::CalculateDerivative(T& derivativeInput, T& derivativeError)
-    {
-        if (differentialOnMeasurement)
-            derivative = -tunnings.kd * derivativeInput / static_cast<T>(std::chrono::duration_cast<std::chrono::microseconds>(sampleTime).count());
-        else
-            derivative -= tunnings.kd * derivativeError / static_cast<T>(std::chrono::duration_cast<std::chrono::microseconds>(sampleTime).count());
-    }
-
-    template<class T>
-    void Pid<T>::UpdateLasts(T& controllerOutput, T& error, T& measuredProcessVariable)
-    {
-        this->lastControllerOutput.Emplace(controllerOutput);
-        this->lastError.Emplace(error);
-        this->lastMeasuredProcessVariable.Emplace(measuredProcessVariable);
     }
 }
 

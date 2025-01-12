@@ -28,6 +28,10 @@ This library is ideal for applications in:
 
 Refer to the documentation and example scripts to quickly integrate and utilize the library's signal processing and control algorithms in your projects.
 
+## Examples
+
+- [PID](doc/examples/pid.md)
+
 ## Contributing
 
 Contributions, issues, and feature requests are welcome. Please check the contributing guidelines before submitting pull requests.
