@@ -14,6 +14,7 @@ target_sources(dsp.math PRIVATE
     HyperbolicFunctions.hpp
     Matrix.hpp
     QNumber.hpp
+    RecursiveBuffer.hpp
     SingleInstructionMultipleData.hpp
     TrigonometricFunctions.hpp
 )

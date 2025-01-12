@@ -22,21 +22,11 @@ if (CONTROL_TOOLBOX_STANDALONE)
 
     FetchContent_Declare(
         emil
-        GIT_REPOSITORY https://gitlab.com/embedded-library/infrastructure/embedded-infra-lib.git
-        GIT_TAG        dc2b87ee100366b4141012d0c86680cf2c7a311b # Unreleased
+        GIT_REPOSITORY https://github.com/embedded-pro/embedded-infra-lib.git
+        GIT_TAG        3a172983dcfe206c6d4c7109175022597966dbdd # Unreleased
     )
 
     FetchContent_MakeAvailable(emil)
-
-    if (TARGET_MCU_VENDOR STREQUAL st)
-        FetchContent_Declare(
-            halst
-            GIT_REPOSITORY https://gitlab.com/embedded-library/infrastructure/hal-st.git
-            GIT_TAG        6563a5806afc5a593a96a2be53329b59ab40b5c3 # unreleased
-        )
-
-        FetchContent_MakeAvailable(halst)
-    endif()
 endif()
 
 project(control_toolbox LANGUAGES C CXX ASM VERSION 0.0.1) # x-release-please-version
@@ -85,7 +75,9 @@ add_subdirectory(controllers)
 add_subdirectory(examples)
 add_subdirectory(math)
 
-emil_clangformat_directories(usb_host DIRECTORIES .)
+emil_clangformat_directories(controllers DIRECTORIES .)
+emil_clangformat_directories(examples DIRECTORIES .)
+emil_clangformat_directories(math DIRECTORIES .)
 
 if (CONTROL_TOOLBOX_STANDALONE)
     emil_folderize_all_targets()
