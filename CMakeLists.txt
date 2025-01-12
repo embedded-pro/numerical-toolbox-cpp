@@ -85,7 +85,9 @@ add_subdirectory(controllers)
 add_subdirectory(examples)
 add_subdirectory(math)
 
-emil_clangformat_directories(usb_host DIRECTORIES .)
+emil_clangformat_directories(controllers DIRECTORIES .)
+emil_clangformat_directories(examples DIRECTORIES .)
+emil_clangformat_directories(math DIRECTORIES .)
 
 if (CONTROL_TOOLBOX_STANDALONE)
     emil_folderize_all_targets()
