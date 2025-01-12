@@ -1,5 +1,5 @@
 add_executable(dsp.examples.controllers.temperature_controller)
-emil_build_for(dsp.examples.controllers.temperature_controller HOST Windows PREREQUISITE_BOOL PREVIEW_BUILD_EXAMPLES)
+emil_build_for(dsp.examples.controllers.temperature_controller HOST Windows PREREQUISITE_BOOL CONTROL_TOOLBOX_BUILD_EXAMPLES)
 
 target_link_libraries(dsp.examples.controllers.temperature_controller PUBLIC
     sciplot

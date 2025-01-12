@@ -71,12 +71,16 @@ if (CONTROL_TOOLBOX_BUILD_TESTS)
     emil_enable_testing()
 endif()
 
+add_subdirectory(analysis)
 add_subdirectory(controllers)
 add_subdirectory(examples)
+add_subdirectory(filters)
 add_subdirectory(math)
 
+emil_clangformat_directories(analysis DIRECTORIES .)
 emil_clangformat_directories(controllers DIRECTORIES .)
 emil_clangformat_directories(examples DIRECTORIES .)
+emil_clangformat_directories(filters DIRECTORIES .)
 emil_clangformat_directories(math DIRECTORIES .)
 
 if (CONTROL_TOOLBOX_STANDALONE)
