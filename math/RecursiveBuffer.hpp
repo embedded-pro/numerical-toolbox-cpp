@@ -35,7 +35,7 @@ namespace math
             std::disjunction_v<std::is_same<T, float>, is_qnumber<T>>;
     }
 
-    template<typename QNumberType, std::size_t Size>
+    template<typename QNumberType, std::size_t Length>
     class RecursiveBuffer
     {
         static_assert(detail::is_supported_type_v<QNumberType>,
@@ -43,24 +43,39 @@ namespace math
 
     public:
         RecursiveBuffer();
+        RecursiveBuffer& operator=(std::initializer_list<QNumberType> init);
 
         void Update(QNumberType value);
+        void Reset();
+        std::size_t Size();
         QNumberType operator[](const IndexRelative& n) const;
 
     private:
-        std::array<QNumberType, Size> buffer;
+        std::array<QNumberType, Length> buffer;
     };
 
     // Implementation
 
-    template<typename QNumberType, std::size_t Size>
-    RecursiveBuffer<QNumberType, Size>::RecursiveBuffer()
+    template<typename QNumberType, std::size_t Length>
+    RecursiveBuffer<QNumberType, Length>::RecursiveBuffer()
     {
         buffer.fill(0);
     }
 
-    template<typename QNumberType, std::size_t Size>
-    void RecursiveBuffer<QNumberType, Size>::Update(QNumberType value)
+    template<typename QNumberType, std::size_t Length>
+    RecursiveBuffer<QNumberType, Length>& RecursiveBuffer<QNumberType, Length>::operator=(std::initializer_list<QNumberType> init)
+    {
+        really_assert(init.size() <= Length);
+        std::copy(init.begin(), init.end(), buffer.begin());
+
+        if (init.size() < Length)
+            std::fill(buffer.begin() + init.size(), buffer.end(), QNumberType(0.0f));
+
+        return *this;
+    }
+
+    template<typename QNumberType, std::size_t Length>
+    void RecursiveBuffer<QNumberType, Length>::Update(QNumberType value)
     {
         for (auto i = buffer.size() - 1; i > 0; --i)
             buffer[i] = buffer[i - 1];
@@ -68,8 +83,20 @@ namespace math
         buffer[0] = value;
     }
 
-    template<typename QNumberType, std::size_t Size>
-    QNumberType RecursiveBuffer<QNumberType, Size>::operator[](const IndexRelative& n) const
+    template<typename QNumberType, std::size_t Length>
+    void RecursiveBuffer<QNumberType, Length>::Reset()
+    {
+        buffer.fill(0);
+    }
+
+    template<typename QNumberType, std::size_t Length>
+    std::size_t RecursiveBuffer<QNumberType, Length>::Size()
+    {
+        return buffer.size();
+    }
+
+    template<typename QNumberType, std::size_t Length>
+    QNumberType RecursiveBuffer<QNumberType, Length>::operator[](const IndexRelative& n) const
     {
         return buffer.at(n.offset);
     }
