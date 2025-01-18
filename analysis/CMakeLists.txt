@@ -11,6 +11,9 @@ target_link_libraries(dsp.analysis INTERFACE
 )
 
 target_sources(dsp.analysis PRIVATE
+    FastFourierTransform.hpp
+    FastFourierTransformRadix2Impl.hpp
+    FastFourierTransformRadix4Impl.hpp
     FrequencyResponse.hpp
 )
 
