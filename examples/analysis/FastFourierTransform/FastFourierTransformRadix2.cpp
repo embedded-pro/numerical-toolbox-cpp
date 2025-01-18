@@ -20,7 +20,7 @@ namespace
 
             for (std::size_t k = 0; k < N; ++k)
             {
-                float angle = -2.0f * M_PI * k / N;
+                float angle = -M_PI * static_cast<float>(k) / static_cast<float>(N);
                 factors.emplace_back(std::cos(angle), std::sin(angle));
             }
         }
@@ -82,8 +82,11 @@ int main()
     {
         frequencies[i] = static_cast<float>(i) * sampleRate / N;
         auto complex = result[i];
-        magnitudes[i] = 20.0f * std::log10(std::sqrt(math::ToFloat(complex.Real()) * math::ToFloat(complex.Real()) +
-                                                     math::ToFloat(complex.Imaginary()) * math::ToFloat(complex.Imaginary())));
+        // magnitudes[i] = 20.0f * std::log10(std::sqrt(math::ToFloat(complex.Real()) * math::ToFloat(complex.Real()) +
+        //                                              math::ToFloat(complex.Imaginary()) * math::ToFloat(complex.Imaginary())) +
+        //                                    +1e-6f);
+        magnitudes[i] = std::sqrt(math::ToFloat(complex.Real()) * math::ToFloat(complex.Real()) +
+                                  math::ToFloat(complex.Imaginary()) * math::ToFloat(complex.Imaginary()));
     }
 
     std::vector<float> timePoints(N);

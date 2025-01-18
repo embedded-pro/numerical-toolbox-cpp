@@ -24,6 +24,7 @@ namespace analysis
 
     private:
         const std::size_t log2_n = FastFourierTransform<QNumberType>::Log2(Length);
+        const QNumberType scale{ 1.0f / static_cast<float>(Length) };
         TwiddleFactors<QNumberType, Length / 2>& twinddleFactors;
         typename infra::BoundedVector<math::Complex<QNumberType>>::template WithMaxSize<Length> frequencyDomain;
         typename infra::BoundedVector<QNumberType>::template WithMaxSize<Length> timeDomain;
@@ -66,8 +67,8 @@ namespace analysis
                     math::Complex twiddle = twinddleFactors[k * stepFactor];
 
                     math::Complex temp = b * twiddle;
-                    b = a - temp;
-                    a = a + temp;
+                    b = (a - temp);
+                    a = (a + temp);
 
                     k++;
                 }
