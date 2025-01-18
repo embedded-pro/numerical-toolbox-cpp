@@ -1,2 +1,2 @@
-add_subdirectory(FastFourierTransform)
+add_subdirectory(FastFourierTransformRadix2)
 add_subdirectory(FilterFrequencyResponse)

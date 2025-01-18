@@ -24,7 +24,8 @@ namespace analysis
 
     private:
         const std::size_t log2_n = FastFourierTransform<QNumberType>::Log2(Length);
-        const QNumberType scale{ 1.0f / static_cast<float>(Length) };
+        const std::size_t radix = 2;
+        const std::size_t radixBits = FastFourierTransform<QNumberType>::Log2(radix);
         TwiddleFactors<QNumberType, Length / 2>& twinddleFactors;
         typename infra::BoundedVector<math::Complex<QNumberType>>::template WithMaxSize<Length> frequencyDomain;
         typename infra::BoundedVector<QNumberType>::template WithMaxSize<Length> timeDomain;
@@ -45,7 +46,7 @@ namespace analysis
 
         for (std::size_t i = 0; i < Length; ++i)
         {
-            auto j = FastFourierTransform<QNumberType>::BitReverse(i, log2_n);
+            auto j = FastFourierTransform<QNumberType>::template BitReverse(i, log2_n, radixBits, radix);
 
             if (i < j)
                 std::swap(frequencyDomain[i], frequencyDomain[j]);

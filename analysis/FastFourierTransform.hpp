@@ -35,14 +35,14 @@ namespace analysis
 
     protected:
         template<typename T>
-        inline T BitReverse(T x, T log2_n)
+        inline T BitReverse(T x, T logr_n, T bits, T radix)
         {
             T n = 0;
 
-            for (T i = 0; i < log2_n; ++i)
+            for (T i = 0; i < logr_n; ++i)
             {
-                n = (n << 1) | (x & 1);
-                x >>= 1;
+                n = (n << bits) | (x & (radix - 1));
+                x >>= bits;
             }
 
             return n;

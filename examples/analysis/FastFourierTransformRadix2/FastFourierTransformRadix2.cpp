@@ -111,7 +111,7 @@ int main()
     Figure figure = { { timePlot, freqPlot } };
     figure.title("Signal Analysis using FFT");
     figure.size(800, 600);
-    figure.save("build/fft_analysis.pdf");
+    figure.save("build/FFT Radix 2 - Analysis.pdf");
 
     return 0;
 }
