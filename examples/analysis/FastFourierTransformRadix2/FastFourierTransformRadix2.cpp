@@ -1,6 +1,7 @@
 #include "analysis/FastFourierTransform.hpp"
 #include "analysis/FastFourierTransformRadix2Impl.hpp"
 #include <cmath>
+#include <iostream>
 #include <sciplot/sciplot.hpp>
 #include <vector>
 
@@ -73,7 +74,7 @@ int main()
     for (const auto& value : signal)
         input.push_back(value);
 
-    auto& result = fft.Forward(input);
+    auto& frequencyDomain = fft.Forward(input);
 
     std::vector<float> frequencies(N / 2);
     std::vector<float> magnitudes(N / 2);
@@ -81,29 +82,47 @@ int main()
     for (std::size_t i = 0; i < N / 2; ++i)
     {
         frequencies[i] = static_cast<float>(i) * sampleRate / N;
-        auto complex = result[i];
-        // magnitudes[i] = 20.0f * std::log10(std::sqrt(math::ToFloat(complex.Real()) * math::ToFloat(complex.Real()) +
-        //                                              math::ToFloat(complex.Imaginary()) * math::ToFloat(complex.Imaginary())) +
-        //                                    +1e-6f);
+        auto complex = frequencyDomain[i];
         magnitudes[i] = std::sqrt(math::ToFloat(complex.Real()) * math::ToFloat(complex.Real()) +
                                   math::ToFloat(complex.Imaginary()) * math::ToFloat(complex.Imaginary()));
     }
 
+    auto& reconstructedSignal = fft.Inverse(frequencyDomain);
+
     std::vector<float> timePoints(N);
-    std::vector<float> signalValues(signal.begin(), signal.end());
+    std::vector<float> originalSignalValues(signal.begin(), signal.end());
+    std::vector<float> reconstructedSignalValues;
+
     for (std::size_t i = 0; i < N; ++i)
+    {
         timePoints[i] = static_cast<float>(i) / sampleRate;
+        reconstructedSignalValues.push_back(reconstructedSignal[i]);
+    }
+
+    float maxError = 0.0f;
+    float totalError = 0.0f;
+    for (std::size_t i = 0; i < N; ++i)
+    {
+        float error = std::abs(originalSignalValues[i] - reconstructedSignalValues[i]);
+        maxError = std::max(maxError, error);
+        totalError += error;
+    }
+    float avgError = totalError / N;
+    std::cout << "Reconstruction Statistics:\n";
+    std::cout << "Maximum Error: " << maxError << "\n";
+    std::cout << "Average Error: " << avgError << "\n";
 
     Plot timePlot;
     timePlot.xlabel("Time (s)");
     timePlot.ylabel("Amplitude");
     timePlot.grid().show();
     timePlot.legend().show();
-    timePlot.drawCurve(timePoints, signalValues).label("Time Domain Signal");
+    timePlot.drawCurve(timePoints, originalSignalValues).label("Original Signal");
+    timePlot.drawCurve(timePoints, reconstructedSignalValues).label("Reconstructed Signal");
 
     Plot freqPlot;
     freqPlot.xlabel("Frequency (Hz)");
-    freqPlot.ylabel("Magnitude (dB)");
+    freqPlot.ylabel("Magnitude");
     freqPlot.grid().show();
     freqPlot.legend().show();
     freqPlot.drawCurve(frequencies, magnitudes).label("Frequency Spectrum");

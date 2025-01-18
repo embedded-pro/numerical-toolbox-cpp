@@ -82,6 +82,50 @@ namespace analysis
     template<typename QNumberType, std::size_t Length>
     typename FastFourierTransformRadix2Impl<QNumberType, Length>::VectorReal& FastFourierTransformRadix2Impl<QNumberType, Length>::Inverse(FastFourierTransformRadix2Impl<QNumberType, Length>::VectorComplex& input)
     {
+        frequencyDomain = input;
+
+        for (auto& value : frequencyDomain)
+            value = math::Complex<QNumberType>{ value.Real(), -value.Imaginary() };
+
+        for (std::size_t i = 0; i < Length; ++i)
+        {
+            auto j = FastFourierTransform<QNumberType>::template BitReverse(i, log2_n, radixBits, radix);
+
+            if (i < j)
+                std::swap(frequencyDomain[i], frequencyDomain[j]);
+        }
+
+        for (auto step = radix; step <= Length; step *= radix)
+        {
+            auto halfStep = step / radix;
+            auto k = 0;
+            auto stepFactor = Length / step;
+
+            for (size_t i = 0; i < Length; i += step)
+            {
+                k = 0;
+                for (size_t j = i; j < i + halfStep; ++j)
+                {
+                    math::Complex<QNumberType>& a = frequencyDomain[j];
+                    math::Complex<QNumberType>& b = frequencyDomain[j + halfStep];
+                    math::Complex twiddle = twinddleFactors[k * stepFactor];
+
+                    math::Complex temp = b * twiddle;
+                    b = (a - temp);
+                    a = (a + temp);
+
+                    k++;
+                }
+            }
+        }
+
+        for (auto& value : frequencyDomain)
+            value = math::Complex<QNumberType>{ value.Real(), -value.Imaginary() };
+
+        timeDomain.clear();
+        for (const auto& value : frequencyDomain)
+            timeDomain.push_back(value.Real() / static_cast<QNumberType>(Length));
+
         return timeDomain;
     }
 }
