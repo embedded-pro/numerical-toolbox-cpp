@@ -40,6 +40,7 @@ jobs:
           variant: sccache
           max-size: 2G
           save: ${{ github.ref == 'refs/heads/main' }}
+      - uses: seanmiddleditch/gha-setup-ninja@96bed6edff20d1dd61ecff9b75cc519d516e6401 # v5
       - uses: lukka/run-cmake@af1be47fd7c933593f687731bc6fdbee024d3ff4 # v10.8
         with:
           configurePreset: "coverage"
