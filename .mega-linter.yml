@@ -4,7 +4,6 @@ ENABLE:
   - DOCKERFILE
   - JSON
   - MARKDOWN
-  - REPOSITORY
   - SPELL
   - XML
   - YAML
