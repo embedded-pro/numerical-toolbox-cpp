@@ -1,11 +1,11 @@
-add_library(dsp.analysis ${EMIL_EXCLUDE_FROM_ALL} INTERFACE)
+add_library(dsp.analysis ${EMIL_EXCLUDE_FROM_ALL})
 
-target_include_directories(dsp.analysis INTERFACE
+target_include_directories(dsp.analysis PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-target_link_libraries(dsp.analysis INTERFACE
+target_link_libraries(dsp.analysis PUBLIC
     infra.util
     dsp.math
 )
@@ -13,6 +13,7 @@ target_link_libraries(dsp.analysis INTERFACE
 target_sources(dsp.analysis PRIVATE
     FastFourierTransform.hpp
     FastFourierTransformRadix2Impl.hpp
+    FrequencyResponse.cpp
     FrequencyResponse.hpp
 )
 
