@@ -40,6 +40,7 @@ if (CONTROL_TOOLBOX_STANDALONE)
         GIT_REPOSITORY          https://github.com/sciplot/sciplot.git
         GIT_TAG                 v0.2.2
         GIT_SHALLOW             TRUE
+        GIT_SUBMODULES_RECURSE  TRUE
     )
     
     FetchContent_GetProperties(sciplot)
