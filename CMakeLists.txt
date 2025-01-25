@@ -37,9 +37,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED On)
 if (CONTROL_TOOLBOX_STANDALONE)
     FetchContent_Declare(
         sciplot
-        GIT_REPOSITORY  https://github.com/sciplot/sciplot.git
-        GIT_TAG         v0.2.2
-        GIT_SUBMODULES_CONFIG "deps/doxystrap;https://github.com/allanleal/doxystrap.git;deps/gnuplot-palettes;https://github.com/sciplot/gnuplot-palettes.git"
+        GIT_REPOSITORY          https://github.com/sciplot/sciplot.git
+        GIT_TAG                 v0.2.2
+        GIT_SUBMODULES_CONFIG   "deps/doxystrap;https://github.com/allanleal/doxystrap.git;deps/gnuplot-palettes;https://github.com/sciplot/gnuplot-palettes.git"
+        GIT_CONFIG              "advice.detachedHead=false;core.autocrlf=false"
     )
     
     FetchContent_GetProperties(sciplot)
