@@ -39,6 +39,7 @@ if (CONTROL_TOOLBOX_STANDALONE)
         sciplot
         GIT_REPOSITORY  https://github.com/sciplot/sciplot.git
         GIT_TAG         v0.2.2
+        GIT_SUBMODULES_CONFIG "deps/doxystrap;https://github.com/allanleal/doxystrap.git;deps/gnuplot-palettes;https://github.com/sciplot/gnuplot-palettes.git"
     )
     
     FetchContent_GetProperties(sciplot)
