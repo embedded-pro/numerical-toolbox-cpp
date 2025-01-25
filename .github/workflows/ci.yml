@@ -50,38 +50,3 @@ jobs:
         with:
           name: test-logs
           path: build/continuous-integration/Testing/Temporary/
-  embedded_build:
-    name: Embedded Build
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        configuration: ["RelWithDebInfo"]
-        gcc: ["10.3-2021.10"]
-        target: ["stm32f407", "stm32f767", "stm32f746"]
-        include:
-          - gcc: "8-2019-q3"
-            configuration: "RelWithDebInfo"
-            target: "stm32f767"
-          - gcc: "9-2020-q2"
-            configuration: "RelWithDebInfo"
-            target: "stm32f767"
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          persist-credentials: false
-      - name: Install GNU Arm Embedded Toolchain ${{ matrix.gcc }}
-        uses: carlosperate/arm-none-eabi-gcc-action@0cc83a7330501be1848887e2966aaceb49a4bb12 # v1.9.1
-        with:
-          release: ${{ matrix.gcc }}
-      - uses: hendrikmuhs/ccache-action@ed74d11c0b343532753ecead8a951bb09bb34bc9 # v1.2.14
-        with:
-          key: ${{ matrix.gcc }}-${{ matrix.configuration }}
-          max-size: 2G
-          save: ${{ github.ref == 'refs/heads/main' }}
-      - run: |
-          sudo apt-get update && sudo apt-get install --no-install-recommends ninja-build xsltproc
-          echo "::add-matcher::.github/matchers/gcc-problem-matcher.json"
-          cmake --preset host -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-          cmake --build --preset host-${{ matrix.configuration }}
-          cmake --preset ${{ matrix.target }} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-          cmake --build --preset ${{ matrix.target }}-${{ matrix.configuration }}
