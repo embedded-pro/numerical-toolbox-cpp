@@ -59,4 +59,4 @@ jobs:
           # to get access to secrets.SONAR_TOKEN, provide GITHUB_TOKEN
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: sonar-scanner -D sonar.host.url="${{ env.SONAR_SERVER_URL }}"
+        run: sonar-scanner -X -D sonar.host.url="${{ env.SONAR_SERVER_URL }}"
