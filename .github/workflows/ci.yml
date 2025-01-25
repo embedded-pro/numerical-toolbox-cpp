@@ -42,13 +42,13 @@ jobs:
           save: ${{ github.ref == 'refs/heads/main' }}
       - uses: lukka/run-cmake@af1be47fd7c933593f687731bc6fdbee024d3ff4 # v10.8
         with:
-          configurePreset: "continuous-integration"
-          buildPreset: "continuous-integration"
-          testPreset: "continuous-integration"
+          configurePreset: "coverage"
+          buildPreset: "coverage"
+          testPreset: "coverage"
           configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=sccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=sccache']"
       - name: Upload test logs
         if: ${{ failure() }}
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: test-logs
-          path: build/continuous-integration/Testing/Temporary/
+          path: build/coverage/Testing/Temporary/
