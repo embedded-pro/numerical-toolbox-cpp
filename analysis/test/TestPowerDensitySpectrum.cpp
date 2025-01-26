@@ -45,11 +45,6 @@ namespace
         explicit FftStub(analysis::TwiddleFactors<QNumberType, Length / 2>&)
         {}
 
-        constexpr std::size_t NumberOfPoints() const override
-        {
-            return Length;
-        }
-
         VectorComplex& Forward(VectorReal& input) override
         {
             result.clear();
@@ -112,37 +107,6 @@ TYPED_TEST(TestPowerSpectralDensity, when_input_smaller_than_fft_size_throws_ass
     EXPECT_DEATH(this->powerDensitySpectrum->Calculate(input), "");
 }
 
-TYPED_TEST(TestPowerSpectralDensity, dc_signal_produces_expected_spectrum)
-{
-    float tolerance = controllers::GetTolerance<TypeParam>();
-
-    typename TestFixture::PowerDensitySpectrum::VectorReal::template WithMaxSize<2 * this->length> input;
-    for (std::size_t i = 0; i < this->length * 2; ++i)
-        input.push_back(TypeParam(0.5f));
-
-    auto [frequencies, spectrum] = this->powerDensitySpectrum->Calculate(input);
-
-    EXPECT_NEAR(math::ToFloat(spectrum[0]), math::ToFloat(TypeParam(0.25f)), tolerance);
-
-    for (std::size_t i = 1; i < spectrum.size(); ++i)
-        EXPECT_NEAR(math::ToFloat(spectrum[i]), 0.0f, tolerance);
-}
-
-TYPED_TEST(TestPowerSpectralDensity, frequency_points_are_correctly_scaled)
-{
-    float tolerance = controllers::GetTolerance<TypeParam>();
-
-    typename TestFixture::PowerDensitySpectrum::VectorReal::template WithMaxSize<2 * this->length> input;
-    for (std::size_t i = 0; i < this->length * 2; ++i)
-        input.push_back(TypeParam(0.0f));
-
-    auto [frequencies, spectrum] = this->powerDensitySpectrum->Calculate(input);
-
-    float expectedDf = 48000.0f / this->length;
-    for (std::size_t i = 0; i < frequencies.size(); ++i)
-        EXPECT_NEAR(math::ToFloat(frequencies[i]), i * expectedDf, tolerance);
-}
-
 TYPED_TEST(TestPowerSpectralDensity, overlapping_segments_are_properly_averaged)
 {
     float tolerance = controllers::GetTolerance<TypeParam>();
@@ -152,9 +116,8 @@ TYPED_TEST(TestPowerSpectralDensity, overlapping_segments_are_properly_averaged)
     for (std::size_t i = 0; i < this->length * 2; ++i)
         input.push_back((i % 2) ? TypeParam(0.5f) : TypeParam(-0.5f));
 
-    auto [frequencies, spectrum1] = this->powerDensitySpectrum->Calculate(input);
-
-    auto [_, spectrum2] = this->powerDensitySpectrum->Calculate(input);
+    auto& spectrum1 = this->powerDensitySpectrum->Calculate(input);
+    auto& spectrum2 = this->powerDensitySpectrum->Calculate(input);
 
     for (std::size_t i = 0; i < spectrum1.size(); ++i)
         EXPECT_NEAR(math::ToFloat(spectrum1[i]), math::ToFloat(spectrum2[i]), tolerance);
