@@ -19,6 +19,8 @@ namespace analysis
 
         explicit FastFourierTransformRadix2Impl(TwiddleFactors<QNumberType, Length / 2>& twinddleFactors);
 
+        constexpr std::size_t NumberOfPoints() const override;
+
         VectorComplex& Forward(VectorReal& input) override;
         VectorReal& Inverse(VectorComplex& input) override;
 
@@ -37,6 +39,12 @@ namespace analysis
     FastFourierTransformRadix2Impl<QNumberType, Length>::FastFourierTransformRadix2Impl(TwiddleFactors<QNumberType, Length / 2>& twinddleFactors)
         : twinddleFactors(twinddleFactors)
     {}
+
+    template<typename QNumberType, std::size_t Length>
+    constexpr std::size_t FastFourierTransformRadix2Impl<QNumberType, Length>::NumberOfPoints() const
+    {
+        return Length;
+    }
 
     template<typename QNumberType, std::size_t Length>
     typename FastFourierTransformRadix2Impl<QNumberType, Length>::VectorComplex& FastFourierTransformRadix2Impl<QNumberType, Length>::Forward(FastFourierTransformRadix2Impl<QNumberType, Length>::VectorReal& input)
@@ -124,7 +132,7 @@ namespace analysis
 
         timeDomain.clear();
         for (const auto& value : frequencyDomain)
-            timeDomain.push_back(value.Real() / static_cast<QNumberType>(Length));
+            timeDomain.push_back(QNumberType(value.Real() / static_cast<float>(Length)));
 
         return timeDomain;
     }

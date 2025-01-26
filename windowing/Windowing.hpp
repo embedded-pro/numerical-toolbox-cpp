@@ -14,6 +14,7 @@ namespace windowing
 
     public:
         virtual QNumberType operator()(std::size_t n, std::size_t order) = 0;
+        virtual QNumberType Power(std::size_t order) = 0;
     };
 
     template<typename QNumberType>
@@ -24,6 +25,11 @@ namespace windowing
         QNumberType operator()(std::size_t n, std::size_t order) override
         {
             return (0.54f - 0.46f * std::cos(2.0f * M_PI * n / order)) * 0.9999f;
+        }
+
+        QNumberType Power(std::size_t order) override
+        {
+            return QNumberType(0.397f * order);
         }
     };
 
@@ -36,6 +42,11 @@ namespace windowing
         {
             return (0.5f * (1.0f - std::cos(2.0f * M_PI * n / order))) * 0.9999f;
         }
+
+        QNumberType Power(std::size_t order) override
+        {
+            return QNumberType(0.375f * order);
+        }
     };
 
     template<typename QNumberType>
@@ -47,6 +58,11 @@ namespace windowing
         {
             return (0.42f - 0.5f * std::cos(2.0f * M_PI * n / order) + 0.08f * std::cos(4.0f * M_PI * n / order)) * 0.9999f;
         }
+
+        QNumberType Power(std::size_t order) override
+        {
+            return QNumberType(0.305f * order);
+        }
     };
 
     template<typename QNumberType>
@@ -56,7 +72,12 @@ namespace windowing
     public:
         QNumberType operator()(std::size_t, std::size_t) override
         {
-            return 0.9999f;
+            return QNumberType(0.9999f);
+        }
+
+        QNumberType Power(std::size_t order) override
+        {
+            return QNumberType(0.9999f);
         }
     };
 }

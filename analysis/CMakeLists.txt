@@ -15,6 +15,7 @@ target_sources(dsp.analysis PRIVATE
     FastFourierTransformRadix2Impl.hpp
     FrequencyResponse.cpp
     FrequencyResponse.hpp
+    PowerDensitySpectrum.hpp
 )
 
 add_subdirectory(test)
