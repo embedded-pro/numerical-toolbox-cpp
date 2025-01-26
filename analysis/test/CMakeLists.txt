@@ -9,5 +9,6 @@ target_link_libraries(dsp.analysis_test PUBLIC
 )
 
 target_sources(dsp.analysis_test PRIVATE
+    TestFastFourierTransformRadix2Impl.cpp
     TestPowerDensitySpectrum.cpp
 )
