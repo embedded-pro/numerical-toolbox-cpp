@@ -29,7 +29,7 @@ namespace analysis
         explicit PowerSpectralDensity(windowing::Window<QNumberType>& window, QNumberType samplingTimeInSeconds)
             : window(window)
             , samplingTimeInSeconds(samplingTimeInSeconds)
-            , frequencyResolution(QNumberType(samplingTimeInSeconds) * QNumberType(segmentSizeInverted))
+            , frequencyResolution(QNumberType(samplingTimeInSeconds * segmentSizeInverted))
         {}
 
         using VectorReal = typename FastFourierTransform<QNumberType>::VectorReal;
@@ -38,39 +38,47 @@ namespace analysis
         std::pair<VectorReal&, VectorReal&> Calculate(const VectorReal& input)
         {
             really_assert(input.size() >= SegmentSize);
-
-            QNumberType segments(static_cast<float>(1 + (input.size() - SegmentSize) / step));
-            QNumberType scalingFactor = (segments * window.Power(SegmentSize)) / samplingTimeInSeconds;
+            auto scale = segmentSizeInverted * samplingTimeInSeconds;
 
             y.clear();
             x.clear();
+            y.resize(SegmentSize / 2 + 1);
+            x.resize(SegmentSize / 2 + 1);
 
             for (std::size_t i = 0, segmentCount = 0; i + SegmentSize <= input.size(); i += step, ++segmentCount)
             {
                 segment.clear();
+                segment.resize(SegmentSize);
                 for (std::size_t j = 0; j < SegmentSize; ++j)
                     segment[j] = (QNumberType(input[i + j] * window(j, SegmentSize)));
 
                 spectrum = fft.Forward(segment);
 
                 for (std::size_t k = 0; k <= SegmentSize / 2; ++k)
-                    y[k] += (spectrum[k].Real() * spectrum[k].Real() + spectrum[k].Imaginary() * spectrum[k].Imaginary());
+                    y[k] += QNumberType(math::ToFloat(MagnitudeSquared(k)) / static_cast<float>(SegmentSize));
             }
 
             for (std::size_t i = 0; i < y.size(); ++i)
             {
-                y[i] /= scalingFactor;
-                x[i] = (frequencyResolution * QNumberType(static_cast<float>(i)));
+                y[i] *= frequencyResolution;
+                x[i] = QNumberType(math::ToFloat(frequencyResolution) * static_cast<float>(i));
             }
 
             return std::make_pair(std::ref(x), std::ref(y));
         }
 
     private:
-        static constexpr float segmentSizeInverted = 1 / SegmentSize;
+        QNumberType MagnitudeSquared(std::size_t k)
+        {
+            return spectrum[k].Real() * spectrum[k].Real() + spectrum[k].Imaginary() * spectrum[k].Imaginary();
+        }
+
+    private:
+        static constexpr QNumberType segmentSizeInverted = QNumberType(1.0f / static_cast<float>(SegmentSize));
         static constexpr std::size_t overlapSize = (SegmentSize * Overlap) / 100;
         static constexpr std::size_t step = SegmentSize - overlapSize;
         QNumberType frequencyResolution;
+        QNumberType scale;
         windowing::Window<QNumberType>& window;
         QNumberType samplingTimeInSeconds;
         TwindleFactor twindleFacors;

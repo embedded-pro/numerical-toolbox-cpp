@@ -116,7 +116,7 @@ TYPED_TEST(TestPowerSpectralDensity, dc_signal_produces_expected_spectrum)
 {
     float tolerance = controllers::GetTolerance<TypeParam>();
 
-    typename TestFixture::PowerDensitySpectrum::VectorReal::template WithMaxSize<this->length> input;
+    typename TestFixture::PowerDensitySpectrum::VectorReal::template WithMaxSize<2 * this->length> input;
     for (std::size_t i = 0; i < this->length * 2; ++i)
         input.push_back(TypeParam(0.5f));
 
@@ -132,7 +132,7 @@ TYPED_TEST(TestPowerSpectralDensity, frequency_points_are_correctly_scaled)
 {
     float tolerance = controllers::GetTolerance<TypeParam>();
 
-    typename TestFixture::PowerDensitySpectrum::VectorReal::template WithMaxSize<this->length> input;
+    typename TestFixture::PowerDensitySpectrum::VectorReal::template WithMaxSize<2 * this->length> input;
     for (std::size_t i = 0; i < this->length * 2; ++i)
         input.push_back(TypeParam(0.0f));
 
@@ -147,15 +147,12 @@ TYPED_TEST(TestPowerSpectralDensity, overlapping_segments_are_properly_averaged)
 {
     float tolerance = controllers::GetTolerance<TypeParam>();
 
-    typename TestFixture::PowerDensitySpectrum::VectorReal::template WithMaxSize<this->length> input;
+    typename TestFixture::PowerDensitySpectrum::VectorReal::template WithMaxSize<2 * this->length> input;
 
     for (std::size_t i = 0; i < this->length * 2; ++i)
         input.push_back((i % 2) ? TypeParam(0.5f) : TypeParam(-0.5f));
 
     auto [frequencies, spectrum1] = this->powerDensitySpectrum->Calculate(input);
-
-    for (std::size_t i = 0; i < this->length * 2; ++i)
-        input.push_back((i % 2) ? TypeParam(0.5f) : TypeParam(-0.5f));
 
     auto [_, spectrum2] = this->powerDensitySpectrum->Calculate(input);
 

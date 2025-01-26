@@ -29,7 +29,7 @@ namespace windowing
 
         QNumberType Power(std::size_t order) override
         {
-            return QNumberType(0.397f * order);
+            return QNumberType(0.397f);
         }
     };
 
@@ -45,7 +45,7 @@ namespace windowing
 
         QNumberType Power(std::size_t order) override
         {
-            return QNumberType(0.375f * order);
+            return QNumberType(0.375f);
         }
     };
 
@@ -61,7 +61,7 @@ namespace windowing
 
         QNumberType Power(std::size_t order) override
         {
-            return QNumberType(0.305f * order);
+            return QNumberType(0.305f);
         }
     };
 

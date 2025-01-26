@@ -50,7 +50,7 @@ namespace math
     {
     public:
         QNumber();
-        QNumber(float f);
+        constexpr QNumber(float f);
         explicit QNumber(IntType rawValue);
 
         float ToFloat() const;
@@ -82,7 +82,7 @@ namespace math
     private:
         IntType value;
 
-        static IntType FloatToFixed(float f)
+        static constexpr IntType FloatToFixed(float f)
         {
             really_assert(f >= -1.0f && f < 1.0f);
             return static_cast<IntType>(std::round(f * (1LL << FractionalBits)));
@@ -108,7 +108,7 @@ namespace math
     {}
 
     template<typename IntType, int FractionalBits>
-    QNumber<IntType, FractionalBits>::QNumber(float f)
+    constexpr QNumber<IntType, FractionalBits>::QNumber(float f)
         : value(FloatToFixed(f))
     {}
 
