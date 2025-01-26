@@ -1,5 +1,5 @@
 add_executable(dsp.examples.analysis.filter_frequency_response)
-emil_build_for(dsp.examples.analysis.filter_frequency_response HOST Windows PREREQUISITE_BOOL CONTROL_TOOLBOX_BUILD_EXAMPLES)
+emil_build_for(dsp.examples.analysis.filter_frequency_response PREREQUISITE_BOOL CONTROL_TOOLBOX_BUILD_EXAMPLES)
 
 target_link_libraries(dsp.examples.analysis.filter_frequency_response PUBLIC
     sciplot

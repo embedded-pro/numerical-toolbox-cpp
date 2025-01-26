@@ -3,6 +3,7 @@
 
 #include "analysis/FastFourierTransform.hpp"
 #include "infra/util/ReallyAssert.hpp"
+#include "math/ComplexNumber.hpp"
 #include "math/QNumber.hpp"
 #include "windowing/Windowing.hpp"
 #include <utility>
@@ -35,42 +36,47 @@ namespace analysis
         using VectorReal = typename FastFourierTransform<QNumberType>::VectorReal;
         using VectorComplex = typename FastFourierTransform<QNumberType>::VectorComplex;
 
-        std::pair<VectorReal&, VectorReal&> Calculate(const VectorReal& input)
+        VectorReal& Calculate(const VectorReal& input)
         {
             really_assert(input.size() >= SegmentSize);
-            auto scale = segmentSizeInverted * samplingTimeInSeconds;
 
-            y.clear();
-            x.clear();
-            y.resize(SegmentSize / 2 + 1);
-            x.resize(SegmentSize / 2 + 1);
+            ResetOutput();
 
             for (std::size_t i = 0, segmentCount = 0; i + SegmentSize <= input.size(); i += step, ++segmentCount)
             {
-                segment.clear();
-                segment.resize(SegmentSize);
+                ResetSegment();
+
                 for (std::size_t j = 0; j < SegmentSize; ++j)
                     segment[j] = (QNumberType(input[i + j] * window(j, SegmentSize)));
 
-                spectrum = fft.Forward(segment);
+                auto& spectrum = fft.Forward(segment);
 
                 for (std::size_t k = 0; k <= SegmentSize / 2; ++k)
-                    y[k] += QNumberType(math::ToFloat(MagnitudeSquared(k)) / static_cast<float>(SegmentSize));
+                    y[k] += QNumberType(math::ToFloat(MagnitudeSquared(spectrum[k])) / static_cast<float>(SegmentSize));
             }
 
             for (std::size_t i = 0; i < y.size(); ++i)
-            {
                 y[i] *= frequencyResolution;
-                x[i] = QNumberType(math::ToFloat(frequencyResolution) * static_cast<float>(i));
-            }
 
-            return std::make_pair(std::ref(x), std::ref(y));
+            return y;
         }
 
     private:
-        QNumberType MagnitudeSquared(std::size_t k)
+        QNumberType MagnitudeSquared(math::Complex<QNumberType>& data)
         {
-            return spectrum[k].Real() * spectrum[k].Real() + spectrum[k].Imaginary() * spectrum[k].Imaginary();
+            return data.Real() * data.Real() + data.Imaginary() * data.Imaginary();
+        }
+
+        void ResetOutput()
+        {
+            y.clear();
+            y.resize(SegmentSize / 2 + 1);
+        }
+
+        void ResetSegment()
+        {
+            segment.clear();
+            segment.resize(SegmentSize);
         }
 
     private:
@@ -84,8 +90,6 @@ namespace analysis
         TwindleFactor twindleFacors;
         Fft fft{ twindleFacors };
         typename infra::BoundedVector<QNumberType>::template WithMaxSize<SegmentSize> segment;
-        typename FastFourierTransform<QNumberType>::VectorComplex::template WithMaxSize<SegmentSize> spectrum;
-        typename FastFourierTransform<QNumberType>::VectorReal::template WithMaxSize<SegmentSize / 2 + 1> x;
         typename FastFourierTransform<QNumberType>::VectorReal::template WithMaxSize<SegmentSize / 2 + 1> y;
     };
 }

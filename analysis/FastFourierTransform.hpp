@@ -30,8 +30,6 @@ namespace analysis
         using VectorComplex = infra::BoundedVector<math::Complex<QNumberType>>;
         using VectorReal = infra::BoundedVector<QNumberType>;
 
-        constexpr virtual std::size_t NumberOfPoints() const = 0;
-
         virtual VectorComplex& Forward(VectorReal& input) = 0;
         virtual VectorReal& Inverse(VectorComplex& input) = 0;
 

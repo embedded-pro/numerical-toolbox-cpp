@@ -19,10 +19,12 @@ namespace analysis
 
         explicit FastFourierTransformRadix2Impl(TwiddleFactors<QNumberType, Length / 2>& twinddleFactors);
 
-        constexpr std::size_t NumberOfPoints() const override;
-
         VectorComplex& Forward(VectorReal& input) override;
         VectorReal& Inverse(VectorComplex& input) override;
+
+    private:
+        void ResetFrequencyDomain();
+        void ResetTimeDomain();
 
     private:
         const std::size_t log2_n = FastFourierTransform<QNumberType>::Log2(Length);
@@ -41,16 +43,12 @@ namespace analysis
     {}
 
     template<typename QNumberType, std::size_t Length>
-    constexpr std::size_t FastFourierTransformRadix2Impl<QNumberType, Length>::NumberOfPoints() const
-    {
-        return Length;
-    }
-
-    template<typename QNumberType, std::size_t Length>
     typename FastFourierTransformRadix2Impl<QNumberType, Length>::VectorComplex& FastFourierTransformRadix2Impl<QNumberType, Length>::Forward(FastFourierTransformRadix2Impl<QNumberType, Length>::VectorReal& input)
     {
-        for (const auto& data : input)
-            frequencyDomain.push_back(math::Complex<QNumberType>{ data, 0.0f });
+        ResetFrequencyDomain();
+
+        for (std::size_t i = 0; i < input.size(); i++)
+            frequencyDomain[i] = (math::Complex<QNumberType>{ input[i], 0.0f });
 
         for (std::size_t i = 0; i < Length; ++i)
         {
@@ -130,11 +128,26 @@ namespace analysis
         for (auto& value : frequencyDomain)
             value = math::Complex<QNumberType>{ value.Real(), -value.Imaginary() };
 
-        timeDomain.clear();
-        for (const auto& value : frequencyDomain)
-            timeDomain.push_back(QNumberType(value.Real() / static_cast<float>(Length)));
+        ResetTimeDomain();
+
+        for (std::size_t i = 0; i < frequencyDomain.size(); i++)
+            timeDomain[i] = (QNumberType(frequencyDomain[i].Real() / static_cast<float>(Length)));
 
         return timeDomain;
+    }
+
+    template<typename QNumberType, std::size_t Length>
+    void FastFourierTransformRadix2Impl<QNumberType, Length>::ResetFrequencyDomain()
+    {
+        frequencyDomain.clear();
+        frequencyDomain.resize(frequencyDomain.max_size());
+    }
+
+    template<typename QNumberType, std::size_t Length>
+    void FastFourierTransformRadix2Impl<QNumberType, Length>::ResetTimeDomain()
+    {
+        timeDomain.clear();
+        timeDomain.resize(timeDomain.max_size());
     }
 }
 
