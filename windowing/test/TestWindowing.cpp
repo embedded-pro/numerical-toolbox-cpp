@@ -1,5 +1,5 @@
-#include "Windowing/Windowing.hpp"
 #include "math/QNumber.hpp"
+#include "windowing/Windowing.hpp"
 #include <gtest/gtest.h>
 
 namespace
