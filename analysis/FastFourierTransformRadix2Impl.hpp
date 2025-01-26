@@ -25,6 +25,8 @@ namespace analysis
     private:
         void ResetFrequencyDomain();
         void ResetTimeDomain();
+        void BitReversePermutation();
+        void Calculate();
 
     private:
         const std::size_t log2_n = FastFourierTransform<QNumberType>::Log2(Length);
@@ -35,38 +37,33 @@ namespace analysis
         typename infra::BoundedVector<QNumberType>::template WithMaxSize<Length> timeDomain;
     };
 
-    /// Implementation ///
-
     template<typename QNumberType, std::size_t Length>
     FastFourierTransformRadix2Impl<QNumberType, Length>::FastFourierTransformRadix2Impl(TwiddleFactors<QNumberType, Length / 2>& twinddleFactors)
         : twinddleFactors(twinddleFactors)
     {}
 
     template<typename QNumberType, std::size_t Length>
-    typename FastFourierTransformRadix2Impl<QNumberType, Length>::VectorComplex& FastFourierTransformRadix2Impl<QNumberType, Length>::Forward(FastFourierTransformRadix2Impl<QNumberType, Length>::VectorReal& input)
+    void FastFourierTransformRadix2Impl<QNumberType, Length>::BitReversePermutation()
     {
-        ResetFrequencyDomain();
-
-        for (std::size_t i = 0; i < input.size(); i++)
-            frequencyDomain[i] = (math::Complex<QNumberType>{ input[i], 0.0f });
-
         for (std::size_t i = 0; i < Length; ++i)
         {
             auto j = FastFourierTransform<QNumberType>::template BitReverse(i, log2_n, radixBits, radix);
-
             if (i < j)
                 std::swap(frequencyDomain[i], frequencyDomain[j]);
         }
+    }
 
+    template<typename QNumberType, std::size_t Length>
+    void FastFourierTransformRadix2Impl<QNumberType, Length>::Calculate()
+    {
         for (auto step = 2; step <= Length; step *= 2)
         {
             auto halfStep = step / 2;
-            auto k = 0;
             auto stepFactor = Length / step;
 
             for (size_t i = 0; i < Length; i += step)
             {
-                k = 0;
+                auto k = 0;
                 for (size_t j = i; j < i + halfStep; ++j)
                 {
                     math::Complex<QNumberType>& a = frequencyDomain[j];
@@ -81,6 +78,18 @@ namespace analysis
                 }
             }
         }
+    }
+
+    template<typename QNumberType, std::size_t Length>
+    typename FastFourierTransformRadix2Impl<QNumberType, Length>::VectorComplex& FastFourierTransformRadix2Impl<QNumberType, Length>::Forward(FastFourierTransformRadix2Impl<QNumberType, Length>::VectorReal& input)
+    {
+        ResetFrequencyDomain();
+
+        for (std::size_t i = 0; i < input.size(); i++)
+            frequencyDomain[i] = (math::Complex<QNumberType>{ input[i], 0.0f });
+
+        BitReversePermutation();
+        Calculate();
 
         return frequencyDomain;
     }
@@ -93,37 +102,8 @@ namespace analysis
         for (auto& value : frequencyDomain)
             value = math::Complex<QNumberType>{ value.Real(), -value.Imaginary() };
 
-        for (std::size_t i = 0; i < Length; ++i)
-        {
-            auto j = FastFourierTransform<QNumberType>::template BitReverse(i, log2_n, radixBits, radix);
-
-            if (i < j)
-                std::swap(frequencyDomain[i], frequencyDomain[j]);
-        }
-
-        for (auto step = radix; step <= Length; step *= radix)
-        {
-            auto halfStep = step / radix;
-            auto k = 0;
-            auto stepFactor = Length / step;
-
-            for (size_t i = 0; i < Length; i += step)
-            {
-                k = 0;
-                for (size_t j = i; j < i + halfStep; ++j)
-                {
-                    math::Complex<QNumberType>& a = frequencyDomain[j];
-                    math::Complex<QNumberType>& b = frequencyDomain[j + halfStep];
-                    math::Complex twiddle = twinddleFactors[k * stepFactor];
-
-                    math::Complex temp = b * twiddle;
-                    b = (a - temp);
-                    a = (a + temp);
-
-                    k++;
-                }
-            }
-        }
+        BitReversePermutation();
+        Calculate();
 
         for (auto& value : frequencyDomain)
             value = math::Complex<QNumberType>{ value.Real(), -value.Imaginary() };
