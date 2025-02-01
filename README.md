@@ -35,6 +35,7 @@ Refer to the documentation and example scripts to quickly integrate and utilize 
 - [PID](doc/controllers/Pid.md)
 - [Fast Fourier Transform](doc/analysis/FastFourierTransform.md)
 - [Windowing](doc/windowing/window.md)
+- [Kalman Filter](doc/filters/active/KalmanFilter.md)
 
 ## Contributing
 

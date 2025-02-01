@@ -14,7 +14,7 @@
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "On",
         "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel",
-        "CONTROL_TOOLBOX_BUILD_EXAMPLES": true
+        "CONTROL_TOOLBOX_BUILD_EXAMPLES": "On"
       }
     },
     {

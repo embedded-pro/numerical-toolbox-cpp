@@ -47,6 +47,8 @@ namespace math
 
         [[nodiscard]] constexpr reference at(size_type row, size_type col);
         [[nodiscard]] constexpr const_reference at(size_type row, size_type col) const;
+        [[nodiscard]] constexpr reference operator[](size_type row);
+        [[nodiscard]] constexpr const_reference operator[](size_type row) const;
 
         [[nodiscard]] constexpr iterator begin() noexcept;
         [[nodiscard]] constexpr iterator end() noexcept;
@@ -58,6 +60,10 @@ namespace math
         template<size_t RhsCols>
         [[nodiscard]] constexpr Matrix<T, Rows, RhsCols> operator*(const Matrix<T, Cols, RhsCols>& rhs) const;
         [[nodiscard]] constexpr Matrix operator*(const T& scalar) const;
+
+        constexpr Matrix& operator+=(const Matrix& rhs);
+        constexpr Matrix& operator-=(const Matrix& rhs);
+        constexpr Matrix& operator*=(const T& scalar);
 
         [[nodiscard]] constexpr Matrix<T, Cols, Rows> Transpose() const;
         [[nodiscard]] static constexpr Matrix Identity();
@@ -129,6 +135,22 @@ namespace math
     {
         really_assert(row < Rows && col < Cols);
         return data[row * Cols + col];
+    }
+
+    template<typename T, size_t Rows, size_t Cols>
+    constexpr typename Matrix<T, Rows, Cols>::reference
+    Matrix<T, Rows, Cols>::operator[](size_type row)
+    {
+        really_assert(row < Rows);
+        return data[row * Cols];
+    }
+
+    template<typename T, size_t Rows, size_t Cols>
+    constexpr typename Matrix<T, Rows, Cols>::const_reference
+    Matrix<T, Rows, Cols>::operator[](size_type row) const
+    {
+        really_assert(row < Rows);
+        return data[row * Cols];
     }
 
     template<typename T, size_t Rows, size_t Cols>
@@ -210,6 +232,36 @@ namespace math
             result.data[i] = data[i] * scalar;
 
         return result;
+    }
+
+    template<typename T, size_t Rows, size_t Cols>
+    constexpr Matrix<T, Rows, Cols>&
+    Matrix<T, Rows, Cols>::operator+=(const Matrix& rhs)
+    {
+        for (size_type i = 0; i < size; ++i)
+            data[i] += rhs.data[i];
+
+        return *this;
+    }
+
+    template<typename T, size_t Rows, size_t Cols>
+    constexpr Matrix<T, Rows, Cols>&
+    Matrix<T, Rows, Cols>::operator-=(const Matrix& rhs)
+    {
+        for (size_type i = 0; i < size; ++i)
+            data[i] -= rhs.data[i];
+
+        return *this;
+    }
+
+    template<typename T, size_t Rows, size_t Cols>
+    constexpr Matrix<T, Rows, Cols>&
+    Matrix<T, Rows, Cols>::operator*=(const T& scalar)
+    {
+        for (size_type i = 0; i < size; ++i)
+            data[i] *= scalar;
+
+        return *this;
     }
 
     template<typename T, size_t Rows, size_t Cols>
