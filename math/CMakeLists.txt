@@ -11,6 +11,7 @@ target_link_libraries(dsp.math PUBLIC
 
 target_sources(dsp.math PRIVATE
     AdvancedFunctions.hpp
+    ComplexNumber.hpp
     HyperbolicFunctions.hpp
     Matrix.cpp
     Matrix.hpp
