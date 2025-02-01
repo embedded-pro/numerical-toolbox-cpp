@@ -11,8 +11,11 @@ target_link_libraries(dsp.analysis PUBLIC
 )
 
 target_sources(dsp.analysis PRIVATE
+    FastFourierTransform.hpp
+    FastFourierTransformRadix2Impl.hpp
     FrequencyResponse.cpp
     FrequencyResponse.hpp
+    PowerDensitySpectrum.hpp
 )
 
 add_subdirectory(test)

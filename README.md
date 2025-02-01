@@ -30,9 +30,11 @@ This library is ideal for applications in:
 
 Refer to the documentation and example scripts to quickly integrate and utilize the library's signal processing and control algorithms in your projects.
 
-## Examples
+## Theory and How to use
 
-- [PID](doc/examples/pid.md)
+- [PID](doc/controllers/Pid.md)
+- [Fast Fourier Transform](doc/analysis/FastFourierTransform.md)
+- [Windowing](doc/windowing/window.md)
 
 ## Contributing
 

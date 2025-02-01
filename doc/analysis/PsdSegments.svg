@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+    <!-- Background -->
+    <rect width="800" height="500" fill="#ffffff"/>
+    
+    <!-- Original Signal -->
+    <g transform="translate(50, 50)">
+        <text x="-40" y="30" font-size="14">Signal</text>
+        <line x1="0" y1="30" x2="700" y2="30" stroke="#dddddd" stroke-width="1"/>
+        <path d="M 0 30 C 50 0, 100 60, 150 30 C 200 0, 250 60, 300 30 C 350 0, 400 60, 450 30 C 500 0, 550 60, 600 30 C 650 0, 700 60, 700 30" 
+              stroke="#2563eb" 
+              fill="none" 
+              stroke-width="2"/>
+    </g>
+
+    <!-- Segment 1 -->
+    <g transform="translate(50, 150)">
+        <text x="-40" y="30" font-size="14">Batch 1</text>
+        <rect x="0" y="0" width="300" height="60" 
+              fill="#22c55e" fill-opacity="0.1" 
+              stroke="#22c55e" stroke-width="2"/>
+        <path d="M 0 30 C 50 0, 100 60, 150 30 C 200 0, 250 60, 300 30" 
+              stroke="#22c55e" 
+              fill="none" 
+              stroke-width="2"/>
+    </g>
+
+    <!-- Segment 2 -->
+    <g transform="translate(50, 250)">
+        <text x="-40" y="30" font-size="14">Batch 2</text>
+        <rect x="150" y="0" width="300" height="60" 
+              fill="#ef4444" fill-opacity="0.1" 
+              stroke="#ef4444" stroke-width="2"/>
+        <path d="M 150 30 C 200 0, 250 60, 300 30 C 350 0, 400 60, 450 30" 
+              stroke="#ef4444" 
+              fill="none" 
+              stroke-width="2"/>
+        <!-- Overlap indicator -->
+        <path d="M 150 70 L 150 80 L 300 80 L 300 70" 
+              stroke="#666666" 
+              stroke-width="1"
+              stroke-dasharray="4"/>
+        <text x="200" y="95" font-size="12" fill="#666666">Overlap Region</text>
+    </g>
+
+    <!-- Segment 3 -->
+    <g transform="translate(50, 350)">
+        <text x="-40" y="30" font-size="14">Batch 3</text>
+        <rect x="300" y="0" width="300" height="60" 
+              fill="#8b5cf6" fill-opacity="0.1" 
+              stroke="#8b5cf6" stroke-width="2"/>
+        <path d="M 300 30 C 350 0, 400 60, 450 30 C 500 0, 550 60, 600 30" 
+              stroke="#8b5cf6" 
+              fill="none" 
+              stroke-width="2"/>
+        <!-- Overlap indicator -->
+        <path d="M 300 70 L 300 80 L 450 80 L 450 70" 
+              stroke="#666666" 
+              stroke-width="1"
+              stroke-dasharray="4"/>
+        <text x="350" y="95" font-size="12" fill="#666666">Overlap Region</text>
+    </g>
+
+    <!-- Time axis -->
+    <g transform="translate(50, 450)">
+        <line x1="0" y1="0" x2="700" y2="0" 
+              stroke="#000000" 
+              stroke-width="2"/>
+        <text x="350" y="30" font-size="14" text-anchor="middle">Time</text>
+        
+        <!-- Time markers -->
+        <line x1="0" y1="0" x2="0" y2="10" stroke="#000000" stroke-width="2"/>
+        <line x1="150" y1="0" x2="150" y2="10" stroke="#000000" stroke-width="2"/>
+        <line x1="300" y1="0" x2="300" y2="10" stroke="#000000" stroke-width="2"/>
+        <line x1="450" y1="0" x2="450" y2="10" stroke="#000000" stroke-width="2"/>
+        <line x1="600" y1="0" x2="600" y2="10" stroke="#000000" stroke-width="2"/>
+        
+        <!-- Time labels -->
+        <text x="0" y="-10" font-size="12" text-anchor="middle">0</text>
+        <text x="150" y="-10" font-size="12" text-anchor="middle">N/4</text>
+        <text x="300" y="-10" font-size="12" text-anchor="middle">N/2</text>
+        <text x="450" y="-10" font-size="12" text-anchor="middle">3N/4</text>
+        <text x="600" y="-10" font-size="12" text-anchor="middle">N</text>
+    </g>
+</svg>
