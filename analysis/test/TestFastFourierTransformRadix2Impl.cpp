@@ -22,10 +22,10 @@ namespace
     public:
         MockTwiddleFactors()
         {
-            factors[0] = math::Complex<T>{ T(1.0f), T(0.0f) };
-            factors[1] = math::Complex<T>{ T(0.0f), T(-1.0f) };
-            factors[2] = math::Complex<T>{ T(-1.0f), T(0.0f) };
-            factors[3] = math::Complex<T>{ T(0.0f), T(1.0f) };
+            factors[0] = math::Complex<T>{ T(0.9999f), T(0.0f) };
+            factors[1] = math::Complex<T>{ T(0.0f), T(-0.9999f) };
+            factors[2] = math::Complex<T>{ T(-0.9999f), T(0.0f) };
+            factors[3] = math::Complex<T>{ T(0.0f), T(0.9999f) };
         }
 
         math::Complex<T>& operator[](std::size_t n) override
@@ -73,12 +73,12 @@ TYPED_TEST(TestFastFourierTransform, dc_signal_appears_in_zero_frequency_bin)
     this->fft.emplace(this->twiddleFactors);
     this->timeDomain.clear();
     this->timeDomain.resize(TestFastFourierTransform<TypeParam>::Length);
-    std::fill(this->timeDomain.begin(), this->timeDomain.end(), TypeParam(1.0f));
+    std::fill(this->timeDomain.begin(), this->timeDomain.end(), TypeParam(0.1f));
 
     auto& result = this->fft->Forward(this->timeDomain);
 
     EXPECT_NEAR(math::ToFloat(CalculateMagnitude(result[0])),
-        static_cast<float>(TestFastFourierTransform<TypeParam>::Length),
+        static_cast<float>(TestFastFourierTransform<TypeParam>::Length) * 0.1f,
         controllers::GetTolerance<TypeParam>());
 
     for (size_t i = 1; i < result.size(); ++i)
@@ -89,7 +89,7 @@ TYPED_TEST(TestFastFourierTransform, forward_and_inverse_transform_recovers_orig
 {
     this->fft.emplace(this->twiddleFactors);
     constexpr std::array<float, TestFastFourierTransform<TypeParam>::Length> signal = {
-        1.0f, 0.7f, 0.0f, -0.7f, -1.0f, -0.7f, 0.0f, 0.7f
+        0.1f, 0.07f, 0.0f, -0.07f, -0.1f, -0.07f, 0.0f, 0.07f
     };
 
     this->timeDomain.clear();
@@ -109,11 +109,11 @@ TYPED_TEST(TestFastFourierTransform, nyquist_frequency_detection)
     this->timeDomain.clear();
 
     for (size_t i = 0; i < TestFastFourierTransform<TypeParam>::Length; ++i)
-        this->timeDomain.push_back(TypeParam((i % 2) ? -1.0f : 1.0f));
+        this->timeDomain.push_back(TypeParam((i % 2) ? -0.1f : 0.1f));
 
     auto& result = this->fft->Forward(this->timeDomain);
 
     EXPECT_NEAR(math::ToFloat(CalculateMagnitude(result[TestFastFourierTransform<TypeParam>::Length / 2])),
-        static_cast<float>(TestFastFourierTransform<TypeParam>::Length),
+        static_cast<float>(TestFastFourierTransform<TypeParam>::Length) * 0.1f,
         controllers::GetTolerance<TypeParam>());
 }

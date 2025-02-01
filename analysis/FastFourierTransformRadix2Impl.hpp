@@ -111,7 +111,7 @@ namespace analysis
         ResetTimeDomain();
 
         for (std::size_t i = 0; i < frequencyDomain.size(); i++)
-            timeDomain[i] = (QNumberType(frequencyDomain[i].Real() / static_cast<float>(Length)));
+            timeDomain[i] = (QNumberType(math::ToFloat(frequencyDomain[i].Real()) / static_cast<float>(Length)));
 
         return timeDomain;
     }
