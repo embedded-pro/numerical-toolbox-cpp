@@ -33,7 +33,6 @@ namespace controllers
         {
             typename Pid<QNumberType>::Tunnings currentTunnings;
             typename Pid<QNumberType>::Limits currentLimits;
-            std::chrono::microseconds sampleTime;
         };
 
         FieldOrientedController(const Configuration& config,
@@ -41,8 +40,8 @@ namespace controllers
             const math::AdvancedFunctions<QNumberType>& advancedFunctions)
             : clarkePark(trigFunctions, advancedFunctions)
             , svm(trigFunctions)
-            , dAxisCurrentController(config.currentTunnings, config.sampleTime, config.currentLimits)
-            , qAxisCurrentController(config.currentTunnings, config.sampleTime, config.currentLimits)
+            , dAxisCurrentController(config.currentTunnings, config.currentLimits)
+            , qAxisCurrentController(config.currentTunnings, config.currentLimits)
         {
         }
 
