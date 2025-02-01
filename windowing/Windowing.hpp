@@ -13,6 +13,8 @@ namespace windowing
             "Window can only be instantiated with math::QNumber types.");
 
     public:
+        virtual ~Window() = default;
+
         virtual QNumberType operator()(std::size_t n, std::size_t order) = 0;
         virtual QNumberType Power(std::size_t order) = 0;
     };
