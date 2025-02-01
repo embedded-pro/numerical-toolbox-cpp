@@ -6,7 +6,6 @@
 #include "math/ComplexNumber.hpp"
 #include "math/QNumber.hpp"
 #include "windowing/Windowing.hpp"
-#include <utility>
 
 namespace analysis
 {

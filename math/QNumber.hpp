@@ -82,10 +82,18 @@ namespace math
     private:
         IntType value;
 
+        static constexpr IntType round(float f)
+        {
+            if (f >= 0.0f)
+                return static_cast<IntType>(f + 0.5f);
+            else
+                return static_cast<IntType>(f - 0.5f);
+        }
+
         static constexpr IntType FloatToFixed(float f)
         {
             really_assert(f >= -1.0f && f < 1.0f);
-            return static_cast<IntType>(std::round(f * (1LL << FractionalBits)));
+            return static_cast<IntType>(round(f * (1LL << FractionalBits)));
         }
     };
 

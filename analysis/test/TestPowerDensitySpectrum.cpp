@@ -100,7 +100,7 @@ namespace
 
 TYPED_TEST(TestPowerSpectralDensity, when_input_smaller_than_fft_size_throws_assertion)
 {
-    typename TestFixture::PowerDensitySpectrum::VectorReal::template WithMaxSize<this->length> input;
+    typename TestFixture::PowerDensitySpectrum::VectorReal::template WithMaxSize<TestFixture::length> input;
     for (std::size_t i = 0; i < this->length - 1; ++i)
         input.push_back(TypeParam(0.1f));
 
@@ -111,7 +111,7 @@ TYPED_TEST(TestPowerSpectralDensity, overlapping_segments_are_properly_averaged)
 {
     float tolerance = controllers::GetTolerance<TypeParam>();
 
-    typename TestFixture::PowerDensitySpectrum::VectorReal::template WithMaxSize<2 * this->length> input;
+    typename TestFixture::PowerDensitySpectrum::VectorReal::template WithMaxSize<2 * TestFixture::length> input;
 
     for (std::size_t i = 0; i < this->length * 2; ++i)
         input.push_back((i % 2) ? TypeParam(0.5f) : TypeParam(-0.5f));
