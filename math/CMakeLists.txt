@@ -20,6 +20,7 @@ target_sources(dsp.math PRIVATE
     RecursiveBuffer.cpp
     RecursiveBuffer.hpp
     SingleInstructionMultipleData.hpp
+    Toeplitz.hpp
     TrigonometricFunctions.hpp
 )
 
