@@ -35,6 +35,9 @@ namespace math
 
         [[nodiscard]] constexpr bool IsSymmetric() const;
 
+        [[nodiscard]] static constexpr bool IsToeplitzMatrix(const Matrix<T, N, N>& matrix);
+        [[nodiscard]] static constexpr std::pair<Vector<T, N>, Vector<T, N>> ExtractToeplitzVectors(const Matrix<T, N, N>& matrix);
+
     private:
         Vector<T, N> first_row;
         Vector<T, N> first_col;
@@ -128,6 +131,34 @@ namespace math
         }
 
         return true;
+    }
+
+    template<typename T, std::size_t N>
+    constexpr bool ToeplitzMatrix<T, N>::IsToeplitzMatrix(const Matrix<T, N, N>& matrix)
+    {
+        for (size_t i = 1; i < N; ++i)
+        {
+            for (size_t j = 0; j < N - 1; ++j)
+                if (i + j < N && !(matrix.at(i, j) == matrix.at(i - 1, j + 1)))
+                    return false;
+        }
+        return true;
+    }
+
+    template<typename T, std::size_t N>
+    constexpr std::pair<Vector<T, N>, Vector<T, N>>
+    ToeplitzMatrix<T, N>::ExtractToeplitzVectors(const Matrix<T, N, N>& matrix)
+    {
+        Vector<T, N> first_row;
+        Vector<T, N> first_col;
+
+        for (size_t i = 0; i < N; ++i)
+        {
+            first_row.at(i, 0) = matrix.at(0, i);
+            first_col.at(i, 0) = matrix.at(i, 0);
+        }
+
+        return { first_row, first_col };
     }
 
     template<typename T, std::size_t N>

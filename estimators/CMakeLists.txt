@@ -14,6 +14,7 @@ target_sources(dsp.estimators PRIVATE
     Estimator.hpp
     LinearRegression.cpp
     LinearRegression.hpp
+    YuleWalker.hpp
 )
 
 add_subdirectory(test)

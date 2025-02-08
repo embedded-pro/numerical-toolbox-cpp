@@ -81,6 +81,7 @@ add_subdirectory(filters)
 add_subdirectory(losses)
 add_subdirectory(math)
 add_subdirectory(optimizers)
+add_subdirectory(solvers)
 add_subdirectory(windowing)
 
 emil_clangformat_directories(analysis DIRECTORIES .)
