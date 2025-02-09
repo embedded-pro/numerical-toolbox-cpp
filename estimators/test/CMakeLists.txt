@@ -9,4 +9,5 @@ target_link_libraries(dsp.estimators_test PUBLIC
 
 target_sources(dsp.estimators_test PRIVATE
     TestLinearRegression.cpp
+    TestYuleWalker.cpp
 )

@@ -1,108 +1,85 @@
 #ifndef ESTIMATORS_YULE_WALKER_HPP
 #define ESTIMATORS_YULE_WALKER_HPP
 
-#include "estimators/Estimator.hpp"
-
-namespace estimators::solver
-{
-    template<typename T, std::size_t N>
-    using ToeplitzMatrix = math::Matrix<T, N, N>;
-
-    template<typename T, std::size_t N>
-    ToeplitzMatrix<T, N> MakeToeplitzMatrix(const math::Matrix<T, N, 1>& autocorrelationVector)
-    {
-        ToeplitzMatrix<T, N> result;
-
-        for (size_t i = 0; i < N; ++i)
-            for (size_t j = 0; j < N; ++j)
-                result.at(i, j) = autocorrelationVector.at(std::abs(static_cast<int>(i - j)), 0);
-
-        return result;
-    }
-
-    template<typename T, std::size_t N>
-    math::Matrix<T, N, 1> LevinsonDurbin(const math::Matrix<T, N, 1>& autocorrelationVector)
-    {
-        math::Matrix<T, N, 1> phi;
-        T error = autocorrelationVector.at(0, 0);
-
-        for (size_t k = 1; k < N; ++k)
-        {
-            T mu = autocorrelationVector.at(k, 0);
-            for (size_t j = 1; j < k; ++j)
-                mu -= phi.at(j, 0) * autocorrelationVector.at(k - j, 0);
-            mu /= error;
-
-            phi.at(k, 0) = mu;
-            for (size_t j = 1; j < k; ++j)
-            {
-                T prev_phi_j = phi.at(j, 0);
-                phi.at(j, 0) = prev_phi_j - mu * phi.at(k - j, 0);
-            }
-
-            error *= (T(1) - mu * mu);
-        }
-
-        return phi;
-    }
-}
+#include "math/Matrix.hpp"
+#include "math/Toeplitz.hpp"
+#include "solvers/Solver.hpp"
 
 namespace estimators
 {
     template<typename T, std::size_t Samples, std::size_t Order>
     class YuleWalker
-        : public Estimator<T, Samples, Order>
     {
     public:
-        using CoefficientsMatrix = typename Estimator<T, Samples, Order>::CoefficientsMatrix;
-        using DesignMatrix = typename Estimator<T, Samples, Order>::DesignMatrix;
-        using InputMatrix = typename Estimator<T, Samples, Order>::InputMatrix;
+        using CoefficientsMatrix = typename math::Matrix<T, Order, 1>;
+        using DesignMatrix = math::Matrix<T, Order, Order>;
+        using InputMatrix = math::Matrix<T, Order, 1>;
         using TimeSeriesVector = math::Matrix<T, Samples, 1>;
-        using AutocorrVector = math::Matrix<T, Order + 1, 1>;
 
-        YuleWalker() = default;
+        explicit YuleWalker(solvers::Solver<T, Order>& solver);
 
-        void Fit(const math::Matrix<T, Samples, Order>& X, const math::Matrix<T, Samples, 1>& y) override;
-        T Predict(const InputMatrix& X) const override;
-        const CoefficientsMatrix& Coefficients() const override;
+        void Fit(const math::Matrix<T, Samples, Order>& X, const math::Matrix<T, Samples, 1>& y);
+        T Predict(const InputMatrix& X) const;
+        const CoefficientsMatrix& Coefficients() const;
 
     private:
         CoefficientsMatrix coefficients;
+        solvers::Solver<T, Order>& solver;
         T mean{};
 
-        // Helper functions
-        T ComputeAutocorrelation(const TimeSeriesVector& timeSeries, size_t lag) const;
+        T ComputeMean(const TimeSeriesVector& timeSeries) const;
         TimeSeriesVector CenterTimeSeries(const TimeSeriesVector& timeSeries) const;
-        AutocorrVector ComputeAutocorrelations(const TimeSeriesVector& centered) const;
     };
 
     // Implementation //
 
     template<typename T, std::size_t Samples, std::size_t Order>
-    void YuleWalker<T, Samples, Order>::Fit(
-        const math::Matrix<T, Samples, Order>& X,
-        const math::Matrix<T, Samples, 1>& y)
+    YuleWalker<T, Samples, Order>::YuleWalker(solvers::Solver<T, Order>& solver)
+        : solver(solver)
+    {}
+
+    template<typename T, std::size_t Samples, std::size_t Order>
+    void YuleWalker<T, Samples, Order>::Fit(const math::Matrix<T, Samples, Order>& X, const math::Matrix<T, Samples, 1>& y)
     {
-        // Compute and remove mean
-        T sum{};
-        for (size_t i = 0; i < Samples; ++i)
-            sum += y.at(i, 0);
-        mean = sum / T(Samples);
+        mean = ComputeMean(y);
+        auto centered_y = CenterTimeSeries(y);
 
-        // Center the time series and compute autocorrelations
-        auto centered = CenterTimeSeries(y);
-        auto autocorr = ComputeAutocorrelations(centered);
+        math::Vector<T, Order> toeplitz_elements;
 
-        // Solve Yule-Walker equations using Levinson-Durbin recursion
-        coefficients = estimators::solver::LevinsonDurbin(autocorr);
+        for (size_t i = 0; i < Order; ++i)
+        {
+            T sum = T(0);
+
+            for (size_t k = 0; k < Samples; ++k)
+                sum += X.at(k, 0) * X.at(k, i);
+
+            toeplitz_elements.at(i, 0) = sum / T(Samples);
+        }
+
+        math::ToeplitzMatrix<T, Order> toeplitz(toeplitz_elements);
+
+        math::Vector<T, Order> rhs;
+        for (size_t i = 0; i < Order; ++i)
+        {
+            T sum = T(0);
+
+            for (size_t k = 0; k < Samples; ++k)
+                sum += X.at(k, i) * centered_y.at(k, 0);
+
+            rhs.at(i, 0) = sum / T(Samples);
+        }
+
+        coefficients = solver.Solve(toeplitz.ToFullMatrix(), rhs);
     }
 
     template<typename T, std::size_t Samples, std::size_t Order>
     T YuleWalker<T, Samples, Order>::Predict(const InputMatrix& X) const
     {
         T result = mean;
+
         for (size_t i = 0; i < Order; ++i)
-            result += X.at(i, 0) * coefficients.at(i + 1, 0);
+            result += X.at(i, 0) * coefficients.at(i, 0);
+
         return result;
     }
 
@@ -114,39 +91,26 @@ namespace estimators
     }
 
     template<typename T, std::size_t Samples, std::size_t Order>
-    T YuleWalker<T, Samples, Order>::ComputeAutocorrelation(
-        const TimeSeriesVector& timeSeries,
-        size_t lag) const
+    T YuleWalker<T, Samples, Order>::ComputeMean(const TimeSeriesVector& timeSeries) const
     {
         T sum{};
-        size_t n = Samples - lag;
 
-        for (size_t i = 0; i < n; ++i)
-            sum += timeSeries.at(i, 0) * timeSeries.at(i + lag, 0);
+        for (size_t i = 0; i < Samples; ++i)
+            sum += timeSeries.at(i, 0);
 
-        return sum / T(n);
+        return sum / T(Samples);
     }
 
     template<typename T, std::size_t Samples, std::size_t Order>
     typename YuleWalker<T, Samples, Order>::TimeSeriesVector
-    YuleWalker<T, Samples, Order>::CenterTimeSeries(
-        const TimeSeriesVector& timeSeries) const
+    YuleWalker<T, Samples, Order>::CenterTimeSeries(const TimeSeriesVector& timeSeries) const
     {
         TimeSeriesVector centered;
+
         for (size_t i = 0; i < Samples; ++i)
             centered.at(i, 0) = timeSeries.at(i, 0) - mean;
-        return centered;
-    }
 
-    template<typename T, std::size_t Samples, std::size_t Order>
-    typename YuleWalker<T, Samples, Order>::AutocorrVector
-    YuleWalker<T, Samples, Order>::ComputeAutocorrelations(
-        const TimeSeriesVector& centered) const
-    {
-        AutocorrVector autocorr;
-        for (size_t i = 0; i <= Order; ++i)
-            autocorr.at(i, 0) = ComputeAutocorrelation(centered, i);
-        return autocorr;
+        return centered;
     }
 }
 
