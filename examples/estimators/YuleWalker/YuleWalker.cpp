@@ -110,7 +110,7 @@ int main()
 
     Figure fig1 = { { timeSeriesPlot } };
     fig1.size(800, 600);
-    fig1.save("YuleWalker_TimeSeries.pdf");
+    fig1.save("YuleWalker - TimeSeries.pdf");
 
     Plot residualPlot;
     residualPlot.xlabel("Time");
@@ -123,7 +123,7 @@ int main()
 
     Figure fig2 = { { residualPlot } };
     fig2.size(800, 400);
-    fig2.save("YuleWalker_Residuals.pdf");
+    fig2.save("YuleWalker - Residuals.pdf");
 
     Plot acfPlot;
     acfPlot.xlabel("Lag");
@@ -169,7 +169,7 @@ int main()
 
     Figure fig3 = { { acfPlot } };
     fig3.size(800, 400);
-    fig3.save("YuleWalker_ACF.pdf");
+    fig3.save("YuleWalker - ACF.pdf");
 
     return 0;
 }

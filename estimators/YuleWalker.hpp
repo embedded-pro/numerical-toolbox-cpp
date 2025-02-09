@@ -28,7 +28,7 @@ namespace estimators
         T mean{};
 
         T ComputeMean(const TimeSeriesVector& timeSeries) const;
-        TimeSeriesVector CenterTimeSeries(const TimeSeriesVector& timeSeries) const;
+        T ComputeAutocovariance(const TimeSeriesVector& timeSeries, size_t lag) const;
     };
 
     // Implementation //
@@ -41,34 +41,26 @@ namespace estimators
     template<typename T, std::size_t Samples, std::size_t Order>
     void YuleWalker<T, Samples, Order>::Fit(const math::Matrix<T, Samples, Order>& X, const math::Matrix<T, Samples, 1>& y)
     {
+        // Compute mean and center the time series
         mean = ComputeMean(y);
-        auto centered_y = CenterTimeSeries(y);
+        TimeSeriesVector centered_y;
+        for (size_t i = 0; i < Samples; ++i)
+            centered_y.at(i, 0) = y.at(i, 0) - mean;
 
-        math::Vector<T, Order> toeplitz_elements;
-
+        // Calculate autocovariances for lags 0 to Order-1
+        math::Vector<T, Order> gamma; // Will store autocovariances
         for (size_t i = 0; i < Order; ++i)
-        {
-            T sum = T(0);
+            gamma.at(i, 0) = ComputeAutocovariance(centered_y, i);
 
-            for (size_t k = 0; k < Samples; ++k)
-                sum += X.at(k, 0) * X.at(k, i);
+        // Create Toeplitz matrix from autocovariances
+        math::ToeplitzMatrix<T, Order> toeplitz(gamma);
 
-            toeplitz_elements.at(i, 0) = sum / T(Samples);
-        }
-
-        math::ToeplitzMatrix<T, Order> toeplitz(toeplitz_elements);
-
+        // Calculate RHS vector (autocovariances at lags 1 to Order)
         math::Vector<T, Order> rhs;
         for (size_t i = 0; i < Order; ++i)
-        {
-            T sum = T(0);
+            rhs.at(i, 0) = ComputeAutocovariance(centered_y, i + 1);
 
-            for (size_t k = 0; k < Samples; ++k)
-                sum += X.at(k, i) * centered_y.at(k, 0);
-
-            rhs.at(i, 0) = sum / T(Samples);
-        }
-
+        // Solve the system
         coefficients = solver.Solve(toeplitz.ToFullMatrix(), rhs);
     }
 
@@ -76,10 +68,8 @@ namespace estimators
     T YuleWalker<T, Samples, Order>::Predict(const InputMatrix& X) const
     {
         T result = mean;
-
         for (size_t i = 0; i < Order; ++i)
             result += X.at(i, 0) * coefficients.at(i, 0);
-
         return result;
     }
 
@@ -94,23 +84,25 @@ namespace estimators
     T YuleWalker<T, Samples, Order>::ComputeMean(const TimeSeriesVector& timeSeries) const
     {
         T sum{};
-
         for (size_t i = 0; i < Samples; ++i)
             sum += timeSeries.at(i, 0);
-
         return sum / T(Samples);
     }
 
     template<typename T, std::size_t Samples, std::size_t Order>
-    typename YuleWalker<T, Samples, Order>::TimeSeriesVector
-    YuleWalker<T, Samples, Order>::CenterTimeSeries(const TimeSeriesVector& timeSeries) const
+    T YuleWalker<T, Samples, Order>::ComputeAutocovariance(const TimeSeriesVector& timeSeries, size_t lag) const
     {
-        TimeSeriesVector centered;
+        T covariance{};
+        size_t n = 0;
 
-        for (size_t i = 0; i < Samples; ++i)
-            centered.at(i, 0) = timeSeries.at(i, 0) - mean;
+        // For numerical stability, use two-pass algorithm
+        for (size_t i = lag; i < Samples; ++i)
+        {
+            covariance += timeSeries.at(i, 0) * timeSeries.at(i - lag, 0);
+            n++;
+        }
 
-        return centered;
+        return covariance / T(Samples); // Using N instead of N-lag for biased estimate
     }
 }
 
