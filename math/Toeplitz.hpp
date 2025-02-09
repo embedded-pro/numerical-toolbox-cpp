@@ -21,7 +21,7 @@ namespace math
         using const_reference = const T&;
 
         static constexpr size_type size = N;
-        static constexpr T epsilon = T(1e-6);
+        static constexpr T epsilon = T(1e-6f);
 
         constexpr ToeplitzMatrix() noexcept;
         constexpr ToeplitzMatrix(const Vector<T, N>& first_row, const Vector<T, N>& first_col);
@@ -139,7 +139,7 @@ namespace math
     {
         for (size_t i = 1; i < N; ++i)
             for (size_t j = 1; j < N; ++j)
-                if (std::abs(matrix.at(i, j) - matrix.at(i - 1, j - 1)) > epsilon)
+                if (std::abs(math::ToFloat(matrix.at(i, j)) - math::ToFloat(matrix.at(i - 1, j - 1))) > math::ToFloat(epsilon))
                     return false;
 
         return true;
