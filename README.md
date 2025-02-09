@@ -34,8 +34,12 @@ Refer to the documentation and example scripts to quickly integrate and utilize 
 
 - [PID](doc/controllers/Pid.md)
 - [Fast Fourier Transform](doc/analysis/FastFourierTransform.md)
+- [Power Density Spectrum](doc/analysis/PowerDensitySpectrum.md)
 - [Windowing](doc/windowing/window.md)
 - [Kalman Filter](doc/filters/active/KalmanFilter.md)
+- [Linear Regression](doc/estimators/LinearRegression.md)
+- [Yule-Walker (for AR and MA models)](doc/estimators/YuleWalker.md)
+- [Levinson-Durbin (Ax + B = 0 matrix solver)](doc/solvers/LevinsonDurbin.md)
 
 ## Contributing
 
