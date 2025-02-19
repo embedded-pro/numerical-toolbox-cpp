@@ -1,6 +1,6 @@
-#include "analysis/FastFourierTransformRadix2Impl.hpp"
-#include "analysis/PowerDensitySpectrum.hpp"
-#include "windowing/Windowing.hpp"
+#include "toolbox/analysis/FastFourierTransformRadix2Impl.hpp"
+#include "toolbox/analysis/PowerDensitySpectrum.hpp"
+#include "toolbox/windowing/Windowing.hpp"
 #include <sciplot/sciplot.hpp>
 #include <vector>
 

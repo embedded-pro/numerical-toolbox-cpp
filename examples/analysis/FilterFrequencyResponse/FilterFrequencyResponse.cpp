@@ -1,4 +1,4 @@
-#include "analysis/FrequencyResponse.hpp"
+#include "toolbox/analysis/FrequencyResponse.hpp"
 #include <sciplot/sciplot.hpp>
 
 using namespace sciplot;
