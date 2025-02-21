@@ -12,4 +12,5 @@ target_sources(dsp.analysis_test PRIVATE
     TestDiscreteCosineTransform.cpp
     TestFastFourierTransformRadix2Impl.cpp
     TestPowerDensitySpectrum.cpp
+    TestShortTimeFourierTransform.cpp
 )
