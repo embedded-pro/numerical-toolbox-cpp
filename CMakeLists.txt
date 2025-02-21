@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 3.24)
 
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    set(CONTROL_TOOLBOX_STANDALONE On)
+    set(NUMERICAL_TOOLBOX_STANDALONE On)
 endif()
 
 option(CMAKE_COMPILE_WARNING_AS_ERROR "Enable warnings-as-error" On)
-option(CONTROL_TOOLBOX_INCLUDE_DEFAULT_INIT "Include default initialization code; turn off when providing custom initialization" On)
-option(CONTROL_TOOLBOX_BUILD_EXAMPLES "Enable build of the examples" Off)
-option(CONTROL_TOOLBOX_BUILD_TESTS "Enable build of the examples" Off)
+option(NUMERICAL_TOOLBOX_INCLUDE_DEFAULT_INIT "Include default initialization code; turn off when providing custom initialization" On)
+option(NUMERICAL_TOOLBOX_BUILD_EXAMPLES "Enable build of the examples" Off)
+option(NUMERICAL_TOOLBOX_BUILD_TESTS "Enable build of the examples" Off)
 
-if (CONTROL_TOOLBOX_BUILD_TESTS)
+if (NUMERICAL_TOOLBOX_BUILD_TESTS)
     # CTest cannot be included before the first project() statement, but Embedded Infastructure
     # Library needs to see that test utilities need to be built.
     set(BUILD_TESTING On)
@@ -17,7 +17,7 @@ endif()
 
 add_definitions(-DEMIL_ENABLE_TRACING=1)
 
-if (CONTROL_TOOLBOX_STANDALONE)
+if (NUMERICAL_TOOLBOX_STANDALONE)
     include(FetchContent)
 
     FetchContent_Declare(
@@ -34,7 +34,7 @@ project(control_toolbox LANGUAGES C CXX ASM VERSION 0.0.1) # x-release-please-ve
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
 
-if (CONTROL_TOOLBOX_STANDALONE)
+if (NUMERICAL_TOOLBOX_STANDALONE)
     FetchContent_Declare(
         sciplot
         GIT_REPOSITORY          https://github.com/sciplot/sciplot.git
@@ -62,31 +62,23 @@ set_directory_properties(PROPERTY USE_FOLDERS ON)
 
 # When building usb-host by itself do not exclude any targets from all
 # Libraries will only be excluded from all when usb-host is a consumed as a dependency.
-if (CONTROL_TOOLBOX_STANDALONE)
-    set(CONTROL_TOOLBOX_EXCLUDE_FROM_ALL "")
+if (NUMERICAL_TOOLBOX_STANDALONE)
+    set(NUMERICAL_TOOLBOX_EXCLUDE_FROM_ALL "")
 else()
-    set(CONTROL_TOOLBOX_EXCLUDE_FROM_ALL "EXCLUDE_FROM_ALL")
+    set(NUMERICAL_TOOLBOX_EXCLUDE_FROM_ALL "EXCLUDE_FROM_ALL")
 endif()
 
-if (CONTROL_TOOLBOX_BUILD_TESTS)
+if (NUMERICAL_TOOLBOX_BUILD_TESTS)
     include(CTest)
     emil_enable_testing()
 endif()
 
-add_subdirectory(analysis)
-add_subdirectory(controllers)
 add_subdirectory(examples)
-add_subdirectory(filters)
-add_subdirectory(math)
-add_subdirectory(windowing)
+add_subdirectory(numerical)
 
-emil_clangformat_directories(analysis DIRECTORIES .)
-emil_clangformat_directories(controllers DIRECTORIES .)
 emil_clangformat_directories(examples DIRECTORIES .)
-emil_clangformat_directories(filters DIRECTORIES .)
-emil_clangformat_directories(math DIRECTORIES .)
-emil_clangformat_directories(windowing DIRECTORIES .)
+emil_clangformat_directories(toolbox DIRECTORIES .)
 
-if (CONTROL_TOOLBOX_STANDALONE)
+if (NUMERICAL_TOOLBOX_STANDALONE)
     emil_folderize_all_targets()
 endif()

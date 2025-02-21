@@ -14,7 +14,7 @@
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "On",
         "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel",
-        "CONTROL_TOOLBOX_BUILD_EXAMPLES": true
+        "NUMERICAL_TOOLBOX_BUILD_EXAMPLES": "On"
       }
     },
     {
@@ -23,8 +23,8 @@
       "description": "Build required tools for host",
       "inherits": "defaults",
       "cacheVariables": {
-        "CONTROL_TOOLBOX_BUILD_TESTS": "On",
-        "CONTROL_TOOLBOX_BUILD_FOR_EMBEDDED": "Off"
+        "NUMERICAL_TOOLBOX_BUILD_TESTS": "On",
+        "NUMERICAL_TOOLBOX_BUILD_FOR_EMBEDDED": "Off"
       },
       "generator": "Ninja Multi-Config"
     },
