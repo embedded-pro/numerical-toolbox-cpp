@@ -36,6 +36,7 @@ Refer to the documentation and example scripts to quickly integrate and utilize 
 - [Fast Fourier Transform](doc/analysis/FastFourierTransform.md)
 - [Power Density Spectrum](doc/analysis/PowerDensitySpectrum.md)
 - [Short Time Fourier Transform](doc/analysis/ShortTimeFourierTransform.md)
+- [Discrete Cosine Transform](doc/analysis/DiscreteCosineTransform.md)
 - [Windowing](doc/windowing/window.md)
 - [Kalman Filter](doc/filters/active/KalmanFilter.md)
 - [Linear Regression](doc/estimators/LinearRegression.md)

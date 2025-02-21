@@ -12,5 +12,6 @@ target_sources(dsp.math_test PRIVATE
     TestQNumber.cpp
     TestMatrix.cpp
     TestRecursiveBuffer.cpp
+    TestStatistics.cpp
     TestToeplitz.cpp
 )
