@@ -1,19 +1,19 @@
-add_executable(dsp.examples.analysis.fast_fourier_transform_radix_2)
-emil_build_for(dsp.examples.analysis.fast_fourier_transform_radix_2 PREREQUISITE_BOOL CONTROL_TOOLBOX_BUILD_EXAMPLES)
+add_executable(numerical.examples.analysis.fast_fourier_transform_radix_2)
+emil_build_for(numerical.examples.analysis.fast_fourier_transform_radix_2 HOST All PREREQUISITE_BOOL NUMERICAL_TOOLBOX_BUILD_EXAMPLES)
 
-target_link_libraries(dsp.examples.analysis.fast_fourier_transform_radix_2 PUBLIC
+target_link_libraries(numerical.examples.analysis.fast_fourier_transform_radix_2 PUBLIC
     sciplot
-    dsp.analysis
+    numerical.analysis
 )
 
-target_sources(dsp.examples.analysis.fast_fourier_transform_radix_2 PRIVATE
+target_sources(numerical.examples.analysis.fast_fourier_transform_radix_2 PRIVATE
     FastFourierTransformRadix2.cpp
 )
 
 if(MSVC)
-    target_compile_options(dsp.examples.analysis.fast_fourier_transform_radix_2 PRIVATE /W4)
+    target_compile_options(numerical.examples.analysis.fast_fourier_transform_radix_2 PRIVATE /W4)
 else()
-    target_compile_options(dsp.examples.analysis.fast_fourier_transform_radix_2 PRIVATE 
+    target_compile_options(numerical.examples.analysis.fast_fourier_transform_radix_2 PRIVATE 
         -Wno-error
     )
 endif()

@@ -1,19 +1,19 @@
-add_executable(dsp.examples.controllers.temperature_controller)
-emil_build_for(dsp.examples.controllers.temperature_controller PREREQUISITE_BOOL CONTROL_TOOLBOX_BUILD_EXAMPLES)
+add_executable(numerical.examples.controllers.temperature_controller)
+emil_build_for(numerical.examples.controllers.temperature_controller HOST All PREREQUISITE_BOOL NUMERICAL_TOOLBOX_BUILD_EXAMPLES)
 
-target_link_libraries(dsp.examples.controllers.temperature_controller PUBLIC
+target_link_libraries(numerical.examples.controllers.temperature_controller PUBLIC
     sciplot
-    dsp.controllers
+    numerical.controllers
 )
 
-target_sources(dsp.examples.controllers.temperature_controller PRIVATE
+target_sources(numerical.examples.controllers.temperature_controller PRIVATE
     TemperatureController.cpp
 )
 
 if(MSVC)
-    target_compile_options(dsp.examples.controllers.temperature_controller PRIVATE /W4)
+    target_compile_options(numerical.examples.controllers.temperature_controller PRIVATE /W4)
 else()
-    target_compile_options(dsp.examples.controllers.temperature_controller PRIVATE 
+    target_compile_options(numerical.examples.controllers.temperature_controller PRIVATE 
         -Wno-error
     )
 endif()
