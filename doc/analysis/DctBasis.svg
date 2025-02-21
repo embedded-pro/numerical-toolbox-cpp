@@ -1,0 +1,41 @@
+<svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="800" height="400" fill="#ffffff"/>
+    
+    <!-- Grid lines -->
+    <g stroke="#eee" stroke-width="1">
+        <!-- Vertical grid -->
+        <line x1="100" y1="50" x2="100" y2="350"/>
+        <line x1="300" y1="50" x2="300" y2="350"/>
+        <line x1="500" y1="50" x2="500" y2="350"/>
+        <line x1="700" y1="50" x2="700" y2="350"/>
+        
+        <!-- Horizontal grid -->
+        <line x1="50" y1="200" x2="750" y2="200"/>
+    </g>
+    
+    <!-- Axis -->
+    <g stroke="#666" stroke-width="2">
+        <!-- k=0 -->
+        <path d="M 60 200 L 240 200" stroke="#2196f3" stroke-width="3"/>
+        <text x="150" y="230" text-anchor="middle" font-family="Arial" font-size="14">k=0 (DC)</text>
+        
+        <!-- k=1 -->
+        <path d="M 260 120 Q 350 120 350 200 Q 350 280 440 280" stroke="#4caf50" stroke-width="3" fill="none"/>
+        <text x="350" y="230" text-anchor="middle" font-family="Arial" font-size="14">k=1</text>
+        
+        <!-- k=2 -->
+        <path d="M 460 120 Q 500 120 500 200 Q 500 280 540 280 Q 580 280 580 200 Q 580 120 640 120" stroke="#ff9800" stroke-width="3" fill="none"/>
+        <text x="550" y="230" text-anchor="middle" font-family="Arial" font-size="14">k=2</text>
+        
+        <!-- k=3 -->
+        <path d="M 660 120 Q 680 120 680 200 Q 680 280 700 280 Q 720 280 720 200 Q 720 120 740 120" stroke="#e91e63" stroke-width="3" fill="none"/>
+        <text x="700" y="230" text-anchor="middle" font-family="Arial" font-size="14">k=3</text>
+    </g>
+    
+    <!-- Title -->
+    <text x="400" y="40" text-anchor="middle" font-family="Arial" font-size="16" font-weight="bold">DCT Basis Functions</text>
+    
+    <!-- Labels -->
+    <text x="400" y="380" text-anchor="middle" font-family="Arial" font-size="14">Different frequency components (k)</text>
+</svg>

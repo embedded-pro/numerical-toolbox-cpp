@@ -1,0 +1,37 @@
+<svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="800" height="300" fill="#ffffff"/>
+    
+    <!-- Input Signal Box -->
+    <rect x="50" y="120" width="120" height="60" fill="#e1f5fe" stroke="#0288d1" stroke-width="2"/>
+    <text x="110" y="155" text-anchor="middle" font-family="Arial" font-size="14">Input Signal</text>
+    
+    <!-- Preprocessing Box -->
+    <rect x="250" y="120" width="120" height="60" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2"/>
+    <text x="310" y="155" text-anchor="middle" font-family="Arial" font-size="14">Preprocessing</text>
+    
+    <!-- FFT Box -->
+    <rect x="450" y="120" width="120" height="60" fill="#fff3e0" stroke="#ef6c00" stroke-width="2"/>
+    <text x="510" y="155" text-anchor="middle" font-family="Arial" font-size="14">FFT</text>
+    
+    <!-- Post Processing Box -->
+    <rect x="650" y="120" width="120" height="60" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2"/>
+    <text x="710" y="155" text-anchor="middle" font-family="Arial" font-size="14">DCT Coefficients</text>
+    
+    <!-- Arrows -->
+    <path d="M170 150 H240" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <path d="M370 150 H440" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <path d="M570 150 H640" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+    
+    <!-- Arrow Marker -->
+    <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#666"/>
+        </marker>
+    </defs>
+    
+    <!-- Process Labels -->
+    <text x="205" y="140" font-family="Arial" font-size="12">1</text>
+    <text x="405" y="140" font-family="Arial" font-size="12">2</text>
+    <text x="605" y="140" font-family="Arial" font-size="12">3</text>
+</svg>
