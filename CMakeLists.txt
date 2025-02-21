@@ -75,6 +75,7 @@ endif()
 
 add_subdirectory(examples)
 add_subdirectory(numerical)
+add_subdirectory(tests)
 
 emil_clangformat_directories(examples DIRECTORIES .)
 emil_clangformat_directories(toolbox DIRECTORIES .)
