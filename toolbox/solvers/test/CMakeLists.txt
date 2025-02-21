@@ -1,12 +1,12 @@
-add_executable(dsp.solvers_test)
-emil_build_for(dsp.solvers_test BOOL CONTROL_TOOLBOX_BUILD_TESTS)
-emil_add_test(dsp.solvers_test)
+add_executable(numerical.solvers_test)
+emil_build_for(numerical.solvers_test BOOL NUMERICAL_TOOLBOX_BUILD_TESTS)
+emil_add_test(numerical.solvers_test)
 
-target_link_libraries(dsp.solvers_test PUBLIC
+target_link_libraries(numerical.solvers_test PUBLIC
     gmock_main
-    dsp.solver
+    numerical.solver
 )
 
-target_sources(dsp.solvers_test PRIVATE
+target_sources(numerical.solvers_test PRIVATE
     TestLevinsonDurbin.cpp
 )

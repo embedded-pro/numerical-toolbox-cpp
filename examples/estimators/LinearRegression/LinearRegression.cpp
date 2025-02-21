@@ -1,4 +1,4 @@
-#include "estimators/LinearRegression.hpp"
+#include "toolbox/estimators/LinearRegression.hpp"
 #include <iostream>
 #include <random>
 #include <sciplot/sciplot.hpp>

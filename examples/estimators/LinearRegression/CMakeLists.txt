@@ -1,19 +1,19 @@
-add_executable(dsp.examples.estimators.linear_regression)
-emil_build_for(dsp.examples.estimators.linear_regression PREREQUISITE_BOOL CONTROL_TOOLBOX_BUILD_EXAMPLES)
+add_executable(numerical.examples.estimators.linear_regression)
+emil_build_for(numerical.examples.estimators.linear_regression HOST All PREREQUISITE_BOOL NUMERICAL_TOOLBOX_BUILD_EXAMPLES)
 
-target_link_libraries(dsp.examples.estimators.linear_regression PUBLIC
+target_link_libraries(numerical.examples.estimators.linear_regression PUBLIC
     sciplot
-    dsp.estimators
+    numerical.estimators
 )
 
-target_sources(dsp.examples.estimators.linear_regression PRIVATE
+target_sources(numerical.examples.estimators.linear_regression PRIVATE
     LinearRegression.cpp
 )
 
 if(MSVC)
-    target_compile_options(dsp.examples.estimators.linear_regression PRIVATE /W4)
+    target_compile_options(numerical.examples.estimators.linear_regression PRIVATE /W4)
 else()
-    target_compile_options(dsp.examples.estimators.linear_regression PRIVATE 
+    target_compile_options(numerical.examples.estimators.linear_regression PRIVATE 
         -Wno-error
     )
 endif()

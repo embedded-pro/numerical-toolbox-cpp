@@ -1,14 +1,14 @@
-add_executable(dsp.analysis_test)
-emil_build_for(dsp.analysis_test BOOL CONTROL_TOOLBOX_BUILD_TESTS)
-emil_add_test(dsp.analysis_test)
+add_executable(numerical.analysis_test)
+emil_build_for(numerical.analysis_test BOOL NUMERICAL_TOOLBOX_BUILD_TESTS)
+emil_add_test(numerical.analysis_test)
 
-target_link_libraries(dsp.analysis_test PUBLIC
+target_link_libraries(numerical.analysis_test PUBLIC
     gmock_main
-    dsp.analysis
-    dsp.math_test_helper
+    numerical.analysis
+    numerical.math_test_helper
 )
 
-target_sources(dsp.analysis_test PRIVATE
+target_sources(numerical.analysis_test PRIVATE
     TestDiscreteCosineTransform.cpp
     TestFastFourierTransformRadix2Impl.cpp
     TestPowerDensitySpectrum.cpp

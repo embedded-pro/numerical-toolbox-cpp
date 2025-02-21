@@ -1,5 +1,5 @@
-#include "analysis/DiscreteCosineTransform.hpp"
-#include "math/QNumber.hpp"
+#include "toolbox/analysis/DiscreteCosineTransform.hpp"
+#include "toolbox/math/QNumber.hpp"
 #include "gmock/gmock.h"
 
 namespace

@@ -1,9 +1,9 @@
 #ifndef ANALYSIS_DISCRETE_COSINE_TRANSFORM_HPP
 #define ANALYSIS_DISCRETE_COSINE_TRANSFORM_HPP
 
-#include "analysis/FastFourierTransform.hpp"
 #include "infra/util/BoundedVector.hpp"
-#include "math/ComplexNumber.hpp"
+#include "toolbox/analysis/FastFourierTransform.hpp"
+#include "toolbox/math/ComplexNumber.hpp"
 #include <cmath>
 
 namespace analysis

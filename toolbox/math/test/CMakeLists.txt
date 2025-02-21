@@ -1,13 +1,13 @@
-add_executable(dsp.math_test)
-emil_build_for(dsp.math_test BOOL CONTROL_TOOLBOX_BUILD_TESTS)
-emil_add_test(dsp.math_test)
+add_executable(numerical.math_test)
+emil_build_for(numerical.math_test BOOL NUMERICAL_TOOLBOX_BUILD_TESTS)
+emil_add_test(numerical.math_test)
 
-target_link_libraries(dsp.math_test PUBLIC
+target_link_libraries(numerical.math_test PUBLIC
     gmock_main
-    dsp.math
+    numerical.math
 )
 
-target_sources(dsp.math_test PRIVATE
+target_sources(numerical.math_test PRIVATE
     TestComplexNumber.cpp
     TestQNumber.cpp
     TestMatrix.cpp

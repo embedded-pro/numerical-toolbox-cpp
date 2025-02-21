@@ -1,12 +1,12 @@
-add_library(dsp.controllers_test_helper INTERFACE)
-emil_build_for(dsp.controllers_test_helper BOOL CONTROL_TOOLBOX_BUILD_TESTS)
+add_library(numerical.controllers_test_helper INTERFACE)
+emil_build_for(numerical.controllers_test_helper BOOL NUMERICAL_TOOLBOX_BUILD_TESTS)
 
-target_link_libraries(dsp.controllers_test_helper INTERFACE
+target_link_libraries(numerical.controllers_test_helper INTERFACE
     gmock
-    dsp.math
+    numerical.math
 )
 
-target_sources(dsp.controllers_test_helper PRIVATE
+target_sources(numerical.controllers_test_helper PRIVATE
     NormalizedAngles.hpp
     Tolerance.hpp
 )

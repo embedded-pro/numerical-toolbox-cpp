@@ -1,5 +1,5 @@
-#include "math/QNumber.hpp"
-#include "math/Statistics.hpp"
+#include "toolbox/math/QNumber.hpp"
+#include "toolbox/math/Statistics.hpp"
 #include <gtest/gtest.h>
 
 namespace

@@ -1,16 +1,16 @@
-add_library(dsp.solver ${EMIL_EXCLUDE_FROM_ALL})
+add_library(numerical.solver ${EMIL_EXCLUDE_FROM_ALL})
 
-target_include_directories(dsp.solver PUBLIC
+target_include_directories(numerical.solver PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-target_link_libraries(dsp.solver PUBLIC
+target_link_libraries(numerical.solver PUBLIC
     infra.util
-    dsp.math
+    numerical.math
 )
 
-target_sources(dsp.solver PRIVATE
+target_sources(numerical.solver PRIVATE
     LevinsonDurbin.hpp
     Solver.cpp
     Solver.hpp

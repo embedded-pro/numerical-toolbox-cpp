@@ -1,16 +1,16 @@
-add_library(dsp.controllers ${EMIL_EXCLUDE_FROM_ALL})
+add_library(numerical.controllers ${EMIL_EXCLUDE_FROM_ALL})
 
-target_include_directories(dsp.controllers PUBLIC
+target_include_directories(numerical.controllers PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-target_link_libraries(dsp.controllers PUBLIC
+target_link_libraries(numerical.controllers PUBLIC
     infra.util
-    dsp.math
+    numerical.math
 )
 
-target_sources(dsp.controllers PRIVATE
+target_sources(numerical.controllers PRIVATE
     FieldOrientedController.cpp
     FieldOrientedController.hpp
     Pid.cpp

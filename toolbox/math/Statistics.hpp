@@ -1,8 +1,8 @@
 #ifndef MATH_STATISTICS_HPP
 #define MATH_STATISTICS_HPP
 
-#include "Matrix.hpp"
-#include "math/QNumber.hpp"
+#include "toolbox/math/Matrix.hpp"
+#include "toolbox/math/QNumber.hpp"
 #include <cmath>
 
 namespace math

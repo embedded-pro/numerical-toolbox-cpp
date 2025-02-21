@@ -1,12 +1,12 @@
-add_executable(dsp.filters.active_test)
-emil_build_for(dsp.filters.active_test BOOL CONTROL_TOOLBOX_BUILD_TESTS)
-emil_add_test(dsp.filters.active_test)
+add_executable(numerical.filters.active_test)
+emil_build_for(numerical.filters.active_test BOOL NUMERICAL_TOOLBOX_BUILD_TESTS)
+emil_add_test(numerical.filters.active_test)
 
-target_link_libraries(dsp.filters.active_test PUBLIC
+target_link_libraries(numerical.filters.active_test PUBLIC
     gmock_main
-    dsp.filters.active
+    numerical.filters.active
 )
 
-target_sources(dsp.filters.active_test PRIVATE
+target_sources(numerical.filters.active_test PRIVATE
     TestKalmanFilter.cpp
 )
