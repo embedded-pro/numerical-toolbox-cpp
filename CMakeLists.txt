@@ -74,7 +74,7 @@ if (NUMERICAL_TOOLBOX_BUILD_TESTS)
 endif()
 
 add_subdirectory(examples)
-add_subdirectory(toolbox)
+add_subdirectory(numerical)
 
 emil_clangformat_directories(examples DIRECTORIES .)
 emil_clangformat_directories(toolbox DIRECTORIES .)
