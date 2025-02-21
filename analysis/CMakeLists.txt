@@ -11,6 +11,7 @@ target_link_libraries(dsp.analysis PUBLIC
 )
 
 target_sources(dsp.analysis PRIVATE
+    DiscreteCosineTransform.hpp
     FastFourierTransform.hpp
     FastFourierTransformRadix2Impl.hpp
     FrequencyResponse.cpp
