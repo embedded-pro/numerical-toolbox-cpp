@@ -115,17 +115,6 @@ TYPED_TEST(StatisticsTest, RSquaredScore)
     EXPECT_TRUE(AreValuesNear(result, this->MakeValue(0.8f), 0.001f));
 }
 
-TYPED_TEST(StatisticsTest, ZScore)
-{
-    auto data = this->MakeMatrix(0.45f, 0.5f, 0.5f, 0.55f);
-    auto result = math::ZScore(data);
-
-    auto expected = this->MakeMatrix(0.482322f, 0.5f, 0.5f, 0.517678f);
-    for (size_t i = 0; i < 2; ++i)
-        for (size_t j = 0; j < 2; ++j)
-            EXPECT_TRUE(AreValuesNear(result.at(i, j), expected.at(i, j)));
-}
-
 TYPED_TEST(StatisticsTest, AutoCorrelation)
 {
     auto data = this->MakeVector(0.02f, 0.04f, 0.06f, 0.08f);
@@ -134,4 +123,15 @@ TYPED_TEST(StatisticsTest, AutoCorrelation)
     auto expected = this->MakeVector(0.9999f, 0.3333f, -0.6f, 0.0f);
     for (size_t i = 0; i < 3; ++i)
         EXPECT_TRUE(AreValuesNear(result.at(i, 0), expected.at(i, 0), 0.001f));
+}
+
+TEST(StatisticsTest, ZScore)
+{
+    auto data = math::Matrix<float, 2, 2>(0.45f, 0.5f, 0.5f, 0.55f);
+    auto result = math::ZScore(data);
+
+    auto expected = math::Matrix<float, 2, 2>(-1.4142f, 0.0f, 0.0f, 1.4142f);
+    for (size_t i = 0; i < 2; ++i)
+        for (size_t j = 0; j < 2; ++j)
+            EXPECT_TRUE(AreValuesNear(result.at(i, j), expected.at(i, j)));
 }

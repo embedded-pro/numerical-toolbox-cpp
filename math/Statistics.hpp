@@ -146,8 +146,8 @@ namespace math
     template<typename T, size_t Rows, size_t Cols>
     [[nodiscard]] constexpr Matrix<T, Rows, Cols> ZScore(const Matrix<T, Rows, Cols>& data)
     {
-        static_assert(detail::is_supported_type_v<T>,
-            "Statistical functions only support float or QNumber types");
+        static_assert(std::is_same_v<T, float>,
+            "ZScore function only supports float type");
 
         const T meanValue = Mean(data);
         const T standardDev = StandardDeviation(data, false);
