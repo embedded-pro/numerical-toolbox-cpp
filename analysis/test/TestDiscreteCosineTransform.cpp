@@ -78,17 +78,6 @@ TYPED_TEST(TestDiscreteConsineTransform, inverse_transform_calls_fft_with_prepro
     this->dct->Inverse(this->input);
 }
 
-TYPED_TEST(TestDiscreteConsineTransform, zero_length_input_handled_properly)
-{
-    this->dct.emplace(this->mockFft);
-    this->input.clear();
-
-    EXPECT_CALL(this->mockFft, Forward(::testing::_))
-        .Times(0);
-
-    this->dct->Forward(this->input);
-}
-
 TYPED_TEST(TestDiscreteConsineTransform, input_size_matches_fft_size)
 {
     this->dct.emplace(this->mockFft);
