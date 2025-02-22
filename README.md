@@ -1,10 +1,12 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=embedded-pro_embedded-dsp-control&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=embedded-pro_embedded-dsp-control)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=embedded-pro_embedded-dsp-control&metric=coverage)](https://sonarcloud.io/summary/new_code?id=embedded-pro_embedded-dsp-control)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=embedded-pro_embedded-dsp-control&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=embedded-pro_embedded-dsp-control)
 
-# Digital Signal Processing and Control Algorithms Library
+# Embedded Numerical Algorithms Library
 
 ## Overview
 
-This library provides a comprehensive collection of digital signal processing (DSP) and control algorithms designed for robust and efficient signal analysis, manipulation, and system control. Developed to address complex technical challenges, the library offers a flexible and extensible framework for engineers, researchers, and developers working in signal processing, control systems, and related domains.
+This library provides a comprehensive collection of digital signal processing (DSP), control algorithms, filters, optimizers, and estimators designed for robust and efficient signal analysis, manipulation, and system control. Developed to address complex technical challenges, the library offers a flexible and extensible framework for engineers, researchers, and developers working in signal processing, control systems, and related domains.
 
 ## Key Features
 
@@ -32,14 +34,22 @@ Refer to the documentation and example scripts to quickly integrate and utilize 
 
 ## Theory and How to use
 
-- [PID](doc/controllers/Pid.md)
-- [Fast Fourier Transform](doc/analysis/FastFourierTransform.md)
-- [Power Density Spectrum](doc/analysis/PowerDensitySpectrum.md)
-- [Windowing](doc/windowing/window.md)
-- [Kalman Filter](doc/filters/active/KalmanFilter.md)
-- [Linear Regression](doc/estimators/LinearRegression.md)
-- [Yule-Walker (for AR and MA models)](doc/estimators/YuleWalker.md)
-- [Levinson-Durbin (Ax + B = 0 matrix solver)](doc/solvers/LevinsonDurbin.md)
+1. Control Systems
+    - [PID](doc/controllers/Pid.md)
+
+2. Analysis
+    - [Fast Fourier Transform](doc/analysis/FastFourierTransform.md)
+    - [Power Density Spectrum](doc/analysis/PowerDensitySpectrum.md)
+    - [Discrete Cosine Transform](doc/analysis/DiscreteCosineTransform.md)
+
+3. Filter
+    - [Windowing](doc/windowing/window.md)
+    - [Kalman Filter](doc/filters/active/KalmanFilter.md)
+
+4. Estimators and Solvers
+    - [Linear Regression](doc/estimators/LinearRegression.md)
+    - [Yule-Walker (for AR and MA models)](doc/estimators/YuleWalker.md)
+    - [Levinson-Durbin (Ax + B = 0 matrix solver)](doc/solvers/LevinsonDurbin.md)
 
 ## Contributing
 

@@ -1,5 +1,5 @@
-#include "estimators/YuleWalker.hpp"
-#include "solvers/LevinsonDurbin.hpp"
+#include "numerical/estimators/YuleWalker.hpp"
+#include "numerical/solvers/LevinsonDurbin.hpp"
 #include <iomanip>
 #include <iostream>
 #include <random>

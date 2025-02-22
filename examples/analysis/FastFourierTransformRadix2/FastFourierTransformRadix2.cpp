@@ -1,5 +1,5 @@
-#include "analysis/FastFourierTransform.hpp"
-#include "analysis/FastFourierTransformRadix2Impl.hpp"
+#include "numerical/analysis/FastFourierTransform.hpp"
+#include "numerical/analysis/FastFourierTransformRadix2Impl.hpp"
 #include <cmath>
 #include <iostream>
 #include <sciplot/sciplot.hpp>
