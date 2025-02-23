@@ -25,7 +25,7 @@ namespace neural_network
     template<typename QNumberType>
     QNumberType Tanh<QNumberType>::Backward(QNumberType x) const
     {
-        QNumberType y = std::tanh(x);
+        QNumberType y = Forward(x);
         return QNumberType(0.9999f) - y * y;
     }
 }

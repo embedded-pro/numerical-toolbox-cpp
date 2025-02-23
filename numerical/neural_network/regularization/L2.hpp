@@ -1,7 +1,7 @@
 #ifndef NEURAL_NETWORK_L2_HPP
 #define NEURAL_NETWORK_L2_HPP
 
-#include "numerical/neural_network/Regularization.hpp"
+#include "numerical/neural_network/regularization/Regularization.hpp"
 
 namespace neural_network
 {
@@ -34,7 +34,7 @@ namespace neural_network
         for (std::size_t i = 0; i < Size; ++i)
             sum += parameters[i] * parameters[i];
 
-        return lambda * sum / QNumberType(2);
+        return QNumberType(math::ToFloat(lambda * sum) / 2.0f);
     }
 }
 

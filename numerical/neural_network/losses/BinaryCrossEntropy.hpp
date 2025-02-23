@@ -1,20 +1,20 @@
-#ifndef NEURAL_NETWORK_LOSSES_MEAN_SQUARED_ERROR_HPP
-#define NEURAL_NETWORK_LOSSES_MEAN_SQUARED_ERROR_HPP
+#ifndef NEURAL_NETWORK_LOSSES_BINARY_CROSS_ENTROPY_HPP
+#define NEURAL_NETWORK_LOSSES_BINARY_CROSS_ENTROPY_HPP
 
 #include "numerical/neural_network/losses/Loss.hpp"
 #include "numerical/neural_network/regularization/Regularization.hpp"
+#include <cmath>
 
 namespace neural_network
 {
     template<typename QNumberType, std::size_t NumberOfFeatures>
-    class MeanSquaredError
+    class BinaryCrossEntropy
         : public Loss<QNumberType, NumberOfFeatures>
     {
     public:
         using Vector = typename Loss<QNumberType, NumberOfFeatures>::Vector;
 
-        MeanSquaredError(const Vector& target, const Regularization<QNumberType, NumberOfFeatures>& regularization);
-
+        BinaryCrossEntropy(const Vector& target, const Regularization<QNumberType, NumberOfFeatures>& regularization);
         QNumberType Cost(const Vector& parameters) override;
         Vector Gradient(const Vector& parameters) override;
 
@@ -26,34 +26,41 @@ namespace neural_network
     // Implementation //
 
     template<typename QNumberType, std::size_t NumberOfFeatures>
-    MeanSquaredError<QNumberType, NumberOfFeatures>::MeanSquaredError(const Vector& target, const Regularization<QNumberType, NumberOfFeatures>& regularization)
+    BinaryCrossEntropy<QNumberType, NumberOfFeatures>::BinaryCrossEntropy(
+        const Vector& target,
+        const Regularization<QNumberType, NumberOfFeatures>& regularization)
         : target(target)
         , regularization(regularization)
     {}
 
     template<typename QNumberType, std::size_t NumberOfFeatures>
-    QNumberType MeanSquaredError<QNumberType, NumberOfFeatures>::Cost(const Vector& parameters)
+    QNumberType BinaryCrossEntropy<QNumberType, NumberOfFeatures>::Cost(const Vector& parameters)
     {
         QNumberType cost = QNumberType(0);
 
         for (std::size_t i = 0; i < NumberOfFeatures; ++i)
         {
-            QNumberType diff = parameters[i] - target[i];
-            cost += diff * diff;
-        }
+            QNumberType pred = std::max(std::min(parameters[i], QNumberType(0.9999f)), QNumberType(0.0001f));
 
-        cost /= QNumberType(2.0f);
+            cost += -(target[i] * std::log(math::ToFloat(pred)) +
+                      (QNumberType(1.0f) - target[i]) * std::log(math::ToFloat(QNumberType(1.0f) - pred)));
+        }
 
         return cost + regularization.Calculate(parameters);
     }
 
     template<typename QNumberType, std::size_t NumberOfFeatures>
-    typename MeanSquaredError<QNumberType, NumberOfFeatures>::Vector MeanSquaredError<QNumberType, NumberOfFeatures>::Gradient(const Vector& parameters)
+    typename BinaryCrossEntropy<QNumberType, NumberOfFeatures>::Vector
+    BinaryCrossEntropy<QNumberType, NumberOfFeatures>::Gradient(const Vector& parameters)
     {
         Vector gradient;
 
         for (std::size_t i = 0; i < NumberOfFeatures; ++i)
-            gradient[i] = parameters[i] - target[i];
+        {
+            QNumberType pred = std::max(std::min(parameters[i], QNumberType(0.9999f)), QNumberType(0.0001f));
+
+            gradient[i] = (pred - target[i]) / (pred * (QNumberType(1.0f) - pred));
+        }
 
         return gradient + regularization.Calculate(parameters);
     }

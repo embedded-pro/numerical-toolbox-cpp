@@ -1,7 +1,7 @@
 #ifndef NEURAL_NETWORK_L1_HPP
 #define NEURAL_NETWORK_L1_HPP
 
-#include "numerical/neural_network/Regularization.hpp"
+#include "numerical/neural_network/regularization/Regularization.hpp"
 
 namespace neural_network
 {
@@ -29,10 +29,10 @@ namespace neural_network
     template<typename QNumberType, std::size_t Size>
     QNumberType L1<QNumberType, Size>::Calculate(const Vector& parameters) const
     {
-        QNumberType sum = QNumberType(0);
+        QNumberType sum = QNumberType(0.0f);
 
         for (std::size_t i = 0; i < Size; ++i)
-            sum += std::abs(parameters[i]);
+            sum += parameters[i] < QNumberType(0.0f) ? -parameters[i] : parameters[i];
 
         return lambda * sum;
     }
