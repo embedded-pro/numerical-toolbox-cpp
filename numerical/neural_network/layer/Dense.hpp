@@ -1,8 +1,8 @@
 #ifndef NEURAL_NETWORK_DENSE_HPP
 #define NEURAL_NETWORK_DENSE_HPP
 
-#include "numerical/neural_network/ActivationFunction.hpp"
-#include "numerical/neural_network/Layer.hpp"
+#include "numerical/neural_network/activation/ActivationFunction.hpp"
+#include "numerical/neural_network/layer/Layer.hpp"
 #include <random>
 
 namespace neural_network
@@ -39,6 +39,9 @@ namespace neural_network
 
         math::Matrix<QNumberType, OutputSize, InputSize> weightGradients;
         math::Vector<QNumberType, OutputSize> biasGradients;
+
+        mutable ParameterVector parameters;
+        InputVector inputGradient;
     };
 
     // Implementation //
@@ -48,27 +51,27 @@ namespace neural_network
     {
         std::random_device random;
         std::mt19937 generator(random());
-        std::normal_distribution<QNumberType> normalDistribution(0.0, std::sqrt(2.0 / InputSize));
+        std::normal_distribution<float> normalDistribution(0.0, std::sqrt(2.0 / InputSize));
 
         for (std::size_t i = 0; i < OutputSize; ++i)
         {
             for (std::size_t j = 0; j < InputSize; ++j)
-                weights(i, j) = normalDistribution(generator);
+                weights.at(i, j) = QNumberType(normalDistribution(generator));
 
-            biases[i] = QNumberType(0.0);
+            biases[i] = QNumberType(0.0f);
         }
     }
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, class Activation>
     void Dense<QNumberType, InputSize, OutputSize, Activation>::Forward(const InputVector& input)
     {
-        input = input;
+        this->input = input;
 
         for (std::size_t i = 0; i < OutputSize; ++i)
         {
             preActivation[i] = biases[i];
             for (std::size_t j = 0; j < InputSize; ++j)
-                preActivation[i] += weights(i, j) * input[j];
+                preActivation[i] += weights.at(i, j) * input[j];
 
             output[i] = activationFunction.Forward(preActivation[i]);
         }
@@ -78,22 +81,21 @@ namespace neural_network
     typename Dense<QNumberType, InputSize, OutputSize, Activation>::InputVector& Dense<QNumberType, InputSize, OutputSize, Activation>::Backward(const OutputVector& output_gradient)
     {
         OutputVector preActivationGradient;
-        InputVector inputGradient;
 
         for (std::size_t i = 0; i < OutputSize; ++i)
             preActivationGradient[i] = activationFunction.Backward(output_gradient[i]);
 
         for (std::size_t j = 0; j < InputSize; ++j)
         {
-            inputGradient[j] = QNumberType(0.0);
+            inputGradient[j] = QNumberType(0.0f);
             for (std::size_t i = 0; i < OutputSize; ++i)
-                inputGradient[j] += weights(i, j) * preActivationGradient[i];
+                inputGradient[j] += weights.at(i, j) * preActivationGradient[i];
         }
 
         for (std::size_t i = 0; i < OutputSize; ++i)
         {
             for (std::size_t j = 0; j < InputSize; ++j)
-                weightGradients(i, j) = preActivationGradient[i] * input[j];
+                weightGradients.at(i, j) = preActivationGradient[i] * input[j];
 
             biasGradients[i] = preActivationGradient[i];
         }
@@ -104,17 +106,16 @@ namespace neural_network
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, class Activation>
     typename Dense<QNumberType, InputSize, OutputSize, Activation>::ParameterVector& Dense<QNumberType, InputSize, OutputSize, Activation>::Parameters() const
     {
-        ParameterVector params;
         std::size_t idx = 0;
 
         for (std::size_t i = 0; i < OutputSize; ++i)
             for (std::size_t j = 0; j < InputSize; ++j)
-                params[idx++] = weights(i, j);
+                parameters[idx++] = weights.at(i, j);
 
         for (std::size_t i = 0; i < OutputSize; ++i)
-            params[idx++] = biases[i];
+            parameters[idx++] = biases[i];
 
-        return params;
+        return parameters;
     }
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, class Activation>
@@ -124,7 +125,7 @@ namespace neural_network
 
         for (std::size_t i = 0; i < OutputSize; ++i)
             for (std::size_t j = 0; j < InputSize; ++j)
-                weights(i, j) = parameters[idx++];
+                weights.at(i, j) = parameters[idx++];
 
         for (std::size_t i = 0; i < OutputSize; ++i)
             biases[i] = parameters[idx++];

@@ -1,14 +1,12 @@
 #ifndef NEURAL_NETWORK_LAYER_HPP
 #define NEURAL_NETWORK_LAYER_HPP
 
-#include "infra/util/IntrusiveList.hpp"
 #include "numerical/math/Matrix.hpp"
 
 namespace neural_network
 {
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, std::size_t ParameterSize>
     class Layer
-        : public infra::IntrusiveList<Layer<QNumberType, InputSize, OutputSize, ParameterSize>>::NodeType
     {
         static_assert(math::is_qnumber<QNumberType>::value || std::is_floating_point<QNumberType>::value,
             "Layer can only be instantiated with math::QNumber types.");
