@@ -1,9 +1,9 @@
 #ifndef NEURAL_NETWORK_MODEL_HPP
 #define NEURAL_NETWORK_MODEL_HPP
 
-#include "numerical/neural_network/Layer.hpp"
-#include "optimizers/Loss.hpp"
-#include "optimizers/Optimizer.hpp"
+#include "numerical/neural_network/layer/Layer.hpp"
+#include "numerical/neural_network/losses/Loss.hpp"
+#include "numerical/neural_network/optimizer/Optimizer.hpp"
 #include <tuple>
 
 namespace neural_network
@@ -11,23 +11,15 @@ namespace neural_network
     namespace detail
     {
         template<typename QNumberType, typename T>
-        struct is_layer_impl
+        struct is_layer
         {
-            template<typename L>
-            static constexpr bool check()
-            {
-                return std::is_base_of<
-                    Layer<QNumberType,
-                        L::InputSize,
-                        L::OutputSize,
-                        L::ParameterSize>,
-                    L>::value;
-            }
+            static constexpr bool value = std::is_base_of_v<
+                Layer<QNumberType,
+                    T::InputSize,
+                    T::OutputSize,
+                    T::ParameterSize>,
+                T>;
         };
-
-        template<typename QNumberType, typename T>
-        struct is_layer : std::integral_constant<bool, is_layer_impl<QNumberType, T>::template check<T>()>
-        {};
 
         template<typename QNumberType, typename... Layers>
         struct all_are_layers;
@@ -55,36 +47,49 @@ namespace neural_network
         template<std::size_t InputSize, typename First, typename... Rest>
         struct verify_layer_sizes<InputSize, First, Rest...>
         {
+            using FirstLayer = Layer<typename First::QNumberType,
+                First::InputSize,
+                First::OutputSize,
+                First::ParameterSize>;
+
             static constexpr bool value =
-                (InputSize == First::InputSize) &&
-                verify_layer_sizes<First::OutputSize, Rest...>::value;
+                (InputSize == FirstLayer::InputSize) &&
+                verify_layer_sizes<FirstLayer::OutputSize, Rest...>::value;
         };
+
+        template<typename QNumberType, typename... Layers>
+        constexpr std::size_t calculate_total_parameters()
+        {
+            return (... + Layers::ParameterSize);
+        }
     }
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
     class Model
     {
         static_assert(math::is_qnumber<QNumberType>::value || std::is_floating_point<QNumberType>::value,
-            "Model can only be instantiated with math::QNumber types.");
+            "Model can only be instantiated with math::QNumber types or floating point types.");
 
         static_assert(detail::all_are_layers<QNumberType, Layers...>::value,
             "All types in Layers must derive from Layer");
 
+        static_assert(sizeof...(Layers) > 0, "Model must have at least one layer");
+
         static_assert(detail::verify_layer_sizes<InputSize, Layers...>::value &&
-                          (sizeof...(Layers) == 0 ||
-                              std::tuple_element_t<sizeof...(Layers) - 1, std::tuple<Layers...>>::OutputSize == OutputSize),
+                          std::tuple_element_t<sizeof...(Layers) - 1,
+                              std::tuple<Layers...>>::OutputSize == OutputSize,
             "Layer sizes do not match");
 
     public:
         using InputVector = math::Vector<QNumberType, InputSize>;
         using OutputVector = math::Vector<QNumberType, OutputSize>;
-        static constexpr std::size_t TotalParameters = (Layers::ParameterSize + ...);
+        static constexpr std::size_t TotalParameters = detail::calculate_total_parameters<QNumberType, Layers...>();
 
         Model();
 
         OutputVector Forward(const InputVector& input);
         InputVector Backward(const OutputVector& output_gradient);
-        void Train(optimizer::Optimizer<QNumberType, TotalParameters>& optimizer, optimizer::Loss<QNumberType, TotalParameters>& loss, const math::Vector<QNumberType, TotalParameters>& initialParameters);
+        void Train(Optimizer<QNumberType, TotalParameters>& optimizer, Loss<QNumberType, TotalParameters>& loss, const math::Vector<QNumberType, TotalParameters>& initialParameters);
         void SetParameters(const math::Vector<QNumberType, TotalParameters>& parameters);
         math::Vector<QNumberType, TotalParameters> GetParameters() const;
 
@@ -132,7 +137,7 @@ namespace neural_network
     }
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
-    void Model<QNumberType, InputSize, OutputSize, Layers...>::Train(optimizer::Optimizer<QNumberType, TotalParameters>& optimizer, optimizer::Loss<QNumberType, TotalParameters>& loss, const math::Vector<QNumberType, TotalParameters>& initialParameters)
+    void Model<QNumberType, InputSize, OutputSize, Layers...>::Train(Optimizer<QNumberType, TotalParameters>& optimizer, Loss<QNumberType, TotalParameters>& loss, const math::Vector<QNumberType, TotalParameters>& initialParameters)
     {
         auto result = optimizer.Minimize(initialParameters, loss);
         SetParameters(result.parameters);
@@ -156,8 +161,7 @@ namespace neural_network
     Model<QNumberType, InputSize, OutputSize, Layers...>::ForwardImpl(const InputVector& input, std::index_sequence<Is...>)
     {
         auto current = input;
-        int dummy[] = { 0, ((current = std::get<Is>(layers).Forward(current)), 0)... };
-        (void)dummy;
+        ((current = std::get<Is>(layers).Forward(current)), ...);
         return current;
     }
 
@@ -167,8 +171,7 @@ namespace neural_network
     Model<QNumberType, InputSize, OutputSize, Layers...>::BackwardImpl(const OutputVector& output_gradient, std::index_sequence<Is...>)
     {
         auto current_gradient = output_gradient;
-        int dummy[] = { 0, ((current_gradient = std::get<sizeof...(Layers) - 1 - Is>(layers).Backward(current_gradient)), 0)... };
-        (void)dummy;
+        ((current_gradient = std::get<sizeof...(Layers) - 1 - Is>(layers).Backward(current_gradient)), ...);
         return current_gradient;
     }
 
@@ -178,9 +181,7 @@ namespace neural_network
         const math::Vector<QNumberType, TotalParameters>& parameters,
         std::index_sequence<Is...>)
     {
-        std::size_t offset = 0;
-        int dummy[] = { 0, (SetLayerParameters(std::get<Is>(layers), parameters, offset), 0)... };
-        (void)dummy;
+        (SetLayerParameters(std::get<Is>(layers), parameters, 0), ...);
     }
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
