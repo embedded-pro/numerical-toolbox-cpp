@@ -7,20 +7,17 @@
 
 namespace neural_network
 {
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, class Activation>
+    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize>
     class Dense
         : public Layer<QNumberType, InputSize, OutputSize, (InputSize * OutputSize) + OutputSize>
     {
-        static_assert(std::is_base_of<ActivationFunction<QNumberType>, Activation>::value,
-            "Activation has to be derived from ActivationFunction.");
-
     public:
         using BaseLayer = Layer<QNumberType, InputSize, OutputSize, (InputSize * OutputSize) + OutputSize>;
         using InputVector = typename BaseLayer::InputVector;
         using OutputVector = typename BaseLayer::OutputVector;
         using ParameterVector = typename BaseLayer::ParameterVector;
 
-        Dense();
+        Dense(const math::Matrix<QNumberType, OutputSize, InputSize>& initialWeights, ActivationFunction<QNumberType>& activation);
 
         void Forward(const InputVector& input) override;
         InputVector& Backward(const OutputVector& output_gradient) override;
@@ -28,7 +25,7 @@ namespace neural_network
         void SetParameters(const ParameterVector& parameters) override;
 
     private:
-        Activation activationFunction;
+        ActivationFunction<QNumberType>& activation;
 
         math::Matrix<QNumberType, OutputSize, InputSize> weights;
         math::Vector<QNumberType, OutputSize> biases;
@@ -46,24 +43,14 @@ namespace neural_network
 
     // Implementation //
 
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, class Activation>
-    Dense<QNumberType, InputSize, OutputSize, Activation>::Dense()
-    {
-        std::random_device random;
-        std::mt19937 generator(random());
-        std::uniform_real_distribution<float> distribution(0.0, 0.5f);
+    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize>
+    Dense<QNumberType, InputSize, OutputSize>::Dense(const math::Matrix<QNumberType, OutputSize, InputSize>& initialWeights, ActivationFunction<QNumberType>& activation)
+        : weights(initialWeights)
+        , activation(activation)
+    {}
 
-        for (std::size_t i = 0; i < OutputSize; ++i)
-        {
-            for (std::size_t j = 0; j < InputSize; ++j)
-                weights.at(i, j) = QNumberType(distribution(generator));
-
-            biases[i] = QNumberType(0.0f);
-        }
-    }
-
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, class Activation>
-    void Dense<QNumberType, InputSize, OutputSize, Activation>::Forward(const InputVector& input)
+    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize>
+    void Dense<QNumberType, InputSize, OutputSize>::Forward(const InputVector& input)
     {
         this->input = input;
 
@@ -73,17 +60,17 @@ namespace neural_network
             for (std::size_t j = 0; j < InputSize; ++j)
                 preActivation[i] += weights.at(i, j) * input[j];
 
-            output[i] = activationFunction.Forward(preActivation[i]);
+            output[i] = activation.Forward(preActivation[i]);
         }
     }
 
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, class Activation>
-    typename Dense<QNumberType, InputSize, OutputSize, Activation>::InputVector& Dense<QNumberType, InputSize, OutputSize, Activation>::Backward(const OutputVector& output_gradient)
+    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize>
+    typename Dense<QNumberType, InputSize, OutputSize>::InputVector& Dense<QNumberType, InputSize, OutputSize>::Backward(const OutputVector& output_gradient)
     {
         OutputVector preActivationGradient;
 
         for (std::size_t i = 0; i < OutputSize; ++i)
-            preActivationGradient[i] = activationFunction.Backward(output_gradient[i]);
+            preActivationGradient[i] = activation.Backward(output_gradient[i]);
 
         for (std::size_t j = 0; j < InputSize; ++j)
         {
@@ -103,8 +90,8 @@ namespace neural_network
         return inputGradient;
     }
 
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, class Activation>
-    typename Dense<QNumberType, InputSize, OutputSize, Activation>::ParameterVector& Dense<QNumberType, InputSize, OutputSize, Activation>::Parameters() const
+    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize>
+    typename Dense<QNumberType, InputSize, OutputSize>::ParameterVector& Dense<QNumberType, InputSize, OutputSize>::Parameters() const
     {
         std::size_t idx = 0;
 
@@ -118,8 +105,8 @@ namespace neural_network
         return parameters;
     }
 
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, class Activation>
-    void Dense<QNumberType, InputSize, OutputSize, Activation>::SetParameters(const ParameterVector& parameters)
+    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize>
+    void Dense<QNumberType, InputSize, OutputSize>::SetParameters(const ParameterVector& parameters)
     {
         std::size_t idx = 0;
 
