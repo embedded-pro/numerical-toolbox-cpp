@@ -15,7 +15,7 @@ namespace neural_network
     public:
         using Vector = typename Loss<QNumberType, NumberOfFeatures>::Vector;
 
-        CategoricalCrossEntropy(const Vector& target, const Regularization<QNumberType, NumberOfFeatures>& regularization);
+        CategoricalCrossEntropy(const Vector& target, Regularization<QNumberType, NumberOfFeatures>& regularization);
         QNumberType Cost(const Vector& parameters) override;
         Vector Gradient(const Vector& parameters) override;
 
@@ -32,7 +32,7 @@ namespace neural_network
     template<typename QNumberType, std::size_t NumberOfFeatures>
     CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::CategoricalCrossEntropy(
         const Vector& target,
-        const Regularization<QNumberType, NumberOfFeatures>& regularization)
+        Regularization<QNumberType, NumberOfFeatures>& regularization)
         : target(target)
         , regularization(regularization)
     {}
@@ -42,7 +42,7 @@ namespace neural_network
     CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::ComputeSoftmaxProbabilities(const Vector& x) const
     {
         Vector output;
-        QNumberType sum = QNumberType(0);
+        QNumberType sum = QNumberType(0.0f);
 
         for (std::size_t i = 0; i < NumberOfFeatures; ++i)
         {
@@ -63,7 +63,7 @@ namespace neural_network
     QNumberType CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::Cost(const Vector& parameters)
     {
         Vector probabilities = ComputeSoftmaxProbabilities(parameters);
-        QNumberType cost = QNumberType(0);
+        QNumberType cost = QNumberType(0.0f);
 
         for (std::size_t i = 0; i < NumberOfFeatures; ++i)
             cost += -target[i] * std::log(math::ToFloat(probabilities[i]));
@@ -75,13 +75,14 @@ namespace neural_network
     typename CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::Vector
     CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::Gradient(const Vector& parameters)
     {
+        auto reg = regularization.Calculate(parameters);
         Vector probabilities = ComputeSoftmaxProbabilities(parameters);
         Vector gradient;
 
         for (std::size_t i = 0; i < NumberOfFeatures; ++i)
-            gradient[i] = probabilities[i] - target[i];
+            gradient[i] = probabilities[i] - target[i] + reg;
 
-        return gradient + regularization.Calculate(parameters);
+        return gradient;
     }
 }
 

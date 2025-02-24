@@ -13,7 +13,7 @@ namespace neural_network
     public:
         using Vector = typename Loss<QNumberType, NumberOfFeatures>::Vector;
 
-        MeanAbsoluteError(const Vector& target, const Regularization<QNumberType, NumberOfFeatures>& regularization);
+        MeanAbsoluteError(const Vector& target, Regularization<QNumberType, NumberOfFeatures>& regularization);
         QNumberType Cost(const Vector& parameters) override;
         Vector Gradient(const Vector& parameters) override;
 
@@ -25,7 +25,7 @@ namespace neural_network
     // Implementation //
 
     template<typename QNumberType, std::size_t NumberOfFeatures>
-    MeanAbsoluteError<QNumberType, NumberOfFeatures>::MeanAbsoluteError(const Vector& target, const Regularization<QNumberType, NumberOfFeatures>& regularization)
+    MeanAbsoluteError<QNumberType, NumberOfFeatures>::MeanAbsoluteError(const Vector& target, Regularization<QNumberType, NumberOfFeatures>& regularization)
         : target(target)
         , regularization(regularization)
     {}
@@ -55,7 +55,7 @@ namespace neural_network
             gradient[i] = diff > QNumberType(0.0f) ? QNumberType(0.9999f) : QNumberType(-0.9999f);
         }
 
-        return gradient + regularization.Calculate(parameters);
+        return gradient;
     }
 }
 

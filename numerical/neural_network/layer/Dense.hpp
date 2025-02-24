@@ -51,12 +51,12 @@ namespace neural_network
     {
         std::random_device random;
         std::mt19937 generator(random());
-        std::normal_distribution<float> normalDistribution(0.0, std::sqrt(2.0 / InputSize));
+        std::uniform_real_distribution<float> distribution(0.0, 0.5f);
 
         for (std::size_t i = 0; i < OutputSize; ++i)
         {
             for (std::size_t j = 0; j < InputSize; ++j)
-                weights.at(i, j) = QNumberType(normalDistribution(generator));
+                weights.at(i, j) = QNumberType(distribution(generator));
 
             biases[i] = QNumberType(0.0f);
         }
