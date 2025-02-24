@@ -1,11 +1,10 @@
-#ifndef OPTIMIZERS_GRADIENT_DESCENT_HPP
-#define OPTIMIZERS_GRADIENT_DESCENT_HPP
+#ifndef NEURAL_NETWORK_GRADIENT_DESCENT_HPP
+#define NEURAL_NETWORK_GRADIENT_DESCENT_HPP
 
-#include "optimizers/Loss.hpp"
-#include "optimizers/Optimizer.hpp"
+#include "numerical/neural_network/optimizer/Optimizer.hpp"
 #include <optional>
 
-namespace optimizer
+namespace neural_network
 {
     template<typename QNumberType, size_t NumberOfFeatures>
     class GradientDescent
@@ -46,7 +45,7 @@ namespace optimizer
     const typename GradientDescent<QNumberType, NumberOfFeatures>::Result& GradientDescent<QNumberType, NumberOfFeatures>::Minimize(const Vector& initialGuess, Loss<QNumberType, NumberOfFeatures>& loss)
     {
         auto currentParams = initialGuess;
-        auto currentCost = loss.Cost(currentParams, QNumberType(0.0f));
+        auto currentCost = loss.Cost(currentParams);
         Vector previousParams;
         size_t iteration = 0;
 
@@ -54,10 +53,10 @@ namespace optimizer
         {
             previousParams = currentParams;
 
-            auto gradient = loss.Gradient(currentParams, QNumberType(0.0f));
+            auto gradient = loss.Gradient(currentParams);
             currentParams = currentParams - (gradient * parameters.learningRate);
 
-            currentCost = loss.Cost(currentParams, QNumberType(0.0f));
+            currentCost = loss.Cost(currentParams);
             ++iteration;
         }
 

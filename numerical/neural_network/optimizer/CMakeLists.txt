@@ -12,6 +12,7 @@ target_link_libraries(numerical.neural_network.optimizer PUBLIC
 )
 
 target_sources(numerical.neural_network.optimizer PRIVATE
+    GradientDescent.hpp
     Optimizer.cpp
     Optimizer.hpp
 )

@@ -1,5 +1,5 @@
-#include "math/QNumber.hpp"
-#include "optimizers/GradientDescent.hpp"
+#include "numerical/math/QNumber.hpp"
+#include "numerical/neural_network/optimizer/GradientDescent.hpp"
 #include "gmock/gmock.h"
 
 namespace
@@ -34,13 +34,13 @@ namespace
 
     template<typename T, std::size_t Features>
     class MockLoss
-        : public optimizer::Loss<T, Features>
+        : public neural_network::Loss<T, Features>
     {
     public:
-        using Vector = typename optimizer::Loss<T, Features>::Vector;
+        using Vector = typename neural_network::Loss<T, Features>::Vector;
 
-        MOCK_METHOD(T, Cost, (const Vector& parameters, T regularization), (override));
-        MOCK_METHOD(Vector, Gradient, (const Vector& parameters, T regularization), (override));
+        MOCK_METHOD(T, Cost, (const Vector& parameters), (override));
+        MOCK_METHOD(Vector, Gradient, (const Vector& parameters), (override));
     };
 
     template<typename T>
@@ -57,7 +57,7 @@ namespace
             params.maxIterations = 100;
         }
 
-        typename optimizer::GradientDescent<T, Features>::Parameters params;
+        typename neural_network::GradientDescent<T, Features>::Parameters params;
         MockLoss<T, Features> loss;
 
         Vector MakeVector(float x, float y)
@@ -84,18 +84,17 @@ TYPED_TEST(TestGradientDescent, performs_expected_number_of_iterations)
 
     auto initialGuess = this->MakeVector(0.0f, 0.0f);
     auto gradientResult = this->MakeVector(0.01f, 0.01f);
-    auto regularization = this->MakeScalar(0.0f);
     auto costResult = this->MakeScalar(0.05f);
 
-    EXPECT_CALL(this->loss, Cost(::testing::_, regularization))
+    EXPECT_CALL(this->loss, Cost(::testing::_))
         .Times(this->params.maxIterations + 1)
         .WillRepeatedly(::testing::Return(costResult));
 
-    EXPECT_CALL(this->loss, Gradient(::testing::_, regularization))
+    EXPECT_CALL(this->loss, Gradient(::testing::_))
         .Times(this->params.maxIterations)
         .WillRepeatedly(::testing::Return(gradientResult));
 
-    optimizer::GradientDescent<TypeParam, TestGradientDescent<TypeParam>::Features>
+    neural_network::GradientDescent<TypeParam, TestGradientDescent<TypeParam>::Features>
         optimizer(this->params);
 
     auto result = optimizer.Minimize(initialGuess, this->loss);
@@ -109,30 +108,29 @@ TYPED_TEST(TestGradientDescent, calls_methods_in_correct_order)
 
     auto initialGuess = this->MakeVector(0.0f, 0.0f);
     auto gradientResult = this->MakeVector(0.1f, 0.1f);
-    auto regularization = this->MakeScalar(0.0f);
     auto costResult = this->MakeScalar(0.5f);
 
     {
         ::testing::InSequence seq;
 
-        EXPECT_CALL(this->loss, Cost(VectorEq(initialGuess), regularization))
+        EXPECT_CALL(this->loss, Cost(VectorEq(initialGuess)))
             .WillOnce(::testing::Return(costResult));
 
-        EXPECT_CALL(this->loss, Gradient(::testing::_, regularization))
+        EXPECT_CALL(this->loss, Gradient(::testing::_))
             .WillOnce(::testing::Return(gradientResult));
 
-        EXPECT_CALL(this->loss, Cost(::testing::_, regularization))
+        EXPECT_CALL(this->loss, Cost(::testing::_))
             .WillOnce(::testing::Return(costResult));
 
-        EXPECT_CALL(this->loss, Gradient(::testing::_, regularization))
+        EXPECT_CALL(this->loss, Gradient(::testing::_))
             .WillOnce(::testing::Return(gradientResult));
 
-        EXPECT_CALL(this->loss, Cost(::testing::_, regularization))
+        EXPECT_CALL(this->loss, Cost(::testing::_))
             .WillOnce(::testing::Return(costResult));
     }
 
     this->params.maxIterations = 2;
-    optimizer::GradientDescent<TypeParam, TestGradientDescent<TypeParam>::Features>
+    neural_network::GradientDescent<TypeParam, TestGradientDescent<TypeParam>::Features>
         optimizer(this->params);
 
     optimizer.Minimize(initialGuess, this->loss);
