@@ -51,6 +51,9 @@ Refer to the documentation and example scripts to quickly integrate and utilize 
     - [Yule-Walker (for AR and MA models)](doc/estimators/YuleWalker.md)
     - [Levinson-Durbin (Ax + B = 0 matrix solver)](doc/solvers/LevinsonDurbin.md)
 
+5. [Neural Network](doc/neural_network/NeuralNetwork.md)
+
+
 ## Contributing
 
 Contributions, issues, and feature requests are welcome. Please check the contributing guidelines before submitting pull requests.

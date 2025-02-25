@@ -1,0 +1,174 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <!-- Background -->
+  <rect width="800" height="600" fill="white"/>
+  
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold">Neural Network Model</text>
+  
+  <!-- Model Architecture -->
+  <g id="model-architecture">
+    <rect x="50" y="70" width="700" height="280" fill="#f9f9f9" stroke="#666" stroke-width="1"/>
+    
+    <!-- Main Title -->
+    <text x="400" y="95" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold">Model Architecture</text>
+    
+    <!-- Input Layer -->
+    <g id="input-layer">
+      <text x="100" y="125" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">Input</text>
+      <circle cx="100" cy="160" r="15" fill="#6495ED" stroke="black" stroke-width="1.5"/>
+      <circle cx="100" cy="200" r="15" fill="#6495ED" stroke="black" stroke-width="1.5"/>
+      <circle cx="100" cy="240" r="15" fill="#6495ED" stroke="black" stroke-width="1.5"/>
+      <circle cx="100" cy="280" r="15" fill="#6495ED" stroke="black" stroke-width="1.5"/>
+    </g>
+    
+    <!-- Layer 1 -->
+    <g id="layer1">
+      <rect x="150" y="120" width="140" height="180" rx="10" ry="10" fill="#e6f2ff" stroke="#0066cc" stroke-width="2"/>
+      <text x="220" y="145" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">Layer 1</text>
+      
+      <!-- Nodes in Layer 1 -->
+      <circle cx="220" cy="180" r="12" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
+      <circle cx="220" cy="220" r="12" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
+      <circle cx="220" cy="260" r="12" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
+      
+      <!-- Layer 1 details -->
+      <text x="220" y="300" text-anchor="middle" font-family="Arial" font-size="12">Dense</text>
+    </g>
+    
+    <!-- Layer 2 -->
+    <g id="layer2">
+      <rect x="330" y="120" width="140" height="180" rx="10" ry="10" fill="#e6f2ff" stroke="#0066cc" stroke-width="2"/>
+      <text x="400" y="145" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">Layer 2</text>
+      
+      <!-- Nodes in Layer 2 -->
+      <circle cx="400" cy="190" r="12" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
+      <circle cx="400" cy="230" r="12" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
+      <circle cx="400" cy="270" r="12" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
+      
+      <!-- Layer 2 details -->
+      <text x="400" y="300" text-anchor="middle" font-family="Arial" font-size="12">Dense</text>
+    </g>
+    
+    <!-- Layer N -->
+    <g id="layerN">
+      <rect x="510" y="120" width="140" height="180" rx="10" ry="10" fill="#e6f2ff" stroke="#0066cc" stroke-width="2"/>
+      <text x="580" y="145" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">Layer N</text>
+      
+      <!-- Nodes in Layer N -->
+      <circle cx="580" cy="190" r="12" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
+      <circle cx="580" cy="230" r="12" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
+      <circle cx="580" cy="270" r="12" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
+      
+      <!-- Layer N details -->
+      <text x="580" y="300" text-anchor="middle" font-family="Arial" font-size="12">Dense</text>
+    </g>
+    
+    <!-- Output Layer -->
+    <g id="output-layer">
+      <text x="700" y="125" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">Output</text>
+      <circle cx="700" cy="180" r="15" fill="#90EE90" stroke="black" stroke-width="1.5"/>
+      <circle cx="700" cy="220" r="15" fill="#90EE90" stroke="black" stroke-width="1.5"/>
+      <circle cx="700" cy="260" r="15" fill="#90EE90" stroke="black" stroke-width="1.5"/>
+    </g>
+    
+    <!-- Connections -->
+    <g id="connections" stroke="#CCCCCC" stroke-width="1">
+      <!-- Input to Layer 1 -->
+      <line x1="115" y1="160" x2="150" y2="180"/>
+      <line x1="115" y1="200" x2="150" y2="200"/>
+      <line x1="115" y1="240" x2="150" y2="220"/>
+      <line x1="115" y1="280" x2="150" y2="260"/>
+      
+      <!-- Layer 1 to Layer 2 -->
+      <line x1="290" y1="180" x2="330" y2="190"/>
+      <line x1="290" y1="200" x2="330" y2="210"/>
+      <line x1="290" y1="220" x2="330" y2="230"/>
+      <line x1="290" y1="240" x2="330" y2="250"/>
+      <line x1="290" y1="260" x2="330" y2="270"/>
+      
+      <!-- Layer 2 to Layer N -->
+      <path d="M 470 210 Q 490 210, 510 210" stroke-dasharray="5,3"/>
+      
+      <!-- Layer N to Output -->
+      <line x1="650" y1="190" x2="685" y2="180"/>
+      <line x1="650" y1="230" x2="685" y2="220"/>
+      <line x1="650" y1="270" x2="685" y2="260"/>
+    </g>
+    
+    <!-- Forward arrow -->
+    <path d="M 375 95 L 425 95" stroke="#3366CC" stroke-width="2" marker-end="url(#arrowhead-blue)"/>
+    <text x="400" y="85" font-family="Arial" font-size="12" fill="#3366CC">Forward Propagation</text>
+  </g>
+  
+  <!-- Model Training Components -->
+  <g id="model-training">
+    <rect x="50" y="370" width="700" height="200" fill="#f8f8f8" stroke="#666" stroke-width="1"/>
+    
+    <!-- Section title -->
+    <text x="400" y="395" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold">Model Training</text>
+    
+    <!-- Component Blocks -->
+    <g id="components">
+      <!-- Model Parameters -->
+      <rect x="100" y="420" width="150" height="60" rx="10" ry="10" fill="#e6f9e6" stroke="#009933" stroke-width="2"/>
+      <text x="175" y="435" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">Parameters</text>
+      <text x="175" y="455" text-anchor="middle" font-family="Arial" font-size="12">GetParameters()</text>
+      <text x="175" y="470" text-anchor="middle" font-family="Arial" font-size="12">SetParameters()</text>
+      
+      <!-- Loss Function -->
+      <rect x="325" y="420" width="150" height="60" rx="10" ry="10" fill="#ffe6cc" stroke="#ff9933" stroke-width="2"/>
+      <text x="400" y="435" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">Loss Function</text>
+      <text x="400" y="455" text-anchor="middle" font-family="Arial" font-size="12">Cost()</text>
+      <text x="400" y="470" text-anchor="middle" font-family="Arial" font-size="12">Gradient()</text>
+      
+      <!-- Optimizer -->
+      <rect x="550" y="420" width="150" height="60" rx="10" ry="10" fill="#e6e6ff" stroke="#3333cc" stroke-width="2"/>
+      <text x="625" y="435" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">Optimizer</text>
+      <text x="625" y="455" text-anchor="middle" font-family="Arial" font-size="12">Minimize()</text>
+      <text x="625" y="470" text-anchor="middle" font-family="Arial" font-size="12">UpdateParameters()</text>
+      
+      <!-- Train Method -->
+      <rect x="325" y="510" width="150" height="40" rx="5" ry="5" fill="#ffd9d9" stroke="#cc3333" stroke-width="2"/>
+      <text x="400" y="535" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">model.Train()</text>
+    </g>
+    
+    <!-- Connection Arrows -->
+    <g id="training-connections">
+      <!-- Parameters to Loss -->
+      <path d="M 250 450 L 325 450" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+      
+      <!-- Loss to Optimizer -->
+      <path d="M 475 450 L 550 450" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+      
+      <!-- Optimizer back to Parameters -->
+      <path d="M 550 470 C 500 500, 250 500, 175 480" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+      
+      <!-- Train connections -->
+      <path d="M 400 510 L 400 480" stroke="#cc3333" stroke-width="1.5" marker-end="url(#arrowhead-red)"/>
+      <path d="M 325 530 C 250 530, 175 530, 175 480" stroke="#cc3333" stroke-width="1.5" marker-end="url(#arrowhead-red)"/>
+      <path d="M 475 530 C 550 530, 625 530, 625 480" stroke="#cc3333" stroke-width="1.5" marker-end="url(#arrowhead-red)"/>
+    </g>
+  </g>
+  
+  <!-- Legend/Features -->
+  <g id="legend" transform="translate(50, 580)">
+    <text x="0" y="0" font-family="Arial" font-size="12" font-weight="bold">Features:</text>
+    <text x="70" y="0" font-family="Arial" font-size="12">• Variadic template layers</text>
+    <text x="250" y="0" font-family="Arial" font-size="12">• Compile-time dimension checking</text>
+    <text x="500" y="0" font-family="Arial" font-size="12">• Parameter management</text>
+    <text x="700" y="0" font-family="Arial" font-size="12">• Type safety</text>
+  </g>
+  
+  <!-- Arrowhead definitions -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+    <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3366CC"/>
+    </marker>
+    <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#cc3333"/>
+    </marker>
+  </defs>
+</svg>
