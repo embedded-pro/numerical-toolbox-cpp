@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <!-- Background -->
+  <rect width="800" height="600" fill="white"/>
+  
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold">Optimization Methods</text>
+  
+  <!-- Loss Landscape -->
+  <g id="loss-landscape">
+    <rect x="50" y="80" width="700" height="300" fill="#f9f9f9" stroke="#666" stroke-width="1"/>
+    
+    <!-- Loss Contours -->
+    <ellipse cx="400" cy="230" rx="300" ry="120" fill="none" stroke="#ddd" stroke-width="1"/>
+    <ellipse cx="400" cy="230" rx="250" ry="100" fill="none" stroke="#ddd" stroke-width="1"/>
+    <ellipse cx="400" cy="230" rx="200" ry="80" fill="none" stroke="#ddd" stroke-width="1"/>
+    <ellipse cx="400" cy="230" rx="150" ry="60" fill="none" stroke="#ddd" stroke-width="1"/>
+    <ellipse cx="400" cy="230" rx="100" ry="40" fill="none" stroke="#ddd" stroke-width="1"/>
+    <ellipse cx="400" cy="230" rx="50" ry="20" fill="none" stroke="#ddd" stroke-width="1"/>
+    
+    <!-- Minimum point -->
+    <circle cx="400" cy="230" r="5" fill="#FF4500" stroke="black" stroke-width="1"/>
+    <text x="410" y="215" font-family="Arial" font-size="12">Global Minimum</text>
+    
+    <!-- Gradient Descent Path -->
+    <g id="gd-path" stroke="#3366CC" stroke-width="2" fill="none">
+      <path d="M 650 150 L 620 165 L 590 180 L 560 190 L 530 200 L 500 210 L 470 218 L 440 224 L 400 230" marker-end="url(#arrowhead-blue)"/>
+      <circle cx="650" cy="150" r="5" fill="#3366CC"/>
+      <text x="660" y="150" font-family="Arial" font-size="12" fill="#3366CC">Start</text>
+    </g>
+    
+    <!-- Zigzag effect with high learning rate -->
+    <g id="zigzag-path" stroke="#FF9933" stroke-width="2" fill="none" stroke-dasharray="5,2">
+      <path d="M 200 120 L 260 190 L 320 140 L 380 210 L 400 230" marker-end="url(#arrowhead-orange)"/>
+      <circle cx="200" cy="120" r="5" fill="#FF9933"/>
+      <text x="180" y="110" font-family="Arial" font-size="12" fill="#FF9933">High LR</text>
+    </g>
+    
+    <!-- Slow convergence with low learning rate -->
+    <g id="slow-path" stroke="#66CC99" stroke-width="2" fill="none" stroke-dasharray="2,2">
+      <path d="M 550 300 L 535 290 L 520 280 L 505 275 L 490 270 L 475 265 L 460 260 L 445 255 L 430 250 L 415 245 L 400 230" marker-end="url(#arrowhead-green)"/>
+      <circle cx="550" cy="300" r="5" fill="#66CC99"/>
+      <text x="560" y="310" font-family="Arial" font-size="12" fill="#66CC99">Low LR</text>
+    </g>
+  </g>
+  
+  <!-- Parameter Update Visualization -->
+  <g id="parameter-updates">
+    <rect x="50" y="400" width="700" height="150" fill="#f8f8f8" stroke="#666" stroke-width="1"/>
+    
+    <!-- Section title -->
+    <text x="400" y="425" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold">Parameter Update Mechanisms</text>
+    
+    <!-- Gradient Descent Update -->
+    <g transform="translate(150, 480)">
+      <text x="0" y="-35" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">Gradient Descent</text>
+      
+      <!-- Current position -->
+      <circle cx="0" cy="0" r="8" fill="#3366CC" stroke="black" stroke-width="1"/>
+      <text x="0" y="25" text-anchor="middle" font-family="Arial" font-size="12">θₜ</text>
+      
+      <!-- Gradient direction -->
+      <line x1="0" y1="0" x2="50" y2="40" stroke="#FF4500" stroke-width="2" stroke-dasharray="4,2"/>
+      <text x="60" y="50" font-family="Arial" font-size="12" fill="#FF4500">∇L(θₜ)</text>
+      
+      <!-- Update direction -->
+      <line x1="0" y1="0" x2="-35" y2="-28" stroke="#3366CC" stroke-width="2" marker-end="url(#arrowhead-blue)"/>
+      <text x="-40" y="-40" font-family="Arial" font-size="12" fill="#3366CC">-η∇L(θₜ)</text>
+      
+      <!-- New position -->
+      <circle cx="-35" cy="-28" r="6" fill="#3366CC" stroke="black" stroke-width="1" stroke-dasharray="3,1"/>
+      <text x="-35" y="-15" text-anchor="middle" font-family="Arial" font-size="12">θₜ₊₁</text>
+    </g>
+    
+    <!-- Momentum Update -->
+    <g transform="translate(400, 480)">
+      <text x="0" y="-35" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">With Momentum</text>
+      
+      <!-- Current position -->
+      <circle cx="0" cy="0" r="8" fill="#66CC99" stroke="black" stroke-width="1"/>
+      <text x="0" y="25" text-anchor="middle" font-family="Arial" font-size="12">θₜ</text>
+      
+      <!-- Previous momentum -->
+      <line x1="0" y1="0" x2="-20" y2="-10" stroke="#9966CC" stroke-width="2" stroke-dasharray="4,2"/>
+      <text x="-25" y="0" font-family="Arial" font-size="12" fill="#9966CC">μvₜ</text>
+      
+      <!-- Gradient direction -->
+      <line x1="0" y1="0" x2="30" y2="40" stroke="#FF4500" stroke-width="2" stroke-dasharray="4,2"/>
+      <text x="40" y="50" font-family="Arial" font-size="12" fill="#FF4500">∇L(θₜ)</text>
+      
+      <!-- Update direction -->
+      <line x1="0" y1="0" x2="-50" y2="-25" stroke="#66CC99" stroke-width="2" marker-end="url(#arrowhead-green)"/>
+      <text x="-60" y="-35" font-family="Arial" font-size="12" fill="#66CC99">μvₜ-η∇L(θₜ)</text>
+      
+      <!-- New position -->
+      <circle cx="-50" cy="-25" r="6" fill="#66CC99" stroke="black" stroke-width="1" stroke-dasharray="3,1"/>
+      <text x="-50" y="-12" text-anchor="middle" font-family="Arial" font-size="12">θₜ₊₁</text>
+    </g>
+    
+    <!-- Adaptive Learning Rate Update -->
+    <g transform="translate(650, 480)">
+      <text x="0" y="-35" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">Adaptive Methods</text>
+      
+      <!-- Current position -->
+      <circle cx="0" cy="0" r="8" fill="#FF9933" stroke="black" stroke-width="1"/>
+      <text x="0" y="25" text-anchor="middle" font-family="Arial" font-size="12">θₜ</text>
+      
+      <!-- Different gradient directions -->
+      <line x1="0" y1="0" x2="20" y2="40" stroke="#FF4500" stroke-width="1" stroke-dasharray="4,2"/>
+      <line x1="0" y1="0" x2="40" y2="20" stroke="#FF4500" stroke-width="4" stroke-dasharray="4,2"/>
+      <text x="50" y="30" font-family="Arial" font-size="12" fill="#FF4500">Different</text>
+      <text x="50" y="45" font-family="Arial" font-size="12" fill="#FF4500">gradient scales</text>
+      
+      <!-- Update direction -->
+      <line x1="0" y1="0" x2="-40" y2="-30" stroke="#FF9933" stroke-width="2" marker-end="url(#arrowhead-orange)"/>
+      <text x="-50" y="-40" font-family="Arial" font-size="12" fill="#FF9933">Adapted step</text>
+      
+      <!-- New position -->
+      <circle cx="-40" cy="-30" r="6" fill="#FF9933" stroke="black" stroke-width="1" stroke-dasharray="3,1"/>
+      <text x="-40" y="-17" text-anchor="middle" font-family="Arial" font-size="12">θₜ₊₁</text>
+    </g>
+  </g>
+  
+  <!-- Formulas -->
+  <g id="formulas">
+    <text x="100" y="565" font-family="Arial" font-size="14" fill="#3366CC" font-weight="bold">Gradient Descent: </text>
+    <text x="225" y="565" font-family="Arial" font-size="14">θₜ₊₁ = θₜ - η∇L(θₜ)</text>
+    
+    <text x="370" y="565" font-family="Arial" font-size="14" fill="#66CC99" font-weight="bold">Momentum: </text>
+    <text x="450" y="565" font-family="Arial" font-size="14">vₜ₊₁ = μvₜ - η∇L(θₜ)</text>
+    <text x="450" y="585" font-family="Arial" font-size="14">θₜ₊₁ = θₜ + vₜ₊₁</text>
+    
+    <text x="590" y="565" font-family="Arial" font-size="14" fill="#FF9933" font-weight="bold">Adaptive: </text>
+    <text x="660" y="565" font-family="Arial" font-size="14">ηᵢ adjusted per parameter</text>
+  </g>
+  
+  <!-- Arrowhead definitions -->
+  <defs>
+    <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3366CC"/>
+    </marker>
+    <marker id="arrowhead-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#FF9933"/>
+    </marker>
+    <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#66CC99"/>
+    </marker>
+  </defs>
+</svg>

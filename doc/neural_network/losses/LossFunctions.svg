@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <!-- Background -->
+  <rect width="800" height="600" fill="white"/>
+  
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold">Loss Functions</text>
+  
+  <!-- Loss Function Graphs -->
+  <g id="coordinate-system">
+    <!-- X-axis -->
+    <line x1="70" y1="250" x2="730" y2="250" stroke="black" stroke-width="1.5"/>
+    <text x="730" y="270" font-family="Arial" font-size="14">Prediction</text>
+    
+    <!-- Y-axis -->
+    <line x1="400" y1="50" x2="400" y2="350" stroke="black" stroke-width="1.5"/>
+    <text x="420" y="60" font-family="Arial" font-size="14">Loss</text>
+    
+    <!-- Target marker -->
+    <line x1="400" y1="245" x2="400" y2="255" stroke="black" stroke-width="2"/>
+    <text x="400" y="275" text-anchor="middle" font-family="Arial" font-size="14">Target</text>
+  </g>
+  
+  <!-- Function Curves -->
+  <g id="functions">
+    <!-- MSE -->
+    <path d="M 100,350 Q 250,250 400,250 T 700,350" fill="none" stroke="#FF4500" stroke-width="3"/>
+    <text x="120" y="330" font-family="Arial" font-size="14" fill="#FF4500">MSE: (ŷ-y)²</text>
+    
+    <!-- MAE -->
+    <path d="M 100,350 L 400,250 L 700,350" fill="none" stroke="#8A2BE2" stroke-width="3"/>
+    <text x="120" y="300" font-family="Arial" font-size="14" fill="#8A2BE2">MAE: |ŷ-y|</text>
+    
+    <!-- Binary Cross Entropy -->
+    <path d="M 100,300 Q 200,320 300,350 Q 380,250 400,250 Q 420,250 500,350 Q 600,320 700,300" fill="none" stroke="#228B22" stroke-width="3"/>
+    <text x="570" y="330" font-family="Arial" font-size="14" fill="#228B22">BCE: -y·log(ŷ)-(1-y)·log(1-ŷ)</text>
+    
+    <!-- Categorical Cross Entropy -->
+    <path d="M 100,280 Q 250,310 350,340 Q 380,250 400,250 Q 420,250 450,340 Q 550,310 700,280" fill="none" stroke="#1E90FF" stroke-width="3"/>
+    <text x="570" y="300" font-family="Arial" font-size="14" fill="#1E90FF">CCE: -Σy·log(ŷ)</text>
+  </g>
+  
+  <!-- Neural Network with Loss -->
+  <g id="network-loss">
+    <rect x="50" y="400" width="700" height="150" rx="10" ry="10" fill="#f8f8f8" stroke="#666" stroke-width="1"/>
+    
+    <!-- Neural Network Components -->
+    <g id="neural-network">
+      <!-- Input Layer -->
+      <circle cx="100" cy="450" r="10" fill="#6495ED" stroke="black" stroke-width="1.5"/>
+      <circle cx="100" cy="475" r="10" fill="#6495ED" stroke="black" stroke-width="1.5"/>
+      <circle cx="100" cy="500" r="10" fill="#6495ED" stroke="black" stroke-width="1.5"/>
+      <text x="100" y="530" text-anchor="middle" font-family="Arial" font-size="12">Input</text>
+      
+      <!-- Hidden Layer -->
+      <circle cx="180" cy="437" r="10" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
+      <circle cx="180" cy="462" r="10" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
+      <circle cx="180" cy="487" r="10" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
+      <circle cx="180" cy="512" r="10" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
+      <text x="180" y="530" text-anchor="middle" font-family="Arial" font-size="12">Hidden</text>
+      
+      <!-- Output Layer -->
+      <circle cx="260" cy="450" r="10" fill="#90EE90" stroke="black" stroke-width="1.5"/>
+      <circle cx="260" cy="475" r="10" fill="#90EE90" stroke="black" stroke-width="1.5"/>
+      <circle cx="260" cy="500" r="10" fill="#90EE90" stroke="black" stroke-width="1.5"/>
+      <text x="260" y="530" text-anchor="middle" font-family="Arial" font-size="12">Output ŷ</text>
+      
+      <!-- Connections -->
+      <g id="connections" stroke="#CCCCCC" stroke-width="0.5">
+        <!-- Input to Hidden connections -->
+        <line x1="110" y1="450" x2="170" y2="437"/>
+        <line x1="110" y1="450" x2="170" y2="462"/>
+        <line x1="110" y1="450" x2="170" y2="487"/>
+        <line x1="110" y1="450" x2="170" y2="512"/>
+        
+        <line x1="110" y1="475" x2="170" y2="437"/>
+        <line x1="110" y1="475" x2="170" y2="462"/>
+        <line x1="110" y1="475" x2="170" y2="487"/>
+        <line x1="110" y1="475" x2="170" y2="512"/>
+        
+        <line x1="110" y1="500" x2="170" y2="437"/>
+        <line x1="110" y1="500" x2="170" y2="462"/>
+        <line x1="110" y1="500" x2="170" y2="487"/>
+        <line x1="110" y1="500" x2="170" y2="512"/>
+        
+        <!-- Hidden to Output connections -->
+        <line x1="190" y1="437" x2="250" y2="450"/>
+        <line x1="190" y1="437" x2="250" y2="475"/>
+        <line x1="190" y1="437" x2="250" y2="500"/>
+        
+        <line x1="190" y1="462" x2="250" y2="450"/>
+        <line x1="190" y1="462" x2="250" y2="475"/>
+        <line x1="190" y1="462" x2="250" y2="500"/>
+        
+        <line x1="190" y1="487" x2="250" y2="450"/>
+        <line x1="190" y1="487" x2="250" y2="475"/>
+        <line x1="190" y1="487" x2="250" y2="500"/>
+        
+        <line x1="190" y1="512" x2="250" y2="450"/>
+        <line x1="190" y1="512" x2="250" y2="475"/>
+        <line x1="190" y1="512" x2="250" y2="500"/>
+      </g>
+    </g>
+    
+    <!-- Loss Function Component -->
+    <g id="loss-function">
+      <rect x="340" y="450" width="100" height="50" rx="10" ry="10" fill="#ffcccc" stroke="#cc0000" stroke-width="2"/>
+      <text x="390" y="480" text-anchor="middle" font-family="Arial" font-size="14">Loss L(ŷ,y)</text>
+      
+      <!-- Target -->
+      <circle cx="390" cy="415" r="10" fill="#d8f3d8" stroke="#009900" stroke-width="1.5"/>
+      <text x="390" y="405" text-anchor="middle" font-family="Arial" font-size="12">Target y</text>
+      
+      <!-- Loss Value -->
+      <circle cx="500" cy="475" r="15" fill="#ffcccc" stroke="#cc0000" stroke-width="1.5"/>
+      <text x="500" y="480" text-anchor="middle" font-family="Arial" font-size="14">L</text>
+      
+      <!-- Gradient -->
+      <rect x="550" y="450" width="100" height="50" rx="10" ry="10" fill="#e6e6ff" stroke="#3333cc" stroke-width="2"/>
+      <text x="600" y="480" text-anchor="middle" font-family="Arial" font-size="14">Gradient ∇L</text>
+    </g>
+    
+    <!-- Connecting Arrows -->
+    <g id="arrows" stroke="#333" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)">
+      <path d="M 270 475 L 340 475"/>
+      <path d="M 390 415 L 390 450"/>
+      <path d="M 440 475 L 485 475"/>
+      <path d="M 515 475 L 550 475"/>
+      
+      <!-- Feedback loop -->
+      <path d="M 650 450 C 680 430, 690 410, 680 390 C 670 370, 300 370, 230 390 C 180 410, 220 440, 260 430" marker-end="url(#arrowhead)"/>
+      <text x="450" y="385" text-anchor="middle" font-family="Arial" font-size="12" fill="#333">Backpropagation</text>
+    </g>
+  </g>
+  
+  <!-- Arrowhead definition -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+  </defs>
+</svg>
