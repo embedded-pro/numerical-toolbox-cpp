@@ -74,17 +74,14 @@ public:
    - Fully connected layer with weights, biases, and activation function
    - Linear transformation followed by non-linear activation
    - Parameters include weights and biases
-   
    **Mathematical Forward Pass:**
    $$\mathbf{z} = \mathbf{W}\mathbf{x} + \mathbf{b}$$
    $$\mathbf{a} = f(\mathbf{z})$$
-   
    **Mathematical Backward Pass:**
    $$\frac{\partial L}{\partial \mathbf{z}} = \frac{\partial L}{\partial \mathbf{a}} \odot f'(\mathbf{z})$$
    $$\frac{\partial L}{\partial \mathbf{W}_{i,j}} = \frac{\partial L}{\partial \mathbf{z}_i} \cdot \mathbf{x}_j$$
    $$\frac{\partial L}{\partial \mathbf{b}_i} = \frac{\partial L}{\partial \mathbf{z}_i}$$
    $$\frac{\partial L}{\partial \mathbf{x}_j} = \sum_{i} \mathbf{W}_{i,j} \cdot \frac{\partial L}{\partial \mathbf{z}_i}$$
-   
    ```cpp
    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize>
    class Dense : public Layer<QNumberType, InputSize, OutputSize, (InputSize * OutputSize) + OutputSize>

@@ -56,7 +56,6 @@ public:
    - Simple, efficient activation function
    - Mitigates vanishing gradient problem
    - May cause "dying neurons" with zero gradients
-   
    ```cpp
    template<typename QNumberType>
    class ReLU : public ActivationFunction<QNumberType>
@@ -78,7 +77,6 @@ public:
    - Addresses the "dying neuron" problem of ReLU
    - Small positive slope for negative inputs
    - Parameterized by alpha (leak coefficient)
-   
    ```cpp
    template<typename QNumberType>
    class LeakyReLU : public ActivationFunction<QNumberType>
@@ -107,7 +105,6 @@ public:
    - Squashes inputs to range (0, 1)
    - Historically common but prone to vanishing gradients
    - Useful for binary classification output nodes
-   
    ```cpp
    template<typename QNumberType>
    class Sigmoid : public ActivationFunction<QNumberType>
@@ -130,7 +127,6 @@ public:
    - Squashes inputs to range (-1, 1)
    - Zero-centered output, unlike Sigmoid
    - Still vulnerable to vanishing gradients at extremes
-   
    ```cpp
    template<typename QNumberType>
    class Tanh : public ActivationFunction<QNumberType>
@@ -153,7 +149,6 @@ public:
    - Converts vector of real numbers to probability distribution
    - Typically used for multi-class classification output
    - Note: Current implementation is per-element; in practice, should be applied to vectors
-   
    ```cpp
    template<typename QNumberType>
    class Softmax : public ActivationFunction<QNumberType>
@@ -221,13 +216,13 @@ float grad_soft = softmax.Backward(x);        // 0.174
 
 ## Common Activation Functions Comparison
 
-| Function   | Range       | Advantages                       | Disadvantages                    |
-|------------|-------------|----------------------------------|----------------------------------|
-| ReLU       | [0, ∞)      | Fast, reduces vanishing gradient | Dead neurons                     |
-| LeakyReLU  | (-∞, ∞)     | Prevents dead neurons            | Additional hyperparameter        |
-| Sigmoid    | (0, 1)      | Smooth, bounded output           | Vanishing gradient, not centered |
-| Tanh       | (-1, 1)     | Zero-centered                    | Vanishing gradient at extremes   |
-| Softmax    | (0, 1)      | Probability distribution         | Computationally expensive        |
+| Function  | Range   | Advantages                       | Disadvantages                    |
+|-----------|---------|----------------------------------|----------------------------------|
+| ReLU      | [0, ∞)  | Fast, reduces vanishing gradient | Dead neurons                     |
+| LeakyReLU | (-∞, ∞) | Prevents dead neurons            | Additional hyperparameter        |
+| Sigmoid   | (0, 1)  | Smooth, bounded output           | Vanishing gradient, not centered |
+| Tanh      | (-1, 1) | Zero-centered                    | Vanishing gradient at extremes   |
+| Softmax   | (0, 1)  | Probability distribution         | Computationally expensive        |
 
 ## Performance Considerations
 

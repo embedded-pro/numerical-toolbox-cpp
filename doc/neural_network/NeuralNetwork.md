@@ -44,8 +44,8 @@ Neural networks learn through optimization. The process involves:
                          a_i = f(z_i)
 2. Loss Calculation: L = loss(a_n, y_target)
 3. Backward Propagation: dL/dW_i, dL/db_i
-4. Weight Update: W_i = W_i - η * dL/dW_i
-                  b_i = b_i - η * dL/db_i
+4. Weight Update: W_i = W_i - η *dL/dW_i
+                  b_i = b_i - η* dL/db_i
 ```
 
 where:
@@ -85,7 +85,6 @@ public:
    - Base `Layer` class template with configurable input size, output size, and parameter size
    - Derived layer types like `Dense` implementing specific transformations
    - Compile-time size verification to ensure proper layer connections
-   
    ```cpp
    template<typename QNumberType, std::size_t InputSize_, std::size_t OutputSize_, std::size_t ParameterSize_>
    class Layer {
@@ -102,7 +101,6 @@ public:
    - Defined as a separate class hierarchy with `Forward` and `Backward` methods
    - Applied within layer implementations
    - Enable non-linear transformations essential for deep learning
-   
    ```cpp
    template<typename QNumberType>
    class ActivationFunction {
@@ -116,7 +114,6 @@ public:
    - Measure prediction error with `Cost` method
    - Provide gradients with respect to parameters via `Gradient` method
    - Guide optimization process based on learning objectives
-   
    ```cpp
    template<typename QNumberType, std::size_t NumberOfFeatures>
    class Loss {
@@ -130,7 +127,6 @@ public:
    - Minimize loss functions by updating parameters
    - Return optimized parameters, final cost, and iteration count
    - Different algorithms with specialized convergence properties
-   
    ```cpp
    template<typename QNumberType, std::size_t NumberOfFeatures>
    class Optimizer {
@@ -150,7 +146,6 @@ public:
    - Penalizes model complexity to prevent overfitting
    - Common types include L1 (sparsity-inducing) and L2 (weight decay)
    - Applied during training as an additional term in the loss function
-   
    ```cpp
    template<typename QNumberType, std::size_t Size>
    class Regularization {
