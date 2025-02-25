@@ -73,15 +73,12 @@ public:
    - Simplest optimization algorithm
    - Updates parameters directly proportional to negative gradient
    - Controlled by learning rate parameter
-   
    **Mathematical Update Rule:**
    $$\theta_{t+1} = \theta_t - \eta \nabla L(\theta_t)$$
-   
    where:
    - θₜ are the parameters at step t
    - η is the learning rate
    - ∇L(θₜ) is the gradient at step t
-   
    ```cpp
    template<typename QNumberType, size_t NumberOfFeatures>
    class GradientDescent : public Optimizer<QNumberType, NumberOfFeatures>

@@ -86,17 +86,14 @@ private:
    - Stores layers in a std::tuple
    - Verifies layer compatibility at compile time
    - Manages data flow between layers
-   
 2. **Parameter Handling**:
    - Collects parameters from all layers
    - Distributes updated parameters to layers
    - Manages parameter vector with correct dimensions
-   
 3. **Forward and Backward Pass**:
    - Chains layer operations for forward propagation
    - Implements backpropagation for gradient computation
    - Maintains intermediate values for backpropagation
-   
 4. **Training Process**:
    - Connects model with optimizer and loss function
    - Handles parameter updates during training

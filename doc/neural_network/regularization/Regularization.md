@@ -55,13 +55,10 @@ public:
    - Encourages sparse models by driving some parameters to zero
    - Feature selection effect by eliminating irrelevant features
    - Sum of absolute parameter values
-   
    **Mathematical Definition:**
    $$R_{L1}(θ) = \lambda \sum_{i=1}^{n} |θ_i|$$
-   
    **Gradient with respect to parameters:**
    $$\frac{\partial R_{L1}}{\partial θ_i} = \lambda \cdot \text{sign}(θ_i)$$
-   
    ```cpp
    template<typename QNumberType, std::size_t Size>
    class L1 : public Regularization<QNumberType, Size>
@@ -91,13 +88,10 @@ public:
    - Penalizes large parameter values
    - Promotes more uniform weight distributions
    - Sum of squared parameter values
-   
    **Mathematical Definition:**
    $$R_{L2}(θ) = \frac{\lambda}{2} \sum_{i=1}^{n} θ_i^2$$
-   
    **Gradient with respect to parameters:**
    $$\frac{\partial R_{L2}}{\partial θ_i} = \lambda \cdot θ_i$$
-   
    ```cpp
    template<typename QNumberType, std::size_t Size>
    class L2 : public Regularization<QNumberType, Size>
@@ -203,14 +197,14 @@ L2<FloatType, parameterSize> strongRegularization(0.1f);
 
 ## L1 vs L2 Regularization Comparison
 
-| Aspect           | L1 Regularization                   | L2 Regularization                    |
-|------------------|-------------------------------------|--------------------------------------|
-| Effect on Weights | Many weights become exactly zero    | All weights become smaller, non-zero |
-| Sparsity         | Creates sparse models               | Creates dense, small-weight models   |
-| Feature Selection | Effectively removes irrelevant features | Keeps all features but reduces impact |
-| Loss Surface     | Non-differentiable at zero          | Smooth, differentiable everywhere    |
-| Best Use Case    | High-dimensional data with many irrelevant features | General purpose, prevents overfitting |
-| Computational    | More complex optimization problem    | Simpler, more stable optimization    |
+| Aspect            | L1 Regularization                                   | L2 Regularization                     |
+|-------------------|-----------------------------------------------------|---------------------------------------|
+| Effect on Weights | Many weights become exactly zero                    | All weights become smaller, non-zero  |
+| Sparsity          | Creates sparse models                               | Creates dense, small-weight models    |
+| Feature Selection | Effectively removes irrelevant features             | Keeps all features but reduces impact |
+| Loss Surface      | Non-differentiable at zero                          | Smooth, differentiable everywhere     |
+| Best Use Case     | High-dimensional data with many irrelevant features | General purpose, prevents overfitting |
+| Computational     | More complex optimization problem                   | Simpler, more stable optimization     |
 
 ## Performance Considerations
 
