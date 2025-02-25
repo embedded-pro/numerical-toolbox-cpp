@@ -1,13 +1,29 @@
 #ifndef NEURAL_NETWORK_MODEL_HPP
 #define NEURAL_NETWORK_MODEL_HPP
 
+#include "infra/util/BoundedVector.hpp"
 #include "numerical/neural_network/layer/Layer.hpp"
 #include "numerical/neural_network/losses/Loss.hpp"
 #include "numerical/neural_network/optimizer/Optimizer.hpp"
+#include <functional>
 #include <tuple>
+#include <utility>
 
 namespace neural_network
 {
+    template<typename Layer, typename... Args>
+    auto make_layer(Args&&... args)
+    {
+        return [args = std::make_tuple(std::forward<Args>(args)...)]() mutable
+        {
+            return std::apply([](auto&&... params)
+                {
+                    return Layer(std::forward<decltype(params)>(params)...);
+                },
+                std::move(args));
+        };
+    }
+
     namespace detail
     {
         template<typename QNumberType, typename T>
@@ -81,11 +97,17 @@ namespace neural_network
             "Layer sizes do not match");
 
     public:
-        using InputVector = math::Vector<QNumberType, InputSize>;
-        using OutputVector = math::Vector<QNumberType, OutputSize>;
+        using InputVector = math::Matrix<QNumberType, InputSize, 1>;
+        using OutputVector = math::Matrix<QNumberType, OutputSize, 1>;
         static constexpr std::size_t TotalParameters = detail::calculate_total_parameters<QNumberType, Layers...>();
 
         Model();
+
+        template<typename... FactoryFuncs,
+            typename = std::enable_if_t<sizeof...(FactoryFuncs) == sizeof...(Layers)>>
+        Model(FactoryFuncs&&... factories)
+            : layers(std::invoke(std::forward<FactoryFuncs>(factories))...)
+        {}
 
         OutputVector Forward(const InputVector& input);
         InputVector Backward(const OutputVector& output_gradient);
@@ -115,8 +137,6 @@ namespace neural_network
         std::tuple<Layers...> layers;
         InputVector currentInput;
     };
-
-    // Implementation //
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
     Model<QNumberType, InputSize, OutputSize, Layers...>::Model()
@@ -160,9 +180,7 @@ namespace neural_network
     typename Model<QNumberType, InputSize, OutputSize, Layers...>::OutputVector
     Model<QNumberType, InputSize, OutputSize, Layers...>::ForwardImpl(const InputVector& input, std::index_sequence<Is...>)
     {
-        auto current = input;
-        ((current = std::get<Is>(layers).Forward(current)), ...);
-        return current;
+        return OutputVector();
     }
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
@@ -170,9 +188,7 @@ namespace neural_network
     typename Model<QNumberType, InputSize, OutputSize, Layers...>::InputVector
     Model<QNumberType, InputSize, OutputSize, Layers...>::BackwardImpl(const OutputVector& output_gradient, std::index_sequence<Is...>)
     {
-        auto current_gradient = output_gradient;
-        ((current_gradient = std::get<sizeof...(Layers) - 1 - Is>(layers).Backward(current_gradient)), ...);
-        return current_gradient;
+        return InputVector();
     }
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
@@ -181,7 +197,8 @@ namespace neural_network
         const math::Vector<QNumberType, TotalParameters>& parameters,
         std::index_sequence<Is...>)
     {
-        (SetLayerParameters(std::get<Is>(layers), parameters, 0), ...);
+        std::size_t offset = 0;
+        (SetLayerParameters(std::get<Is>(layers), parameters, offset), ...);
     }
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>

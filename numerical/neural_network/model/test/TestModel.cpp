@@ -14,13 +14,13 @@ namespace
         using OutputVector = typename BaseLayer::OutputVector;
         using ParameterVector = typename BaseLayer::ParameterVector;
         using QNumberType = QNumberTypeMock;
-
         static constexpr std::size_t InputSize = InputSizeMock;
         static constexpr std::size_t OutputSize = OutputSizeMock;
         static constexpr std::size_t ParameterSize = ParameterSizeMock;
 
-        LayerMock()
+        LayerMock(int mockParam = 0)
         {
+            (void)mockParam;
             setupDefaultBehavior();
         }
 
@@ -93,7 +93,10 @@ namespace
         using SecondLayer = LayerMock<T, HiddenSize, OutputSize, ParameterSize>;
         using ModelType = neural_network::Model<T, InputSize, OutputSize, FirstLayer, SecondLayer>;
 
-        TestModel() = default;
+        TestModel()
+            : model(neural_network::make_layer<FirstLayer>(42),
+                  neural_network::make_layer<SecondLayer>(43))
+        {}
 
         ModelType model;
     };
@@ -102,6 +105,48 @@ namespace
     TYPED_TEST_SUITE(TestModel, TestedTypes);
 }
 
-TYPED_TEST(TestModel, placeholder)
+TYPED_TEST(TestModel, LayerConstructionWithParameters)
 {
+    using FirstLayer = typename TestFixture::FirstLayer;
+    using SecondLayer = typename TestFixture::SecondLayer;
+
+    auto firstLayerParam = 100;
+    auto secondLayerParam = 200;
+
+    typename TestFixture::ModelType customModel(
+        neural_network::make_layer<FirstLayer>(firstLayerParam),
+        neural_network::make_layer<SecondLayer>(secondLayerParam));
+}
+
+TYPED_TEST(TestModel, SetParameters)
+{
+    using ParameterVector = math::Vector<TypeParam, TestFixture::ModelType::TotalParameters>;
+
+    ParameterVector parameters;
+    for (size_t i = 0; i < TestFixture::ModelType::TotalParameters; ++i)
+        parameters[i] = TypeParam(static_cast<float>(i) * 0.1f);
+
+    TestFixture::model.SetParameters(parameters);
+
+    auto retrievedParams = TestFixture::model.GetParameters();
+
+    for (size_t i = 0; i < TestFixture::ModelType::TotalParameters; ++i)
+        EXPECT_EQ(math::ToFloat(retrievedParams[i]), math::ToFloat(parameters[i]));
+}
+
+TYPED_TEST(TestModel, ConstructorVariants)
+{
+    typename TestFixture::ModelType defaultModel;
+
+    typename TestFixture::ModelType factoryModel(
+        neural_network::make_layer<typename TestFixture::FirstLayer>(1),
+        neural_network::make_layer<typename TestFixture::SecondLayer>(2));
+
+    typename TestFixture::ModelType::InputVector input;
+    auto defaultOutput = defaultModel.Forward(input);
+    auto factoryOutput = factoryModel.Forward(input);
+
+    typename TestFixture::ModelType::OutputVector outputGradient;
+    auto defaultGradient = defaultModel.Backward(outputGradient);
+    auto factoryGradient = factoryModel.Backward(outputGradient);
 }
