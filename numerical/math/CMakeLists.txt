@@ -1,4 +1,4 @@
-add_library(numerical.math ${EMIL_EXCLUDE_FROM_ALL})
+add_library(numerical.math ${EMIL_EXCLUDE_FROM_ALL} STATIC)
 
 target_include_directories(numerical.math PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../>"
