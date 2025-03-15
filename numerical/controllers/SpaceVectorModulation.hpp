@@ -10,7 +10,7 @@ namespace controllers
     class SpaceVectorModulation
     {
         static_assert(math::is_qnumber<QNumberType>::value ||
-                          std::is_floating_point<QNumberType>::value,
+                          std::is_floating_point_v<QNumberType>,
             "SpaceVectorModulation can only be instantiated with math::QNumber or floating point types.");
 
     public:
@@ -23,24 +23,11 @@ namespace controllers
 
         explicit SpaceVectorModulation(const math::TrigonometricFunctions<QNumberType>& trigFunctions)
             : trigFunctions(trigFunctions)
+        {}
+
+        Output Generate(const TwoPhase<QNumberType>& voltagePhase)
         {
-            InitializeConstants();
-        }
-
-        Output Generate(const RotatingFrame<QNumberType>& dqVoltage, QNumberType scaledTheta)
-        {
-            really_assert(scaledTheta >= math::Lowest<QNumberType>() && scaledTheta <= math::Max<QNumberType>());
-
-            QNumberType d = dqVoltage.d * outputScale;
-            QNumberType q = dqVoltage.q * outputScale;
-
-            QNumberType cosTheta = trigFunctions.Cosine(scaledTheta);
-            QNumberType sinTheta = trigFunctions.Sine(scaledTheta);
-
-            QNumberType valpha = d * cosTheta - q * sinTheta;
-            QNumberType vbeta = d * sinTheta + q * cosTheta;
-
-            auto pattern = CalculateSwitchingTimes(valpha, vbeta);
+            auto pattern = CalculateSwitchingTimes(voltagePhase.alpha, voltagePhase.beta);
 
             return Output{
                 ClampDutyCycle(pattern.ta),
@@ -50,36 +37,12 @@ namespace controllers
         }
 
     private:
-        void InitializeConstants()
-        {
-            if constexpr (std::is_floating_point<QNumberType>::value)
-            {
-                zero = QNumberType(0.0f);
-                one = QNumberType(1.0f);
-                half = QNumberType(0.5f);
-                invSqrt3 = QNumberType(0.577350269189625f);
-                sqrt3Div2 = QNumberType(0.866025403784438f);
-                twoDivSqrt3 = QNumberType(1.154700538379252f);
-                outputScale = QNumberType(1.0f);
-            }
-            else
-            {
-                zero = QNumberType(0.0f);
-                one = QNumberType(0.2f);
-                half = QNumberType(0.1f);
-                invSqrt3 = QNumberType(0.115470053837925f);
-                sqrt3Div2 = QNumberType(0.1732050807568876f);
-                twoDivSqrt3 = QNumberType(0.2309401076758504f);
-                outputScale = QNumberType(0.2f);
-            }
-        }
-
         QNumberType ClampDutyCycle(QNumberType duty)
         {
             if (duty < zero)
                 return zero;
             if (duty > one)
-                return one / outputScale;
+                return QNumberType{ 0.9999f };
 
             return duty / outputScale;
         }
@@ -167,13 +130,13 @@ namespace controllers
         }
 
         const math::TrigonometricFunctions<QNumberType>& trigFunctions;
-        QNumberType zero;
-        QNumberType one;
-        QNumberType half;
-        QNumberType invSqrt3;
-        QNumberType sqrt3Div2;
-        QNumberType twoDivSqrt3;
-        QNumberType outputScale;
+        QNumberType zero{ std::is_floating_point_v<QNumberType> ? QNumberType(0.0f) : QNumberType(0.0f) };
+        QNumberType one{ std::is_floating_point_v<QNumberType> ? QNumberType(1.0f) : QNumberType(0.2f) };
+        QNumberType half{ std::is_floating_point_v<QNumberType> ? QNumberType(0.5f) : QNumberType(0.1f) };
+        QNumberType invSqrt3{ std::is_floating_point_v<QNumberType> ? QNumberType(0.577350269189625f) : QNumberType(0.115470053837925f) };
+        QNumberType sqrt3Div2{ std::is_floating_point_v<QNumberType> ? QNumberType(0.866025403784438f) : QNumberType(0.1732050807568876f) };
+        QNumberType twoDivSqrt3{ std::is_floating_point_v<QNumberType> ? QNumberType(1.154700538379252f) : QNumberType(0.2309401076758504f) };
+        QNumberType outputScale{ std::is_floating_point_v<QNumberType> ? QNumberType(1.0f) : QNumberType(0.2f) };
     };
 }
 
