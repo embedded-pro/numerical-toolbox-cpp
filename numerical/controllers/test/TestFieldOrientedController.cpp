@@ -27,12 +27,11 @@ namespace
         : public ::testing::Test
     {
     protected:
-        math::AdvancedFunctionsStub<T> advancedFunctions;
         math::TrigonometricFunctionsStub<T> trigFunctions;
 
         void SetUp() override
         {
-            controller.emplace(CreateConfig<T>(), trigFunctions, advancedFunctions);
+            controller.emplace(CreateConfig<T>(), trigFunctions);
         }
 
         std::optional<controllers::FieldOrientedController<T>> controller;

@@ -18,11 +18,10 @@ namespace
     {
     public:
         std::optional<controllers::SpaceVectorModulation<T>> spaceVectorModulation;
-        math::TrigonometricFunctionsStub<T> trigFunctions;
 
         void SetUp() override
         {
-            spaceVectorModulation.emplace(trigFunctions);
+            spaceVectorModulation.emplace();
         }
     };
 

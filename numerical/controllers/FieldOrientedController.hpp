@@ -22,11 +22,8 @@ namespace controllers
         };
 
         FieldOrientedController(const Configuration& config,
-            const math::TrigonometricFunctions<QNumberType>& trigFunctions,
-            const math::AdvancedFunctions<QNumberType>& advancedFunctions)
-            : clarke(advancedFunctions)
-            , park(trigFunctions)
-            , spaceVectorModulation(trigFunctions)
+            const math::TrigonometricFunctions<QNumberType>& trigFunctions)
+            : park(trigFunctions)
             , dAxisCurrentController(config.currentTunnings, config.currentLimits)
             , qAxisCurrentController(config.currentTunnings, config.currentLimits)
         {
@@ -57,8 +54,8 @@ namespace controllers
         }
 
     private:
-        Clarke<QNumberType> clarke;
         Park<QNumberType> park;
+        Clarke<QNumberType> clarke;
         SpaceVectorModulation<QNumberType> spaceVectorModulation;
         Pid<QNumberType> dAxisCurrentController;
         Pid<QNumberType> qAxisCurrentController;

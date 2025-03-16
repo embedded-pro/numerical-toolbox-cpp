@@ -37,10 +37,6 @@ namespace controllers
             "Clarke can only be instantiated with math::QNumber or floating point types.");
 
     public:
-        explicit Clarke(const math::AdvancedFunctions<QNumberType>& advancedFunctions)
-            : advancedFunctions(advancedFunctions)
-        {}
-
         TwoPhase<QNumberType> Forward(const ThreePhase<QNumberType>& input)
         {
             const QNumberType bc_sum = input.b + input.c;
@@ -56,7 +52,6 @@ namespace controllers
         }
 
     private:
-        const math::AdvancedFunctions<QNumberType>& advancedFunctions;
         QNumberType oneHalf = QNumberType(0.5f);
         QNumberType twoThirds = QNumberType(0.666666667f);
         QNumberType invSqrt3 = QNumberType(0.577350269f);
@@ -117,10 +112,8 @@ namespace controllers
             "ClarkePark can only be instantiated with math::QNumber or floating point types.");
 
     public:
-        ClarkePark(const math::TrigonometricFunctions<QNumberType>& trigFunctions,
-            const math::AdvancedFunctions<QNumberType>& advancedFunctions)
-            : clarke(advancedFunctions)
-            , park(trigFunctions)
+        ClarkePark(const math::TrigonometricFunctions<QNumberType>& trigFunctions)
+            : park(trigFunctions)
         {}
 
         RotatingFrame<QNumberType> Forward(const ThreePhase<QNumberType>& input, QNumberType theta)
