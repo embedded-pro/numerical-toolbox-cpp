@@ -21,10 +21,6 @@ namespace controllers
             QNumberType c;
         };
 
-        explicit SpaceVectorModulation(const math::TrigonometricFunctions<QNumberType>& trigFunctions)
-            : trigFunctions(trigFunctions)
-        {}
-
         Output Generate(const TwoPhase<QNumberType>& voltagePhase)
         {
             auto pattern = CalculateSwitchingTimes(voltagePhase.alpha, voltagePhase.beta);
@@ -129,7 +125,6 @@ namespace controllers
             return Calculate0To60Degrees(valpha, vbeta);
         }
 
-        const math::TrigonometricFunctions<QNumberType>& trigFunctions;
         QNumberType zero{ std::is_floating_point_v<QNumberType> ? QNumberType(0.0f) : QNumberType(0.0f) };
         QNumberType one{ std::is_floating_point_v<QNumberType> ? QNumberType(1.0f) : QNumberType(0.2f) };
         QNumberType half{ std::is_floating_point_v<QNumberType> ? QNumberType(0.5f) : QNumberType(0.1f) };
