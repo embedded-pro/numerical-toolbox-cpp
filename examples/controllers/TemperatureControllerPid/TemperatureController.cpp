@@ -110,14 +110,14 @@ namespace
             std::vector<float> controlActions;
         };
 
-        Simulator(const std::string& label, const std::string& colour)
+        Simulator(const std::string& labelParam, const std::string& colourParam)
             : setPointSchedule({ { 0, 20 },
                   { 100, 60 },
                   { 300, 40 },
                   { 500, 50 },
                   { 650, 25 } })
-            , label(label)
-            , colour(colour)
+            , label(labelParam)
+            , colour(colourParam)
         {
             auto setPoint = GetSetPointAndTime(setPointSchedule);
             TemperatureController<QNumberType> controller(scale, config, setPoint.targetTemperature);

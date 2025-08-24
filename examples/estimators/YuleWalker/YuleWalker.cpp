@@ -1,6 +1,5 @@
 #include "numerical/estimators/YuleWalker.hpp"
 #include "numerical/solvers/LevinsonDurbin.hpp"
-#include <iomanip>
 #include <iostream>
 #include <random>
 #include <sciplot/sciplot.hpp>
@@ -137,12 +136,12 @@ int main()
     float mean_residual = 0.0f;
     for (float residual : residuals)
         mean_residual += residual;
-    mean_residual /= residuals.size();
+    mean_residual /= static_cast<float>(residuals.size());
 
     float variance = 0.0f;
     for (float residual : residuals)
         variance += (residual - mean_residual) * (residual - mean_residual);
-    variance /= residuals.size();
+    variance /= static_cast<float>(residuals.size());
 
     for (int lag = 0; lag < max_lag; ++lag)
     {
@@ -150,7 +149,7 @@ int main()
         float sum = 0.0f;
         for (size_t i = 0; i < residuals.size() - lag; ++i)
             sum += (residuals[i] - mean_residual) * (residuals[i + lag] - mean_residual);
-        acf[lag] = sum / (residuals.size() * variance);
+        acf[lag] = sum / (static_cast<float>(residuals.size()) * variance);
     }
 
     acfPlot.drawPoints(lags, acf)
