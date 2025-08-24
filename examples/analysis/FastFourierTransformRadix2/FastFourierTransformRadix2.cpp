@@ -16,12 +16,11 @@ namespace
     public:
         TwiddleFactorsImpl()
         {
-            const auto N = Length;
-            factors.reserve(N);
+            factors.reserve(Length);
 
-            for (std::size_t k = 0; k < N; ++k)
+            for (std::size_t k = 0; k < Length; ++k)
             {
-                float angle = -M_PI * static_cast<float>(k) / static_cast<float>(N);
+                float angle = -M_PI * static_cast<float>(k) / static_cast<float>(Length);
                 factors.emplace_back(std::cos(angle), std::sin(angle));
             }
         }
