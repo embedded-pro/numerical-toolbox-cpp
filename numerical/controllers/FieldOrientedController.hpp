@@ -15,20 +15,6 @@ namespace controllers
             "FieldOrientedController can only be instantiated with math::QNumber or floating point types.");
 
     public:
-        struct CurrentReferences
-        {
-            QNumberType directAxisCurrent;
-            QNumberType quadratureAxisCurrent;
-        };
-
-        struct PhaseMeasurements
-        {
-            QNumberType phaseACurrent;
-            QNumberType phaseBCurrent;
-            QNumberType phaseCCurrent;
-            QNumberType electricalAngle;
-        };
-
         struct Configuration
         {
             typename Pid<QNumberType>::Tunnings currentTunnings;
@@ -36,34 +22,29 @@ namespace controllers
         };
 
         FieldOrientedController(const Configuration& config,
-            const math::TrigonometricFunctions<QNumberType>& trigFunctions,
-            const math::AdvancedFunctions<QNumberType>& advancedFunctions)
-            : clarkePark(trigFunctions, advancedFunctions)
-            , svm(trigFunctions)
+            const math::TrigonometricFunctions<QNumberType>& trigFunctions)
+            : park(trigFunctions)
             , dAxisCurrentController(config.currentTunnings, config.currentLimits)
             , qAxisCurrentController(config.currentTunnings, config.currentLimits)
         {
+            dAxisCurrentController.SetPoint(QNumberType{ 0.0f });
         }
 
-        typename SpaceVectorModulation<QNumberType>::Output Process(
-            const CurrentReferences& references,
-            const PhaseMeasurements& measurements)
+        typename SpaceVectorModulation<QNumberType>::Output Process(const ThreePhase<QNumberType>& phaseCurrents, QNumberType electricalAngle)
         {
-            auto dqCurrents = clarkePark.Forward({ measurements.phaseACurrent,
-                                                     measurements.phaseBCurrent,
-                                                     measurements.phaseCCurrent },
-                measurements.electricalAngle);
+            auto dqCurrents = park.Forward(clarke.Forward(phaseCurrents), electricalAngle);
 
             QNumberType vd = dAxisCurrentController.Process(dqCurrents.d);
             QNumberType vq = qAxisCurrentController.Process(dqCurrents.q);
 
-            return svm.Generate({ vd, vq }, measurements.electricalAngle);
+            auto voltagePhase = park.Inverse({ vd, vq }, electricalAngle);
+
+            return spaceVectorModulation.Generate(voltagePhase);
         }
 
-        void SetCurrentReferences(const CurrentReferences& references)
+        void SetCurrentReference(QNumberType targetCurrent)
         {
-            dAxisCurrentController.SetPoint(references.directAxisCurrent);
-            qAxisCurrentController.SetPoint(references.quadratureAxisCurrent);
+            qAxisCurrentController.SetPoint(targetCurrent);
         }
 
         void Reset()
@@ -73,8 +54,9 @@ namespace controllers
         }
 
     private:
-        ClarkePark<QNumberType> clarkePark;
-        SpaceVectorModulation<QNumberType> svm;
+        Park<QNumberType> park;
+        Clarke<QNumberType> clarke;
+        SpaceVectorModulation<QNumberType> spaceVectorModulation;
         Pid<QNumberType> dAxisCurrentController;
         Pid<QNumberType> qAxisCurrentController;
     };

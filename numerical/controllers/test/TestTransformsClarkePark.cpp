@@ -1,7 +1,6 @@
 #include "numerical/controllers/TransformsClarkePark.hpp"
 #include "numerical/controllers/test_doubles/NormalizedAngles.hpp"
 #include "numerical/controllers/test_doubles/Tolerance.hpp"
-#include "numerical/math/test_doubles/AdvancedFunctionsStub.hpp"
 #include "numerical/math/test_doubles/TrigonometricFunctionsStub.hpp"
 #include <gmock/gmock.h>
 
@@ -27,14 +26,13 @@ namespace
         std::optional<controllers::Clarke<T>> clarke;
         std::optional<controllers::Park<T>> park;
         std::optional<controllers::ClarkePark<T>> clarkePark;
-        math::AdvancedFunctionsStub<T> advancedFunctions;
         math::TrigonometricFunctionsStub<T> trigFunctions;
 
         void SetUp() override
         {
-            clarke.emplace(advancedFunctions);
+            clarke.emplace();
             park.emplace(trigFunctions);
-            clarkePark.emplace(trigFunctions, advancedFunctions);
+            clarkePark.emplace(trigFunctions);
         }
     };
 

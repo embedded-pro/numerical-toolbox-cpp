@@ -7,12 +7,9 @@
 namespace
 {
     template<typename T>
-    controllers::RotatingFrame<T> CreateRotatingFrame(float d, float q)
+    controllers::TwoPhase<T> CreateTwoPhaseFrame(float d, float q)
     {
-        if constexpr (std::is_same_v<T, float>)
-            return { T(d), T(q) };
-        else
-            return { T(std::clamp(d, -0.9f, 0.9f)), T(std::clamp(q, -0.9f, 0.9f)) };
+        return { T(d), T(q) };
     }
 
     template<typename T>
@@ -21,11 +18,10 @@ namespace
     {
     public:
         std::optional<controllers::SpaceVectorModulation<T>> spaceVectorModulation;
-        math::TrigonometricFunctionsStub<T> trigFunctions;
 
         void SetUp() override
         {
-            spaceVectorModulation.emplace(trigFunctions);
+            spaceVectorModulation.emplace();
         }
     };
 
@@ -35,10 +31,9 @@ namespace
 
 TYPED_TEST(TestSpaceVectorModulation, zero_voltage)
 {
-    auto dqVoltage = CreateRotatingFrame<TypeParam>(0.0f, 0.0f);
-    auto angle = controllers::CreateNormalizedAngle<TypeParam>(M_PI / 4);
+    auto twoPhaseVoltage = CreateTwoPhaseFrame<TypeParam>(0.0f, 0.0f);
 
-    auto pwm = this->spaceVectorModulation->Generate(dqVoltage, angle);
+    auto pwm = this->spaceVectorModulation->Generate(twoPhaseVoltage);
     float tolerance = controllers::GetTolerance<TypeParam>();
 
     EXPECT_NEAR(math::ToFloat(pwm.a), 0.5f, tolerance);
@@ -48,9 +43,8 @@ TYPED_TEST(TestSpaceVectorModulation, zero_voltage)
 
 TYPED_TEST(TestSpaceVectorModulation, sector_1_pure_d)
 {
-    auto dqVoltage = CreateRotatingFrame<TypeParam>(0.5f, 0.0f);
-    auto angle = controllers::CreateNormalizedAngle<TypeParam>(0.0f);
-    auto pwm = this->spaceVectorModulation->Generate(dqVoltage, angle);
+    auto twoPhaseVoltage = CreateTwoPhaseFrame<TypeParam>(0.5f, 0.0f);
+    auto pwm = this->spaceVectorModulation->Generate(twoPhaseVoltage);
     float tolerance = controllers::GetTolerance<TypeParam>();
 
     EXPECT_NEAR(math::ToFloat(pwm.b), math::ToFloat(pwm.c), tolerance);
@@ -71,9 +65,8 @@ TYPED_TEST(TestSpaceVectorModulation, sector_1_pure_d)
 
 TYPED_TEST(TestSpaceVectorModulation, overmodulation)
 {
-    auto dqVoltage = CreateRotatingFrame<TypeParam>(0.9f, 0.9f);
-    auto angle = controllers::CreateNormalizedAngle<TypeParam>(M_PI / 4);
-    auto pwm = this->spaceVectorModulation->Generate(dqVoltage, angle);
+    auto twoPhaseVoltage = CreateTwoPhaseFrame<TypeParam>(0.5f, 0.5f);
+    auto pwm = this->spaceVectorModulation->Generate(twoPhaseVoltage);
 
     EXPECT_GE(math::ToFloat(pwm.a), 0.0f);
     EXPECT_LE(math::ToFloat(pwm.a), 1.0f);
@@ -85,9 +78,8 @@ TYPED_TEST(TestSpaceVectorModulation, overmodulation)
 
 TYPED_TEST(TestSpaceVectorModulation, common_mode_injection)
 {
-    auto dqVoltage = CreateRotatingFrame<TypeParam>(0.5f, 0.0f);
-    auto angle = controllers::CreateNormalizedAngle<TypeParam>(0.0f);
-    auto pwm = this->spaceVectorModulation->Generate(dqVoltage, angle);
+    auto twoPhaseVoltage = CreateTwoPhaseFrame<TypeParam>(0.5f, 0.0f);
+    auto pwm = this->spaceVectorModulation->Generate(twoPhaseVoltage);
     float tolerance = controllers::GetTolerance<TypeParam>();
 
     float min_duty = std::min({ math::ToFloat(pwm.a), math::ToFloat(pwm.b), math::ToFloat(pwm.c) });
@@ -99,14 +91,14 @@ TYPED_TEST(TestSpaceVectorModulation, common_mode_injection)
 TYPED_TEST(TestSpaceVectorModulation, duty_cycle_bounds)
 {
     auto test_points = {
-        CreateRotatingFrame<TypeParam>(0.5f, 0.0f),
-        CreateRotatingFrame<TypeParam>(0.0f, 0.5f),
-        CreateRotatingFrame<TypeParam>(0.35f, 0.35f)
+        CreateTwoPhaseFrame<TypeParam>(0.5f, 0.0f),
+        CreateTwoPhaseFrame<TypeParam>(0.0f, 0.5f),
+        CreateTwoPhaseFrame<TypeParam>(0.35f, 0.35f)
     };
 
     for (const auto& dq : test_points)
     {
-        auto pwm = this->spaceVectorModulation->Generate(dq, controllers::CreateNormalizedAngle<TypeParam>(0.0f));
+        auto pwm = this->spaceVectorModulation->Generate(dq);
         EXPECT_GE(math::ToFloat(pwm.a), 0.0f);
         EXPECT_LE(math::ToFloat(pwm.a), 1.0f);
         EXPECT_GE(math::ToFloat(pwm.b), 0.0f);
@@ -118,12 +110,11 @@ TYPED_TEST(TestSpaceVectorModulation, duty_cycle_bounds)
 
 TYPED_TEST(TestSpaceVectorModulation, output_linearity)
 {
-    auto dq_small = CreateRotatingFrame<TypeParam>(0.25f, 0.0f);
-    auto dq_large = CreateRotatingFrame<TypeParam>(0.5f, 0.0f);
-    auto theta = controllers::CreateNormalizedAngle<TypeParam>(0.0f);
+    auto dq_small = CreateTwoPhaseFrame<TypeParam>(0.05f, 0.0f);
+    auto dq_large = CreateTwoPhaseFrame<TypeParam>(0.1f, 0.0f);
 
-    auto pwm_small = this->spaceVectorModulation->Generate(dq_small, theta);
-    auto pwm_large = this->spaceVectorModulation->Generate(dq_large, theta);
+    auto pwm_small = this->spaceVectorModulation->Generate(dq_small);
+    auto pwm_large = this->spaceVectorModulation->Generate(dq_large);
 
     float tolerance = controllers::GetTolerance<TypeParam>();
     float small_dev = std::abs(math::ToFloat(pwm_small.a) - 0.5f);
@@ -133,8 +124,8 @@ TYPED_TEST(TestSpaceVectorModulation, output_linearity)
 
 TYPED_TEST(TestSpaceVectorModulation, zero_voltage_centering)
 {
-    auto zero_voltage = CreateRotatingFrame<TypeParam>(0.0f, 0.0f);
-    auto pwm = this->spaceVectorModulation->Generate(zero_voltage, controllers::CreateNormalizedAngle<TypeParam>(0.0f));
+    auto zero_voltage = CreateTwoPhaseFrame<TypeParam>(0.0f, 0.0f);
+    auto pwm = this->spaceVectorModulation->Generate(zero_voltage);
 
     float tolerance = controllers::GetTolerance<TypeParam>();
     EXPECT_NEAR(math::ToFloat(pwm.a), 0.5f, tolerance);
@@ -144,11 +135,10 @@ TYPED_TEST(TestSpaceVectorModulation, zero_voltage_centering)
 
 TYPED_TEST(TestSpaceVectorModulation, sector_continuity)
 {
-    auto dq = CreateRotatingFrame<TypeParam>(0.5f, 0.0f);
-    float angle = M_PI / 3.0f;
+    auto dq = CreateTwoPhaseFrame<TypeParam>(0.5f, 0.0f);
 
-    auto pwm1 = this->spaceVectorModulation->Generate(dq, controllers::CreateNormalizedAngle<TypeParam>(angle - 0.1f));
-    auto pwm2 = this->spaceVectorModulation->Generate(dq, controllers::CreateNormalizedAngle<TypeParam>(angle + 0.1f));
+    auto pwm1 = this->spaceVectorModulation->Generate(dq);
+    auto pwm2 = this->spaceVectorModulation->Generate(dq);
 
     float max_change = 0.2f;
     EXPECT_NEAR(math::ToFloat(pwm1.a), math::ToFloat(pwm2.a), max_change);

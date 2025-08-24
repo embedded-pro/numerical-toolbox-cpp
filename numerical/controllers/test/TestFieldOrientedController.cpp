@@ -27,12 +27,11 @@ namespace
         : public ::testing::Test
     {
     protected:
-        math::AdvancedFunctionsStub<T> advancedFunctions;
         math::TrigonometricFunctionsStub<T> trigFunctions;
 
         void SetUp() override
         {
-            controller.emplace(CreateConfig<T>(), trigFunctions, advancedFunctions);
+            controller.emplace(CreateConfig<T>(), trigFunctions);
         }
 
         std::optional<controllers::FieldOrientedController<T>> controller;
@@ -44,20 +43,14 @@ namespace
 
 TYPED_TEST(TestFieldOrientedController, zero_current_reference)
 {
-    typename controllers::FieldOrientedController<TypeParam>::CurrentReferences refs{
+    typename controllers::ThreePhase<TypeParam> phaseCurrents{
         TypeParam(0.0f),
-        TypeParam(0.0f)
+        TypeParam(0.0f),
+        TypeParam(0.0f),
     };
 
-    typename controllers::FieldOrientedController<TypeParam>::PhaseMeasurements meas{
-        TypeParam(0.0f),
-        TypeParam(0.0f),
-        TypeParam(0.0f),
-        controllers::CreateNormalizedAngle<TypeParam>(0.0f)
-    };
-
-    this->controller->SetCurrentReferences(refs);
-    auto output = this->controller->Process(refs, meas);
+    this->controller->SetCurrentReference(TypeParam(0.0f));
+    auto output = this->controller->Process(phaseCurrents, controllers::CreateNormalizedAngle<TypeParam>(0.0f));
 
     float tolerance = controllers::GetTolerance<TypeParam>();
 
@@ -68,26 +61,24 @@ TYPED_TEST(TestFieldOrientedController, zero_current_reference)
 
 TYPED_TEST(TestFieldOrientedController, current_tracking)
 {
-    typename controllers::FieldOrientedController<TypeParam>::CurrentReferences refs{
-        TypeParam(0.4f),
-        TypeParam(0.0f)
+    typename controllers::ThreePhase<TypeParam> phaseCurrents0{
+        TypeParam(0.0f),
+        TypeParam(0.0f),
+        TypeParam(0.0f),
     };
 
-    std::vector<typename controllers::FieldOrientedController<TypeParam>::PhaseMeasurements> measurements = {
-        { TypeParam(0.0f),
-            TypeParam(0.0f),
-            TypeParam(0.0f),
-            controllers::CreateNormalizedAngle<TypeParam>(0.0f) },
-        { TypeParam(0.6f),
-            TypeParam(0.0f),
-            TypeParam(0.0f),
-            controllers::CreateNormalizedAngle<TypeParam>(0.0f) }
+    typename controllers::ThreePhase<TypeParam> phaseCurrents1{
+        TypeParam(0.6f),
+        TypeParam(0.0f),
+        TypeParam(0.0f),
     };
 
-    this->controller->SetCurrentReferences(refs);
+    auto angle = controllers::CreateNormalizedAngle<TypeParam>(0.0f);
 
-    auto output1 = this->controller->Process(refs, measurements[0]);
-    auto output2 = this->controller->Process(refs, measurements[1]);
+    this->controller->SetCurrentReference(TypeParam(0.4f));
+
+    auto output1 = this->controller->Process(phaseCurrents0, angle);
+    auto output2 = this->controller->Process(phaseCurrents1, angle);
 
     EXPECT_GT(math::ToFloat(output1.a) - math::ToFloat(output1.b),
         math::ToFloat(output2.a) - math::ToFloat(output2.b));
@@ -100,20 +91,14 @@ TYPED_TEST(TestFieldOrientedController, current_tracking)
 
 TYPED_TEST(TestFieldOrientedController, output_limits)
 {
-    typename controllers::FieldOrientedController<TypeParam>::CurrentReferences refs{
-        TypeParam(0.9f),
-        TypeParam(0.9f)
+    typename controllers::ThreePhase<TypeParam> phaseCurrents{
+        TypeParam(0.0f),
+        TypeParam(0.0f),
+        TypeParam(0.0f),
     };
 
-    typename controllers::FieldOrientedController<TypeParam>::PhaseMeasurements meas{
-        TypeParam(0.0f),
-        TypeParam(0.0f),
-        TypeParam(0.0f),
-        controllers::CreateNormalizedAngle<TypeParam>(0.0f)
-    };
-
-    this->controller->SetCurrentReferences(refs);
-    auto output = this->controller->Process(refs, meas);
+    this->controller->SetCurrentReference(TypeParam(0.9f));
+    auto output = this->controller->Process(phaseCurrents, controllers::CreateNormalizedAngle<TypeParam>(0.0f));
 
     EXPECT_GE(math::ToFloat(output.a), 0.0f);
     EXPECT_LE(math::ToFloat(output.a), 1.0f);
@@ -125,51 +110,32 @@ TYPED_TEST(TestFieldOrientedController, output_limits)
 
 TYPED_TEST(TestFieldOrientedController, reset_behavior)
 {
-    typename controllers::FieldOrientedController<TypeParam>::CurrentReferences refs{
-        TypeParam(0.5f),
-        TypeParam(0.5f)
+    typename controllers::ThreePhase<TypeParam> phaseCurrents{
+        TypeParam(0.0f),
+        TypeParam(0.0f),
+        TypeParam(0.0f),
     };
 
-    typename controllers::FieldOrientedController<TypeParam>::PhaseMeasurements meas{
-        TypeParam(0.0f),
-        TypeParam(0.0f),
-        TypeParam(0.0f),
-        TypeParam(0.0f)
-    };
-
-    this->controller->SetCurrentReferences(refs);
-    auto output1 = this->controller->Process(refs, meas);
+    this->controller->SetCurrentReference(TypeParam(0.5f));
+    auto output1 = this->controller->Process(phaseCurrents, controllers::CreateNormalizedAngle<TypeParam>(0.0f));
 
     this->controller->Reset();
-    auto output2 = this->controller->Process(refs, meas);
+    auto output2 = this->controller->Process(phaseCurrents, controllers::CreateNormalizedAngle<TypeParam>(0.0f));
 
     EXPECT_NE(math::ToFloat(output1.a), math::ToFloat(output2.a));
 }
 
 TYPED_TEST(TestFieldOrientedController, angle_dependency)
 {
-    typename controllers::FieldOrientedController<TypeParam>::CurrentReferences refs{
-        TypeParam(0.5f),
-        TypeParam(0.0f)
+    typename controllers::ThreePhase<TypeParam> phaseCurrents{
+        TypeParam(0.1f),
+        TypeParam(0.1f),
+        TypeParam(0.1f),
     };
 
-    typename controllers::FieldOrientedController<TypeParam>::PhaseMeasurements meas1{
-        TypeParam(0.1f),
-        TypeParam(0.1f),
-        TypeParam(0.1f),
-        controllers::CreateNormalizedAngle<TypeParam>(0.0f)
-    };
-
-    typename controllers::FieldOrientedController<TypeParam>::PhaseMeasurements meas2{
-        TypeParam(0.1f),
-        TypeParam(0.1f),
-        TypeParam(0.1f),
-        controllers::CreateNormalizedAngle<TypeParam>(M_PI_2)
-    };
-
-    this->controller->SetCurrentReferences(refs);
-    auto output1 = this->controller->Process(refs, meas1);
-    auto output2 = this->controller->Process(refs, meas2);
+    this->controller->SetCurrentReference(TypeParam(0.5f));
+    auto output1 = this->controller->Process(phaseCurrents, controllers::CreateNormalizedAngle<TypeParam>(0.0f));
+    auto output2 = this->controller->Process(phaseCurrents, controllers::CreateNormalizedAngle<TypeParam>(M_PI_2));
 
     EXPECT_NE(math::ToFloat(output1.a), math::ToFloat(output2.a));
 }
