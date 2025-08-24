@@ -12,5 +12,6 @@ target_sources(numerical.controllers_test PRIVATE
     TestFieldOrientedController.cpp
     TestPid.cpp
     TestSpaceVectorModulation.cpp
+    TestTrajectoryGenerator.cpp
     TestTransformsClarkePark.cpp
 )
