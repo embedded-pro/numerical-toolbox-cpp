@@ -6,14 +6,21 @@
   "mounts": [
     "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
   ],
-  "runArgs": ["--add-host=host.docker.internal:host-gateway", "--privileged"],
+  "runArgs": [
+    "--add-host=host.docker.internal:host-gateway",
+    "--privileged"
+  ],
   "customizations": {
     "vscode": {
-      "extensions": ["JacquesLucke.gcov-viewer@0.5.0"],
+      "extensions": [
+        "JacquesLucke.gcov-viewer@0.5.0"
+      ],
       "settings": {
         "editor.formatOnSave": true,
         "files.insertFinalNewline": true,
-        "gcovViewer.buildDirectories": ["${workspaceFolder}/build/Coverage"],
+        "gcovViewer.buildDirectories": [
+          "${workspaceFolder}/build/Coverage"
+        ],
         "gcovViewer.highlightMissedLines": true
       }
     }
@@ -21,6 +28,8 @@
   "postCreateCommand": {
     "submodule.update": "git submodule update --init --recursive",
     "config.core.autocrlf": "git config --replace-all core.autocrlf false",
-    "config.core.eol": "git config --replace-all core.eol lf"
+    "config.core.eol": "git config --replace-all core.eol lf",
+    "config.url.https-ssh": "git config --global url.\"https://github.com/\".insteadOf \"ssh://git@github.com/\"",
+    "config.url.https-git": "git config --global --add url.\"https://github.com/\".insteadOf \"git@github.com:\""
   }
 }

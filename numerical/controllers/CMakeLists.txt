@@ -17,6 +17,8 @@ target_sources(numerical.controllers PRIVATE
     Pid.hpp
     SpaceVectorModulation.cpp
     SpaceVectorModulation.hpp
+    TrajectoryGeneratorTrapezoidal.hpp
+    TrajectoryGenerator.hpp
     TransformsClarkePark.cpp
     TransformsClarkePark.hpp
 )
