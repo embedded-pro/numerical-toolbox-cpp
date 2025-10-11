@@ -96,6 +96,14 @@ add_subdirectory(numerical)
 
 if(TARGET yaml-cpp)
     emil_exclude_from_clang_format(yaml-cpp)
+
+    get_target_property(yaml_cpp_compile_options yaml-cpp COMPILE_OPTIONS)
+    if(yaml_cpp_compile_options)
+        list(REMOVE_ITEM yaml_cpp_compile_options /WX -Werror)
+        set_target_properties(yaml-cpp PROPERTIES COMPILE_OPTIONS "${yaml_cpp_compile_options}")
+    endif()
+    
+    set_target_properties(yaml-cpp PROPERTIES COMPILE_WARNING_AS_ERROR OFF)
 endif()
 
 emil_clangformat_directories(examples DIRECTORIES .)
