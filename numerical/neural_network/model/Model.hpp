@@ -113,7 +113,7 @@ namespace neural_network
         InputVector Backward(const OutputVector& output_gradient);
         void Train(Optimizer<QNumberType, TotalParameters>& optimizer, Loss<QNumberType, TotalParameters>& loss, const math::Vector<QNumberType, TotalParameters>& initialParameters);
         void SetParameters(const math::Vector<QNumberType, TotalParameters>& parameters);
-        math::Vector<QNumberType, TotalParameters> GetParameters() const;
+        math::Vector<QNumberType, Model::TotalParameters> GetParameters() const;
 
     private:
         template<std::size_t... Is>
@@ -129,7 +129,7 @@ namespace neural_network
         void SetLayerParameters(Layer& layer, const math::Vector<QNumberType, TotalParameters>& parameters, std::size_t& offset);
 
         template<std::size_t... Is>
-        math::Vector<QNumberType, TotalParameters> GetParametersImpl(std::index_sequence<Is...>) const;
+        math::Vector<QNumberType, Model::TotalParameters> GetParametersImpl(std::index_sequence<Is...>) const;
 
         template<typename Layer>
         void GetLayerParameters(const Layer& layer, math::Vector<QNumberType, TotalParameters>& parameters, std::size_t& offset) const;
@@ -170,7 +170,7 @@ namespace neural_network
     }
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
-    typename math::Vector<QNumberType, Model<QNumberType, InputSize, OutputSize, Layers...>::TotalParameters> Model<QNumberType, InputSize, OutputSize, Layers...>::GetParameters() const
+    math::Vector<QNumberType, Model<QNumberType, InputSize, OutputSize, Layers...>::TotalParameters> Model<QNumberType, InputSize, OutputSize, Layers...>::GetParameters() const
     {
         return GetParametersImpl(std::make_index_sequence<sizeof...(Layers)>{});
     }
