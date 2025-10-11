@@ -30,9 +30,9 @@ if (NUMERICAL_TOOLBOX_STANDALONE)
 
     if (EMIL_HOST_BUILD)
         FetchContent_Declare(
-            cucumber-cpp
+            cucumber-cpp-runner
             GIT_REPOSITORY https://github.com/philips-software/amp-cucumber-cpp-runner.git
-            GIT_TAG        752b9f6f82b1f2f35bc01a4ae19aff4fd43ad97f # v1.1.0
+            GIT_TAG        d8b8c030c0bea97f1c41cc5229a927b2d06f5290 # v3.0.0
         )
 
         FetchContent_MakeAvailable(cucumber-cpp-runner)
@@ -45,6 +45,14 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
 
 if (NUMERICAL_TOOLBOX_STANDALONE)
+    # Configure Git to use HTTPS instead of SSH for GitHub
+    execute_process(
+        COMMAND git config --global url.https://github.com/.insteadOf git@github.com:
+        RESULT_VARIABLE GIT_CONFIG_RESULT
+        OUTPUT_QUIET
+        ERROR_QUIET
+    )
+    
     FetchContent_Declare(
         sciplot
         GIT_REPOSITORY          https://github.com/sciplot/sciplot.git
@@ -85,6 +93,10 @@ endif()
 
 add_subdirectory(examples)
 add_subdirectory(numerical)
+
+if(TARGET yaml-cpp)
+    emil_exclude_from_clang_format(yaml-cpp)
+endif()
 
 emil_clangformat_directories(examples DIRECTORIES .)
 emil_clangformat_directories(numerical DIRECTORIES .)
