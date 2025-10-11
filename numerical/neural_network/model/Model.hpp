@@ -170,7 +170,7 @@ namespace neural_network
     }
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
-    math::Vector<QNumberType, Model<QNumberType, InputSize, OutputSize, Layers...>::TotalParameters> Model<QNumberType, InputSize, OutputSize, Layers...>::GetParameters() const
+    typename math::Vector<QNumberType, Model<QNumberType, InputSize, OutputSize, Layers...>::TotalParameters> Model<QNumberType, InputSize, OutputSize, Layers...>::GetParameters() const
     {
         return GetParametersImpl(std::make_index_sequence<sizeof...(Layers)>{});
     }
@@ -220,7 +220,7 @@ namespace neural_network
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
     template<std::size_t... Is>
-    math::Vector<QNumberType, Model<QNumberType, InputSize, OutputSize, Layers...>::TotalParameters>
+    typename math::Vector<QNumberType, Model<QNumberType, InputSize, OutputSize, Layers...>::TotalParameters>
     Model<QNumberType, InputSize, OutputSize, Layers...>::GetParametersImpl(
         std::index_sequence<Is...>) const
     {
