@@ -23,10 +23,20 @@ if (NUMERICAL_TOOLBOX_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/embedded-pro/embedded-infra-lib.git
-        GIT_TAG        3a172983dcfe206c6d4c7109175022597966dbdd # Unreleased
+        GIT_TAG        74165ff75d8734b9968bd5f2772e542968bfe2a0 # Unreleased
     )
 
     FetchContent_MakeAvailable(emil)
+
+    if (EMIL_HOST_BUILD)
+        FetchContent_Declare(
+            cucumber-cpp
+            GIT_REPOSITORY https://github.com/philips-software/amp-cucumber-cpp-runner.git
+            GIT_TAG        752b9f6f82b1f2f35bc01a4ae19aff4fd43ad97f # v1.1.0
+        )
+
+        FetchContent_MakeAvailable(cucumber-cpp-runner)
+    endif()
 endif()
 
 project(numerical LANGUAGES C CXX ASM VERSION 1.0.0) # x-release-please-version
@@ -82,3 +92,18 @@ emil_clangformat_directories(numerical DIRECTORIES .)
 if (NUMERICAL_TOOLBOX_STANDALONE)
     emil_folderize_all_targets()
 endif()
+
+set(CPACK_GENERATOR "ZIP;TGZ")
+set(CPACK_SOURCE_IGNORE_FILES ".vs/;.git/;build/")
+set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_PACKAGE_DESCRIPTION "${PROJECT_DESCRIPTION}")
+set(CPACK_DEBIAN_PACKAGE_NAME "${CPACK_PACKAGE_NAME}")
+set(CPACK_RPM_PACKAGE_NAME "${CPACK_PACKAGE_NAME}")
+set(CPACK_PACKAGE_HOMEPAGE_URL "${PROJECT_HOMEPAGE_URL}")
+set(CPACK_PACKAGE_MAINTAINER "${CPACK_PACKAGE_VENDOR}")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${CPACK_PACKAGE_VENDOR}")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+
+include(CPack)
