@@ -21,7 +21,8 @@
       "displayName": "Configuration for Host Tooling and Tests",
       "inherits": "defaults",
       "cacheVariables": {
-        "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel"
+        "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel",
+        "NUMERICAL_TOOLBOX_BUILD_TESTS": true
       },
       "generator": "Ninja Multi-Config"
     },
@@ -31,7 +32,7 @@
       "inherits": "defaults",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "EMIL_ENABLE_DOCKER_TOOLS": "Off"
+        "NUMERICAL_TOOLBOX_BUILD_TESTS": true
       }
     },
     {
