@@ -23,18 +23,36 @@ if (NUMERICAL_TOOLBOX_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/embedded-pro/embedded-infra-lib.git
-        GIT_TAG        3a172983dcfe206c6d4c7109175022597966dbdd # Unreleased
+        GIT_TAG        74165ff75d8734b9968bd5f2772e542968bfe2a0 # Unreleased
     )
 
     FetchContent_MakeAvailable(emil)
+
+    if (EMIL_HOST_BUILD)
+        FetchContent_Declare(
+            cucumber-cpp-runner
+            GIT_REPOSITORY https://github.com/philips-software/amp-cucumber-cpp-runner.git
+            GIT_TAG        d8b8c030c0bea97f1c41cc5229a927b2d06f5290 # v3.0.0
+        )
+
+        FetchContent_MakeAvailable(cucumber-cpp-runner)
+    endif()
 endif()
 
-project(numerical LANGUAGES C CXX ASM VERSION 1.0.0) # x-release-please-version
+project(numerical-toolbox LANGUAGES C CXX ASM VERSION 1.0.0) # x-release-please-version
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
 
 if (NUMERICAL_TOOLBOX_STANDALONE)
+    # Configure Git to use HTTPS instead of SSH for GitHub
+    execute_process(
+        COMMAND git config --global url.https://github.com/.insteadOf git@github.com:
+        RESULT_VARIABLE GIT_CONFIG_RESULT
+        OUTPUT_QUIET
+        ERROR_QUIET
+    )
+    
     FetchContent_Declare(
         sciplot
         GIT_REPOSITORY          https://github.com/sciplot/sciplot.git
@@ -76,9 +94,36 @@ endif()
 add_subdirectory(examples)
 add_subdirectory(numerical)
 
+if(TARGET yaml-cpp)
+    emil_exclude_from_clang_format(yaml-cpp)
+
+    get_target_property(yaml_cpp_compile_options yaml-cpp COMPILE_OPTIONS)
+    if(yaml_cpp_compile_options)
+        list(REMOVE_ITEM yaml_cpp_compile_options /WX -Werror)
+        set_target_properties(yaml-cpp PROPERTIES COMPILE_OPTIONS "${yaml_cpp_compile_options}")
+    endif()
+    
+    set_target_properties(yaml-cpp PROPERTIES COMPILE_WARNING_AS_ERROR OFF)
+endif()
+
 emil_clangformat_directories(examples DIRECTORIES .)
 emil_clangformat_directories(numerical DIRECTORIES .)
 
 if (NUMERICAL_TOOLBOX_STANDALONE)
     emil_folderize_all_targets()
 endif()
+
+set(CPACK_GENERATOR "ZIP;TGZ")
+set(CPACK_SOURCE_IGNORE_FILES ".vs/;.git/;build/")
+set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_PACKAGE_DESCRIPTION "${PROJECT_DESCRIPTION}")
+set(CPACK_DEBIAN_PACKAGE_NAME "${CPACK_PACKAGE_NAME}")
+set(CPACK_RPM_PACKAGE_NAME "${CPACK_PACKAGE_NAME}")
+set(CPACK_PACKAGE_HOMEPAGE_URL "${PROJECT_HOMEPAGE_URL}")
+set(CPACK_PACKAGE_MAINTAINER "${CPACK_PACKAGE_VENDOR}")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${CPACK_PACKAGE_VENDOR}")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+
+include(CPack)

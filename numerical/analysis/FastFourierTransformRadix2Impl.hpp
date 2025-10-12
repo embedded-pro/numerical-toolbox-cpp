@@ -47,7 +47,7 @@ namespace analysis
     {
         for (std::size_t i = 0; i < Length; ++i)
         {
-            auto j = FastFourierTransform<QNumberType>::template BitReverse(i, log2_n, radixBits, radix);
+            auto j = this->BitReverse(i, log2_n, radixBits, radix);
             if (i < j)
                 std::swap(frequencyDomain[i], frequencyDomain[j]);
         }
