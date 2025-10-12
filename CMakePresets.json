@@ -99,6 +99,12 @@
       "configurePreset": "coverage",
       "configuration": "Debug",
       "inherits": "defaults"
+    },
+    {
+      "name": "host-single-Debug",
+      "configurePreset": "host-single-Debug",
+      "configuration": "Debug",
+      "inherits": "defaults"
     }
   ]
 }
