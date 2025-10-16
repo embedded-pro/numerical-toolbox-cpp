@@ -2,6 +2,7 @@
 #define TRANSFORMS_CLARKE_PARK_HPP
 
 #include "numerical/math/AdvancedFunctions.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/QNumber.hpp"
 #include "numerical/math/TrigonometricFunctions.hpp"
 
@@ -37,6 +38,7 @@ namespace controllers
             "Clarke can only be instantiated with math::QNumber or floating point types.");
 
     public:
+        ALWAYS_INLINE_HOT
         TwoPhase<QNumberType> Forward(const ThreePhase<QNumberType>& input)
         {
             const QNumberType bc_sum = input.b + input.c;
@@ -44,6 +46,7 @@ namespace controllers
             return TwoPhase<QNumberType>{ twoThirds * (input.a - oneHalf * bc_sum), invSqrt3 * (input.b - input.c) };
         }
 
+        ALWAYS_INLINE_HOT
         ThreePhase<QNumberType> Inverse(const TwoPhase<QNumberType>& input)
         {
             const QNumberType alpha_half = oneHalf * input.alpha;
@@ -70,6 +73,7 @@ namespace controllers
             : trigFunctions(trigFunctions)
         {}
 
+        ALWAYS_INLINE_HOT
         RotatingFrame<QNumberType> Forward(const TwoPhase<QNumberType>& input, QNumberType scaledTheta)
         {
             really_assert(scaledTheta >= math::Lowest<QNumberType>() && scaledTheta <= math::Max<QNumberType>());
@@ -85,6 +89,7 @@ namespace controllers
             return RotatingFrame<QNumberType>{ alpha_cos + beta_sin, -alpha_sin + beta_cos };
         }
 
+        ALWAYS_INLINE_HOT
         TwoPhase<QNumberType> Inverse(const RotatingFrame<QNumberType>& input, QNumberType scaledTheta)
         {
             really_assert(scaledTheta >= math::Lowest<QNumberType>() && scaledTheta <= math::Max<QNumberType>());

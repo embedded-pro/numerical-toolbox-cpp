@@ -1,6 +1,7 @@
 #ifndef CONTROLLERS_PID_HPP
 #define CONTROLLERS_PID_HPP
 
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/QNumber.hpp"
 #include "numerical/math/RecursiveBuffer.hpp"
 #include <optional>
@@ -109,7 +110,9 @@ namespace controllers
     }
 
     template<class QNumberType>
-    QNumberType Pid<QNumberType>::Clamp(QNumberType input)
+    ALWAYS_INLINE
+        QNumberType
+        Pid<QNumberType>::Clamp(QNumberType input)
     {
         if (input > limits.max)
             return limits.max;
@@ -121,7 +124,9 @@ namespace controllers
     }
 
     template<class QNumberType>
-    QNumberType Pid<QNumberType>::Process(QNumberType measuredProcessVariable)
+    ALWAYS_INLINE_HOT
+        QNumberType
+        Pid<QNumberType>::Process(QNumberType measuredProcessVariable)
     {
         if (!setPoint || !autoMode)
             return measuredProcessVariable;
