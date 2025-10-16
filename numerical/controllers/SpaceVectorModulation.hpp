@@ -2,6 +2,7 @@
 #define CONTROLLERS_SPACE_VECTOR_MODULATION_HPP
 
 #include "numerical/controllers/TransformsClarkePark.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/QNumber.hpp"
 
 namespace controllers
@@ -21,6 +22,7 @@ namespace controllers
             QNumberType c;
         };
 
+        ALWAYS_INLINE_HOT
         Output Generate(const TwoPhase<QNumberType>& voltagePhase)
         {
             auto pattern = CalculateSwitchingTimes(voltagePhase.alpha, voltagePhase.beta);
@@ -33,6 +35,7 @@ namespace controllers
         }
 
     private:
+        ALWAYS_INLINE
         QNumberType ClampDutyCycle(QNumberType duty)
         {
             if (duty < zero)
@@ -50,6 +53,7 @@ namespace controllers
             QNumberType tc;
         };
 
+        ALWAYS_INLINE
         SwitchingPattern AddCommonInjection(SwitchingPattern pattern)
         {
             static const QNumberType _half = QNumberType(0.5f);
@@ -64,6 +68,7 @@ namespace controllers
             return pattern;
         }
 
+        ALWAYS_INLINE
         SwitchingPattern Calculate60To120Degrees(QNumberType valpha, QNumberType vbeta)
         {
             QNumberType t1 = valpha + vbeta * invSqrt3;
@@ -71,6 +76,7 @@ namespace controllers
             return AddCommonInjection({ t2, t1 + t2, zero });
         }
 
+        ALWAYS_INLINE
         SwitchingPattern Calculate120To180Degrees(QNumberType valpha, QNumberType vbeta)
         {
             QNumberType t1 = -valpha + vbeta * invSqrt3;
@@ -78,6 +84,7 @@ namespace controllers
             return AddCommonInjection({ zero, t1 + t2, t2 });
         }
 
+        ALWAYS_INLINE
         SwitchingPattern Calculate180To240Degrees(QNumberType valpha, QNumberType vbeta)
         {
             QNumberType t1 = -valpha - vbeta * invSqrt3;
@@ -85,6 +92,7 @@ namespace controllers
             return AddCommonInjection({ zero, t2, t1 + t2 });
         }
 
+        ALWAYS_INLINE
         SwitchingPattern Calculate240To300Degrees(QNumberType valpha, QNumberType vbeta)
         {
             QNumberType t1 = -valpha + vbeta * invSqrt3;
@@ -92,6 +100,7 @@ namespace controllers
             return AddCommonInjection({ t2, zero, t1 + t2 });
         }
 
+        ALWAYS_INLINE
         SwitchingPattern Calculate300To360Degrees(QNumberType valpha, QNumberType vbeta)
         {
             QNumberType t1 = valpha + vbeta * invSqrt3;
@@ -99,6 +108,7 @@ namespace controllers
             return AddCommonInjection({ t1 + t2, zero, t2 });
         }
 
+        ALWAYS_INLINE
         SwitchingPattern Calculate0To60Degrees(QNumberType valpha, QNumberType vbeta)
         {
             QNumberType t1 = valpha - vbeta * invSqrt3;
@@ -106,6 +116,7 @@ namespace controllers
             return AddCommonInjection({ t1 + t2, t2, zero });
         }
 
+        ALWAYS_INLINE_HOT
         SwitchingPattern CalculateSwitchingTimes(QNumberType valpha, QNumberType vbeta)
         {
             QNumberType v_ref_60 = (valpha * half - vbeta * sqrt3Div2);
