@@ -1,8 +1,8 @@
 #pragma once
 
-#if defined(__GNUC__) && !defined(__clang__)
+#if defined(__GNUC__) && !defined(__clang__) && defined(NumericalToolbox_ENABLE_OPTIMIZATIONS)
 #define OPTIMIZE_FOR_SPEED __attribute__((hot, optimize("-O3"), optimize("-ffast-math"), flatten)) inline
-#elif defined(__clang__)
+#elif defined(__clang__) && defined(NumericalToolbox_ENABLE_OPTIMIZATIONS)
 #define OPTIMIZE_FOR_SPEED __attribute__((hot, flatten)) inline
 #elif defined(_MSC_VER)
 #define OPTIMIZE_FOR_SPEED
