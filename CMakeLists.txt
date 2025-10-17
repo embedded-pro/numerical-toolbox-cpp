@@ -8,11 +8,16 @@ option(CMAKE_COMPILE_WARNING_AS_ERROR "Enable warnings-as-error" On)
 option(NUMERICAL_TOOLBOX_INCLUDE_DEFAULT_INIT "Include default initialization code; turn off when providing custom initialization" On)
 option(NUMERICAL_TOOLBOX_BUILD_EXAMPLES "Enable build of the examples" Off)
 option(NUMERICAL_TOOLBOX_BUILD_TESTS "Enable build of the tests" Off)
+option(NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS "Enable compiler optimizations for numerical routines" On)
 
 if (NUMERICAL_TOOLBOX_BUILD_TESTS)
     # CTest cannot be included before the first project() statement, but Embedded Infastructure
     # Library needs to see that test utilities need to be built.
     set(BUILD_TESTING On)
+endif()
+
+if (NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS)
+    add_definitions(-DNumericalToolbox_ENABLE_OPTIMIZATIONS=1)
 endif()
 
 add_definitions(-DEMIL_ENABLE_TRACING=1)
