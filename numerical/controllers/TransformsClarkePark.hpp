@@ -38,7 +38,7 @@ namespace controllers
             "Clarke can only be instantiated with math::QNumber or floating point types.");
 
     public:
-        ALWAYS_INLINE_HOT
+        OPTIMIZE_FOR_SPEED
         TwoPhase<QNumberType> Forward(const ThreePhase<QNumberType>& input)
         {
             const QNumberType bc_sum = input.b + input.c;
@@ -46,7 +46,7 @@ namespace controllers
             return TwoPhase<QNumberType>{ twoThirds * (input.a - oneHalf * bc_sum), invSqrt3 * (input.b - input.c) };
         }
 
-        ALWAYS_INLINE_HOT
+        OPTIMIZE_FOR_SPEED
         ThreePhase<QNumberType> Inverse(const TwoPhase<QNumberType>& input)
         {
             const QNumberType alpha_half = oneHalf * input.alpha;
@@ -73,7 +73,7 @@ namespace controllers
             : trigFunctions(trigFunctions)
         {}
 
-        ALWAYS_INLINE_HOT
+        OPTIMIZE_FOR_SPEED
         RotatingFrame<QNumberType> Forward(const TwoPhase<QNumberType>& input, QNumberType scaledTheta)
         {
             really_assert(scaledTheta >= math::Lowest<QNumberType>() && scaledTheta <= math::Max<QNumberType>());
@@ -89,7 +89,7 @@ namespace controllers
             return RotatingFrame<QNumberType>{ alpha_cos + beta_sin, -alpha_sin + beta_cos };
         }
 
-        ALWAYS_INLINE_HOT
+        OPTIMIZE_FOR_SPEED
         TwoPhase<QNumberType> Inverse(const RotatingFrame<QNumberType>& input, QNumberType scaledTheta)
         {
             really_assert(scaledTheta >= math::Lowest<QNumberType>() && scaledTheta <= math::Max<QNumberType>());
@@ -117,15 +117,17 @@ namespace controllers
             "ClarkePark can only be instantiated with math::QNumber or floating point types.");
 
     public:
-        ClarkePark(const math::TrigonometricFunctions<QNumberType>& trigFunctions)
+        explicit ClarkePark(const math::TrigonometricFunctions<QNumberType>& trigFunctions)
             : park(trigFunctions)
         {}
 
+        OPTIMIZE_FOR_SPEED
         RotatingFrame<QNumberType> Forward(const ThreePhase<QNumberType>& input, QNumberType theta)
         {
             return park.Forward(clarke.Forward(input), theta);
         }
 
+        OPTIMIZE_FOR_SPEED
         ThreePhase<QNumberType> Inverse(const RotatingFrame<QNumberType>& input, QNumberType theta)
         {
             return clarke.Inverse(park.Inverse(input, theta));
