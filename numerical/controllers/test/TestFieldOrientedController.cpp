@@ -12,9 +12,9 @@ namespace
     {
         typename controllers::FieldOrientedController<T>::Configuration config;
 
-        config.currentTunnings.kp = T(0.5f);
-        config.currentTunnings.ki = T(0.1f);
-        config.currentTunnings.kd = T(0.01f);
+        config.currentTunings.kp = T(0.5f);
+        config.currentTunings.ki = T(0.1f);
+        config.currentTunings.kd = T(0.01f);
 
         config.currentLimits.min = T(-0.9999f);
         config.currentLimits.max = T(0.9999f);

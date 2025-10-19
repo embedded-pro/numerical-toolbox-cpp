@@ -16,7 +16,7 @@ namespace controllers
             "Pid can only be instantiated with math::QNumber types.");
 
     public:
-        struct Tunnings
+        struct Tunings
         {
             QNumberType kp;
             QNumberType ki;
@@ -29,14 +29,14 @@ namespace controllers
             QNumberType max;
         };
 
-        Pid(Tunnings tunnings, Limits limits, bool autoMode = true);
+        Pid(Tunings tunnings, Limits limits, bool autoMode = true);
 
         void SetPoint(QNumberType setPoint);
         QNumberType Process(QNumberType measuredProcessVariable);
         void Enable();
         void Disable();
         void SetLimits(Limits limits);
-        void SetTunnings(Tunnings tunnings);
+        void SetTunings(Tunings tunnings);
         void Reset();
 
     private:
@@ -60,7 +60,7 @@ namespace controllers
     ////    Implementation    ////
 
     template<typename QNumberType>
-    Pid<QNumberType>::Pid(Tunnings tunnings, Limits limits, bool autoMode)
+    Pid<QNumberType>::Pid(Tunings tunnings, Limits limits, bool autoMode)
         : limits(limits)
         , autoMode(autoMode)
     {
@@ -95,14 +95,13 @@ namespace controllers
     template<class QNumberType>
     void Pid<QNumberType>::SetLimits(Limits limits)
     {
-        if (limits.max >= limits.min)
-            std::abort();
+        really_assert(limits.max < limits.min);
 
         this->limits = limits;
     }
 
     template<class QNumberType>
-    void Pid<QNumberType>::SetTunnings(Tunnings tunnings)
+    void Pid<QNumberType>::SetTunings(Tunings tunnings)
     {
         a0 = tunnings.kp + tunnings.ki + tunnings.kd;
         a1 = -tunnings.kp - (tunnings.kd + tunnings.kd);

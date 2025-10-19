@@ -48,7 +48,7 @@ where:
 template<typename QNumberType>
 class Pid {
 public:
-    struct Tunnings {
+    struct Tunings {
         QNumberType kp;
         QNumberType ki;
         QNumberType kd;
@@ -59,7 +59,7 @@ public:
         QNumberType max;
     };
 
-    Pid(Tunnings tunnings, Limits limits, bool autoMode = true);
+    Pid(Tunings tunings, Limits limits, bool autoMode = true);
     
     // Core functionality
     void SetPoint(QNumberType setPoint);
@@ -69,14 +69,14 @@ public:
     void Enable();
     void Disable();
     void SetLimits(Limits limits);
-    void SetTunnings(Tunnings tunnings);
+    void SetTunings(Tunings tunings);
     void Reset();
 };
 ```
 
 ### Key Components
 
-1. **Tunnings Structure**: Holds the PID gains (Kp, Ki, Kd)
+1. **Tunings Structure**: Holds the PID gains (Kp, Ki, Kd)
 2. **Limits Structure**: Defines output saturation limits
 3. **RecursiveBuffer**: Stores historical values for error and output
 4. **Process Method**: Implements the core PID algorithm
@@ -88,7 +88,7 @@ public:
 
 ```cpp
 // Create a PID instance
-Pid<float>::Tunnings tunnings{
+Pid<float>::Tunings tunings{
     .kp = 1.0f,
     .ki = 0.1f,
     .kd = 0.05f
@@ -99,7 +99,7 @@ Pid<float>::Limits limits{
     .max = 100.0f
 };
 
-Pid<float> pid(tunnings, limits);
+Pid<float> pid(tunings, limits);
 
 // Set the desired setpoint
 pid.SetPoint(50.0f);
@@ -143,7 +143,7 @@ Tuning guidelines:
 
 ```cpp
 // Configure PID for temperature control
-Pid<float>::Tunnings tunnings{
+Pid<float>::Tunings tunings{
     .kp = 2.0f,    // Aggressive proportional for quick response
     .ki = 0.1f,    // Small integral to eliminate steady state error
     .kd = 0.5f     // Moderate derivative to prevent overshoot
@@ -154,7 +154,7 @@ Pid<float>::Limits limits{
     .max = 100.0f  // Maximum heater power
 };
 
-Pid<float> temperatureController(tunnings, limits);
+Pid<float> temperatureController(tunings, limits);
 
 // Set desired temperature
 temperatureController.SetPoint(75.0f);

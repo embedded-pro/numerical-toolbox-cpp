@@ -29,7 +29,7 @@ TYPED_TEST(TestPid, no_variation_input_results_in_no_action_control)
 {
     float tolerance = controllers::GetTolerance<TypeParam>();
     this->controller.emplace(
-        typename controllers::Pid<TypeParam>::Tunnings{
+        typename controllers::Pid<TypeParam>::Tunings{
             TypeParam(0.1f),
             TypeParam(0.1f),
             TypeParam(0.1f) },
@@ -42,7 +42,7 @@ TYPED_TEST(TestPid, proportional_action)
 {
     float tolerance = controllers::GetTolerance<TypeParam>();
     this->controller.emplace(
-        typename controllers::Pid<TypeParam>::Tunnings{
+        typename controllers::Pid<TypeParam>::Tunings{
             TypeParam(0.5f),
             TypeParam(0.0f),
             TypeParam(0.0f) },
@@ -59,7 +59,7 @@ TYPED_TEST(TestPid, integrative_action)
 {
     float tolerance = controllers::GetTolerance<TypeParam>();
     this->controller.emplace(
-        typename controllers::Pid<TypeParam>::Tunnings{
+        typename controllers::Pid<TypeParam>::Tunings{
             TypeParam(0.0f),
             TypeParam(0.1f),
             TypeParam(0.0f) },
@@ -75,7 +75,7 @@ TYPED_TEST(TestPid, derivative_action)
 {
     float tolerance = controllers::GetTolerance<TypeParam>();
     this->controller.emplace(
-        typename controllers::Pid<TypeParam>::Tunnings{
+        typename controllers::Pid<TypeParam>::Tunings{
             TypeParam(0.0f),
             TypeParam(0.0f),
             TypeParam(0.1f) },
@@ -92,7 +92,7 @@ TYPED_TEST(TestPid, check_output_limits)
     float tolerance = controllers::GetTolerance<TypeParam>();
     auto limits = CreateLimits<TypeParam>();
     this->controller.emplace(
-        typename controllers::Pid<TypeParam>::Tunnings{
+        typename controllers::Pid<TypeParam>::Tunings{
             TypeParam(0.05f),
             TypeParam(0.05f),
             TypeParam(0.01f) },
@@ -112,7 +112,7 @@ TYPED_TEST(TestPid, process_reaches_set_point)
 {
     float tolerance = controllers::GetTolerance<TypeParam>();
     this->controller.emplace(
-        typename controllers::Pid<TypeParam>::Tunnings{
+        typename controllers::Pid<TypeParam>::Tunings{
             TypeParam(0.1f),
             TypeParam(0.05f),
             TypeParam(0.02f) },

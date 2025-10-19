@@ -25,7 +25,7 @@ namespace controllers
         OPTIMIZE_FOR_SPEED
         Output Generate(const TwoPhase<QNumberType>& voltagePhase)
         {
-            auto pattern = CalculateSwitchingTimes(voltagePhase.alpha, voltagePhase.beta);
+            auto pattern = CalculateSwitchingTimes(voltagePhase.alpha * sqrt3Const, voltagePhase.beta * sqrt3Const);
 
             return Output{
                 ClampDutyCycle(pattern.ta),
@@ -41,9 +41,9 @@ namespace controllers
             if (duty < zero)
                 return zero;
             if (duty > one)
-                return QNumberType{ 0.9999f };
+                return one;
 
-            return duty / outputScale;
+            return duty;
         }
 
         struct SwitchingPattern
@@ -139,10 +139,10 @@ namespace controllers
         QNumberType zero{ std::is_floating_point_v<QNumberType> ? QNumberType(0.0f) : QNumberType(0.0f) };
         QNumberType one{ std::is_floating_point_v<QNumberType> ? QNumberType(1.0f) : QNumberType(0.2f) };
         QNumberType half{ std::is_floating_point_v<QNumberType> ? QNumberType(0.5f) : QNumberType(0.1f) };
+        QNumberType sqrt3Const{ std::is_floating_point_v<QNumberType> ? QNumberType(1.732050807568877f) : QNumberType(0.3464101615137754f) };
         QNumberType invSqrt3{ std::is_floating_point_v<QNumberType> ? QNumberType(0.577350269189625f) : QNumberType(0.115470053837925f) };
         QNumberType sqrt3Div2{ std::is_floating_point_v<QNumberType> ? QNumberType(0.866025403784438f) : QNumberType(0.1732050807568876f) };
         QNumberType twoDivSqrt3{ std::is_floating_point_v<QNumberType> ? QNumberType(1.154700538379252f) : QNumberType(0.2309401076758504f) };
-        QNumberType outputScale{ std::is_floating_point_v<QNumberType> ? QNumberType(1.0f) : QNumberType(0.2f) };
     };
 }
 

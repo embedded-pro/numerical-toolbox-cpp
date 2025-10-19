@@ -38,8 +38,8 @@ namespace
         : controllers::Pid<QNumberType>
     {
     public:
-        ScaledPid(float scale, typename controllers::Pid<QNumberType>::Tunnings tunnings, typename controllers::Pid<QNumberType>::Limits limits, bool autoMode = true)
-            : controllers::Pid<QNumberType>(tunnings, limits, autoMode)
+        ScaledPid(float scale, typename controllers::Pid<QNumberType>::Tunings tunings, typename controllers::Pid<QNumberType>::Limits limits, bool autoMode = true)
+            : controllers::Pid<QNumberType>(tunings, limits, autoMode)
             , scale(scale)
             , squaredScale(scale * scale)
         {}

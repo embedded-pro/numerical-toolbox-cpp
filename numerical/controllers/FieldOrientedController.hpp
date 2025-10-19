@@ -17,15 +17,15 @@ namespace controllers
     public:
         struct Configuration
         {
-            typename Pid<QNumberType>::Tunnings currentTunnings;
+            typename Pid<QNumberType>::Tunings currentTunings;
             typename Pid<QNumberType>::Limits currentLimits;
         };
 
         FieldOrientedController(const Configuration& config,
             const math::TrigonometricFunctions<QNumberType>& trigFunctions)
             : park(trigFunctions)
-            , dAxisCurrentController(config.currentTunnings, config.currentLimits)
-            , qAxisCurrentController(config.currentTunnings, config.currentLimits)
+            , dAxisCurrentController(config.currentTunings, config.currentLimits)
+            , qAxisCurrentController(config.currentTunings, config.currentLimits)
         {
             dAxisCurrentController.SetPoint(QNumberType{ 0.0f });
         }
