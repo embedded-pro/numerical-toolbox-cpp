@@ -91,11 +91,11 @@ namespace controllers
     }
 
     template<class QNumberType>
-    void PidIncremental<QNumberType>::SetLimits(PidIncremental<QNumberType>::PidBase::Limits limits)
+    void PidIncremental<QNumberType>::SetLimits(PidIncremental<QNumberType>::PidBase::Limits _limits)
     {
-        really_assert(limits.max < limits.min);
+        really_assert(_limits.max > _limits.min);
 
-        this->limits = limits;
+        this->limits = _limits;
     }
 
     template<class QNumberType>

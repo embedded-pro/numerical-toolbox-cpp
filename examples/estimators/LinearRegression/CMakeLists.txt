@@ -13,7 +13,7 @@ target_sources(numerical.examples.estimators.linear_regression PRIVATE
 target_include_directories(numerical.examples.estimators.linear_regression SYSTEM PRIVATE ${sciplot_SOURCE_DIR})
 
 if(MSVC)
-    target_compile_options(numerical.examples.estimators.linear_regression PRIVATE /W4)
+    target_compile_options(numerical.examples.estimators.linear_regression PRIVATE  /W4 /wd4244 /wd4100)
 else()
     target_compile_options(numerical.examples.estimators.linear_regression PRIVATE 
         -Wno-error
