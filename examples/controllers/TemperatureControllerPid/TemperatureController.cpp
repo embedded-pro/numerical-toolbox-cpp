@@ -201,11 +201,11 @@ namespace
             }
         }
 
-        SetPointSchedule GetSetPointAndTime(std::queue<SetPointSchedule>& setPointSchedule)
+        SetPointSchedule GetSetPointAndTime(std::queue<SetPointSchedule>& _setPointSchedule)
         {
-            auto setPointAndTime = setPointSchedule.front();
-            setPointSchedule.pop();
-            return setPointAndTime;
+            auto value = _setPointSchedule.front();
+            _setPointSchedule.pop();
+            return value;
         }
 
         void PlotTarget(Plot& plot)
