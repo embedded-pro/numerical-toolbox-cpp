@@ -1,6 +1,6 @@
-#include "numerical/controllers/test_doubles/Tolerance.hpp"
 #include "numerical/filters/passive/Iir.hpp"
 #include "numerical/math/RecursiveBuffer.hpp"
+#include "numerical/math/Tolerance.hpp"
 #include "gtest/gtest.h"
 
 namespace

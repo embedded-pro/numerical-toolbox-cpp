@@ -3,7 +3,7 @@ emil_build_for(numerical.examples.controllers.temperature_controller HOST All PR
 
 target_link_libraries(numerical.examples.controllers.temperature_controller PUBLIC
     sciplot
-    numerical.controllers
+    numerical.controllers.implementations
 )
 
 target_sources(numerical.examples.controllers.temperature_controller PRIVATE

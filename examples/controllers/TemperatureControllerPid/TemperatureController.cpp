@@ -1,7 +1,7 @@
-#include "numerical/controllers/Pid.hpp"
+#include "numerical/controllers/implementations/PidIncremental.hpp"
+#include <chrono>
 #include <queue>
 #include <sciplot/sciplot.hpp>
-#include <variant>
 #include <vector>
 
 using namespace sciplot;
@@ -26,43 +26,57 @@ namespace
         }
 
     private:
-        // Transfer function: G(z) = (b1 * z^-1)/(1 - a1 * z^-1)
         float previousOutput = 0.0f;
         float previousInput = 0.0f;
         const float b1 = 0.1f;
         const float a1 = 0.9f;
     };
 
-    template<typename QNumberType>
-    class ScaledPid
-        : controllers::Pid<QNumberType>
-    {
-    public:
-        ScaledPid(float scale, typename controllers::Pid<QNumberType>::Tunings tunings, typename controllers::Pid<QNumberType>::Limits limits, bool autoMode = true)
-            : controllers::Pid<QNumberType>(tunings, limits, autoMode)
-            , scale(scale)
-            , squaredScale(scale * scale)
-        {}
-
-        void SetPoint(float setPoint)
-        {
-            controllers::Pid<QNumberType>::SetPoint(QNumberType(setPoint * scale));
-        }
-
-        float Process(float measuredProcessVariable)
-        {
-            return math::ToFloat(controllers::Pid<QNumberType>::Process(QNumberType(measuredProcessVariable * scale))) / squaredScale;
-        }
-
-    private:
-        float scale;
-        float squaredScale;
-    };
-
     struct SetPointSchedule
     {
         float time;
         float targetTemperature;
+    };
+
+    template<typename T>
+    class SimulationPidDriver
+        : public controllers::PidDriver<T>
+    {
+    public:
+        void Read(const infra::Function<void(T)>& onDone) override
+        {
+            readCallback = onDone;
+        }
+
+        void ControlAction(T action) override
+        {
+            lastControlAction = action;
+        }
+
+        void Start(std::chrono::system_clock::duration sampleTime) override
+        {
+            // Simulation doesn't need actual timing control
+        }
+
+        void Stop() override
+        {
+            // Simulation doesn't need actual timing control
+        }
+
+        void SimulateRead(T measuredValue)
+        {
+            if (readCallback)
+                readCallback(measuredValue);
+        }
+
+        T GetLastControlAction() const
+        {
+            return lastControlAction;
+        }
+
+    private:
+        infra::Function<void(T)> readCallback;
+        T lastControlAction{};
     };
 
     template<typename T>
@@ -76,26 +90,31 @@ namespace
             T kd;
         };
 
-        explicit TemperatureController(float scale, const Config& config, float targetTemperature)
-            : pidController(scale, { config.kp, config.ki, config.kd },
+        explicit TemperatureController(const Config& config, float targetTemperature)
+            : driver()
+            , pidController(driver, std::chrono::milliseconds(100),
+                  { config.kp, config.ki, config.kd },
                   { T(-0.9f), T(0.9f) })
             , targetTemperature(targetTemperature)
         {
             SetTargetTemperature(targetTemperature);
+            pidController.Enable();
         }
 
         void SetTargetTemperature(float temperatureCelsius)
         {
-            pidController.SetPoint(temperatureCelsius);
+            pidController.SetPoint(T(temperatureCelsius));
         }
 
-        float Process(float temperature)
+        T Process(float temperature)
         {
-            return pidController.Process(temperature);
+            driver.SimulateRead(T(temperature));
+            return driver.GetLastControlAction();
         }
 
     private:
-        ScaledPid<T> pidController;
+        SimulationPidDriver<T> driver;
+        controllers::PidIncremental<T> pidController;
         float targetTemperature;
     };
 
@@ -120,19 +139,19 @@ namespace
             , colour(colourParam)
         {
             auto setPoint = GetSetPointAndTime(setPointSchedule);
-            TemperatureController<QNumberType> controller(scale, config, setPoint.targetTemperature);
+            TemperatureController<QNumberType> controller(config, setPoint.targetTemperature);
             TemperaturePlant system(25.0f);
             float currentTime = 0.0f;
 
             while (currentTime < simulationTime)
             {
                 controller.SetTargetTemperature(setPoint.targetTemperature);
-                auto currentTemp = system.Update(results.controlActions.empty() ? 0.0f : results.controlActions.back());
+                auto currentTemp = system.Update(results.controlActions.empty() ? 0.0f : math::ToFloat(results.controlActions.back()));
                 auto controlAction = controller.Process(currentTemp);
 
                 results.times.push_back(currentTime);
                 results.temperatures.push_back(currentTemp);
-                results.controlActions.push_back(controlAction);
+                results.controlActions.push_back(math::ToFloat(controlAction));
 
                 currentTime += timeStep;
 

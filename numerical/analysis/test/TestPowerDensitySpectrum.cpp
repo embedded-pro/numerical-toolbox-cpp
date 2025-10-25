@@ -1,6 +1,6 @@
 #include "numerical/analysis/FastFourierTransform.hpp"
 #include "numerical/analysis/PowerDensitySpectrum.hpp"
-#include "numerical/controllers/test_doubles/Tolerance.hpp"
+#include "numerical/math/Tolerance.hpp"
 #include "numerical/windowing/Windowing.hpp"
 #include "gmock/gmock.h"
 

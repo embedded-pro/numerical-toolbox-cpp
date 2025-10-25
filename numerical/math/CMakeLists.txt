@@ -22,6 +22,7 @@ target_sources(numerical.math PRIVATE
     SingleInstructionMultipleData.hpp
     Statistics.hpp
     Toeplitz.hpp
+    Tolerance.hpp
     TrigonometricFunctions.hpp
 )
 

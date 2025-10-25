@@ -8,5 +8,4 @@ target_link_libraries(numerical.controllers_test_helper INTERFACE
 
 target_sources(numerical.controllers_test_helper PRIVATE
     NormalizedAngles.hpp
-    Tolerance.hpp
 )
