@@ -80,6 +80,47 @@ namespace
     };
 
     template<typename T>
+    class ScaledPidIncremental
+    {
+    public:
+        ScaledPidIncremental(float scale, controllers::PidDriver<T>& driver,
+            std::chrono::system_clock::duration sampleTime,
+            typename controllers::PidController<T>::Tunings tunings,
+            typename controllers::PidController<T>::Limits limits)
+            : pidController(driver, sampleTime, tunings, limits)
+            , scale(scale)
+            , squaredScale(scale * scale)
+        {}
+
+        void SetPoint(float setPoint)
+        {
+            pidController.SetPoint(T(setPoint * scale));
+        }
+
+        void Enable()
+        {
+            pidController.Enable();
+        }
+
+        void Disable()
+        {
+            pidController.Disable();
+        }
+
+        float Process(float measuredProcessVariable, controllers::PidDriver<T>& driver)
+        {
+            auto& simDriver = static_cast<SimulationPidDriver<T>&>(driver);
+            simDriver.SimulateRead(T(measuredProcessVariable * scale));
+            return math::ToFloat(simDriver.GetLastControlAction()) / squaredScale;
+        }
+
+    private:
+        controllers::PidIncremental<T> pidController;
+        float scale;
+        float squaredScale;
+    };
+
+    template<typename T>
     class TemperatureController
     {
     public:
@@ -90,9 +131,9 @@ namespace
             T kd;
         };
 
-        explicit TemperatureController(const Config& config, float targetTemperature)
+        explicit TemperatureController(float scale, const Config& config, float targetTemperature)
             : driver()
-            , pidController(driver, std::chrono::milliseconds(100),
+            , pidController(scale, driver, std::chrono::milliseconds(100),
                   { config.kp, config.ki, config.kd },
                   { T(-0.9f), T(0.9f) })
             , targetTemperature(targetTemperature)
@@ -103,18 +144,17 @@ namespace
 
         void SetTargetTemperature(float temperatureCelsius)
         {
-            pidController.SetPoint(T(temperatureCelsius));
+            pidController.SetPoint(temperatureCelsius);
         }
 
-        T Process(float temperature)
+        float Process(float temperature)
         {
-            driver.SimulateRead(T(temperature));
-            return driver.GetLastControlAction();
+            return pidController.Process(temperature, driver);
         }
 
     private:
         SimulationPidDriver<T> driver;
-        controllers::PidIncremental<T> pidController;
+        ScaledPidIncremental<T> pidController;
         float targetTemperature;
     };
 
@@ -138,20 +178,21 @@ namespace
             , label(labelParam)
             , colour(colourParam)
         {
+            const float scale = 0.01f;
             auto setPoint = GetSetPointAndTime(setPointSchedule);
-            TemperatureController<QNumberType> controller(config, setPoint.targetTemperature);
+            TemperatureController<QNumberType> controller(scale, config, setPoint.targetTemperature);
             TemperaturePlant system(25.0f);
             float currentTime = 0.0f;
 
             while (currentTime < simulationTime)
             {
                 controller.SetTargetTemperature(setPoint.targetTemperature);
-                auto currentTemp = system.Update(results.controlActions.empty() ? 0.0f : math::ToFloat(results.controlActions.back()));
+                auto currentTemp = system.Update(results.controlActions.empty() ? 0.0f : results.controlActions.back());
                 auto controlAction = controller.Process(currentTemp);
 
                 results.times.push_back(currentTime);
                 results.temperatures.push_back(currentTemp);
-                results.controlActions.push_back(math::ToFloat(controlAction));
+                results.controlActions.push_back(controlAction);
 
                 currentTime += timeStep;
 
@@ -184,11 +225,10 @@ namespace
         }
 
     private:
-        const float scale = 0.01f;
         const typename TemperatureController<QNumberType>::Config config{
-            QNumberType(1.0f * scale),
-            QNumberType(0.1f * scale),
-            QNumberType(0.35f * scale)
+            QNumberType(1.0f),
+            QNumberType(0.1f),
+            QNumberType(0.35f)
         };
 
         std::queue<SetPointSchedule> setPointSchedule;
@@ -203,8 +243,8 @@ namespace
 int main()
 {
     Simulator<float> simulatorFloat{ "Float", "red" };
-    Simulator<math::Q31> simulatorQ31{ "Q31", "green" };
-    Simulator<math::Q15> simulatorQ15{ "Q15", "blue" };
+    // Simulator<math::Q31> simulatorQ31{ "Q31", "green" };
+    // Simulator<math::Q15> simulatorQ15{ "Q15", "blue" };
 
     Plot tempPlot;
     tempPlot.xlabel("Time (s)");
@@ -216,8 +256,8 @@ int main()
     tempPlot.grid().show();
 
     simulatorFloat.PlotTarget(tempPlot);
-    simulatorQ31.PlotTarget(tempPlot);
-    simulatorQ15.PlotTarget(tempPlot);
+    // simulatorQ31.PlotTarget(tempPlot);
+    // simulatorQ15.PlotTarget(tempPlot);
 
     tempPlot.yrange(0, 70);
 
