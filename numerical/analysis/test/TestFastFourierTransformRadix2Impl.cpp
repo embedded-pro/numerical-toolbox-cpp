@@ -1,6 +1,6 @@
 #include "numerical/analysis/FastFourierTransformRadix2Impl.hpp"
-#include "numerical/controllers/test_doubles/Tolerance.hpp"
 #include "numerical/math/QNumber.hpp"
+#include "numerical/math/Tolerance.hpp"
 #include "gtest/gtest.h"
 #include <array>
 #include <cmath>

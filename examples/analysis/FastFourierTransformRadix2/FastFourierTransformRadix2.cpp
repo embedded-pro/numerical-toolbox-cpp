@@ -20,7 +20,7 @@ namespace
 
             for (std::size_t k = 0; k < Length; ++k)
             {
-                float angle = -M_PI * static_cast<float>(k) / static_cast<float>(Length);
+                float angle = static_cast<float>(-M_PI) * static_cast<float>(k) / static_cast<float>(Length);
                 factors.emplace_back(std::cos(angle), std::sin(angle));
             }
         }

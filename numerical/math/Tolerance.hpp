@@ -1,5 +1,4 @@
-#ifndef CONTROLLERS_TEST_DOUBLES_TOLERANCE_HPP
-#define CONTROLLERS_TEST_DOUBLES_TOLERANCE_HPP
+#pragma once
 
 #include "numerical/math/QNumber.hpp"
 
@@ -16,5 +15,3 @@ namespace controllers
             return 7e-2f;
     }
 }
-
-#endif

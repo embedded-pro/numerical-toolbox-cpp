@@ -1,5 +1,4 @@
-#ifndef CONTROLLERS_TEST_DOUBLES_NORMALIZED_ANGLES_HPP
-#define CONTROLLERS_TEST_DOUBLES_NORMALIZED_ANGLES_HPP
+#pragma once
 
 #include "numerical/math/QNumber.hpp"
 #include <cmath>
@@ -22,5 +21,3 @@ namespace controllers
         return T(normalizedTo2Pi / TWO_PI) * MAX_VALUE;
     }
 }
-
-#endif

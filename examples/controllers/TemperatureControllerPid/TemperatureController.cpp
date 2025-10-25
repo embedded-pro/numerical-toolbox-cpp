@@ -1,7 +1,7 @@
-#include "numerical/controllers/Pid.hpp"
+#include "numerical/controllers/implementations/PidIncremental.hpp"
+#include <chrono>
 #include <queue>
 #include <sciplot/sciplot.hpp>
-#include <variant>
 #include <vector>
 
 using namespace sciplot;
@@ -26,43 +26,98 @@ namespace
         }
 
     private:
-        // Transfer function: G(z) = (b1 * z^-1)/(1 - a1 * z^-1)
         float previousOutput = 0.0f;
         float previousInput = 0.0f;
         const float b1 = 0.1f;
         const float a1 = 0.9f;
     };
 
-    template<typename QNumberType>
-    class ScaledPid
-        : controllers::Pid<QNumberType>
+    struct SetPointSchedule
+    {
+        float time;
+        float targetTemperature;
+    };
+
+    template<typename T>
+    class SimulationPidDriver
+        : public controllers::PidDriver<T>
     {
     public:
-        ScaledPid(float scale, typename controllers::Pid<QNumberType>::Tunnings tunnings, typename controllers::Pid<QNumberType>::Limits limits, bool autoMode = true)
-            : controllers::Pid<QNumberType>(tunnings, limits, autoMode)
+        void Read(const infra::Function<void(T)>& onDone) override
+        {
+            readCallback = onDone;
+        }
+
+        void ControlAction(T action) override
+        {
+            lastControlAction = action;
+        }
+
+        void Start(std::chrono::system_clock::duration sampleTime) override
+        {
+            // Simulation doesn't need actual timing control
+        }
+
+        void Stop() override
+        {
+            // Simulation doesn't need actual timing control
+        }
+
+        void SimulateRead(T measuredValue)
+        {
+            if (readCallback)
+                readCallback(measuredValue);
+        }
+
+        T GetLastControlAction() const
+        {
+            return lastControlAction;
+        }
+
+    private:
+        infra::Function<void(T)> readCallback;
+        T lastControlAction{};
+    };
+
+    template<typename T>
+    class ScaledPidIncremental
+    {
+    public:
+        ScaledPidIncremental(float scale, controllers::PidDriver<T>& driver,
+            std::chrono::system_clock::duration sampleTime,
+            typename controllers::PidController<T>::Tunings tunings,
+            typename controllers::PidController<T>::Limits limits)
+            : pidController(driver, sampleTime, tunings, limits)
             , scale(scale)
             , squaredScale(scale * scale)
         {}
 
         void SetPoint(float setPoint)
         {
-            controllers::Pid<QNumberType>::SetPoint(QNumberType(setPoint * scale));
+            pidController.SetPoint(T(setPoint * scale));
         }
 
-        float Process(float measuredProcessVariable)
+        void Enable()
         {
-            return math::ToFloat(controllers::Pid<QNumberType>::Process(QNumberType(measuredProcessVariable * scale))) / squaredScale;
+            pidController.Enable();
+        }
+
+        void Disable()
+        {
+            pidController.Disable();
+        }
+
+        float Process(float measuredProcessVariable, controllers::PidDriver<T>& driver)
+        {
+            auto& simDriver = static_cast<SimulationPidDriver<T>&>(driver);
+            simDriver.SimulateRead(T(measuredProcessVariable * scale));
+            return math::ToFloat(simDriver.GetLastControlAction()) / squaredScale;
         }
 
     private:
+        controllers::PidIncremental<T> pidController;
         float scale;
         float squaredScale;
-    };
-
-    struct SetPointSchedule
-    {
-        float time;
-        float targetTemperature;
     };
 
     template<typename T>
@@ -77,11 +132,14 @@ namespace
         };
 
         explicit TemperatureController(float scale, const Config& config, float targetTemperature)
-            : pidController(scale, { config.kp, config.ki, config.kd },
+            : driver()
+            , pidController(scale, driver, std::chrono::milliseconds(100),
+                  { config.kp, config.ki, config.kd },
                   { T(-0.9f), T(0.9f) })
             , targetTemperature(targetTemperature)
         {
             SetTargetTemperature(targetTemperature);
+            pidController.Enable();
         }
 
         void SetTargetTemperature(float temperatureCelsius)
@@ -91,11 +149,12 @@ namespace
 
         float Process(float temperature)
         {
-            return pidController.Process(temperature);
+            return pidController.Process(temperature, driver);
         }
 
     private:
-        ScaledPid<T> pidController;
+        SimulationPidDriver<T> driver;
+        ScaledPidIncremental<T> pidController;
         float targetTemperature;
     };
 
@@ -119,6 +178,7 @@ namespace
             , label(labelParam)
             , colour(colourParam)
         {
+            const float scale = 0.01f;
             auto setPoint = GetSetPointAndTime(setPointSchedule);
             TemperatureController<QNumberType> controller(scale, config, setPoint.targetTemperature);
             TemperaturePlant system(25.0f);
@@ -141,11 +201,11 @@ namespace
             }
         }
 
-        SetPointSchedule GetSetPointAndTime(std::queue<SetPointSchedule>& setPointSchedule)
+        SetPointSchedule GetSetPointAndTime(std::queue<SetPointSchedule>& _setPointSchedule)
         {
-            auto setPointAndTime = setPointSchedule.front();
-            setPointSchedule.pop();
-            return setPointAndTime;
+            auto value = _setPointSchedule.front();
+            _setPointSchedule.pop();
+            return value;
         }
 
         void PlotTarget(Plot& plot)
@@ -165,11 +225,10 @@ namespace
         }
 
     private:
-        const float scale = 0.01f;
         const typename TemperatureController<QNumberType>::Config config{
-            QNumberType(1.0f * scale),
-            QNumberType(0.1f * scale),
-            QNumberType(0.35f * scale)
+            QNumberType(1.0f),
+            QNumberType(0.1f),
+            QNumberType(0.35f)
         };
 
         std::queue<SetPointSchedule> setPointSchedule;

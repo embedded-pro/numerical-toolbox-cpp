@@ -10,8 +10,10 @@ target_sources(numerical.examples.analysis.filter_frequency_response PRIVATE
     FilterFrequencyResponse.cpp
 )
 
+target_include_directories(numerical.examples.analysis.filter_frequency_response SYSTEM PRIVATE ${sciplot_SOURCE_DIR})
+
 if(MSVC)
-    target_compile_options(numerical.examples.analysis.filter_frequency_response PRIVATE /W4)
+    target_compile_options(numerical.examples.analysis.filter_frequency_response PRIVATE /W4 /wd4244 /wd4100)
 else()
     target_compile_options(numerical.examples.analysis.filter_frequency_response PRIVATE 
         -Wno-error
