@@ -30,7 +30,7 @@ namespace windowing
             return (0.54f - 0.46f * std::cos(2.0f * M_PI * n / order)) * 0.9999f;
         }
 
-        QNumberType Power(std::size_t order) override
+        QNumberType Power([[maybe_unused]] std::size_t order) override
         {
             return QNumberType(0.397f);
         }

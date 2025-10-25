@@ -13,7 +13,7 @@ target_sources(numerical.examples.controllers.temperature_controller PRIVATE
 target_include_directories(numerical.examples.controllers.temperature_controller SYSTEM PRIVATE ${sciplot_SOURCE_DIR})
 
 if(MSVC)
-    target_compile_options(numerical.examples.controllers.temperature_controller PRIVATE /W4)
+    target_compile_options(numerical.examples.controllers.temperature_controller PRIVATE /W4 /wd4100)
 else()
     target_compile_options(numerical.examples.controllers.temperature_controller PRIVATE 
         -Wno-error

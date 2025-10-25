@@ -66,9 +66,9 @@ namespace controllers
     }
 
     template<class QNumberType>
-    void PidIncremental<QNumberType>::SetPoint(QNumberType setPoint)
+    void PidIncremental<QNumberType>::SetPoint(QNumberType _setPoint)
     {
-        this->setPoint.emplace(setPoint);
+        this->setPoint.emplace(_setPoint);
     }
 
     template<class QNumberType>
