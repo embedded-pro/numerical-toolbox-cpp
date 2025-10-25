@@ -243,8 +243,8 @@ namespace
 int main()
 {
     Simulator<float> simulatorFloat{ "Float", "red" };
-    // Simulator<math::Q31> simulatorQ31{ "Q31", "green" };
-    // Simulator<math::Q15> simulatorQ15{ "Q15", "blue" };
+    Simulator<math::Q31> simulatorQ31{ "Q31", "green" };
+    Simulator<math::Q15> simulatorQ15{ "Q15", "blue" };
 
     Plot tempPlot;
     tempPlot.xlabel("Time (s)");
@@ -256,8 +256,8 @@ int main()
     tempPlot.grid().show();
 
     simulatorFloat.PlotTarget(tempPlot);
-    // simulatorQ31.PlotTarget(tempPlot);
-    // simulatorQ15.PlotTarget(tempPlot);
+    simulatorQ31.PlotTarget(tempPlot);
+    simulatorQ15.PlotTarget(tempPlot);
 
     tempPlot.yrange(0, 70);
 

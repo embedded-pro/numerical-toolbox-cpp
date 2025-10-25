@@ -10,6 +10,8 @@ target_sources(numerical.examples.controllers.temperature_controller PRIVATE
     TemperatureController.cpp
 )
 
+target_include_directories(numerical.examples.controllers.temperature_controller SYSTEM PRIVATE ${sciplot_SOURCE_DIR})
+
 if(MSVC)
     target_compile_options(numerical.examples.controllers.temperature_controller PRIVATE /W4)
 else()

@@ -10,6 +10,8 @@ target_sources(numerical.examples.analysis.power_density_spectrum_welch PRIVATE
     PowerDensitySpectrumWelch.cpp
 )
 
+target_include_directories(numerical.examples.analysis.power_density_spectrum_welch SYSTEM PRIVATE ${sciplot_SOURCE_DIR})
+
 if(MSVC)
     target_compile_options(numerical.examples.analysis.power_density_spectrum_welch PRIVATE /W4)
 else()

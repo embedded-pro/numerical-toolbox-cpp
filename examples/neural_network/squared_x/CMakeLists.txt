@@ -10,6 +10,8 @@ target_sources(numerical.examples.neural_network.squared_x PRIVATE
     Main.cpp
 )
 
+target_include_directories(numerical.examples.neural_network.squared_x SYSTEM PRIVATE ${sciplot_SOURCE_DIR})
+
 if(MSVC)
     target_compile_options(numerical.examples.neural_network.squared_x PRIVATE /W4)
 else()
