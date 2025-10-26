@@ -12,12 +12,11 @@ namespace
     {
     public:
         ::testing::StrictMock<controllers::MockPidDriver<T>> driver;
-        std::optional<controllers::PidIncremental<T>> controller;
+        std::optional<controllers::PidIncrementalAsynchronous<T>> controller;
         std::chrono::system_clock::duration sampleTime{ std::chrono::milliseconds(100) };
         infra::Function<void(T)> readCallback;
 
-        void CreateController(typename controllers::PidController<T>::Tunings tunings,
-            typename controllers::PidController<T>::Limits limits)
+        void CreateController(controllers::PidTunings<T> tunings, controllers::PidLimits<T> limits)
         {
             using ::testing::_;
             using ::testing::SaveArg;
@@ -44,7 +43,7 @@ namespace
     TYPED_TEST_SUITE(TestPidIncremental, TestedTypes);
 
     template<typename T>
-    typename controllers::PidController<T>::Limits CreateLimits()
+    typename controllers::PidLimits<T> CreateLimits()
     {
         if constexpr (std::is_same_v<T, float>)
             return { -1000, 1000 };
@@ -55,10 +54,10 @@ namespace
 
 TYPED_TEST(TestPidIncremental, no_variation_input_results_in_no_action_control)
 {
-    float tolerance = controllers::GetTolerance<TypeParam>();
+    float tolerance = math::Tolerance<TypeParam>();
 
     this->CreateController(
-        typename controllers::PidController<TypeParam>::Tunings{
+        typename controllers::PidTunings<TypeParam>{
             TypeParam(0.1f),
             TypeParam(0.1f),
             TypeParam(0.1f) },
@@ -74,10 +73,10 @@ TYPED_TEST(TestPidIncremental, no_variation_input_results_in_no_action_control)
 
 TYPED_TEST(TestPidIncremental, proportional_action)
 {
-    float tolerance = controllers::GetTolerance<TypeParam>();
+    float tolerance = math::Tolerance<TypeParam>();
 
     this->CreateController(
-        typename controllers::PidController<TypeParam>::Tunings{
+        typename controllers::PidTunings<TypeParam>{
             TypeParam(0.5f),
             TypeParam(0.0f),
             TypeParam(0.0f) },
@@ -95,10 +94,10 @@ TYPED_TEST(TestPidIncremental, proportional_action)
 
 TYPED_TEST(TestPidIncremental, integrative_action)
 {
-    float tolerance = controllers::GetTolerance<TypeParam>();
+    float tolerance = math::Tolerance<TypeParam>();
 
     this->CreateController(
-        typename controllers::PidController<TypeParam>::Tunings{
+        typename controllers::PidTunings<TypeParam>{
             TypeParam(0.0f),
             TypeParam(0.1f),
             TypeParam(0.0f) },
@@ -115,10 +114,10 @@ TYPED_TEST(TestPidIncremental, integrative_action)
 
 TYPED_TEST(TestPidIncremental, derivative_action)
 {
-    float tolerance = controllers::GetTolerance<TypeParam>();
+    float tolerance = math::Tolerance<TypeParam>();
 
     this->CreateController(
-        typename controllers::PidController<TypeParam>::Tunings{
+        typename controllers::PidTunings<TypeParam>{
             TypeParam(0.0f),
             TypeParam(0.0f),
             TypeParam(0.1f) },
@@ -135,11 +134,11 @@ TYPED_TEST(TestPidIncremental, derivative_action)
 
 TYPED_TEST(TestPidIncremental, check_output_limits)
 {
-    float tolerance = controllers::GetTolerance<TypeParam>();
+    float tolerance = math::Tolerance<TypeParam>();
     auto limits = CreateLimits<TypeParam>();
 
     this->CreateController(
-        typename controllers::PidController<TypeParam>::Tunings{
+        typename controllers::PidTunings<TypeParam>{
             TypeParam(0.05f),
             TypeParam(0.05f),
             TypeParam(0.01f) },
@@ -160,10 +159,10 @@ TYPED_TEST(TestPidIncremental, check_output_limits)
 
 TYPED_TEST(TestPidIncremental, process_reaches_set_point)
 {
-    float tolerance = controllers::GetTolerance<TypeParam>();
+    float tolerance = math::Tolerance<TypeParam>();
 
     this->CreateController(
-        typename controllers::PidController<TypeParam>::Tunings{
+        typename controllers::PidTunings<TypeParam>{
             TypeParam(0.1f),
             TypeParam(0.05f),
             TypeParam(0.02f) },
