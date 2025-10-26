@@ -2,16 +2,16 @@
 
 #include "numerical/math/QNumber.hpp"
 
-namespace controllers
+namespace math
 {
     template<typename T>
-    float GetTolerance()
+    float Tolerance()
     {
         if constexpr (std::is_same_v<T, float>)
             return 1e-3f;
         else if constexpr (std::is_same_v<T, math::Q31>)
-            return 5e-2f;
+            return 1e-3f;
         else
-            return 7e-2f;
+            return 1e-3f;
     }
 }

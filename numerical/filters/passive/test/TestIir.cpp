@@ -34,7 +34,7 @@ TYPED_TEST(TestIir, when_disabled_returns_input_unchanged)
 
 TYPED_TEST(TestIir, first_order_lowpass_filter_check)
 {
-    float tolerance = controllers::GetTolerance<TypeParam>();
+    float tolerance = math::Tolerance<TypeParam>();
 
     this->b_coeffs = { TypeParam(0.1f), TypeParam(0.0f) };
     this->a_coeffs = { TypeParam(0.5f), TypeParam(0.4f) };
@@ -48,7 +48,7 @@ TYPED_TEST(TestIir, first_order_lowpass_filter_check)
 
 TYPED_TEST(TestIir, reset_clears_filter_state)
 {
-    float tolerance = controllers::GetTolerance<TypeParam>();
+    float tolerance = math::Tolerance<TypeParam>();
 
     this->b_coeffs = { TypeParam(0.1f), TypeParam(0.0f) };
     this->a_coeffs = { TypeParam(0.5f), TypeParam(0.4f) };
@@ -65,7 +65,7 @@ TYPED_TEST(TestIir, reset_clears_filter_state)
 
 TYPED_TEST(TestIir, enable_disable_toggle)
 {
-    float tolerance = controllers::GetTolerance<TypeParam>();
+    float tolerance = math::Tolerance<TypeParam>();
 
     this->b_coeffs = { TypeParam(0.1f), TypeParam(0.0f) };
     this->a_coeffs = { TypeParam(0.5f), TypeParam(0.4f) };
@@ -83,7 +83,7 @@ TYPED_TEST(TestIir, enable_disable_toggle)
 
 TYPED_TEST(TestIir, second_order_filter_check)
 {
-    float tolerance = controllers::GetTolerance<TypeParam>();
+    float tolerance = math::Tolerance<TypeParam>();
 
     this->b_coeffs = { TypeParam(0.1f), TypeParam(0.2f) };
     this->a_coeffs = { TypeParam(0.5f), TypeParam(-0.1f) };
