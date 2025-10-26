@@ -73,10 +73,6 @@ namespace controllers
         void Enable() override;
         void Disable() override;
         QNumberType Process(QNumberType processVariable) override;
-
-    private:
-        PidDriver<QNumberType>& driver;
-        std::chrono::system_clock::duration sampleTime;
     };
 
     ////    Implementation    ////
@@ -231,7 +227,6 @@ namespace controllers
     template<class QNumberType>
     void PidIncrementalSynchronous<QNumberType>::Disable()
     {
-        PidIncrementalBase<QNumberType>::Disable();
     }
 
     template<class QNumberType>
