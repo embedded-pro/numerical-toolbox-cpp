@@ -85,8 +85,8 @@ namespace
     public:
         ScaledPidIncremental(float scale, controllers::PidDriver<T>& driver,
             std::chrono::system_clock::duration sampleTime,
-            typename controllers::PidController<T>::Tunings tunings,
-            typename controllers::PidController<T>::Limits limits)
+            controllers::PidTunings<T> tunings,
+            controllers::PidLimits<T> limits)
             : pidController(driver, sampleTime, tunings, limits)
             , scale(scale)
             , squaredScale(scale * scale)
@@ -115,7 +115,7 @@ namespace
         }
 
     private:
-        controllers::PidIncremental<T> pidController;
+        controllers::PidIncrementalAsynchronous<T> pidController;
         float scale;
         float squaredScale;
     };
