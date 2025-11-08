@@ -113,6 +113,7 @@ endif()
 
 emil_clangformat_directories(examples DIRECTORIES .)
 emil_clangformat_directories(numerical DIRECTORIES .)
+emil_coverage_targets(DIRECTORIES .)
 
 if (NUMERICAL_TOOLBOX_STANDALONE)
     emil_folderize_all_targets()
