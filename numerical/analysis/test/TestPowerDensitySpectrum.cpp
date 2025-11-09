@@ -1,6 +1,6 @@
 #include "numerical/analysis/FastFourierTransform.hpp"
 #include "numerical/analysis/PowerDensitySpectrum.hpp"
-#include "numerical/controllers/test_doubles/Tolerance.hpp"
+#include "numerical/math/Tolerance.hpp"
 #include "numerical/windowing/Windowing.hpp"
 #include "gmock/gmock.h"
 
@@ -109,7 +109,7 @@ TYPED_TEST(TestPowerSpectralDensity, when_input_smaller_than_fft_size_throws_ass
 
 TYPED_TEST(TestPowerSpectralDensity, overlapping_segments_are_properly_averaged)
 {
-    float tolerance = controllers::GetTolerance<TypeParam>();
+    float tolerance = math::Tolerance<TypeParam>();
 
     typename TestFixture::PowerDensitySpectrum::VectorReal::template WithMaxSize<2 * TestFixture::length> input;
 

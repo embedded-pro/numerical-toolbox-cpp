@@ -1,6 +1,6 @@
-#include "numerical/controllers/test_doubles/Tolerance.hpp"
 #include "numerical/filters/passive/Fir.hpp"
 #include "numerical/math/RecursiveBuffer.hpp"
+#include "numerical/math/Tolerance.hpp"
 #include "gtest/gtest.h"
 
 namespace
@@ -31,7 +31,7 @@ TYPED_TEST(TestFir, when_disabled_returns_input_unchanged)
 
 TYPED_TEST(TestFir, simple_moving_average_filter_check)
 {
-    float tolerance = controllers::GetTolerance<TypeParam>();
+    float tolerance = math::Tolerance<TypeParam>();
 
     // Coefficients for a 3-point moving average (each coefficient = 0.25)
     this->b_coeffs = { TypeParam(0.25f), TypeParam(0.25f), TypeParam(0.25f) };
@@ -44,7 +44,7 @@ TYPED_TEST(TestFir, simple_moving_average_filter_check)
 
 TYPED_TEST(TestFir, reset_clears_filter_state)
 {
-    float tolerance = controllers::GetTolerance<TypeParam>();
+    float tolerance = math::Tolerance<TypeParam>();
 
     this->b_coeffs = { TypeParam(0.3f), TypeParam(0.2f), TypeParam(0.1f) };
     this->filter.emplace(this->b_coeffs);
@@ -60,7 +60,7 @@ TYPED_TEST(TestFir, reset_clears_filter_state)
 
 TYPED_TEST(TestFir, enable_disable_toggle)
 {
-    float tolerance = controllers::GetTolerance<TypeParam>();
+    float tolerance = math::Tolerance<TypeParam>();
 
     this->b_coeffs = { TypeParam(0.3f), TypeParam(0.2f), TypeParam(0.1f) };
     this->filter.emplace(this->b_coeffs);
@@ -76,7 +76,7 @@ TYPED_TEST(TestFir, enable_disable_toggle)
 
 TYPED_TEST(TestFir, weighted_average_filter_check)
 {
-    float tolerance = controllers::GetTolerance<TypeParam>();
+    float tolerance = math::Tolerance<TypeParam>();
 
     // Weighted average with decreasing weights
     this->b_coeffs = { TypeParam(0.3f), TypeParam(0.2f), TypeParam(0.1f) };

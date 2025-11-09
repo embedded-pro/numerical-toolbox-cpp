@@ -38,7 +38,6 @@ namespace solvers
         SolutionVector k;
 
         T prev_error = first_row.at(0, 0);
-        T curr_error;
 
         k.at(0, 0) = b.at(0, 0) / prev_error;
         phi.at(0, 0) = k.at(0, 0);

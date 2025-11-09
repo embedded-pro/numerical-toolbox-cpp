@@ -1,6 +1,6 @@
 #include "numerical/analysis/FastFourierTransformRadix2Impl.hpp"
-#include "numerical/controllers/test_doubles/Tolerance.hpp"
 #include "numerical/math/QNumber.hpp"
+#include "numerical/math/Tolerance.hpp"
 #include "gtest/gtest.h"
 #include <array>
 #include <cmath>
@@ -65,7 +65,7 @@ TYPED_TEST(TestFastFourierTransform, zero_input_produces_zero_output)
     auto& result = this->fft->Forward(this->timeDomain);
 
     for (const auto& value : result)
-        EXPECT_NEAR(math::ToFloat(CalculateMagnitude(value)), 0.0f, controllers::GetTolerance<TypeParam>());
+        EXPECT_NEAR(math::ToFloat(CalculateMagnitude(value)), 0.0f, math::Tolerance<TypeParam>());
 }
 
 TYPED_TEST(TestFastFourierTransform, dc_signal_appears_in_zero_frequency_bin)
@@ -79,10 +79,10 @@ TYPED_TEST(TestFastFourierTransform, dc_signal_appears_in_zero_frequency_bin)
 
     EXPECT_NEAR(math::ToFloat(CalculateMagnitude(result[0])),
         static_cast<float>(TestFastFourierTransform<TypeParam>::Length) * 0.1f,
-        controllers::GetTolerance<TypeParam>());
+        math::Tolerance<TypeParam>());
 
     for (size_t i = 1; i < result.size(); ++i)
-        EXPECT_NEAR(math::ToFloat(CalculateMagnitude(result[i])), 0.0f, controllers::GetTolerance<TypeParam>());
+        EXPECT_NEAR(math::ToFloat(CalculateMagnitude(result[i])), 0.0f, math::Tolerance<TypeParam>());
 }
 
 TYPED_TEST(TestFastFourierTransform, forward_and_inverse_transform_recovers_original_signal)
@@ -100,7 +100,7 @@ TYPED_TEST(TestFastFourierTransform, forward_and_inverse_transform_recovers_orig
     auto& recovered = this->fft->Inverse(frequency);
 
     for (size_t i = 0; i < signal.size(); ++i)
-        EXPECT_NEAR(math::ToFloat(recovered[i]), signal[i], controllers::GetTolerance<TypeParam>());
+        EXPECT_NEAR(math::ToFloat(recovered[i]), signal[i], math::Tolerance<TypeParam>());
 }
 
 TYPED_TEST(TestFastFourierTransform, nyquist_frequency_detection)
@@ -115,5 +115,5 @@ TYPED_TEST(TestFastFourierTransform, nyquist_frequency_detection)
 
     EXPECT_NEAR(math::ToFloat(CalculateMagnitude(result[TestFastFourierTransform<TypeParam>::Length / 2])),
         static_cast<float>(TestFastFourierTransform<TypeParam>::Length) * 0.1f,
-        controllers::GetTolerance<TypeParam>());
+        math::Tolerance<TypeParam>());
 }

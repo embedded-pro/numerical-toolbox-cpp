@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <!-- Background -->
+  <rect width="800" height="600" fill="white"/>
+  
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold">Regularization Methods</text>
+  
+  <!-- Regularization Effects -->
+  <g id="coordinate-system">
+    <!-- Axes for weight visualization -->
+    <rect x="50" y="80" width="700" height="280" fill="#f9f9f9" stroke="#666" stroke-width="1"/>
+    
+    <!-- Main Title -->
+    <text x="400" y="110" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold">Effect on Model Parameters</text>
+  </g>
+  
+  <!-- Parameter Spaces -->
+  <g id="parameter-spaces">
+    <!-- No Regularization -->
+    <g transform="translate(170, 180)">
+      <text x="0" y="-50" text-anchor="middle" font-family="Arial" font-size="16" font-weight="bold">No Regularization</text>
+      
+      <!-- Coordinate System -->
+      <line x1="-70" y1="0" x2="70" y2="0" stroke="black" stroke-width="1"/>
+      <line x1="0" y1="-70" x2="0" y2="70" stroke="black" stroke-width="1"/>
+      <text x="75" y="15" font-family="Arial" font-size="12">w₁</text>
+      <text x="15" y="-75" font-family="Arial" font-size="12">w₂</text>
+      
+      <!-- Loss Function Contours -->
+      <ellipse cx="0" cy="0" rx="40" ry="60" fill="none" stroke="#FF9933" stroke-width="1"/>
+      <ellipse cx="0" cy="0" rx="20" ry="30" fill="none" stroke="#FF9933" stroke-width="1"/>
+      
+      <!-- Optimal Point -->
+      <circle cx="48" cy="-35" r="5" fill="#FF4500" stroke="black" stroke-width="1"/>
+      <text x="50" y="-45" font-family="Arial" font-size="12">optimal</text>
+    </g>
+    
+    <!-- L1 Regularization -->
+    <g transform="translate(400, 180)">
+      <text x="0" y="-50" text-anchor="middle" font-family="Arial" font-size="16" font-weight="bold">L1 Regularization</text>
+      
+      <!-- Coordinate System -->
+      <line x1="-70" y1="0" x2="70" y2="0" stroke="black" stroke-width="1"/>
+      <line x1="0" y1="-70" x2="0" y2="70" stroke="black" stroke-width="1"/>
+      <text x="75" y="15" font-family="Arial" font-size="12">w₁</text>
+      <text x="15" y="-75" font-family="Arial" font-size="12">w₂</text>
+      
+      <!-- Loss Function Contours -->
+      <ellipse cx="0" cy="0" rx="40" ry="60" fill="none" stroke="#FF9933" stroke-width="1"/>
+      <ellipse cx="0" cy="0" rx="20" ry="30" fill="none" stroke="#FF9933" stroke-width="1"/>
+      
+      <!-- L1 Constraint (Diamond) -->
+      <polygon points="0,-40 40,0 0,40 -40,0" fill="none" stroke="#3366FF" stroke-width="2" stroke-dasharray="4,2"/>
+      
+      <!-- Optimal Point -->
+      <circle cx="40" cy="0" r="5" fill="#FF4500" stroke="black" stroke-width="1"/>
+      <text x="40" y="-10" font-family="Arial" font-size="12">sparse</text>
+    </g>
+    
+    <!-- L2 Regularization -->
+    <g transform="translate(630, 180)">
+      <text x="0" y="-50" text-anchor="middle" font-family="Arial" font-size="16" font-weight="bold">L2 Regularization</text>
+      
+      <!-- Coordinate System -->
+      <line x1="-70" y1="0" x2="70" y2="0" stroke="black" stroke-width="1"/>
+      <line x1="0" y1="-70" x2="0" y2="70" stroke="black" stroke-width="1"/>
+      <text x="75" y="15" font-family="Arial" font-size="12">w₁</text>
+      <text x="15" y="-75" font-family="Arial" font-size="12">w₂</text>
+      
+      <!-- Loss Function Contours -->
+      <ellipse cx="0" cy="0" rx="40" ry="60" fill="none" stroke="#FF9933" stroke-width="1"/>
+      <ellipse cx="0" cy="0" rx="20" ry="30" fill="none" stroke="#FF9933" stroke-width="1"/>
+      
+      <!-- L2 Constraint (Circle) -->
+      <circle cx="0" cy="0" r="40" fill="none" stroke="#3366FF" stroke-width="2" stroke-dasharray="4,2"/>
+      
+      <!-- Optimal Point -->
+      <circle cx="20" cy="-30" r="5" fill="#FF4500" stroke="black" stroke-width="1"/>
+      <text x="25" y="-40" font-family="Arial" font-size="12">small</text>
+    </g>
+  </g>
+  
+  <!-- Weight Visualization -->
+  <g id="weight-patterns">
+    <rect x="50" y="380" width="700" height="170" fill="#f8f8f8" stroke="#666" stroke-width="1"/>
+    
+    <!-- Section title -->
+    <text x="400" y="410" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold">Weight Distribution</text>
+    
+    <!-- No Regularization -->
+    <g transform="translate(170, 450)">
+      <!-- Bars for weights -->
+      <rect x="-60" y="0" width="10" height="-40" fill="#FF9933" stroke="black" stroke-width="1"/>
+      <rect x="-45" y="0" width="10" height="30" fill="#FF9933" stroke="black" stroke-width="1"/>
+      <rect x="-30" y="0" width="10" height="-50" fill="#FF9933" stroke="black" stroke-width="1"/>
+      <rect x="-15" y="0" width="10" height="20" fill="#FF9933" stroke="black" stroke-width="1"/>
+      <rect x="0" y="0" width="10" height="-80" fill="#FF9933" stroke="black" stroke-width="1"/>
+      <rect x="15" y="0" width="10" height="60" fill="#FF9933" stroke="black" stroke-width="1"/>
+      <rect x="30" y="0" width="10" height="-35" fill="#FF9933" stroke="black" stroke-width="1"/>
+      <rect x="45" y="0" width="10" height="45" fill="#FF9933" stroke="black" stroke-width="1"/>
+      
+      <!-- Zero line -->
+      <line x1="-70" y1="0" x2="70" y2="0" stroke="black" stroke-width="1"/>
+      
+      <!-- Label -->
+      <text x="0" y="70" text-anchor="middle" font-family="Arial" font-size="14">Many large weights</text>
+    </g>
+    
+    <!-- L1 Regularization -->
+    <g transform="translate(400, 450)">
+      <!-- Bars for weights -->
+      <rect x="-60" y="0" width="10" height="-10" fill="#3366FF" stroke="black" stroke-width="1"/>
+      <rect x="-45" y="0" width="10" height="0" fill="#3366FF" stroke="black" stroke-width="1"/>
+      <rect x="-30" y="0" width="10" height="-30" fill="#3366FF" stroke="black" stroke-width="1"/>
+      <rect x="-15" y="0" width="10" height="0" fill="#3366FF" stroke="black" stroke-width="1"/>
+      <rect x="0" y="0" width="10" height="-40" fill="#3366FF" stroke="black" stroke-width="1"/>
+      <rect x="15" y="0" width="10" height="20" fill="#3366FF" stroke="black" stroke-width="1"/>
+      <rect x="30" y="0" width="10" height="0" fill="#3366FF" stroke="black" stroke-width="1"/>
+      <rect x="45" y="0" width="10" height="0" fill="#3366FF" stroke="black" stroke-width="1"/>
+      
+      <!-- Zero line -->
+      <line x1="-70" y1="0" x2="70" y2="0" stroke="black" stroke-width="1"/>
+      
+      <!-- Label -->
+      <text x="0" y="70" text-anchor="middle" font-family="Arial" font-size="14">Some weights at zero</text>
+    </g>
+    
+    <!-- L2 Regularization -->
+    <g transform="translate(630, 450)">
+      <!-- Bars for weights -->
+      <rect x="-60" y="0" width="10" height="-15" fill="#66CC99" stroke="black" stroke-width="1"/>
+      <rect x="-45" y="0" width="10" height="10" fill="#66CC99" stroke="black" stroke-width="1"/>
+      <rect x="-30" y="0" width="10" height="-25" fill="#66CC99" stroke="black" stroke-width="1"/>
+      <rect x="-15" y="0" width="10" height="8" fill="#66CC99" stroke="black" stroke-width="1"/>
+      <rect x="0" y="0" width="10" height="-30" fill="#66CC99" stroke="black" stroke-width="1"/>
+      <rect x="15" y="0" width="10" height="20" fill="#66CC99" stroke="black" stroke-width="1"/>
+      <rect x="30" y="0" width="10" height="-12" fill="#66CC99" stroke="black" stroke-width="1"/>
+      <rect x="45" y="0" width="10" height="15" fill="#66CC99" stroke="black" stroke-width="1"/>
+      
+      <!-- Zero line -->
+      <line x1="-70" y1="0" x2="70" y2="0" stroke="black" stroke-width="1"/>
+      
+      <!-- Label -->
+      <text x="0" y="70" text-anchor="middle" font-family="Arial" font-size="14">All weights small</text>
+    </g>
+  </g>
+  
+  <!-- Formulas -->
+  <g id="formulas">
+    <text x="100" y="565" font-family="Arial" font-size="14" fill="#FF9933" font-weight="bold">Unregularized Loss: </text>
+    <text x="245" y="565" font-family="Arial" font-size="14">L(θ)</text>
+    
+    <text x="345" y="565" font-family="Arial" font-size="14" fill="#3366FF" font-weight="bold">L1 Regularization: </text>
+    <text x="485" y="565" font-family="Arial" font-size="14">L(θ) + λ∑|θᵢ|</text>
+    
+    <text x="575" y="565" font-family="Arial" font-size="14" fill="#66CC99" font-weight="bold">L2 Regularization: </text>
+    <text x="715" y="565" font-family="Arial" font-size="14">L(θ) + λ∑θᵢ²</text>
+  </g>
+</svg>

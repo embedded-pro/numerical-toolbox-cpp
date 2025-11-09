@@ -1,5 +1,4 @@
-#ifndef WINDOWING_HPP
-#define WINDOWING_HPP
+#pragma once
 
 #include "numerical/math/QNumber.hpp"
 #include <cmath>
@@ -15,7 +14,6 @@ namespace windowing
 
     public:
         virtual ~Window() = default;
-
         virtual QNumberType operator()(std::size_t n, std::size_t order) = 0;
         virtual QNumberType Power(std::size_t order) = 0;
     };
@@ -27,10 +25,10 @@ namespace windowing
     public:
         QNumberType operator()(std::size_t n, std::size_t order) override
         {
-            return (0.54f - 0.46f * std::cos(2.0f * M_PI * n / order)) * 0.9999f;
+            return (0.54f - 0.46f * static_cast<float>(std::cos(2.0f * M_PI * n / order))) * 0.9999f;
         }
 
-        QNumberType Power(std::size_t order) override
+        QNumberType Power([[maybe_unused]] std::size_t order) override
         {
             return QNumberType(0.397f);
         }
@@ -43,10 +41,10 @@ namespace windowing
     public:
         QNumberType operator()(std::size_t n, std::size_t order) override
         {
-            return (0.5f * (1.0f - std::cos(2.0f * M_PI * n / order))) * 0.9999f;
+            return (0.5f * (1.0f - static_cast<float>(std::cos(2.0f * M_PI * n / order))) * 0.9999f);
         }
 
-        QNumberType Power(std::size_t order) override
+        QNumberType Power([[maybe_unused]] std::size_t order) override
         {
             return QNumberType(0.375f);
         }
@@ -59,10 +57,11 @@ namespace windowing
     public:
         QNumberType operator()(std::size_t n, std::size_t order) override
         {
-            return (0.42f - 0.5f * std::cos(2.0f * M_PI * n / order) + 0.08f * std::cos(4.0f * M_PI * n / order)) * 0.9999f;
+            return QNumberType(
+                (0.42f - 0.5f * static_cast<float>(std::cos(2.0f * M_PI * n / order)) + 0.08f * static_cast<float>(std::cos(4.0f * M_PI * n / order))) * 0.9999f);
         }
 
-        QNumberType Power(std::size_t order) override
+        QNumberType Power([[maybe_unused]] std::size_t order) override
         {
             return QNumberType(0.305f);
         }
@@ -78,11 +77,9 @@ namespace windowing
             return QNumberType(0.9999f);
         }
 
-        QNumberType Power(std::size_t order) override
+        QNumberType Power([[maybe_unused]] std::size_t order) override
         {
             return QNumberType(0.9999f);
         }
     };
 }
-
-#endif

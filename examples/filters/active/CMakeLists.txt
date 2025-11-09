@@ -10,8 +10,10 @@ target_sources(numerical.examples.filters.active.kalman_filter PRIVATE
     KalmanFilter.cpp
 )
 
+target_include_directories(numerical.examples.filters.active.kalman_filter SYSTEM PRIVATE ${sciplot_SOURCE_DIR})
+
 if(MSVC)
-    target_compile_options(numerical.examples.filters.active.kalman_filter PRIVATE /W4)
+    target_compile_options(numerical.examples.filters.active.kalman_filter PRIVATE /W4 /wd4244 /wd4100)
 else()
     target_compile_options(numerical.examples.filters.active.kalman_filter PRIVATE 
         -Wno-error
