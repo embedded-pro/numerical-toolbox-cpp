@@ -10,6 +10,7 @@ target_link_libraries(numerical.controllers.implementations INTERFACE
 )
 
 target_sources(numerical.controllers.implementations PRIVATE
+    PidAbsolute.hpp
     PidIncremental.hpp
 )
 
