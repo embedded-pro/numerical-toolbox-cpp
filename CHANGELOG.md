@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.0.0](https://github.com/embedded-pro/numerical-toolbox-cpp/compare/v1.0.0...v2.0.0) (2025-11-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* controllers refactored ([#57](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/57))
+
+### Features
+
+* Controllers refactored ([#57](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/57)) ([2a420e9](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/2a420e9464540b6271622f9ceb9142eb38d07f03))
+* Integration test folder ([#30](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/30)) ([1f7810d](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/1f7810de8f85e9a6493d9956e28b4d5fab0ecfa3))
+
+
+### Bug Fixes
+
+* Sonarqube issues ([#67](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/67)) ([6079480](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/60794803f9ff099cc2e52ffcb752fb2a62282d8d))
+
 ## 1.0.0 (2025-08-24)
 
 
