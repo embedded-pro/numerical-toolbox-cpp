@@ -177,6 +177,164 @@ TYPED_TEST(TestPidIncremental, process_reaches_set_point)
     EXPECT_NEAR(math::ToFloat(this->ProcessValue(setpoint)), 0, tolerance);
 }
 
+TYPED_TEST(TestPidIncremental, set_tunings_updates_behavior)
+{
+    float tolerance = math::Tolerance<TypeParam>();
+
+    this->CreateController(
+        typename controllers::PidTunings<TypeParam>{
+            TypeParam(0.5f),
+            TypeParam(0.0f),
+            TypeParam(0.0f) },
+        CreateLimits<TypeParam>());
+
+    this->controller->SetPoint(TypeParam(0.2f));
+
+    EXPECT_CALL(this->driver, Start(::testing::_));
+    this->controller->Enable();
+
+    EXPECT_NEAR(math::ToFloat(this->ProcessValue(TypeParam(0.0f))), 0.1f, tolerance);
+
+    this->controller->SetTunings(typename controllers::PidTunings<TypeParam>{
+        TypeParam(0.25f),
+        TypeParam(0.0f),
+        TypeParam(0.0f) });
+
+    EXPECT_CALL(this->driver, Start(::testing::_));
+    this->controller->Enable();
+
+    EXPECT_NEAR(math::ToFloat(this->ProcessValue(TypeParam(0.0f))), 0.05f, tolerance);
+}
+
+TYPED_TEST(TestPidIncremental, set_limits_constrains_output)
+{
+    this->CreateController(
+        typename controllers::PidTunings<TypeParam>{
+            TypeParam(0.5f),
+            TypeParam(0.1f),
+            TypeParam(0.0f) },
+        CreateLimits<TypeParam>());
+
+    this->controller->SetPoint(TypeParam(0.8f));
+
+    EXPECT_CALL(this->driver, Start(::testing::_));
+    this->controller->Enable();
+
+    auto newLimits = typename controllers::PidLimits<TypeParam>{ TypeParam(-0.05f), TypeParam(0.05f) };
+    this->controller->SetLimits(newLimits);
+
+    for (int i = 0; i < 5; ++i)
+    {
+        auto output = this->ProcessValue(TypeParam(0.0f));
+        EXPECT_LE(math::ToFloat(output), math::ToFloat(newLimits.max));
+        EXPECT_GE(math::ToFloat(output), math::ToFloat(newLimits.min));
+    }
+}
+
+TYPED_TEST(TestPidIncremental, disable_stops_controller)
+{
+    float tolerance = math::Tolerance<TypeParam>();
+
+    this->CreateController(
+        typename controllers::PidTunings<TypeParam>{
+            TypeParam(0.5f),
+            TypeParam(0.0f),
+            TypeParam(0.0f) },
+        CreateLimits<TypeParam>());
+
+    this->controller->SetPoint(TypeParam(0.2f));
+
+    EXPECT_CALL(this->driver, Start(::testing::_));
+    this->controller->Enable();
+
+    EXPECT_NEAR(math::ToFloat(this->ProcessValue(TypeParam(0.0f))), 0.1f, tolerance);
+
+    EXPECT_CALL(this->driver, Stop());
+    this->controller->Disable();
+}
+
+TYPED_TEST(TestPidIncremental, clamp_at_max_limit)
+{
+    auto limits = typename controllers::PidLimits<TypeParam>{ TypeParam(-0.1f), TypeParam(0.1f) };
+
+    this->CreateController(
+        typename controllers::PidTunings<TypeParam>{
+            TypeParam(0.5f),
+            TypeParam(0.0f),
+            TypeParam(0.0f) },
+        limits);
+
+    this->controller->SetPoint(TypeParam(0.4f));
+
+    EXPECT_CALL(this->driver, Start(::testing::_));
+    this->controller->Enable();
+
+    auto output = this->ProcessValue(TypeParam(0.0f));
+    EXPECT_FLOAT_EQ(math::ToFloat(output), math::ToFloat(limits.max));
+}
+
+TYPED_TEST(TestPidIncremental, clamp_at_min_limit)
+{
+    auto limits = typename controllers::PidLimits<TypeParam>{ TypeParam(-0.1f), TypeParam(0.1f) };
+
+    this->CreateController(
+        typename controllers::PidTunings<TypeParam>{
+            TypeParam(0.5f),
+            TypeParam(0.0f),
+            TypeParam(0.0f) },
+        limits);
+
+    this->controller->SetPoint(TypeParam(-0.4f));
+
+    EXPECT_CALL(this->driver, Start(::testing::_));
+    this->controller->Enable();
+
+    auto output = this->ProcessValue(TypeParam(0.0f));
+    EXPECT_FLOAT_EQ(math::ToFloat(output), math::ToFloat(limits.min));
+}
+
+TYPED_TEST(TestPidIncremental, process_without_setpoint_returns_input)
+{
+    float tolerance = math::Tolerance<TypeParam>();
+
+    this->CreateController(
+        typename controllers::PidTunings<TypeParam>{
+            TypeParam(0.5f),
+            TypeParam(0.0f),
+            TypeParam(0.0f) },
+        CreateLimits<TypeParam>());
+
+    EXPECT_CALL(this->driver, Start(::testing::_));
+    this->controller->Enable();
+
+    auto input = TypeParam(0.3f);
+    auto output = this->ProcessValue(input);
+    EXPECT_NEAR(math::ToFloat(output), math::ToFloat(input), tolerance);
+}
+
+TYPED_TEST(TestPidIncremental, output_within_limits_not_clamped)
+{
+    float tolerance = math::Tolerance<TypeParam>();
+    auto limits = CreateLimits<TypeParam>();
+
+    this->CreateController(
+        typename controllers::PidTunings<TypeParam>{
+            TypeParam(0.1f),
+            TypeParam(0.0f),
+            TypeParam(0.0f) },
+        limits);
+
+    this->controller->SetPoint(TypeParam(0.1f));
+
+    EXPECT_CALL(this->driver, Start(::testing::_));
+    this->controller->Enable();
+
+    auto output = this->ProcessValue(TypeParam(0.0f));
+    EXPECT_NEAR(math::ToFloat(output), 0.01f, tolerance);
+    EXPECT_LT(math::ToFloat(output), math::ToFloat(limits.max));
+    EXPECT_GT(math::ToFloat(output), math::ToFloat(limits.min));
+}
+
 namespace
 {
     template<typename T>

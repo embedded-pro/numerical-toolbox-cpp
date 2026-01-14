@@ -249,4 +249,16 @@ namespace controllers
     {
         return PidIncrementalBase<QNumberType>::Process(processVariable);
     }
+
+    extern template class PidIncrementalBase<float>;
+    extern template class PidIncrementalBase<math::Q15>;
+    extern template class PidIncrementalBase<math::Q31>;
+
+    extern template class PidIncrementalAsynchronous<float>;
+    extern template class PidIncrementalAsynchronous<math::Q15>;
+    extern template class PidIncrementalAsynchronous<math::Q31>;
+
+    extern template class PidIncrementalSynchronous<float>;
+    extern template class PidIncrementalSynchronous<math::Q15>;
+    extern template class PidIncrementalSynchronous<math::Q31>;
 }
