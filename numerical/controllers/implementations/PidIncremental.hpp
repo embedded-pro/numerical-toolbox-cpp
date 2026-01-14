@@ -3,7 +3,10 @@
 #include "numerical/controllers/interfaces/PidController.hpp"
 #include "numerical/controllers/interfaces/PidDriver.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
-#include <optional>
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
 
 namespace controllers
 {
@@ -15,6 +18,7 @@ namespace controllers
         void SetLimits(PidLimits<QNumberType> limits);
         void SetTunings(PidTunings<QNumberType> tunnings);
         void Enable();
+        void Disable();
         QNumberType Process(QNumberType processVariable);
 
     protected:
@@ -24,7 +28,8 @@ namespace controllers
         QNumberType Clamp(QNumberType input);
 
     private:
-        std::optional<QNumberType> setPoint;
+        QNumberType setPointValue{};
+        bool hasSetPoint = false;
         PidLimits<QNumberType> limits;
         QNumberType a0 = 0;
         QNumberType a1 = 0;
@@ -90,7 +95,8 @@ namespace controllers
     template<class QNumberType>
     void PidIncrementalBase<QNumberType>::SetPoint(QNumberType _setPoint)
     {
-        this->setPoint.emplace(_setPoint);
+        this->setPointValue = _setPoint;
+        this->hasSetPoint = true;
     }
 
     template<class QNumberType>
@@ -102,6 +108,12 @@ namespace controllers
         e = QNumberType(0.0f);
         e_1 = QNumberType(0.0f);
         e_2 = QNumberType(0.0f);
+    }
+
+    template<class QNumberType>
+    void PidIncrementalBase<QNumberType>::Disable()
+    {
+        hasSetPoint = false;
     }
 
     template<class QNumberType>
@@ -139,13 +151,13 @@ namespace controllers
         QNumberType
         PidIncrementalBase<QNumberType>::Process(QNumberType processVariable)
     {
-        if (!setPoint.has_value())
+        if (!hasSetPoint) [[unlikely]]
             return processVariable;
 
         u_1 = u;
         e_2 = e_1;
         e_1 = e;
-        e = *setPoint - processVariable;
+        e = setPointValue - processVariable;
         u = Clamp(u_1 + a0 * e + a1 * e_1 + a2 * e_2);
 
         return u;
@@ -227,6 +239,7 @@ namespace controllers
     template<class QNumberType>
     void PidIncrementalSynchronous<QNumberType>::Disable()
     {
+        PidIncrementalBase<QNumberType>::Disable();
     }
 
     template<class QNumberType>
@@ -236,4 +249,16 @@ namespace controllers
     {
         return PidIncrementalBase<QNumberType>::Process(processVariable);
     }
+
+    extern template class PidIncrementalBase<float>;
+    extern template class PidIncrementalBase<math::Q15>;
+    extern template class PidIncrementalBase<math::Q31>;
+
+    extern template class PidIncrementalAsynchronous<float>;
+    extern template class PidIncrementalAsynchronous<math::Q15>;
+    extern template class PidIncrementalAsynchronous<math::Q31>;
+
+    extern template class PidIncrementalSynchronous<float>;
+    extern template class PidIncrementalSynchronous<math::Q15>;
+    extern template class PidIncrementalSynchronous<math::Q31>;
 }
