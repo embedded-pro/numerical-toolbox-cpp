@@ -239,6 +239,7 @@ namespace controllers
     template<class QNumberType>
     void PidIncrementalSynchronous<QNumberType>::Disable()
     {
+        PidIncrementalBase<QNumberType>::Disable();
     }
 
     template<class QNumberType>

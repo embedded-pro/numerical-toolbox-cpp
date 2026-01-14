@@ -176,3 +176,203 @@ TYPED_TEST(TestPidIncremental, process_reaches_set_point)
 
     EXPECT_NEAR(math::ToFloat(this->ProcessValue(setpoint)), 0, tolerance);
 }
+
+namespace
+{
+    template<typename T>
+    class TestPidIncrementalSynchronous
+        : public ::testing::Test
+    {
+    public:
+        std::optional<controllers::PidIncrementalSynchronous<T>> controller;
+
+        void CreateController(controllers::PidTunings<T> tunings, controllers::PidLimits<T> limits)
+        {
+            controller.emplace(tunings, limits);
+        }
+    };
+
+    TYPED_TEST_SUITE(TestPidIncrementalSynchronous, TestedTypes);
+}
+
+TYPED_TEST(TestPidIncrementalSynchronous, no_variation_input_results_in_no_action_control)
+{
+    float tolerance = math::Tolerance<TypeParam>();
+
+    this->CreateController(
+        typename controllers::PidTunings<TypeParam>{
+            TypeParam(0.1f),
+            TypeParam(0.1f),
+            TypeParam(0.1f) },
+        CreateLimits<TypeParam>());
+
+    this->controller->SetPoint(TypeParam(0.0f));
+    this->controller->Enable();
+
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.0f))), 0, tolerance);
+}
+
+TYPED_TEST(TestPidIncrementalSynchronous, proportional_action)
+{
+    float tolerance = math::Tolerance<TypeParam>();
+
+    this->CreateController(
+        typename controllers::PidTunings<TypeParam>{
+            TypeParam(0.5f),
+            TypeParam(0.0f),
+            TypeParam(0.0f) },
+        CreateLimits<TypeParam>());
+
+    this->controller->SetPoint(TypeParam(0.2f));
+    this->controller->Enable();
+
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.0f))), 0.1f, tolerance);
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.1f))), 0.05f, tolerance);
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(-0.1f))), 0.15f, tolerance);
+}
+
+TYPED_TEST(TestPidIncrementalSynchronous, integrative_action)
+{
+    float tolerance = math::Tolerance<TypeParam>();
+
+    this->CreateController(
+        typename controllers::PidTunings<TypeParam>{
+            TypeParam(0.0f),
+            TypeParam(0.1f),
+            TypeParam(0.0f) },
+        CreateLimits<TypeParam>());
+
+    this->controller->SetPoint(TypeParam(0.2f));
+    this->controller->Enable();
+
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.0f))), 0.02f, tolerance);
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.0f))), 0.04f, tolerance);
+}
+
+TYPED_TEST(TestPidIncrementalSynchronous, derivative_action)
+{
+    float tolerance = math::Tolerance<TypeParam>();
+
+    this->CreateController(
+        typename controllers::PidTunings<TypeParam>{
+            TypeParam(0.0f),
+            TypeParam(0.0f),
+            TypeParam(0.1f) },
+        CreateLimits<TypeParam>());
+
+    this->controller->SetPoint(TypeParam(0.2f));
+    this->controller->Enable();
+
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.0f))), 0.02f, tolerance);
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.1f))), -0.01f, tolerance);
+}
+
+TYPED_TEST(TestPidIncrementalSynchronous, check_output_limits)
+{
+    auto limits = CreateLimits<TypeParam>();
+
+    this->CreateController(
+        typename controllers::PidTunings<TypeParam>{
+            TypeParam(0.05f),
+            TypeParam(0.05f),
+            TypeParam(0.01f) },
+        limits);
+
+    this->controller->SetPoint(TypeParam(0.8f));
+    this->controller->Enable();
+
+    for (int i = 0; i < 10; ++i)
+    {
+        auto output = this->controller->Process(TypeParam(0.0f));
+        EXPECT_LE(math::ToFloat(output), math::ToFloat(limits.max));
+        EXPECT_GE(math::ToFloat(output), math::ToFloat(limits.min));
+    }
+}
+
+TYPED_TEST(TestPidIncrementalSynchronous, process_reaches_set_point)
+{
+    float tolerance = math::Tolerance<TypeParam>();
+
+    this->CreateController(
+        typename controllers::PidTunings<TypeParam>{
+            TypeParam(0.1f),
+            TypeParam(0.05f),
+            TypeParam(0.02f) },
+        CreateLimits<TypeParam>());
+
+    auto setpoint = TypeParam(0.2f);
+    this->controller->SetPoint(setpoint);
+    this->controller->Enable();
+
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(setpoint)), 0, tolerance);
+}
+
+TYPED_TEST(TestPidIncrementalSynchronous, set_tunings_updates_controller_behavior)
+{
+    float tolerance = math::Tolerance<TypeParam>();
+
+    this->CreateController(
+        typename controllers::PidTunings<TypeParam>{
+            TypeParam(0.5f),
+            TypeParam(0.0f),
+            TypeParam(0.0f) },
+        CreateLimits<TypeParam>());
+
+    this->controller->SetPoint(TypeParam(0.2f));
+    this->controller->Enable();
+
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.0f))), 0.1f, tolerance);
+
+    this->controller->SetTunings(typename controllers::PidTunings<TypeParam>{
+        TypeParam(0.25f),
+        TypeParam(0.0f),
+        TypeParam(0.0f) });
+
+    this->controller->Enable();
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.0f))), 0.05f, tolerance);
+}
+
+TYPED_TEST(TestPidIncrementalSynchronous, set_limits_updates_output_clamping)
+{
+    this->CreateController(
+        typename controllers::PidTunings<TypeParam>{
+            TypeParam(0.2f),
+            TypeParam(0.1f),
+            TypeParam(0.0f) },
+        CreateLimits<TypeParam>());
+
+    this->controller->SetPoint(TypeParam(0.5f));
+    this->controller->Enable();
+
+    auto newLimits = typename controllers::PidLimits<TypeParam>{ TypeParam(-0.1f), TypeParam(0.1f) };
+    this->controller->SetLimits(newLimits);
+
+    for (int i = 0; i < 5; ++i)
+    {
+        auto output = this->controller->Process(TypeParam(0.0f));
+        EXPECT_LE(math::ToFloat(output), math::ToFloat(newLimits.max));
+        EXPECT_GE(math::ToFloat(output), math::ToFloat(newLimits.min));
+    }
+}
+
+TYPED_TEST(TestPidIncrementalSynchronous, disable_clears_setpoint)
+{
+    float tolerance = math::Tolerance<TypeParam>();
+
+    this->CreateController(
+        typename controllers::PidTunings<TypeParam>{
+            TypeParam(0.5f),
+            TypeParam(0.0f),
+            TypeParam(0.0f) },
+        CreateLimits<TypeParam>());
+
+    this->controller->SetPoint(TypeParam(0.2f));
+    this->controller->Enable();
+
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(TypeParam(0.0f))), 0.1f, tolerance);
+
+    this->controller->Disable();
+
+    auto input = TypeParam(0.5f);
+    EXPECT_NEAR(math::ToFloat(this->controller->Process(input)), math::ToFloat(input), tolerance);
+}
