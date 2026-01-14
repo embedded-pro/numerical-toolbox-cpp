@@ -108,8 +108,6 @@ namespace controllers
         e = QNumberType(0.0f);
         e_1 = QNumberType(0.0f);
         e_2 = QNumberType(0.0f);
-
-        hasSetPoint = false;
     }
 
     template<class QNumberType>
