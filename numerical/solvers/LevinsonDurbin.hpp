@@ -1,5 +1,4 @@
-#ifndef SOLVERS_LEVINSON_DURBIN_HPP
-#define SOLVERS_LEVINSON_DURBIN_HPP
+#pragma once
 
 #include "numerical/math/Toeplitz.hpp"
 #include "numerical/solvers/Solver.hpp"
@@ -79,5 +78,3 @@ namespace solvers
         return LevinsonDurbin<T, N>();
     }
 }
-
-#endif
