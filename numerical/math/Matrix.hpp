@@ -67,6 +67,7 @@ namespace math
 
         [[nodiscard]] constexpr Matrix<T, Cols, Rows> Transpose() const;
         [[nodiscard]] static constexpr Matrix Identity();
+        [[nodiscard]] constexpr T Trace() const;
 
     private:
         std::array<T, Rows * Cols> data;
@@ -288,6 +289,20 @@ namespace math
             result.at(i, i) = T(0.9999f);
 
         return result;
+    }
+
+    template<typename T, size_t Rows, size_t Cols>
+    constexpr T
+    Matrix<T, Rows, Cols>::Trace() const
+    {
+        static_assert(Rows == Cols,
+            "Trace can only be computed for square matrices");
+
+        T sum{};
+        for (size_type i = 0; i < Rows; ++i)
+            sum += at(i, i);
+
+        return sum;
     }
 }
 

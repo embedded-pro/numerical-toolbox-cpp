@@ -4,6 +4,12 @@
 
 namespace estimators
 {
+    enum class State
+    {
+        unstable,
+        converged,
+    };
+
     template<typename T, std::size_t Features>
     class RecursiveLeastSquares
         : public OnlineEstimator<T, Features>
@@ -12,20 +18,24 @@ namespace estimators
         using CoefficientsMatrix = typename OnlineEstimator<T, Features>::CoefficientsMatrix;
         using DesignMatrix = typename OnlineEstimator<T, Features>::DesignMatrix;
         using InputMatrix = typename OnlineEstimator<T, Features>::InputMatrix;
+        using EstimationMetrics = typename OnlineEstimator<T, Features>::EstimationMetrics;
 
         RecursiveLeastSquares(std::optional<T> initialCovariance, T forgettingFactor);
 
-        void Update(const InputMatrix& X, const math::Matrix<T, 1, 1>& y) override;
+        EstimationMetrics Update(const InputMatrix& X, const math::Matrix<T, 1, 1>& y) override;
         const CoefficientsMatrix& Coefficients() const override;
 
         template<typename... Args>
         static InputMatrix& MakeRegressor(InputMatrix& regressor, Args&&... args);
+
+        static State EvaluateConvergence(const EstimationMetrics& metrics, T innovationThreshold, T uncertaintyThreshold);
 
     private:
         CoefficientsMatrix theta;
         DesignMatrix covariance;
         T lambda;
         T lambdaInverse;
+        EstimationMetrics metrics;
     };
 
     // Implementation
@@ -42,13 +52,19 @@ namespace estimators
     }
 
     template<typename T, std::size_t Features>
-    void RecursiveLeastSquares<T, Features>::Update(const InputMatrix& x, const math::Matrix<T, 1, 1>& y)
+    typename RecursiveLeastSquares<T, Features>::EstimationMetrics RecursiveLeastSquares<T, Features>::Update(const InputMatrix& x, const math::Matrix<T, 1, 1>& y)
     {
         auto Px = covariance * x;
         auto denominatorInv = T(1) / (lambda + (x.Transpose() * Px).at(0, 0));
         auto error = y.at(0, 0) - (x.Transpose() * theta).at(0, 0);
         theta += Px * (error * denominatorInv);
         covariance = (covariance - Px * Px.Transpose() * denominatorInv) * lambdaInverse;
+
+        metrics.innovation = error;
+        metrics.residual = y.at(0, 0) - (x.Transpose() * theta).at(0, 0);
+        metrics.uncertainty = covariance.Trace();
+
+        return metrics;
     }
 
     template<typename T, std::size_t Features>
@@ -67,5 +83,14 @@ namespace estimators
         std::size_t i = 1;
         ((regressor.at(i++, 0) = std::forward<Args>(args)), ...);
         return regressor;
+    }
+
+    template<typename T, std::size_t Features>
+    State RecursiveLeastSquares<T, Features>::EvaluateConvergence(const EstimationMetrics& metrics, T innovationThreshold, T uncertaintyThreshold)
+    {
+        if (std::abs(metrics.innovation) < innovationThreshold && metrics.uncertainty < uncertaintyThreshold)
+            return State::converged;
+        else
+            return State::unstable;
     }
 }

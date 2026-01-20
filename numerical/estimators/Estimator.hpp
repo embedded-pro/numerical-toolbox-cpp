@@ -31,7 +31,14 @@ namespace estimators
         using DesignMatrix = math::Matrix<T, Features, Features>;
         using InputMatrix = math::Matrix<T, Features, 1>;
 
-        virtual void Update(const InputMatrix& x, const math::Matrix<T, 1, 1>& y) = 0;
+        struct EstimationMetrics
+        {
+            T innovation;  // The error BEFORE the update (how surprised we were)
+            T residual;    // The error AFTER the update (how well we matched it)
+            T uncertainty; // The 'Trace' or 'Norm' of P (how confident we are)
+        };
+
+        virtual EstimationMetrics Update(const InputMatrix& x, const math::Matrix<T, 1, 1>& y) = 0;
         virtual const CoefficientsMatrix& Coefficients() const = 0;
     };
 }

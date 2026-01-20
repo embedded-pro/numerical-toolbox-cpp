@@ -55,6 +55,7 @@ TYPED_TEST(RecursiveLeastSquaresTest, ConvergesToLinearRelationship)
     constexpr float trueSlope = 3.0f;
 
     typename TestFixture::EstimatorType rls(1000.0f, 0.99f);
+    typename TestFixture::EstimatorType::EstimationMetrics metrics;
 
     for (int i = 1; i <= 100; ++i)
     {
@@ -63,12 +64,15 @@ TYPED_TEST(RecursiveLeastSquaresTest, ConvergesToLinearRelationship)
 
         auto input = this->MakeInput(1.0f, x);
         auto output = this->MakeOutput(y);
-        rls.Update(input, output);
+        metrics = rls.Update(input, output);
     }
 
     const auto& coef = rls.Coefficients();
     EXPECT_TRUE(AreFloatsNear(coef.at(0, 0), this->MakeValue(trueIntercept), 0.1f));
     EXPECT_TRUE(AreFloatsNear(coef.at(1, 0), this->MakeValue(trueSlope), 0.1f));
+
+    auto state = TestFixture::EstimatorType::EvaluateConvergence(metrics, TypeParam(0.1f), TypeParam(1.0f));
+    EXPECT_EQ(state, estimators::State::converged);
 }
 
 TYPED_TEST(RecursiveLeastSquaresTest, ConvergesWithNoisyData)
@@ -104,6 +108,7 @@ TYPED_TEST(RecursiveLeastSquaresTest, ConvergesWithNoisyData)
 TYPED_TEST(RecursiveLeastSquaresTest, TracksTimeVaryingSystem)
 {
     typename TestFixture::EstimatorType rls(1000.0f, 0.95f);
+    typename TestFixture::EstimatorType::EstimationMetrics metrics;
 
     for (int i = 1; i <= 50; ++i)
     {
@@ -115,19 +120,34 @@ TYPED_TEST(RecursiveLeastSquaresTest, TracksTimeVaryingSystem)
         rls.Update(input, output);
     }
 
-    for (int i = 1; i <= 200; ++i)
-    {
-        float x = static_cast<float>(i) * 0.1f;
-        float y = 3.0f + 4.0f * x;
+    // First update after system change should show high innovation (unstable)
+    float x = 0.1f;
+    float y = 3.0f + 4.0f * x;
+    auto input = this->MakeInput(1.0f, x);
+    auto output = this->MakeOutput(y);
+    metrics = rls.Update(input, output);
 
-        auto input = this->MakeInput(1.0f, x);
-        auto output = this->MakeOutput(y);
-        rls.Update(input, output);
+    auto stateAfterChange = TestFixture::EstimatorType::EvaluateConvergence(metrics, TypeParam(0.1f), TypeParam(1.0f));
+    EXPECT_EQ(stateAfterChange, estimators::State::unstable);
+
+    // Continue adapting to new system
+    for (int i = 2; i <= 200; ++i)
+    {
+        x = static_cast<float>(i) * 0.1f;
+        y = 3.0f + 4.0f * x;
+
+        input = this->MakeInput(1.0f, x);
+        output = this->MakeOutput(y);
+        metrics = rls.Update(input, output);
     }
 
     const auto& coef = rls.Coefficients();
     EXPECT_TRUE(AreFloatsNear(coef.at(0, 0), this->MakeValue(3.0f), 0.5f));
     EXPECT_TRUE(AreFloatsNear(coef.at(1, 0), this->MakeValue(4.0f), 0.5f));
+
+    // With forgetting factor < 1, uncertainty stays bounded but may not be very low
+    auto stateAfterAdaptation = TestFixture::EstimatorType::EvaluateConvergence(metrics, TypeParam(0.5f), TypeParam(10.0f));
+    EXPECT_EQ(stateAfterAdaptation, estimators::State::converged);
 }
 
 TYPED_TEST(RecursiveLeastSquaresTest, InitializesWithDefaultCovariance)
@@ -197,6 +217,7 @@ TYPED_TEST(RecursiveLeastSquaresTest, MultipleFeatures)
 TYPED_TEST(RecursiveLeastSquaresTest, ForgettingFactorOneNoForgetting)
 {
     typename TestFixture::EstimatorType rls(1000.0f, 1.0f);
+    typename TestFixture::EstimatorType::EstimationMetrics metrics;
 
     for (int i = 1; i <= 50; ++i)
     {
@@ -205,12 +226,16 @@ TYPED_TEST(RecursiveLeastSquaresTest, ForgettingFactorOneNoForgetting)
 
         auto input = this->MakeInput(1.0f, x);
         auto output = this->MakeOutput(y);
-        rls.Update(input, output);
+        metrics = rls.Update(input, output);
     }
 
     const auto& coef = rls.Coefficients();
     EXPECT_TRUE(AreFloatsNear(coef.at(0, 0), this->MakeValue(2.0f), 0.1f));
     EXPECT_TRUE(AreFloatsNear(coef.at(1, 0), this->MakeValue(1.0f), 0.1f));
+
+    // With lambda=1, uncertainty decreases monotonically
+    auto state = TestFixture::EstimatorType::EvaluateConvergence(metrics, TypeParam(0.1f), TypeParam(0.1f));
+    EXPECT_EQ(state, estimators::State::converged);
 }
 
 TYPED_TEST(RecursiveLeastSquaresTest, MakeRegressorSetsBiasAndSamples)
@@ -252,6 +277,7 @@ TYPED_TEST(RecursiveLeastSquaresTest, MakeRegressorWorksWithUpdate)
     typename TestFixture::EstimatorType rls(1000.0f, 0.99f);
     typename TestFixture::InputType regressor;
     typename TestFixture::OutputType output;
+    typename TestFixture::EstimatorType::EstimationMetrics metrics;
 
     for (int i = 1; i <= 100; ++i)
     {
@@ -260,10 +286,13 @@ TYPED_TEST(RecursiveLeastSquaresTest, MakeRegressorWorksWithUpdate)
 
         TestFixture::EstimatorType::MakeRegressor(regressor, TypeParam(x));
         output.at(0, 0) = TypeParam(y);
-        rls.Update(regressor, output);
+        metrics = rls.Update(regressor, output);
     }
 
     const auto& coef = rls.Coefficients();
     EXPECT_TRUE(AreFloatsNear(coef.at(0, 0), this->MakeValue(trueIntercept), 0.1f));
     EXPECT_TRUE(AreFloatsNear(coef.at(1, 0), this->MakeValue(trueSlope), 0.1f));
+
+    auto state = TestFixture::EstimatorType::EvaluateConvergence(metrics, TypeParam(0.1f), TypeParam(1.0f));
+    EXPECT_EQ(state, estimators::State::converged);
 }
