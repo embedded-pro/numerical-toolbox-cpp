@@ -1,5 +1,4 @@
-#ifndef ESTIMATORS_LINEAR_REGRESSION_HPP
-#define ESTIMATORS_LINEAR_REGRESSION_HPP
+#pragma once
 
 #include "numerical/estimators/Estimator.hpp"
 
@@ -7,12 +6,12 @@ namespace estimators
 {
     template<typename T, std::size_t Samples, std::size_t Features>
     class LinearRegression
-        : public Estimator<T, Samples, Features>
+        : public OfflineEstimator<T, Samples, Features>
     {
     public:
-        using CoefficientsMatrix = typename Estimator<T, Samples, Features>::CoefficientsMatrix;
-        using DesignMatrix = typename Estimator<T, Samples, Features>::DesignMatrix;
-        using InputMatrix = typename Estimator<T, Samples, Features>::InputMatrix;
+        using CoefficientsMatrix = typename OfflineEstimator<T, Samples, Features>::CoefficientsMatrix;
+        using DesignMatrix = typename OfflineEstimator<T, Samples, Features>::DesignMatrix;
+        using InputMatrix = typename OfflineEstimator<T, Samples, Features>::InputMatrix;
 
         LinearRegression() = default;
 
@@ -112,5 +111,3 @@ namespace estimators
         return x;
     }
 }
-
-#endif

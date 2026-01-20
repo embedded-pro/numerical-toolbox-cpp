@@ -1,2 +1,1 @@
 add_subdirectory(LinearRegression)
-add_subdirectory(YuleWalker)

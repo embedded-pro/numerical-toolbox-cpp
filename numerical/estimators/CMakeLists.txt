@@ -14,7 +14,8 @@ target_sources(numerical.estimators PRIVATE
     Estimator.hpp
     LinearRegression.cpp
     LinearRegression.hpp
-    YuleWalker.hpp
+    RecursiveLeastSquares.cpp
+    RecursiveLeastSquares.hpp
 )
 
 add_subdirectory(test)
