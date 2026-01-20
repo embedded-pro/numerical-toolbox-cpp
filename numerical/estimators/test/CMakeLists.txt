@@ -10,5 +10,4 @@ target_link_libraries(numerical.estimators_test PUBLIC
 target_sources(numerical.estimators_test PRIVATE
     TestLinearRegression.cpp
     TestRecursiveLeastSquares.cpp
-    TestYuleWalker.cpp
 )
