@@ -152,9 +152,10 @@ namespace math
         QNumber<IntType, FractionalBits>
         QNumber<IntType, FractionalBits>::operator+(const QNumber& other) const
     {
+#ifdef NUMERICAL_TOOLBOX_ENABLE_ASSERTIONS
         really_assert((other.value <= 0 || value <= std::numeric_limits<IntType>::max() - other.value) &&
                       (other.value >= 0 || value >= std::numeric_limits<IntType>::min() - other.value));
-
+#endif
         return QNumber(static_cast<IntType>(value + other.value));
     }
 
@@ -163,9 +164,10 @@ namespace math
         QNumber<IntType, FractionalBits>
         QNumber<IntType, FractionalBits>::operator-(const QNumber& other) const
     {
+#ifdef NUMERICAL_TOOLBOX_ENABLE_ASSERTIONS
         really_assert((other.value >= 0 || value <= std::numeric_limits<IntType>::max() + other.value) &&
                       (other.value <= 0 || value >= std::numeric_limits<IntType>::min() + other.value));
-
+#endif
         return QNumber(static_cast<IntType>(value - other.value));
     }
 
@@ -176,9 +178,10 @@ namespace math
     {
         auto temp = static_cast<int64_t>(value) * other.value;
         temp >>= FractionalBits;
-
+#ifdef NUMERICAL_TOOLBOX_ENABLE_ASSERTIONS
         really_assert(temp <= std::numeric_limits<IntType>::max() &&
                       temp >= std::numeric_limits<IntType>::min());
+#endif
         return QNumber(static_cast<IntType>(temp));
     }
 
@@ -187,13 +190,15 @@ namespace math
         QNumber<IntType, FractionalBits>
         QNumber<IntType, FractionalBits>::operator/(const QNumber& other) const
     {
+#ifdef NUMERICAL_TOOLBOX_ENABLE_ASSERTIONS
         really_assert(other.value != 0);
-
+#endif
         int64_t numerator = static_cast<int64_t>(value) << FractionalBits;
         int64_t result = numerator / other.value;
-
+#ifdef NUMERICAL_TOOLBOX_ENABLE_ASSERTIONS
         really_assert(result <= std::numeric_limits<IntType>::max() &&
                       result >= std::numeric_limits<IntType>::min());
+#endif
         return QNumber(static_cast<IntType>(result));
     }
 
@@ -202,9 +207,10 @@ namespace math
         QNumber<IntType, FractionalBits>&
         QNumber<IntType, FractionalBits>::operator+=(const QNumber& other)
     {
+#ifdef NUMERICAL_TOOLBOX_ENABLE_ASSERTIONS
         really_assert((other.value <= 0 || value <= std::numeric_limits<IntType>::max() - other.value) &&
                       (other.value >= 0 || value >= std::numeric_limits<IntType>::min() - other.value));
-
+#endif
         value += other.value;
         return *this;
     }
@@ -214,8 +220,10 @@ namespace math
         QNumber<IntType, FractionalBits>&
         QNumber<IntType, FractionalBits>::operator-=(const QNumber& other)
     {
+#ifdef NUMERICAL_TOOLBOX_ENABLE_ASSERTIONS
         really_assert((other.value >= 0 || value <= std::numeric_limits<IntType>::max() + other.value) &&
                       (other.value <= 0 || value >= std::numeric_limits<IntType>::min() + other.value));
+#endif
         value -= other.value;
         return *this;
     }
@@ -227,9 +235,10 @@ namespace math
     {
         auto temp = static_cast<int64_t>(value) * other.value;
         temp >>= FractionalBits;
-
+#ifdef NUMERICAL_TOOLBOX_ENABLE_ASSERTIONS
         really_assert(temp <= std::numeric_limits<IntType>::max() &&
                       temp >= std::numeric_limits<IntType>::min());
+#endif
         value = static_cast<IntType>(temp);
         return *this;
     }
@@ -239,13 +248,15 @@ namespace math
         QNumber<IntType, FractionalBits>&
         QNumber<IntType, FractionalBits>::operator/=(const QNumber& other)
     {
+#ifdef NUMERICAL_TOOLBOX_ENABLE_ASSERTIONS
         really_assert(other.value != 0);
-
+#endif
         int64_t numerator = static_cast<int64_t>(value) << FractionalBits;
         int64_t result = numerator / other.value;
-
+#ifdef NUMERICAL_TOOLBOX_ENABLE_ASSERTIONS
         really_assert(result <= std::numeric_limits<IntType>::max() &&
                       result >= std::numeric_limits<IntType>::min());
+#endif
         value = static_cast<IntType>(result);
         return *this;
     }

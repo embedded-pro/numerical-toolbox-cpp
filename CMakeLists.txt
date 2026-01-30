@@ -14,6 +14,7 @@ if (NUMERICAL_TOOLBOX_BUILD_TESTS)
     # CTest cannot be included before the first project() statement, but Embedded Infastructure
     # Library needs to see that test utilities need to be built.
     set(BUILD_TESTING On)
+    add_definitions(-DNUMERICAL_TOOLBOX_ENABLE_ASSERTIONS=1)
 endif()
 
 if (NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS)

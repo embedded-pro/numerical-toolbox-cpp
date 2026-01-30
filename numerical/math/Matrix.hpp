@@ -1,6 +1,7 @@
 #ifndef MATH_MATRIX_HPP
 #define MATH_MATRIX_HPP
 
+#include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/QNumber.hpp"
 #include <array>
 #include <type_traits>
@@ -126,6 +127,9 @@ namespace math
     OPTIMIZE_FOR_SPEED constexpr typename Matrix<T, Rows, Cols>::reference
     Matrix<T, Rows, Cols>::at(size_type row, size_type col)
     {
+#ifdef NUMERICAL_TOOLBOX_ENABLE_ASSERTIONS
+        really_assert(row < Rows && col < Cols);
+#endif
         return data[row * Cols + col];
     }
 
@@ -133,6 +137,9 @@ namespace math
     OPTIMIZE_FOR_SPEED constexpr typename Matrix<T, Rows, Cols>::const_reference
     Matrix<T, Rows, Cols>::at(size_type row, size_type col) const
     {
+#ifdef NUMERICAL_TOOLBOX_ENABLE_ASSERTIONS
+        really_assert(row < Rows && col < Cols);
+#endif
         return data[row * Cols + col];
     }
 
@@ -140,6 +147,9 @@ namespace math
     OPTIMIZE_FOR_SPEED constexpr typename Matrix<T, Rows, Cols>::reference
     Matrix<T, Rows, Cols>::operator[](size_type row)
     {
+#ifdef NUMERICAL_TOOLBOX_ENABLE_ASSERTIONS
+        really_assert(row < Rows);
+#endif
         return data[row * Cols];
     }
 
@@ -147,6 +157,9 @@ namespace math
     OPTIMIZE_FOR_SPEED constexpr typename Matrix<T, Rows, Cols>::const_reference
     Matrix<T, Rows, Cols>::operator[](size_type row) const
     {
+#ifdef NUMERICAL_TOOLBOX_ENABLE_ASSERTIONS
+        really_assert(row < Rows);
+#endif
         return data[row * Cols];
     }
 
