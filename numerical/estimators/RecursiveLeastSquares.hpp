@@ -1,6 +1,11 @@
 #pragma once
 
 #include "numerical/estimators/Estimator.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
 
 namespace estimators
 {
@@ -20,7 +25,8 @@ namespace estimators
         using InputMatrix = typename OnlineEstimator<T, Features>::InputMatrix;
         using EstimationMetrics = typename OnlineEstimator<T, Features>::EstimationMetrics;
 
-        RecursiveLeastSquares(std::optional<T> initialCovariance, T forgettingFactor);
+        explicit RecursiveLeastSquares(T forgettingFactor);
+        RecursiveLeastSquares(T initialCovariance, T forgettingFactor);
 
         EstimationMetrics Update(const InputMatrix& X, const math::Matrix<T, 1, 1>& y) override;
         const CoefficientsMatrix& Coefficients() const override;
@@ -28,7 +34,7 @@ namespace estimators
         template<typename... Args>
         static InputMatrix& MakeRegressor(InputMatrix& regressor, Args&&... args);
 
-        static State EvaluateConvergence(const EstimationMetrics& metrics, T innovationThreshold, T uncertaintyThreshold);
+        static State EvaluateConvergence(const EstimationMetrics& metrics, T innovationThreshold, T uncertaintyThreshold) noexcept;
 
     private:
         CoefficientsMatrix theta;
@@ -41,18 +47,27 @@ namespace estimators
     // Implementation
 
     template<typename T, std::size_t Features>
-    RecursiveLeastSquares<T, Features>::RecursiveLeastSquares(std::optional<T> initialCovariance, T forgettingFactor)
+    RecursiveLeastSquares<T, Features>::RecursiveLeastSquares(T forgettingFactor)
         : theta{}
-        , covariance(initialCovariance.has_value()
-                         ? DesignMatrix::Identity() * initialCovariance.value()
-                         : DesignMatrix::Identity())
+        , covariance(DesignMatrix::Identity())
         , lambda(forgettingFactor)
         , lambdaInverse(T(1) / lambda)
     {
     }
 
     template<typename T, std::size_t Features>
-    typename RecursiveLeastSquares<T, Features>::EstimationMetrics RecursiveLeastSquares<T, Features>::Update(const InputMatrix& x, const math::Matrix<T, 1, 1>& y)
+    RecursiveLeastSquares<T, Features>::RecursiveLeastSquares(T initialCovariance, T forgettingFactor)
+        : theta{}
+        , covariance(DesignMatrix::Identity() * initialCovariance)
+        , lambda(forgettingFactor)
+        , lambdaInverse(T(1) / lambda)
+    {
+    }
+
+    template<typename T, std::size_t Features>
+    OPTIMIZE_FOR_SPEED
+        typename RecursiveLeastSquares<T, Features>::EstimationMetrics
+        RecursiveLeastSquares<T, Features>::Update(const InputMatrix& x, const math::Matrix<T, 1, 1>& y)
     {
         auto Px = covariance * x;
         auto denominatorInv = T(1) / (lambda + (x.Transpose() * Px).at(0, 0));
@@ -86,9 +101,11 @@ namespace estimators
     }
 
     template<typename T, std::size_t Features>
-    State RecursiveLeastSquares<T, Features>::EvaluateConvergence(const EstimationMetrics& metrics, T innovationThreshold, T uncertaintyThreshold)
+    OPTIMIZE_FOR_SPEED
+        State
+        RecursiveLeastSquares<T, Features>::EvaluateConvergence(const EstimationMetrics& metrics, T innovationThreshold, T uncertaintyThreshold) noexcept
     {
-        if (std::abs(metrics.innovation) < innovationThreshold && metrics.uncertainty < uncertaintyThreshold)
+        if (std::abs(metrics.innovation) < innovationThreshold && metrics.uncertainty < uncertaintyThreshold) [[likely]]
             return State::converged;
         else
             return State::unstable;

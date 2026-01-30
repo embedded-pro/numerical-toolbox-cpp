@@ -2,9 +2,14 @@
 #define MATH_Q_NUMBER_H
 
 #include "infra/util/ReallyAssert.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
 #include <chrono>
 #include <cstdint>
 #include <limits>
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -21,7 +26,7 @@
 namespace math
 {
     template<typename T>
-    float ToFloat(T value)
+    OPTIMIZE_FOR_SPEED float ToFloat(T value)
     {
         if constexpr (std::is_same_v<T, float>)
             return value;
@@ -30,16 +35,16 @@ namespace math
     }
 
     template<typename T>
-    float Min()
+    OPTIMIZE_FOR_SPEED float Min()
     {
         if constexpr (std::is_same_v<T, float>)
             return std::numeric_limits<float>::min();
         else
-            return 0.0f;
+            return -0.9999f;
     }
 
     template<typename T>
-    float Max()
+    OPTIMIZE_FOR_SPEED float Max()
     {
         if constexpr (std::is_same_v<T, float>)
             return std::numeric_limits<float>::max();
@@ -48,7 +53,7 @@ namespace math
     }
 
     template<typename T>
-    float Lowest()
+    OPTIMIZE_FOR_SPEED float Lowest()
     {
         if constexpr (std::is_same_v<T, float>)
             return std::numeric_limits<float>::lowest();
@@ -137,14 +142,15 @@ namespace math
     {}
 
     template<typename IntType, int FractionalBits>
-    float QNumber<IntType, FractionalBits>::ToFloat() const
+    OPTIMIZE_FOR_SPEED float QNumber<IntType, FractionalBits>::ToFloat() const
     {
         return static_cast<float>(value) / (1LL << FractionalBits);
     }
 
     template<typename IntType, int FractionalBits>
-    QNumber<IntType, FractionalBits>
-    QNumber<IntType, FractionalBits>::operator+(const QNumber& other) const
+    OPTIMIZE_FOR_SPEED
+        QNumber<IntType, FractionalBits>
+        QNumber<IntType, FractionalBits>::operator+(const QNumber& other) const
     {
         really_assert((other.value <= 0 || value <= std::numeric_limits<IntType>::max() - other.value) &&
                       (other.value >= 0 || value >= std::numeric_limits<IntType>::min() - other.value));
@@ -153,8 +159,9 @@ namespace math
     }
 
     template<typename IntType, int FractionalBits>
-    QNumber<IntType, FractionalBits>
-    QNumber<IntType, FractionalBits>::operator-(const QNumber& other) const
+    OPTIMIZE_FOR_SPEED
+        QNumber<IntType, FractionalBits>
+        QNumber<IntType, FractionalBits>::operator-(const QNumber& other) const
     {
         really_assert((other.value >= 0 || value <= std::numeric_limits<IntType>::max() + other.value) &&
                       (other.value <= 0 || value >= std::numeric_limits<IntType>::min() + other.value));
@@ -163,8 +170,9 @@ namespace math
     }
 
     template<typename IntType, int FractionalBits>
-    QNumber<IntType, FractionalBits>
-    QNumber<IntType, FractionalBits>::operator*(const QNumber& other) const
+    OPTIMIZE_FOR_SPEED
+        QNumber<IntType, FractionalBits>
+        QNumber<IntType, FractionalBits>::operator*(const QNumber& other) const
     {
         auto temp = static_cast<int64_t>(value) * other.value;
         temp >>= FractionalBits;
@@ -175,8 +183,9 @@ namespace math
     }
 
     template<typename IntType, int FractionalBits>
-    QNumber<IntType, FractionalBits>
-    QNumber<IntType, FractionalBits>::operator/(const QNumber& other) const
+    OPTIMIZE_FOR_SPEED
+        QNumber<IntType, FractionalBits>
+        QNumber<IntType, FractionalBits>::operator/(const QNumber& other) const
     {
         really_assert(other.value != 0);
 
@@ -189,8 +198,9 @@ namespace math
     }
 
     template<typename IntType, int FractionalBits>
-    QNumber<IntType, FractionalBits>&
-    QNumber<IntType, FractionalBits>::operator+=(const QNumber& other)
+    OPTIMIZE_FOR_SPEED
+        QNumber<IntType, FractionalBits>&
+        QNumber<IntType, FractionalBits>::operator+=(const QNumber& other)
     {
         really_assert((other.value <= 0 || value <= std::numeric_limits<IntType>::max() - other.value) &&
                       (other.value >= 0 || value >= std::numeric_limits<IntType>::min() - other.value));
@@ -200,8 +210,9 @@ namespace math
     }
 
     template<typename IntType, int FractionalBits>
-    QNumber<IntType, FractionalBits>&
-    QNumber<IntType, FractionalBits>::operator-=(const QNumber& other)
+    OPTIMIZE_FOR_SPEED
+        QNumber<IntType, FractionalBits>&
+        QNumber<IntType, FractionalBits>::operator-=(const QNumber& other)
     {
         really_assert((other.value >= 0 || value <= std::numeric_limits<IntType>::max() + other.value) &&
                       (other.value <= 0 || value >= std::numeric_limits<IntType>::min() + other.value));
@@ -210,8 +221,9 @@ namespace math
     }
 
     template<typename IntType, int FractionalBits>
-    QNumber<IntType, FractionalBits>&
-    QNumber<IntType, FractionalBits>::operator*=(const QNumber& other)
+    OPTIMIZE_FOR_SPEED
+        QNumber<IntType, FractionalBits>&
+        QNumber<IntType, FractionalBits>::operator*=(const QNumber& other)
     {
         auto temp = static_cast<int64_t>(value) * other.value;
         temp >>= FractionalBits;
@@ -223,8 +235,9 @@ namespace math
     }
 
     template<typename IntType, int FractionalBits>
-    QNumber<IntType, FractionalBits>&
-    QNumber<IntType, FractionalBits>::operator/=(const QNumber& other)
+    OPTIMIZE_FOR_SPEED
+        QNumber<IntType, FractionalBits>&
+        QNumber<IntType, FractionalBits>::operator/=(const QNumber& other)
     {
         really_assert(other.value != 0);
 
@@ -238,51 +251,55 @@ namespace math
     }
 
     template<typename IntType, int FractionalBits>
-    QNumber<IntType, FractionalBits>
-    QNumber<IntType, FractionalBits>::operator+() const
+    OPTIMIZE_FOR_SPEED
+        QNumber<IntType, FractionalBits>
+        QNumber<IntType, FractionalBits>::operator+() const
     {
         return QNumber(static_cast<IntType>(value));
     }
 
     template<typename IntType, int FractionalBits>
-    QNumber<IntType, FractionalBits>
-    QNumber<IntType, FractionalBits>::operator-() const
+    OPTIMIZE_FOR_SPEED
+        QNumber<IntType, FractionalBits>
+        QNumber<IntType, FractionalBits>::operator-() const
     {
         return QNumber(static_cast<IntType>(-value));
     }
 
     template<typename IntType, int FractionalBits>
-    bool QNumber<IntType, FractionalBits>::operator==(const QNumber& other) const
+    OPTIMIZE_FOR_SPEED bool QNumber<IntType, FractionalBits>::operator==(const QNumber& other) const
     {
         return value == other.value;
     }
 
     template<typename IntType, int FractionalBits>
-    bool QNumber<IntType, FractionalBits>::operator<(const QNumber& other) const
+    OPTIMIZE_FOR_SPEED bool QNumber<IntType, FractionalBits>::operator<(const QNumber& other) const
     {
         return value < other.value;
     }
 
     template<typename IntType, int FractionalBits>
-    bool QNumber<IntType, FractionalBits>::operator<=(const QNumber& other) const
+    OPTIMIZE_FOR_SPEED bool QNumber<IntType, FractionalBits>::operator<=(const QNumber& other) const
     {
         return value <= other.value;
     }
 
     template<typename IntType, int FractionalBits>
-    bool QNumber<IntType, FractionalBits>::operator>(const QNumber& other) const
+    OPTIMIZE_FOR_SPEED bool QNumber<IntType, FractionalBits>::operator>(const QNumber& other) const
     {
         return value > other.value;
     }
 
     template<typename IntType, int FractionalBits>
-    bool QNumber<IntType, FractionalBits>::operator>=(const QNumber& other) const
+    OPTIMIZE_FOR_SPEED bool QNumber<IntType, FractionalBits>::operator>=(const QNumber& other) const
     {
         return value >= other.value;
     }
 
     template<typename IntType, int FractionalBits>
-    IntType QNumber<IntType, FractionalBits>::RawValue() const
+    OPTIMIZE_FOR_SPEED
+        IntType
+        QNumber<IntType, FractionalBits>::RawValue() const
     {
         return value;
     }

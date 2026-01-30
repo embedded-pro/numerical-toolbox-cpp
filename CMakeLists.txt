@@ -49,6 +49,11 @@ project(numerical-toolbox LANGUAGES C CXX ASM VERSION 1.0.0) # x-release-please-
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
 
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    set(CMAKE_C_FLAGS_DEBUG "-Og -g" CACHE STRING "C Debug flags" FORCE)
+    set(CMAKE_CXX_FLAGS_DEBUG "-Og -g" CACHE STRING "C++ Debug flags" FORCE)
+endif()
+
 if (NUMERICAL_TOOLBOX_STANDALONE)
     # Configure Git to use HTTPS instead of SSH for GitHub
     execute_process(
