@@ -29,6 +29,7 @@ namespace controllers
 
     private:
         QNumberType setPointValue{};
+        bool hasSetPoint = false;
         PidLimits<QNumberType> limits;
         QNumberType a0 = 0;
         QNumberType a1 = 0;
@@ -112,6 +113,7 @@ namespace controllers
     template<class QNumberType>
     void PidIncrementalBase<QNumberType>::Disable()
     {
+        hasSetPoint = false;
     }
 
     template<class QNumberType>
@@ -149,6 +151,9 @@ namespace controllers
         QNumberType
         PidIncrementalBase<QNumberType>::Process(QNumberType processVariable)
     {
+        if (!hasSetPoint) [[unlikely]]
+            return processVariable;
+
         u_1 = u;
         e_2 = e_1;
         e_1 = e;

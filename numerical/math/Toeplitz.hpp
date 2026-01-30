@@ -103,11 +103,9 @@ namespace math
         {
             T sum{};
 
-            // Upper triangular part: j >= i
             for (size_type j = i; j < N; ++j)
                 sum += first_row.at(j - i, 0) * vec.at(j, 0);
 
-            // Lower triangular part: j < i (count down to 0)
             for (size_type j = i; j-- > 0;)
                 sum += first_col.at(i - j, 0) * vec.at(j, 0);
 
