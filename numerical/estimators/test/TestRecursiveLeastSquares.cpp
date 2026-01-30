@@ -152,7 +152,7 @@ TYPED_TEST(RecursiveLeastSquaresTest, TracksTimeVaryingSystem)
 
 TYPED_TEST(RecursiveLeastSquaresTest, InitializesWithDefaultCovariance)
 {
-    typename TestFixture::EstimatorType rls(std::nullopt, 1.0f);
+    typename TestFixture::EstimatorType rls(1.0f);
 
     const auto& coef = rls.Coefficients();
     EXPECT_TRUE(AreFloatsNear(coef.at(0, 0), this->MakeValue(0.0f)));

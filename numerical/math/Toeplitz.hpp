@@ -2,7 +2,12 @@
 #define MATH_TOEPLITZ_MATRIX_HPP
 
 #include "infra/util/ReallyAssert.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
 
 namespace math
 {
@@ -27,10 +32,10 @@ namespace math
         constexpr ToeplitzMatrix(const Vector<T, N>& first_row, const Vector<T, N>& first_col);
         explicit constexpr ToeplitzMatrix(const Vector<T, N>& autocorrelation);
 
-        [[nodiscard]] constexpr T at(size_type row, size_type col) const;
+        [[nodiscard]] constexpr T at(size_type row, size_type col) const noexcept;
         [[nodiscard]] constexpr Matrix<T, N, N> ToFullMatrix() const;
 
-        [[nodiscard]] constexpr Vector<T, N> operator*(const Vector<T, N>& vec) const;
+        [[nodiscard]] constexpr Vector<T, N> operator*(const Vector<T, N>& vec) const noexcept;
         [[nodiscard]] constexpr ToeplitzMatrix operator+(const ToeplitzMatrix& other) const;
         [[nodiscard]] constexpr ToeplitzMatrix operator-(const ToeplitzMatrix& other) const;
 
@@ -57,8 +62,10 @@ namespace math
         : first_row(first_row)
         , first_col(first_col)
     {
-        // First element must be the same in row and column
+#ifndef NDEBUG
+        // First element must be the same in row and column (debug check only)
         really_assert(first_row.at(0, 0) == first_col.at(0, 0));
+#endif
     }
 
     template<typename T, std::size_t N>
@@ -68,18 +75,16 @@ namespace math
     {}
 
     template<typename T, std::size_t N>
-    constexpr T ToeplitzMatrix<T, N>::at(size_type row, size_type col) const
+    OPTIMIZE_FOR_SPEED constexpr T ToeplitzMatrix<T, N>::at(size_type row, size_type col) const noexcept
     {
-        really_assert(row < N && col < N);
-
-        if (row <= col)
+        if (row <= col) [[likely]]
             return first_row.at(col - row, 0);
         else
             return first_col.at(row - col, 0);
     }
 
     template<typename T, std::size_t N>
-    constexpr Matrix<T, N, N> ToeplitzMatrix<T, N>::ToFullMatrix() const
+    OPTIMIZE_FOR_SPEED constexpr Matrix<T, N, N> ToeplitzMatrix<T, N>::ToFullMatrix() const
     {
         Matrix<T, N, N> result;
         for (size_type i = 0; i < N; ++i)
@@ -90,7 +95,7 @@ namespace math
     }
 
     template<typename T, std::size_t N>
-    constexpr Vector<T, N> ToeplitzMatrix<T, N>::operator*(const Vector<T, N>& vec) const
+    OPTIMIZE_FOR_SPEED constexpr Vector<T, N> ToeplitzMatrix<T, N>::operator*(const Vector<T, N>& vec) const noexcept
     {
         Vector<T, N> result;
 
@@ -101,7 +106,7 @@ namespace math
             for (size_type j = i; j < N; ++j)
                 sum += first_row.at(j - i, 0) * vec.at(j, 0);
 
-            for (size_type j = 0; j < i; ++j)
+            for (size_type j = i; j-- > 0;)
                 sum += first_col.at(i - j, 0) * vec.at(j, 0);
 
             result.at(i, 0) = sum;
@@ -111,13 +116,13 @@ namespace math
     }
 
     template<typename T, std::size_t N>
-    constexpr ToeplitzMatrix<T, N> ToeplitzMatrix<T, N>::operator+(const ToeplitzMatrix& other) const
+    OPTIMIZE_FOR_SPEED constexpr ToeplitzMatrix<T, N> ToeplitzMatrix<T, N>::operator+(const ToeplitzMatrix& other) const
     {
         return ToeplitzMatrix(first_row + other.first_row, first_col + other.first_col);
     }
 
     template<typename T, std::size_t N>
-    constexpr ToeplitzMatrix<T, N> ToeplitzMatrix<T, N>::operator-(const ToeplitzMatrix& other) const
+    OPTIMIZE_FOR_SPEED constexpr ToeplitzMatrix<T, N> ToeplitzMatrix<T, N>::operator-(const ToeplitzMatrix& other) const
     {
         return ToeplitzMatrix(first_row - other.first_row, first_col - other.first_col);
     }

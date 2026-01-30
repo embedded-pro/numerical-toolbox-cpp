@@ -1,9 +1,14 @@
 #ifndef MATH_MATRIX_HPP
 #define MATH_MATRIX_HPP
 
+#include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/QNumber.hpp"
 #include <array>
 #include <type_traits>
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
 
 namespace math
 {
@@ -98,20 +103,16 @@ namespace math
 
     template<typename T, size_t Rows, size_t Cols>
     template<typename... Args, typename>
-    constexpr Matrix<T, Rows, Cols>::Matrix(Args&&... args) noexcept
+    OPTIMIZE_FOR_SPEED constexpr Matrix<T, Rows, Cols>::Matrix(Args&&... args) noexcept
         : data{ std::forward<Args>(args)... }
     {}
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr Matrix<T, Rows, Cols>::Matrix(std::initializer_list<std::initializer_list<T>> init)
+    OPTIMIZE_FOR_SPEED constexpr Matrix<T, Rows, Cols>::Matrix(std::initializer_list<std::initializer_list<T>> init)
     {
-        really_assert(init.size() <= Rows);
-
         size_t row = 0;
         for (const auto& row_list : init)
         {
-            really_assert(row_list.size() <= Cols);
-
             size_t col = 0;
             for (const auto& value : row_list)
             {
@@ -123,67 +124,75 @@ namespace math
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr typename Matrix<T, Rows, Cols>::reference
+    OPTIMIZE_FOR_SPEED constexpr typename Matrix<T, Rows, Cols>::reference
     Matrix<T, Rows, Cols>::at(size_type row, size_type col)
     {
+#ifdef NUMERICAL_TOOLBOX_ENABLE_ASSERTIONS
         really_assert(row < Rows && col < Cols);
+#endif
         return data[row * Cols + col];
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr typename Matrix<T, Rows, Cols>::const_reference
+    OPTIMIZE_FOR_SPEED constexpr typename Matrix<T, Rows, Cols>::const_reference
     Matrix<T, Rows, Cols>::at(size_type row, size_type col) const
     {
+#ifdef NUMERICAL_TOOLBOX_ENABLE_ASSERTIONS
         really_assert(row < Rows && col < Cols);
+#endif
         return data[row * Cols + col];
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr typename Matrix<T, Rows, Cols>::reference
+    OPTIMIZE_FOR_SPEED constexpr typename Matrix<T, Rows, Cols>::reference
     Matrix<T, Rows, Cols>::operator[](size_type row)
     {
+#ifdef NUMERICAL_TOOLBOX_ENABLE_ASSERTIONS
         really_assert(row < Rows);
+#endif
         return data[row * Cols];
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr typename Matrix<T, Rows, Cols>::const_reference
+    OPTIMIZE_FOR_SPEED constexpr typename Matrix<T, Rows, Cols>::const_reference
     Matrix<T, Rows, Cols>::operator[](size_type row) const
     {
+#ifdef NUMERICAL_TOOLBOX_ENABLE_ASSERTIONS
         really_assert(row < Rows);
+#endif
         return data[row * Cols];
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr typename Matrix<T, Rows, Cols>::iterator
+    OPTIMIZE_FOR_SPEED constexpr typename Matrix<T, Rows, Cols>::iterator
     Matrix<T, Rows, Cols>::begin() noexcept
     {
         return data.begin();
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr typename Matrix<T, Rows, Cols>::iterator
+    OPTIMIZE_FOR_SPEED constexpr typename Matrix<T, Rows, Cols>::iterator
     Matrix<T, Rows, Cols>::end() noexcept
     {
         return data.end();
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr typename Matrix<T, Rows, Cols>::const_iterator
+    OPTIMIZE_FOR_SPEED constexpr typename Matrix<T, Rows, Cols>::const_iterator
     Matrix<T, Rows, Cols>::begin() const noexcept
     {
         return data.begin();
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr typename Matrix<T, Rows, Cols>::const_iterator
+    OPTIMIZE_FOR_SPEED constexpr typename Matrix<T, Rows, Cols>::const_iterator
     Matrix<T, Rows, Cols>::end() const noexcept
     {
         return data.end();
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr Matrix<T, Rows, Cols>
+    OPTIMIZE_FOR_SPEED constexpr Matrix<T, Rows, Cols>
     Matrix<T, Rows, Cols>::operator+(const Matrix& rhs) const
     {
         Matrix result;
@@ -194,7 +203,7 @@ namespace math
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr Matrix<T, Rows, Cols>
+    OPTIMIZE_FOR_SPEED constexpr Matrix<T, Rows, Cols>
     Matrix<T, Rows, Cols>::operator-(const Matrix& rhs) const
     {
         Matrix result;
@@ -206,7 +215,7 @@ namespace math
 
     template<typename T, size_t Rows, size_t Cols>
     template<size_t RhsCols>
-    constexpr Matrix<T, Rows, RhsCols>
+    OPTIMIZE_FOR_SPEED constexpr Matrix<T, Rows, RhsCols>
     Matrix<T, Rows, Cols>::operator*(const Matrix<T, Cols, RhsCols>& rhs) const
     {
         Matrix<T, Rows, RhsCols> result;
@@ -225,7 +234,7 @@ namespace math
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr Matrix<T, Rows, Cols>
+    OPTIMIZE_FOR_SPEED constexpr Matrix<T, Rows, Cols>
     Matrix<T, Rows, Cols>::operator*(const T& scalar) const
     {
         Matrix result;
@@ -236,7 +245,7 @@ namespace math
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr Matrix<T, Rows, Cols>&
+    OPTIMIZE_FOR_SPEED constexpr Matrix<T, Rows, Cols>&
     Matrix<T, Rows, Cols>::operator+=(const Matrix& rhs)
     {
         for (size_type i = 0; i < size; ++i)
@@ -246,7 +255,7 @@ namespace math
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr Matrix<T, Rows, Cols>&
+    OPTIMIZE_FOR_SPEED constexpr Matrix<T, Rows, Cols>&
     Matrix<T, Rows, Cols>::operator-=(const Matrix& rhs)
     {
         for (size_type i = 0; i < size; ++i)
@@ -256,7 +265,7 @@ namespace math
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr Matrix<T, Rows, Cols>&
+    OPTIMIZE_FOR_SPEED constexpr Matrix<T, Rows, Cols>&
     Matrix<T, Rows, Cols>::operator*=(const T& scalar)
     {
         for (size_type i = 0; i < size; ++i)
@@ -266,7 +275,7 @@ namespace math
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr Matrix<T, Cols, Rows>
+    OPTIMIZE_FOR_SPEED constexpr Matrix<T, Cols, Rows>
     Matrix<T, Rows, Cols>::Transpose() const
     {
         Matrix<T, Cols, Rows> result;
@@ -278,7 +287,7 @@ namespace math
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr Matrix<T, Rows, Cols>
+    OPTIMIZE_FOR_SPEED constexpr Matrix<T, Rows, Cols>
     Matrix<T, Rows, Cols>::Identity()
     {
         static_assert(Rows == Cols,
@@ -292,7 +301,7 @@ namespace math
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr T
+    OPTIMIZE_FOR_SPEED constexpr T
     Matrix<T, Rows, Cols>::Trace() const
     {
         static_assert(Rows == Cols,
