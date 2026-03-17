@@ -78,4 +78,15 @@ namespace controllers
         auto BtPA = BtP * A;
         gain = solvers::SolveSystem<T, InputSize, StateSize>(S, BtPA);
     }
+
+    extern template class Lqr<float, 1, 1>;
+    extern template class Lqr<float, 2, 1>;
+    extern template class Lqr<float, 3, 1>;
+    extern template class Lqr<float, 2, 2>;
+
+    extern template class Lqr<math::Q15, 1, 1>;
+    extern template class Lqr<math::Q15, 2, 1>;
+
+    extern template class Lqr<math::Q31, 1, 1>;
+    extern template class Lqr<math::Q31, 2, 1>;
 }
