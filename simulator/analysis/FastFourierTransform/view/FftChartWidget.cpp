@@ -96,7 +96,8 @@ namespace simulator::analysis::view
         QPointF previousPoint;
         bool hasPrevious = false;
 
-        for (std::size_t i = 0; i < frequencies.size(); ++i)
+        const std::size_t count = std::min(frequencies.size(), magnitudes.size());
+        for (std::size_t i = 0; i < count; ++i)
         {
             float xRatio = frequencies[i] / maxFrequency;
             float yRatio = magnitudes[i] / maxMagnitude;
