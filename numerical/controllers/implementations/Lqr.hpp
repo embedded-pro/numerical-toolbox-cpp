@@ -52,13 +52,7 @@ namespace controllers
         typename Lqr<T, StateSize, InputSize>::InputVector
         Lqr<T, StateSize, InputSize>::ComputeControl(const StateVector& state)
     {
-        auto u = gain * state;
-
-        InputVector result;
-        for (std::size_t i = 0; i < InputSize; ++i)
-            result.at(i, 0) = T(0.0f) - u.at(i, 0);
-
-        return result;
+        return gain * state * T(-1.0f);
     }
 
     template<typename T, std::size_t StateSize, std::size_t InputSize>
