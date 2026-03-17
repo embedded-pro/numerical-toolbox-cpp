@@ -104,6 +104,7 @@ endif()
 
 add_subdirectory(examples)
 add_subdirectory(numerical)
+add_subdirectory(simulator)
 
 if(TARGET yaml-cpp)
     emil_exclude_from_clang_format(yaml-cpp)
@@ -119,6 +120,7 @@ endif()
 
 emil_clangformat_directories(examples DIRECTORIES .)
 emil_clangformat_directories(numerical DIRECTORIES .)
+emil_clangformat_directories(simulator DIRECTORIES .)
 emil_coverage_targets(DIRECTORIES .)
 
 if (NUMERICAL_TOOLBOX_STANDALONE)
