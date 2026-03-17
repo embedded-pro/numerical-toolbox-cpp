@@ -3,17 +3,35 @@
     "context": "..",
     "dockerfile": "Dockerfile"
   },
+  // GUI support: requires an X server on the host.
+  //   Windows: install VcXsrv or X410, launch with "Disable access control" enabled.
+  //   macOS:   install XQuartz, enable "Allow connections from network clients" in Preferences > Security.
+  //   Linux:   run 'xhost +local:docker' to allow container access.
   "mounts": [
     "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
   ],
-  "runArgs": ["--add-host=host.docker.internal:host-gateway", "--privileged"],
+  "containerEnv": {
+    "DISPLAY": "host.docker.internal:0.0",
+    "QT_X11_NO_MITSHM": "1",
+    "LIBGL_ALWAYS_INDIRECT": "1"
+  },
+  "runArgs": [
+    "--add-host=host.docker.internal:host-gateway",
+    "--privileged",
+    "--shm-size=256m"
+  ],
   "customizations": {
     "vscode": {
-      "extensions": ["JacquesLucke.gcov-viewer@0.5.0"],
+      "extensions": [
+        "JacquesLucke.gcov-viewer@0.5.0",
+        "matepek.vscode-catch2-test-adapter@4.12.2"
+      ],
       "settings": {
         "editor.formatOnSave": true,
         "files.insertFinalNewline": true,
-        "gcovViewer.buildDirectories": ["${workspaceFolder}/build/Coverage"],
+        "gcovViewer.buildDirectories": [
+          "${workspaceFolder}/build/Coverage"
+        ],
         "gcovViewer.highlightMissedLines": true
       }
     }
