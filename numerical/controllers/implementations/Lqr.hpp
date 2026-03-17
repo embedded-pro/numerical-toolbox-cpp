@@ -1,5 +1,6 @@
 #pragma once
 
+#include "infra/util/ReallyAssert.hpp"
 #include "numerical/controllers/interfaces/LqrController.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/solvers/DiscreteAlgebraicRiccatiEquation.hpp"
@@ -31,6 +32,7 @@ namespace controllers
 
         GainMatrix gain;
         StateMatrix riccatiSolution;
+        bool riccatiSolutionAvailable = false;
     };
 
     template<typename T, std::size_t StateSize, std::size_t InputSize>
@@ -39,6 +41,7 @@ namespace controllers
     {
         solvers::DiscreteAlgebraicRiccatiEquation<T, StateSize, InputSize> dare;
         riccatiSolution = dare.Solve(A, B, Q, R);
+        riccatiSolutionAvailable = true;
         ComputeGain(A, B, riccatiSolution, R);
     }
 
@@ -66,6 +69,7 @@ namespace controllers
     const typename Lqr<T, StateSize, InputSize>::StateMatrix&
     Lqr<T, StateSize, InputSize>::GetRiccatiSolution() const
     {
+        really_assert(riccatiSolutionAvailable);
         return riccatiSolution;
     }
 

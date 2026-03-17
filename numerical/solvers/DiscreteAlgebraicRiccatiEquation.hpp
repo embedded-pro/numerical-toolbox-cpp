@@ -3,6 +3,7 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/QNumber.hpp"
+#include "numerical/math/Tolerance.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 #include <cmath>
 
@@ -60,7 +61,7 @@ namespace solvers
             StateMatrix Pprev = P;
             P = Iterate(P, A, B, Q, R);
 
-            if (HasConverged(P, Pprev, 1e-9f))
+            if (HasConverged(P, Pprev, math::Tolerance<T>()))
                 break;
         }
 

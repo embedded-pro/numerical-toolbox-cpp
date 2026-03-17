@@ -1,5 +1,6 @@
 #pragma once
 
+#include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/QNumber.hpp"
@@ -68,6 +69,7 @@ namespace solvers
     void GaussianElimination<T, N>::EliminateBelow(InputMatrix& matrix, SolutionVector& vector, std::size_t col) const
     {
         T pivot = matrix.at(col, col);
+        really_assert(std::abs(math::ToFloat(pivot)) > 0.0f);
 
         for (std::size_t row = col + 1; row < N; ++row)
         {
@@ -94,6 +96,7 @@ namespace solvers
             for (std::size_t j = row + 1; j < N; ++j)
                 sum = sum - matrix.at(row, j) * x.at(j, 0);
 
+            really_assert(std::abs(math::ToFloat(matrix.at(row, row))) > 0.0f);
             x.at(row, 0) = sum / matrix.at(row, row);
         }
 
