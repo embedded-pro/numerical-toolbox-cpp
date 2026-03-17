@@ -1,6 +1,9 @@
 #include "numerical/math/QNumber.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 #include <gtest/gtest.h>
+#include <algorithm>
+#include <cmath>
+#include <type_traits>
 
 namespace
 {
@@ -152,4 +155,6 @@ TEST(TestGaussianEliminationFloat, solve_system_multiple_rhs)
 
     EXPECT_NEAR(X.at(0, 0), 0.4f, 0.01f);
     EXPECT_NEAR(X.at(1, 0), 0.45f, 0.01f);
+    EXPECT_NEAR(X.at(0, 1), 1.0f, 0.01f);
+    EXPECT_NEAR(X.at(1, 1), 0.0f, 0.01f);
 }

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cmath>
+#include <type_traits>
+
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/solvers/Solver.hpp"
