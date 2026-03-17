@@ -41,7 +41,8 @@
       "displayName": "Configuration for Code Coverage",
       "inherits": "host",
       "cacheVariables": {
-        "EMIL_ENABLE_COVERAGE": "On"
+        "EMIL_ENABLE_COVERAGE": "On",
+        "NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS": "Off"
       },
       "generator": "Ninja"
     }
