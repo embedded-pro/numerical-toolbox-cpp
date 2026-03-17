@@ -2,6 +2,7 @@
 #include <QHBoxLayout>
 #include <QMessageBox>
 #include <QSplitter>
+#include <stdexcept>
 
 namespace simulator::analysis::view
 {

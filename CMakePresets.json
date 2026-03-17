@@ -23,7 +23,8 @@
       "inherits": "defaults",
       "cacheVariables": {
         "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel",
-        "NUMERICAL_TOOLBOX_BUILD_TESTS": true
+        "NUMERICAL_TOOLBOX_BUILD_TESTS": true,
+        "NUMERICAL_TOOLBOX_BUILD_SIMULATOR": true
       },
       "generator": "Ninja Multi-Config"
     },
@@ -42,7 +43,8 @@
       "inherits": "host",
       "cacheVariables": {
         "EMIL_ENABLE_COVERAGE": "On",
-        "NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS": "Off"
+        "NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS": "Off",
+        "NUMERICAL_TOOLBOX_BUILD_SIMULATOR": false
       },
       "generator": "Ninja"
     }

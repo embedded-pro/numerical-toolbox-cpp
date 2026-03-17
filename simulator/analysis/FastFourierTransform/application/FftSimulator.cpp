@@ -1,6 +1,7 @@
 #include "simulator/analysis/FastFourierTransform/application/FftSimulator.hpp"
 #include "numerical/analysis/FastFourierTransformRadix2Impl.hpp"
 #include "simulator/analysis/FastFourierTransform/application/TwiddleFactorsTable.hpp"
+#include <algorithm>
 #include <cmath>
 #include <stdexcept>
 

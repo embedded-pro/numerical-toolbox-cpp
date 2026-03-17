@@ -1,5 +1,6 @@
 #include "simulator/analysis/FastFourierTransform/application/SignalGenerator.hpp"
 #include <cmath>
+#include <numbers>
 
 namespace simulator::analysis
 {
@@ -12,7 +13,7 @@ namespace simulator::analysis
             float t = static_cast<float>(i) / sampleRateHz;
 
             for (const auto& component : components)
-                signal[i] += component.amplitude * std::sin(2.0f * static_cast<float>(M_PI) * component.frequencyHz * t);
+                signal[i] += component.amplitude * std::sin(2.0f * std::numbers::pi_v<float> * component.frequencyHz * t);
         }
 
         return signal;

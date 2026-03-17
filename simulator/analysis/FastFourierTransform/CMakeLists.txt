@@ -4,7 +4,7 @@ add_subdirectory(application)
 add_subdirectory(view)
 
 add_executable(numerical.simulator.analysis.fast_fourier_transform)
-emil_build_for(numerical.simulator.analysis.fast_fourier_transform HOST All PREREQUISITE_BOOL NUMERICAL_TOOLBOX_BUILD_EXAMPLES)
+emil_build_for(numerical.simulator.analysis.fast_fourier_transform HOST All PREREQUISITE_BOOL NUMERICAL_TOOLBOX_BUILD_SIMULATOR)
 
 target_link_libraries(numerical.simulator.analysis.fast_fourier_transform PRIVATE
     numerical.simulator.analysis.fft.application

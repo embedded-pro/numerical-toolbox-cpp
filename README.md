@@ -36,6 +36,36 @@ Refer to the documentation and example scripts to quickly integrate and utilize 
 
 5. [Neural Network](doc/neural_network/NeuralNetwork.md)
 
+## Simulator
+
+The `simulator/` directory contains interactive Qt-based GUI applications for visualizing and experimenting with the library's algorithms. These are desktop tools intended for development and exploration, separate from the core embedded-targeted library.
+
+### FFT Simulator
+
+A graphical application for computing and visualizing Fast Fourier Transforms. Features:
+
+- Configurable FFT size (64–4096 points)
+- Adjustable sample rate
+- Multi-component signal generation (frequency + amplitude per component)
+- Real-time magnitude spectrum visualization
+
+The simulator is split into two layers:
+
+- **application/** — Pure C++ logic (signal generation, FFT computation). No Qt dependency.
+- **view/** — Qt Widgets GUI (chart rendering, configuration panel, main window).
+
+### Building the Simulator
+
+The simulator requires Qt6 and is disabled by default. Enable it with:
+
+```bash
+cmake --preset host  # host preset enables it automatically
+# or manually:
+cmake -DNUMERICAL_TOOLBOX_BUILD_SIMULATOR=ON ...
+```
+
+Prerequisites: `qt6-base-dev` and `libgl1-mesa-dev` (Ubuntu/Debian).
+
 
 ## Contributing
 

@@ -1,8 +1,9 @@
 #pragma once
 
 #include "numerical/analysis/FastFourierTransform.hpp"
+#include <array>
 #include <cmath>
-#include <vector>
+#include <numbers>
 
 namespace simulator::analysis
 {
@@ -13,12 +14,10 @@ namespace simulator::analysis
     public:
         TwiddleFactorsTable()
         {
-            factors.reserve(Length);
-
             for (std::size_t k = 0; k < Length; ++k)
             {
-                float angle = static_cast<float>(-M_PI) * static_cast<float>(k) / static_cast<float>(Length);
-                factors.emplace_back(std::cos(angle), std::sin(angle));
+                float angle = -std::numbers::pi_v<float> * static_cast<float>(k) / static_cast<float>(Length);
+                factors[k] = math::Complex<QNumberType>(std::cos(angle), std::sin(angle));
             }
         }
 
@@ -28,6 +27,6 @@ namespace simulator::analysis
         }
 
     private:
-        std::vector<math::Complex<QNumberType>> factors;
+        std::array<math::Complex<QNumberType>, Length> factors{};
     };
 }

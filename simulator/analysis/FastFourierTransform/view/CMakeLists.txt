@@ -1,7 +1,7 @@
 add_library(numerical.simulator.analysis.fft.view STATIC)
 
 target_include_directories(numerical.simulator.analysis.fft.view PUBLIC
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../../>"
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../../../>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
