@@ -34,11 +34,11 @@ namespace simulator::analysis::view
     void FftMainWindow::OnComputeRequested()
     {
         auto config = configPanel->GetConfiguration();
-        simulator.Configure(config);
+        fftSimulator.Configure(config);
 
         try
         {
-            auto result = simulator.Compute();
+            auto result = fftSimulator.Compute();
             chartWidget->SetData(result);
             statusBar()->showMessage(
                 QString("FFT computed: %1 points, sample rate %2 Hz")

@@ -44,6 +44,9 @@ namespace simulator::analysis
 
     FftResult FftSimulator::Compute()
     {
+        if (configuration.sampleRateHz <= 0.0f)
+            throw std::invalid_argument("Sample rate must be greater than zero.");
+
         auto signal = SignalGenerator::Generate(configuration.fftSize, configuration.sampleRateHz, configuration.signalComponents);
 
         switch (configuration.fftSize)

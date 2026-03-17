@@ -19,7 +19,7 @@ namespace simulator::analysis::view
     private:
         void OnComputeRequested();
 
-        FftSimulator simulator;
+        FftSimulator fftSimulator;
         FftConfigurationPanel* configPanel;
         FftChartWidget* chartWidget;
     };

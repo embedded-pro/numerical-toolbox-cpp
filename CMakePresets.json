@@ -44,7 +44,7 @@
       "cacheVariables": {
         "EMIL_ENABLE_COVERAGE": "On",
         "NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS": "Off",
-        "NUMERICAL_TOOLBOX_BUILD_SIMULATOR": false
+        "NUMERICAL_TOOLBOX_BUILD_SIMULATOR": true
       },
       "generator": "Ninja"
     }
