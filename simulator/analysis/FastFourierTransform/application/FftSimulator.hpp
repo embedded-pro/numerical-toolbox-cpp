@@ -2,7 +2,6 @@
 
 #include "simulator/analysis/FastFourierTransform/application/SignalGenerator.hpp"
 #include <cstddef>
-#include <functional>
 #include <vector>
 
 namespace simulator::analysis

@@ -24,7 +24,16 @@ namespace simulator::analysis::view
         fftSizeCombo = new QComboBox(this);
         for (auto size : FftSimulator::SupportedFftSizes())
             fftSizeCombo->addItem(QString::number(size), QVariant::fromValue(static_cast<qulonglong>(size)));
-        fftSizeCombo->setCurrentIndex(4);
+
+        // Select default FFT size by value (e.g., 1024) rather than by hard-coded index.
+        // Fall back to the first entry if the desired size is not available.
+        constexpr qulonglong defaultFftSize = 1024u;
+        const int defaultIndex = fftSizeCombo->findData(QVariant::fromValue(defaultFftSize));
+        if (defaultIndex != -1)
+            fftSizeCombo->setCurrentIndex(defaultIndex);
+        else if (fftSizeCombo->count() > 0)
+            fftSizeCombo->setCurrentIndex(0);
+
         sizeLayout->addWidget(fftSizeCombo);
         fftLayout->addLayout(sizeLayout);
 
