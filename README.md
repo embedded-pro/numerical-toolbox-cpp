@@ -16,6 +16,7 @@ Refer to the documentation and example scripts to quickly integrate and utilize 
 
 1. Control Systems
     - [PID](doc/controllers/Pid.md)
+    - [LQR](doc/controllers/Lqr.md)
 
 2. Analysis
     - [Fast Fourier Transform](doc/analysis/FastFourierTransform.md)
@@ -30,6 +31,8 @@ Refer to the documentation and example scripts to quickly integrate and utilize 
     - [Linear Regression](doc/estimators/LinearRegression.md)
     - [Yule-Walker (for AR and MA models)](doc/estimators/YuleWalker.md)
     - [Levinson-Durbin (Ax + B = 0 matrix solver)](doc/solvers/LevinsonDurbin.md)
+    - [Gaussian Elimination](doc/solvers/GaussianElimination.md)
+    - [Discrete Algebraic Riccati Equation](doc/solvers/DiscreteAlgebraicRiccatiEquation.md)
 
 5. [Neural Network](doc/neural_network/NeuralNetwork.md)
 

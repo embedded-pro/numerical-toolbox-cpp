@@ -7,9 +7,12 @@ target_include_directories(numerical.controllers.implementations PUBLIC
 
 target_link_libraries(numerical.controllers.implementations PUBLIC
     numerical.controllers.interfaces
+    numerical.solver
 )
 
 target_sources(numerical.controllers.implementations PRIVATE
+    Lqr.cpp
+    Lqr.hpp
     PidIncremental.cpp
     PidIncremental.hpp
 )
