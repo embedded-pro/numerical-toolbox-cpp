@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
