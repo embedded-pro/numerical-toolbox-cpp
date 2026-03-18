@@ -2,6 +2,27 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Simulator",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/host/simulator/analysis/${input:simulatorTarget}/Debug/numerical.simulator.analysis.${input:simulatorTarget}",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "cmake: build"
+    },
+    {
       "name": "Linux Debug",
       "type": "cppdbg",
       "request": "launch",
@@ -20,6 +41,17 @@
           "ignoreFailures": true
         }
       ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "simulatorTarget",
+      "type": "pickString",
+      "description": "Select simulator to debug",
+      "options": [
+        "fast_fourier_transform"
+      ],
+      "default": "fast_fourier_transform"
     }
   ]
 }

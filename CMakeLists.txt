@@ -7,6 +7,7 @@ endif()
 option(CMAKE_COMPILE_WARNING_AS_ERROR "Enable warnings-as-error" On)
 option(NUMERICAL_TOOLBOX_INCLUDE_DEFAULT_INIT "Include default initialization code; turn off when providing custom initialization" On)
 option(NUMERICAL_TOOLBOX_BUILD_EXAMPLES "Enable build of the examples" Off)
+option(NUMERICAL_TOOLBOX_BUILD_SIMULATOR "Enable build of the Qt simulator applications" Off)
 option(NUMERICAL_TOOLBOX_BUILD_TESTS "Enable build of the tests" Off)
 option(NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS "Enable compiler optimizations for numerical routines" On)
 
@@ -105,6 +106,10 @@ endif()
 add_subdirectory(examples)
 add_subdirectory(numerical)
 
+if (NUMERICAL_TOOLBOX_BUILD_SIMULATOR)
+    add_subdirectory(simulator)
+endif()
+
 if(TARGET yaml-cpp)
     emil_exclude_from_clang_format(yaml-cpp)
 
@@ -119,6 +124,11 @@ endif()
 
 emil_clangformat_directories(examples DIRECTORIES .)
 emil_clangformat_directories(numerical DIRECTORIES .)
+
+if (NUMERICAL_TOOLBOX_BUILD_SIMULATOR)
+    emil_clangformat_directories(simulator DIRECTORIES .)
+endif()
+
 emil_coverage_targets(DIRECTORIES .)
 
 if (NUMERICAL_TOOLBOX_STANDALONE)

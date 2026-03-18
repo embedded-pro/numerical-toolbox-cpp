@@ -42,6 +42,10 @@ jobs:
           key: ${{ github.job }}
           max-size: 2G
           save: ${{ github.ref == 'refs/heads/main' }}
+      - name: Install Qt6
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends qt6-base-dev libgl1-mesa-dev
       - name: Build & Collect Coverage
         run: |
           cmake --preset coverage -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
