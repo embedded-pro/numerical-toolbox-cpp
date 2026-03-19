@@ -5,6 +5,7 @@
 #include "simulator/utils/TwiddleFactorsTable.hpp"
 #include <algorithm>
 #include <cmath>
+#include <memory>
 #include <stdexcept>
 
 namespace simulator::analysis::psd
@@ -86,6 +87,9 @@ namespace simulator::analysis::psd
 
         if (configuration.inputSize < configuration.segmentSize)
             throw std::invalid_argument("Input size must be greater than or equal to segment size.");
+
+        if (configuration.inputSize > 4096)
+            throw std::invalid_argument("Input size must not exceed 4096 samples.");
 
         auto signal = utils::SignalGenerator::Generate(configuration.inputSize, configuration.sampleRateHz,
             configuration.signalComponents, configuration.noise);

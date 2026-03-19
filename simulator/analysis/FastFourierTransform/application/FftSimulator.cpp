@@ -4,6 +4,7 @@
 #include "simulator/utils/TwiddleFactorsTable.hpp"
 #include <algorithm>
 #include <cmath>
+#include <memory>
 #include <stdexcept>
 
 namespace simulator::analysis

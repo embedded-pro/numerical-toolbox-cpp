@@ -2,12 +2,16 @@
 #include <cmath>
 #include <numbers>
 #include <random>
+#include <stdexcept>
 
 namespace simulator::utils
 {
     std::vector<float> SignalGenerator::Generate(std::size_t length, float sampleRateHz,
         const std::vector<SignalComponent>& components, const NoiseConfiguration& noise)
     {
+        if (sampleRateHz <= 0.0f)
+            throw std::invalid_argument("Sample rate must be greater than zero.");
+
         std::vector<float> signal(length, 0.0f);
 
         for (std::size_t i = 0; i < length; ++i)
