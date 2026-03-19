@@ -1,12 +1,12 @@
-#include "simulator/analysis/FastFourierTransform/view/FftChartWidget.hpp"
+#include "simulator/analysis/PowerDensitySpectrum/view/PsdChartWidget.hpp"
 #include <QPainter>
 #include <QPen>
 #include <algorithm>
 #include <cmath>
 
-namespace simulator::analysis::view
+namespace simulator::analysis::psd::view
 {
-    FftChartWidget::FftChartWidget(QWidget* parent)
+    PsdChartWidget::PsdChartWidget(QWidget* parent)
         : QWidget(parent)
     {
         setMinimumSize(400, 500);
@@ -14,17 +14,17 @@ namespace simulator::analysis::view
         setAutoFillBackground(true);
     }
 
-    void FftChartWidget::SetData(const FftResult& result)
+    void PsdChartWidget::SetData(const PsdResult& result)
     {
         time = result.time;
         signal = result.signal;
-        windowedSignal = result.windowedSignal;
         frequencies = result.frequencies;
-        magnitudes = result.magnitudes;
+        powerDensityDb = result.powerDensityDb;
 
         maxTime = 0.0f;
         maxSignalAmplitude = 0.0f;
-        maxMagnitude = 0.0f;
+        minPowerDb = 0.0f;
+        maxPowerDb = -100.0f;
         maxFrequency = 0.0f;
 
         if (!time.empty())
@@ -36,17 +36,20 @@ namespace simulator::analysis::view
                 maxSignalAmplitude = std::max(maxSignalAmplitude, std::abs(s));
         }
 
-        if (!windowedSignal.empty())
-        {
-            for (auto s : windowedSignal)
-                maxSignalAmplitude = std::max(maxSignalAmplitude, std::abs(s));
-        }
-
         if (maxSignalAmplitude == 0.0f)
             maxSignalAmplitude = 1.0f;
 
-        if (!magnitudes.empty())
-            maxMagnitude = *std::max_element(magnitudes.begin(), magnitudes.end());
+        if (!powerDensityDb.empty())
+        {
+            minPowerDb = *std::min_element(powerDensityDb.begin(), powerDensityDb.end());
+            maxPowerDb = *std::max_element(powerDensityDb.begin(), powerDensityDb.end());
+
+            if (maxPowerDb - minPowerDb < 1.0f)
+            {
+                minPowerDb -= 5.0f;
+                maxPowerDb += 5.0f;
+            }
+        }
 
         if (!frequencies.empty())
             maxFrequency = frequencies.back();
@@ -54,21 +57,21 @@ namespace simulator::analysis::view
         update();
     }
 
-    void FftChartWidget::Clear()
+    void PsdChartWidget::Clear()
     {
         time.clear();
         signal.clear();
-        windowedSignal.clear();
         frequencies.clear();
-        magnitudes.clear();
+        powerDensityDb.clear();
         maxTime = 0.0f;
         maxSignalAmplitude = 0.0f;
-        maxMagnitude = 0.0f;
+        minPowerDb = 0.0f;
+        maxPowerDb = 0.0f;
         maxFrequency = 0.0f;
         update();
     }
 
-    void FftChartWidget::paintEvent(QPaintEvent* event)
+    void PsdChartWidget::paintEvent(QPaintEvent* event)
     {
         Q_UNUSED(event);
 
@@ -83,14 +86,14 @@ namespace simulator::analysis::view
 
         int availableHeight = height() - topMargin - bottomMargin - chartSpacing;
         int timeDomainHeight = availableHeight * 2 / 5;
-        int freqDomainHeight = availableHeight - timeDomainHeight;
+        int psdHeight = availableHeight - timeDomainHeight;
         int plotWidth = width() - leftMargin - rightMargin;
 
-        if (plotWidth <= 0 || timeDomainHeight <= 0 || freqDomainHeight <= 0)
+        if (plotWidth <= 0 || timeDomainHeight <= 0 || psdHeight <= 0)
             return;
 
         QRect timePlot(leftMargin, topMargin, plotWidth, timeDomainHeight);
-        QRect freqPlot(leftMargin, topMargin + timeDomainHeight + chartSpacing, plotWidth, freqDomainHeight);
+        QRect psdPlot(leftMargin, topMargin + timeDomainHeight + chartSpacing, plotWidth, psdHeight);
 
         // Time domain chart
         DrawAxes(painter, timePlot);
@@ -101,7 +104,7 @@ namespace simulator::analysis::view
         titleFont.setBold(true);
         painter.setFont(titleFont);
         painter.setPen(Qt::black);
-        painter.drawText(timePlot.left(), timePlot.top() - 3, "Time Domain");
+        painter.drawText(timePlot.left(), timePlot.top() - 3, "Time Domain (Signal + Noise)");
 
         if (!time.empty() && !signal.empty())
             DrawTimeDomain(painter, timePlot);
@@ -118,8 +121,7 @@ namespace simulator::analysis::view
         {
             int x = timePlot.left() + (i * timePlot.width() / gridLines);
             float t = maxTime > 0.0f ? (static_cast<float>(i) / gridLines) * maxTime * 1000.0f : 0.0f;
-            QString label = QString::number(static_cast<double>(t), 'f', 2);
-            painter.drawText(x - 15, timePlot.bottom() + 14, label);
+            painter.drawText(x - 15, timePlot.bottom() + 14, QString::number(static_cast<double>(t), 'f', 2));
         }
 
         for (int i = 0; i <= gridLines; ++i)
@@ -139,43 +141,20 @@ namespace simulator::analysis::view
         painter.drawText(0, 0, "Amplitude");
         painter.restore();
 
-        // Legend for time domain
-        if (!signal.empty())
-        {
-            labelFont.setPointSize(8);
-            painter.setFont(labelFont);
-
-            int legendX = timePlot.right() - 170;
-            int legendY = timePlot.top() + 15;
-
-            painter.setPen(QPen(QColor(41, 128, 185), 2));
-            painter.drawLine(legendX, legendY, legendX + 20, legendY);
-            painter.setPen(Qt::black);
-            painter.drawText(legendX + 25, legendY + 4, "Original");
-
-            if (!windowedSignal.empty())
-            {
-                painter.setPen(QPen(QColor(231, 76, 60), 2));
-                painter.drawLine(legendX, legendY + 18, legendX + 20, legendY + 18);
-                painter.setPen(Qt::black);
-                painter.drawText(legendX + 25, legendY + 22, "Windowed");
-            }
-        }
-
-        // Frequency domain chart
-        DrawAxes(painter, freqPlot);
-        DrawGridLines(painter, freqPlot);
+        // PSD chart
+        DrawAxes(painter, psdPlot);
+        DrawGridLines(painter, psdPlot);
 
         titleFont.setPointSize(10);
         titleFont.setBold(true);
         painter.setFont(titleFont);
         painter.setPen(Qt::black);
-        painter.drawText(freqPlot.left(), freqPlot.top() - 3, "Frequency Domain (FFT)");
+        painter.drawText(psdPlot.left(), psdPlot.top() - 3, "Power Spectral Density");
 
-        if (!frequencies.empty() && !magnitudes.empty())
-            DrawFrequencyDomain(painter, freqPlot);
+        if (!frequencies.empty() && !powerDensityDb.empty())
+            DrawPowerSpectralDensity(painter, psdPlot);
 
-        // Frequency domain labels
+        // PSD labels
         labelFont.setPointSize(8);
         labelFont.setBold(false);
         painter.setFont(labelFont);
@@ -183,31 +162,31 @@ namespace simulator::analysis::view
 
         for (int i = 0; i <= gridLines; ++i)
         {
-            int x = freqPlot.left() + (i * freqPlot.width() / gridLines);
+            int x = psdPlot.left() + (i * psdPlot.width() / gridLines);
             float freq = maxFrequency > 0.0f ? (static_cast<float>(i) / gridLines) * maxFrequency : 0.0f;
-            QString label = QString::number(static_cast<int>(freq)) + " Hz";
-            painter.drawText(x - 20, freqPlot.bottom() + 14, label);
+            painter.drawText(x - 20, psdPlot.bottom() + 14, QString::number(static_cast<int>(freq)) + " Hz");
         }
 
+        float powerRange = maxPowerDb - minPowerDb;
         for (int i = 0; i <= gridLines; ++i)
         {
-            int y = freqPlot.bottom() - (i * freqPlot.height() / gridLines);
-            float mag = maxMagnitude > 0.0f ? (static_cast<float>(i) / gridLines) * maxMagnitude : 0.0f;
-            painter.drawText(freqPlot.left() - 55, y + 4, QString::number(static_cast<double>(mag), 'f', 3));
+            int y = psdPlot.bottom() - (i * psdPlot.height() / gridLines);
+            float db = minPowerDb + (static_cast<float>(i) / gridLines) * powerRange;
+            painter.drawText(psdPlot.left() - 55, y + 4, QString::number(static_cast<double>(db), 'f', 1));
         }
 
         labelFont.setPointSize(9);
         painter.setFont(labelFont);
-        painter.drawText(freqPlot.center().x() - 40, freqPlot.bottom() + 30, "Frequency (Hz)");
+        painter.drawText(psdPlot.center().x() - 40, psdPlot.bottom() + 30, "Frequency (Hz)");
 
         painter.save();
-        painter.translate(12, freqPlot.center().y() + 30);
+        painter.translate(12, psdPlot.center().y() + 40);
         painter.rotate(-90);
-        painter.drawText(0, 0, "Magnitude");
+        painter.drawText(0, 0, "Power (dB/Hz)");
         painter.restore();
     }
 
-    void FftChartWidget::DrawAxes(QPainter& painter, const QRect& plotArea)
+    void PsdChartWidget::DrawAxes(QPainter& painter, const QRect& plotArea)
     {
         QPen axisPen(Qt::darkGray, 1);
         painter.setPen(axisPen);
@@ -216,7 +195,7 @@ namespace simulator::analysis::view
         painter.drawLine(plotArea.bottomLeft(), plotArea.topLeft());
     }
 
-    void FftChartWidget::DrawGridLines(QPainter& painter, const QRect& plotArea)
+    void PsdChartWidget::DrawGridLines(QPainter& painter, const QRect& plotArea)
     {
         QPen gridPen(QColor(220, 220, 220), 1, Qt::DashLine);
         painter.setPen(gridPen);
@@ -235,60 +214,56 @@ namespace simulator::analysis::view
         }
     }
 
-    void FftChartWidget::DrawTimeDomain(QPainter& painter, const QRect& plotArea)
+    void PsdChartWidget::DrawTimeDomain(QPainter& painter, const QRect& plotArea)
     {
         if (maxTime <= 0.0f)
             return;
 
-        auto drawSignalLine = [&](const std::vector<float>& sig, const QColor& color)
+        QPen pen(QColor(41, 128, 185), 1);
+        painter.setPen(pen);
+
+        QPointF previousPoint;
+        bool hasPrevious = false;
+
+        const std::size_t count = std::min(time.size(), signal.size());
+        for (std::size_t i = 0; i < count; ++i)
         {
-            QPen pen(color, 1);
-            painter.setPen(pen);
+            float xRatio = time[i] / maxTime;
+            float yRatio = (signal[i] + maxSignalAmplitude) / (2.0f * maxSignalAmplitude);
 
-            QPointF previousPoint;
-            bool hasPrevious = false;
+            int x = plotArea.left() + static_cast<int>(xRatio * plotArea.width());
+            int y = plotArea.bottom() - static_cast<int>(yRatio * plotArea.height());
 
-            const std::size_t count = std::min(time.size(), sig.size());
-            for (std::size_t i = 0; i < count; ++i)
-            {
-                float xRatio = time[i] / maxTime;
-                float yRatio = (sig[i] + maxSignalAmplitude) / (2.0f * maxSignalAmplitude);
+            QPointF currentPoint(x, y);
 
-                int x = plotArea.left() + static_cast<int>(xRatio * plotArea.width());
-                int y = plotArea.bottom() - static_cast<int>(yRatio * plotArea.height());
+            if (hasPrevious)
+                painter.drawLine(previousPoint, currentPoint);
 
-                QPointF currentPoint(x, y);
-
-                if (hasPrevious)
-                    painter.drawLine(previousPoint, currentPoint);
-
-                previousPoint = currentPoint;
-                hasPrevious = true;
-            }
-        };
-
-        drawSignalLine(signal, QColor(41, 128, 185));
-
-        if (!windowedSignal.empty())
-            drawSignalLine(windowedSignal, QColor(231, 76, 60));
+            previousPoint = currentPoint;
+            hasPrevious = true;
+        }
     }
 
-    void FftChartWidget::DrawFrequencyDomain(QPainter& painter, const QRect& plotArea)
+    void PsdChartWidget::DrawPowerSpectralDensity(QPainter& painter, const QRect& plotArea)
     {
-        if (maxMagnitude <= 0.0f || maxFrequency <= 0.0f)
+        if (maxFrequency <= 0.0f)
             return;
 
-        QPen spectrumPen(QColor(41, 128, 185), 2);
+        float powerRange = maxPowerDb - minPowerDb;
+        if (powerRange <= 0.0f)
+            return;
+
+        QPen spectrumPen(QColor(192, 57, 43), 2);
         painter.setPen(spectrumPen);
 
         QPointF previousPoint;
         bool hasPrevious = false;
 
-        const std::size_t count = std::min(frequencies.size(), magnitudes.size());
+        const std::size_t count = std::min(frequencies.size(), powerDensityDb.size());
         for (std::size_t i = 0; i < count; ++i)
         {
             float xRatio = frequencies[i] / maxFrequency;
-            float yRatio = magnitudes[i] / maxMagnitude;
+            float yRatio = (powerDensityDb[i] - minPowerDb) / powerRange;
 
             int x = plotArea.left() + static_cast<int>(xRatio * plotArea.width());
             int y = plotArea.bottom() - static_cast<int>(yRatio * plotArea.height());

@@ -2,10 +2,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Simulator",
+      "name": "FFT Simulator",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/host/simulator/analysis/${input:simulatorTarget}/Debug/numerical.simulator.analysis.${input:simulatorTarget}",
+      "program": "${workspaceFolder}/build/host/simulator/analysis/FastFourierTransform/Debug/numerical.simulator.analysis.fast_fourier_transform",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
@@ -19,8 +19,27 @@
           "text": "-enable-pretty-printing",
           "ignoreFailures": true
         }
-      ],
-      "preLaunchTask": "cmake: build"
+      ]
+    },
+    {
+      "name": "PSD Simulator",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/host/simulator/analysis/PowerDensitySpectrum/Debug/numerical.simulator.analysis.power_density_spectrum",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
     },
     {
       "name": "Linux Debug",
@@ -41,17 +60,6 @@
           "ignoreFailures": true
         }
       ]
-    }
-  ],
-  "inputs": [
-    {
-      "id": "simulatorTarget",
-      "type": "pickString",
-      "description": "Select simulator to debug",
-      "options": [
-        "fast_fourier_transform"
-      ],
-      "default": "fast_fourier_transform"
     }
   ]
 }

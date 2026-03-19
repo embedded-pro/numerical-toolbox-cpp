@@ -7,14 +7,13 @@ target_include_directories(numerical.simulator.analysis.fft.application PUBLIC
 
 target_link_libraries(numerical.simulator.analysis.fft.application PUBLIC
     numerical.analysis
+    numerical.windowing
+    numerical.simulator.utils
 )
 
 target_sources(numerical.simulator.analysis.fft.application PRIVATE
     FftSimulator.cpp
     FftSimulator.hpp
-    SignalGenerator.cpp
-    SignalGenerator.hpp
-    TwiddleFactorsTable.hpp
 )
 
 if(MSVC)

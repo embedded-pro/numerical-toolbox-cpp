@@ -47,6 +47,16 @@ namespace simulator::analysis::view
         rateLayout->addWidget(sampleRateSpinBox);
         fftLayout->addLayout(rateLayout);
 
+        auto* windowLayout = new QHBoxLayout();
+        windowLayout->addWidget(new QLabel("Window:", this));
+        windowTypeCombo = new QComboBox(this);
+        windowTypeCombo->addItem("Rectangular", static_cast<int>(WindowType::Rectangular));
+        windowTypeCombo->addItem("Hamming", static_cast<int>(WindowType::Hamming));
+        windowTypeCombo->addItem("Hanning", static_cast<int>(WindowType::Hanning));
+        windowTypeCombo->addItem("Blackman", static_cast<int>(WindowType::Blackman));
+        windowLayout->addWidget(windowTypeCombo);
+        fftLayout->addLayout(windowLayout);
+
         mainLayout->addWidget(fftGroup);
 
         auto* signalGroup = new QGroupBox("Signal Components", this);
@@ -95,6 +105,7 @@ namespace simulator::analysis::view
         FftSimulator::Configuration config;
         config.fftSize = fftSizeCombo->currentData().toULongLong();
         config.sampleRateHz = static_cast<float>(sampleRateSpinBox->value());
+        config.windowType = static_cast<WindowType>(windowTypeCombo->currentData().toInt());
 
         config.signalComponents.clear();
         for (int row = 0; row < componentsTable->rowCount(); ++row)
