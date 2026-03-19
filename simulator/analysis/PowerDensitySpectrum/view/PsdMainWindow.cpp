@@ -1,23 +1,23 @@
-#include "simulator/analysis/FastFourierTransform/view/FftMainWindow.hpp"
+#include "simulator/analysis/PowerDensitySpectrum/view/PsdMainWindow.hpp"
 #include <QHBoxLayout>
 #include <QMessageBox>
 #include <QSplitter>
 #include <stdexcept>
 
-namespace simulator::analysis::view
+namespace simulator::analysis::psd::view
 {
-    FftMainWindow::FftMainWindow(QWidget* parent)
+    PsdMainWindow::PsdMainWindow(QWidget* parent)
         : QMainWindow(parent)
     {
-        setWindowTitle("FFT Simulator");
+        setWindowTitle("PSD Simulator");
         resize(1024, 800);
 
         auto* splitter = new QSplitter(Qt::Horizontal, this);
 
-        configPanel = new FftConfigurationPanel(splitter);
+        configPanel = new PsdConfigurationPanel(splitter);
         configPanel->setMaximumWidth(320);
 
-        chartWidget = new FftChartWidget(splitter);
+        chartWidget = new PsdChartWidget(splitter);
 
         splitter->addWidget(configPanel);
         splitter->addWidget(chartWidget);
@@ -26,23 +26,25 @@ namespace simulator::analysis::view
 
         setCentralWidget(splitter);
 
-        statusBar()->showMessage("Configure parameters and press Compute FFT");
+        statusBar()->showMessage("Configure parameters and press Compute PSD");
 
-        connect(configPanel, &FftConfigurationPanel::ComputeRequested, this, &FftMainWindow::OnComputeRequested);
+        connect(configPanel, &PsdConfigurationPanel::ComputeRequested, this, &PsdMainWindow::OnComputeRequested);
     }
 
-    void FftMainWindow::OnComputeRequested()
+    void PsdMainWindow::OnComputeRequested()
     {
         auto config = configPanel->GetConfiguration();
-        fftSimulator.Configure(config);
+        psdSimulator.Configure(config);
 
         try
         {
-            auto result = fftSimulator.Compute();
+            auto result = psdSimulator.Compute();
             chartWidget->SetData(result);
             statusBar()->showMessage(
-                QString("FFT computed: %1 points, sample rate %2 Hz")
-                    .arg(config.fftSize)
+                QString("PSD computed: %1 input samples, %2-point segments, %3% overlap, %4 Hz")
+                    .arg(config.inputSize)
+                    .arg(config.segmentSize)
+                    .arg(config.overlapPercent)
                     .arg(static_cast<double>(config.sampleRateHz), 0, 'f', 1));
         }
         catch (const std::exception& e)

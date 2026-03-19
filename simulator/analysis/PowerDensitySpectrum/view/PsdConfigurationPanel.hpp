@@ -1,25 +1,24 @@
 #pragma once
 
-#include "simulator/analysis/FastFourierTransform/application/FftSimulator.hpp"
+#include "simulator/analysis/PowerDensitySpectrum/application/PsdSimulator.hpp"
 #include <QComboBox>
 #include <QDoubleSpinBox>
 #include <QGroupBox>
 #include <QPushButton>
-#include <QSpinBox>
 #include <QTableWidget>
 #include <QWidget>
 
-namespace simulator::analysis::view
+namespace simulator::analysis::psd::view
 {
-    class FftConfigurationPanel
+    class PsdConfigurationPanel
         : public QWidget
     {
         Q_OBJECT
 
     public:
-        explicit FftConfigurationPanel(QWidget* parent = nullptr);
+        explicit PsdConfigurationPanel(QWidget* parent = nullptr);
 
-        FftSimulator::Configuration GetConfiguration() const;
+        PsdSimulator::Configuration GetConfiguration() const;
 
     signals:
         void ComputeRequested();
@@ -29,9 +28,13 @@ namespace simulator::analysis::view
         void AddSignalComponent();
         void RemoveSignalComponent();
 
-        QComboBox* fftSizeCombo;
+        QComboBox* segmentSizeCombo;
         QComboBox* windowTypeCombo;
+        QComboBox* overlapCombo;
         QDoubleSpinBox* sampleRateSpinBox;
+        QDoubleSpinBox* inputSizeSpinBox;
+        QComboBox* noiseTypeCombo;
+        QDoubleSpinBox* noiseAmplitudeSpinBox;
         QTableWidget* componentsTable;
         QPushButton* addComponentButton;
         QPushButton* removeComponentButton;
