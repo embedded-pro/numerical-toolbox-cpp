@@ -12,4 +12,5 @@ target_sources(numerical.analysis_test PRIVATE
     TestDiscreteCosineTransform.cpp
     TestFastFourierTransformRadix2Impl.cpp
     TestPowerDensitySpectrum.cpp
+    TestRootLocus.cpp
 )

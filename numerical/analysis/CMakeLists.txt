@@ -8,6 +8,7 @@ target_include_directories(numerical.analysis PUBLIC
 target_link_libraries(numerical.analysis PUBLIC
     infra.util
     numerical.math
+    numerical.solver
 )
 
 target_sources(numerical.analysis PRIVATE
@@ -17,6 +18,7 @@ target_sources(numerical.analysis PRIVATE
     FrequencyResponse.cpp
     FrequencyResponse.hpp
     PowerDensitySpectrum.hpp
+    RootLocus.hpp
 )
 
 add_subdirectory(test)
