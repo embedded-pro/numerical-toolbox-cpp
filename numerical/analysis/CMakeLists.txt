@@ -18,6 +18,7 @@ target_sources(numerical.analysis PRIVATE
     FrequencyResponse.cpp
     FrequencyResponse.hpp
     PowerDensitySpectrum.hpp
+    RootLocus.cpp
     RootLocus.hpp
 )
 

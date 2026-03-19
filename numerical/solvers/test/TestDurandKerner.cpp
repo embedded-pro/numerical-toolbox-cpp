@@ -1,125 +1,115 @@
 #include "numerical/solvers/DurandKerner.hpp"
 #include <array>
-#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 namespace
 {
-    TEST(TestDurandKerner, finds_roots_of_linear_polynomial)
+    template<typename T>
+    class TestDurandKerner : public ::testing::Test
     {
-        std::array<float, 2> coefficients = { 2.0f, 4.0f };
-        solvers::DurandKerner<float, 10> solver;
+    protected:
+        solvers::DurandKerner<T, 10> solver;
+    };
 
-        auto roots = solver.Solve(infra::MemoryRange<const float>(coefficients));
+    using TestTypes = ::testing::Types<float, double>;
+    TYPED_TEST_SUITE(TestDurandKerner, TestTypes);
+}
 
-        ASSERT_EQ(roots.size(), 1u);
-        EXPECT_NEAR(roots[0].real(), -2.0f, 1e-4f);
-        EXPECT_NEAR(roots[0].imag(), 0.0f, 1e-4f);
-    }
+TYPED_TEST(TestDurandKerner, finds_roots_of_linear_polynomial)
+{
+    std::array<TypeParam, 2> coefficients = { TypeParam(2.0), TypeParam(4.0) };
 
-    TEST(TestDurandKerner, finds_real_roots_of_quadratic)
-    {
-        std::array<float, 3> coefficients = { 1.0f, -3.0f, 2.0f };
-        solvers::DurandKerner<float, 10> solver;
+    auto roots = this->solver.Solve(infra::MemoryRange<const TypeParam>(coefficients));
 
-        auto roots = solver.Solve(infra::MemoryRange<const float>(coefficients));
+    ASSERT_EQ(roots.size(), 1u);
+    EXPECT_NEAR(roots[0].real(), -2.0, 1e-4);
+    EXPECT_NEAR(roots[0].imag(), 0.0, 1e-4);
+}
 
-        ASSERT_EQ(roots.size(), 2u);
-        EXPECT_NEAR(roots[0].real(), 1.0f, 1e-4f);
-        EXPECT_NEAR(roots[0].imag(), 0.0f, 1e-4f);
-        EXPECT_NEAR(roots[1].real(), 2.0f, 1e-4f);
-        EXPECT_NEAR(roots[1].imag(), 0.0f, 1e-4f);
-    }
+TYPED_TEST(TestDurandKerner, finds_real_roots_of_quadratic)
+{
+    std::array<TypeParam, 3> coefficients = { TypeParam(1.0), TypeParam(-3.0), TypeParam(2.0) };
 
-    TEST(TestDurandKerner, finds_complex_roots_of_quadratic)
-    {
-        std::array<float, 3> coefficients = { 1.0f, 0.0f, 1.0f };
-        solvers::DurandKerner<float, 10> solver;
+    auto roots = this->solver.Solve(infra::MemoryRange<const TypeParam>(coefficients));
 
-        auto roots = solver.Solve(infra::MemoryRange<const float>(coefficients));
+    ASSERT_EQ(roots.size(), 2u);
+    EXPECT_NEAR(roots[0].real(), 1.0, 1e-4);
+    EXPECT_NEAR(roots[0].imag(), 0.0, 1e-4);
+    EXPECT_NEAR(roots[1].real(), 2.0, 1e-4);
+    EXPECT_NEAR(roots[1].imag(), 0.0, 1e-4);
+}
 
-        ASSERT_EQ(roots.size(), 2u);
-        EXPECT_NEAR(roots[0].real(), 0.0f, 1e-4f);
-        EXPECT_NEAR(std::abs(roots[0].imag()), 1.0f, 1e-4f);
-        EXPECT_NEAR(roots[1].real(), 0.0f, 1e-4f);
-        EXPECT_NEAR(std::abs(roots[1].imag()), 1.0f, 1e-4f);
-    }
+TYPED_TEST(TestDurandKerner, finds_complex_roots_of_quadratic)
+{
+    std::array<TypeParam, 3> coefficients = { TypeParam(1.0), TypeParam(0.0), TypeParam(1.0) };
 
-    TEST(TestDurandKerner, finds_roots_of_cubic)
-    {
-        std::array<float, 4> coefficients = { 1.0f, -6.0f, 11.0f, -6.0f };
-        solvers::DurandKerner<float, 10> solver;
+    auto roots = this->solver.Solve(infra::MemoryRange<const TypeParam>(coefficients));
 
-        auto roots = solver.Solve(infra::MemoryRange<const float>(coefficients));
+    ASSERT_EQ(roots.size(), 2u);
+    EXPECT_NEAR(roots[0].real(), 0.0, 1e-4);
+    EXPECT_NEAR(std::abs(roots[0].imag()), 1.0, 1e-4);
+    EXPECT_NEAR(roots[1].real(), 0.0, 1e-4);
+    EXPECT_NEAR(std::abs(roots[1].imag()), 1.0, 1e-4);
+}
 
-        ASSERT_EQ(roots.size(), 3u);
-        EXPECT_NEAR(roots[0].real(), 1.0f, 1e-3f);
-        EXPECT_NEAR(roots[0].imag(), 0.0f, 1e-3f);
-        EXPECT_NEAR(roots[1].real(), 2.0f, 1e-3f);
-        EXPECT_NEAR(roots[1].imag(), 0.0f, 1e-3f);
-        EXPECT_NEAR(roots[2].real(), 3.0f, 1e-3f);
-        EXPECT_NEAR(roots[2].imag(), 0.0f, 1e-3f);
-    }
+TYPED_TEST(TestDurandKerner, finds_roots_of_cubic)
+{
+    std::array<TypeParam, 4> coefficients = { TypeParam(1.0), TypeParam(-6.0), TypeParam(11.0), TypeParam(-6.0) };
 
-    TEST(TestDurandKerner, finds_roots_of_quartic)
-    {
-        std::array<float, 5> coefficients = { 1.0f, -10.0f, 35.0f, -50.0f, 24.0f };
-        solvers::DurandKerner<float, 10> solver;
+    auto roots = this->solver.Solve(infra::MemoryRange<const TypeParam>(coefficients));
 
-        auto roots = solver.Solve(infra::MemoryRange<const float>(coefficients));
+    ASSERT_EQ(roots.size(), 3u);
+    EXPECT_NEAR(roots[0].real(), 1.0, 1e-3);
+    EXPECT_NEAR(roots[0].imag(), 0.0, 1e-3);
+    EXPECT_NEAR(roots[1].real(), 2.0, 1e-3);
+    EXPECT_NEAR(roots[1].imag(), 0.0, 1e-3);
+    EXPECT_NEAR(roots[2].real(), 3.0, 1e-3);
+    EXPECT_NEAR(roots[2].imag(), 0.0, 1e-3);
+}
 
-        ASSERT_EQ(roots.size(), 4u);
-        EXPECT_NEAR(roots[0].real(), 1.0f, 1e-2f);
-        EXPECT_NEAR(roots[1].real(), 2.0f, 1e-2f);
-        EXPECT_NEAR(roots[2].real(), 3.0f, 1e-2f);
-        EXPECT_NEAR(roots[3].real(), 4.0f, 1e-2f);
-    }
+TYPED_TEST(TestDurandKerner, finds_roots_of_quartic)
+{
+    std::array<TypeParam, 5> coefficients = { TypeParam(1.0), TypeParam(-10.0), TypeParam(35.0), TypeParam(-50.0), TypeParam(24.0) };
 
-    TEST(TestDurandKerner, finds_repeated_roots)
-    {
-        std::array<float, 3> coefficients = { 1.0f, -2.0f, 1.0f };
-        solvers::DurandKerner<float, 10> solver;
+    auto roots = this->solver.Solve(infra::MemoryRange<const TypeParam>(coefficients));
 
-        auto roots = solver.Solve(infra::MemoryRange<const float>(coefficients));
+    ASSERT_EQ(roots.size(), 4u);
+    EXPECT_NEAR(roots[0].real(), 1.0, 1e-2);
+    EXPECT_NEAR(roots[1].real(), 2.0, 1e-2);
+    EXPECT_NEAR(roots[2].real(), 3.0, 1e-2);
+    EXPECT_NEAR(roots[3].real(), 4.0, 1e-2);
+}
 
-        ASSERT_EQ(roots.size(), 2u);
-        EXPECT_NEAR(roots[0].real(), 1.0f, 1e-3f);
-        EXPECT_NEAR(roots[1].real(), 1.0f, 1e-3f);
-    }
+TYPED_TEST(TestDurandKerner, finds_repeated_roots)
+{
+    std::array<TypeParam, 3> coefficients = { TypeParam(1.0), TypeParam(-2.0), TypeParam(1.0) };
 
-    TEST(TestDurandKerner, returns_empty_for_constant_polynomial)
-    {
-        std::array<float, 1> coefficients = { 5.0f };
-        solvers::DurandKerner<float, 10> solver;
+    auto roots = this->solver.Solve(infra::MemoryRange<const TypeParam>(coefficients));
 
-        auto roots = solver.Solve(infra::MemoryRange<const float>(coefficients));
+    ASSERT_EQ(roots.size(), 2u);
+    EXPECT_NEAR(roots[0].real(), 1.0, 1e-3);
+    EXPECT_NEAR(roots[1].real(), 1.0, 1e-3);
+}
 
-        EXPECT_EQ(roots.size(), 0u);
-    }
+TYPED_TEST(TestDurandKerner, returns_empty_for_constant_polynomial)
+{
+    std::array<TypeParam, 1> coefficients = { TypeParam(5.0) };
 
-    TEST(TestDurandKerner, finds_roots_with_double_precision)
-    {
-        std::array<double, 3> coefficients = { 1.0, -3.0, 2.0 };
-        solvers::DurandKerner<double, 10> solver;
+    auto roots = this->solver.Solve(infra::MemoryRange<const TypeParam>(coefficients));
 
-        auto roots = solver.Solve(infra::MemoryRange<const double>(coefficients));
+    EXPECT_EQ(roots.size(), 0u);
+}
 
-        ASSERT_EQ(roots.size(), 2u);
-        EXPECT_NEAR(roots[0].real(), 1.0, 1e-10);
-        EXPECT_NEAR(roots[1].real(), 2.0, 1e-10);
-    }
+TYPED_TEST(TestDurandKerner, finds_roots_of_second_order_system_polynomial)
+{
+    TypeParam wn(2.0);
+    TypeParam zeta(0.5);
+    std::array<TypeParam, 3> coefficients = { TypeParam(1.0), TypeParam(2.0) * zeta * wn, wn * wn };
 
-    TEST(TestDurandKerner, finds_roots_of_second_order_system_polynomial)
-    {
-        float wn = 2.0f;
-        float zeta = 0.5f;
-        std::array<float, 3> coefficients = { 1.0f, 2.0f * zeta * wn, wn * wn };
-        solvers::DurandKerner<float, 10> solver;
+    auto roots = this->solver.Solve(infra::MemoryRange<const TypeParam>(coefficients));
 
-        auto roots = solver.Solve(infra::MemoryRange<const float>(coefficients));
-
-        ASSERT_EQ(roots.size(), 2u);
-        EXPECT_NEAR(roots[0].real(), -zeta * wn, 1e-3f);
-        EXPECT_NEAR(roots[1].real(), -zeta * wn, 1e-3f);
-        EXPECT_NEAR(std::abs(roots[0].imag()), wn * std::sqrt(1.0f - zeta * zeta), 1e-3f);
-    }
+    ASSERT_EQ(roots.size(), 2u);
+    EXPECT_NEAR(roots[0].real(), double(-zeta * wn), 1e-3);
+    EXPECT_NEAR(roots[1].real(), double(-zeta * wn), 1e-3);
+    EXPECT_NEAR(std::abs(roots[0].imag()), double(wn * std::sqrt(TypeParam(1.0) - zeta * zeta)), 1e-3);
 }

@@ -96,4 +96,8 @@ namespace solvers
 
         return roots;
     }
+
+    extern template class DurandKerner<float, 10>;
+
+    extern template class DurandKerner<double, 10>;
 }

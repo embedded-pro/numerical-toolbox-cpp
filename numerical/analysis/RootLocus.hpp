@@ -121,4 +121,6 @@ namespace analysis
 
         return result;
     }
+
+    extern template class RootLocus<float, 5, 100>;
 }
