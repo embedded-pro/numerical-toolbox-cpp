@@ -51,6 +51,7 @@ namespace simulator::analysis
             auto& frequencyDomain = fft.Forward(input);
 
             FftResult result;
+            result.sampleRateHz = sampleRateHz;
 
             result.time.resize(N);
             result.signal.resize(N);

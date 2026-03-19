@@ -30,6 +30,7 @@ namespace simulator::analysis::psd
             auto& magnitudes = psd.Calculate(input);
 
             PsdResult result;
+            result.sampleRateHz = sampleRateHz;
 
             result.time.resize(inputSize);
             result.signal.resize(inputSize);

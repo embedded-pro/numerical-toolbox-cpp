@@ -51,8 +51,7 @@ namespace simulator::analysis::psd::view
             }
         }
 
-        if (!frequencies.empty())
-            maxFrequency = frequencies.back();
+        maxFrequency = result.sampleRateHz / 2.0f;
 
         update();
     }
@@ -121,7 +120,8 @@ namespace simulator::analysis::psd::view
         {
             int x = timePlot.left() + (i * timePlot.width() / gridLines);
             float t = maxTime > 0.0f ? (static_cast<float>(i) / gridLines) * maxTime * 1000.0f : 0.0f;
-            painter.drawText(x - 15, timePlot.bottom() + 14, QString::number(static_cast<double>(t), 'f', 2));
+            QRect labelRect(x - 30, timePlot.bottom() + 4, 60, 14);
+            painter.drawText(labelRect, Qt::AlignCenter, QString::number(static_cast<double>(t), 'f', 2));
         }
 
         for (int i = 0; i <= gridLines; ++i)
@@ -164,7 +164,13 @@ namespace simulator::analysis::psd::view
         {
             int x = psdPlot.left() + (i * psdPlot.width() / gridLines);
             float freq = maxFrequency > 0.0f ? (static_cast<float>(i) / gridLines) * maxFrequency : 0.0f;
-            painter.drawText(x - 20, psdPlot.bottom() + 14, QString::number(static_cast<int>(freq)) + " Hz");
+            QString label;
+            if (freq >= 1000.0f)
+                label = QString::number(static_cast<double>(freq / 1000.0f), 'f', 1) + " kHz";
+            else
+                label = QString::number(static_cast<int>(freq)) + " Hz";
+            QRect labelRect(x - 35, psdPlot.bottom() + 4, 70, 14);
+            painter.drawText(labelRect, Qt::AlignCenter, label);
         }
 
         float powerRange = maxPowerDb - minPowerDb;

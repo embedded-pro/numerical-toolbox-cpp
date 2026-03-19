@@ -20,6 +20,7 @@ namespace simulator::analysis::psd
 
     struct PsdResult
     {
+        float sampleRateHz = 0.0f;
         std::vector<float> time;
         std::vector<float> signal;
         std::vector<float> frequencies;
