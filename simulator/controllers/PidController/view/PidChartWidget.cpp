@@ -33,7 +33,7 @@ namespace simulator::controllers::view
         maxError = 0.0f;
         minError = 0.0f;
 
-        for (std::size_t i = 0; i < output.size(); ++i)
+        for (std::size_t i = 0; i < std::min(output.size(), reference.size()); ++i)
         {
             maxOutput = std::max(maxOutput, std::max(output[i], reference[i]));
             minOutput = std::min(minOutput, std::min(output[i], reference[i]));
@@ -773,8 +773,9 @@ namespace simulator::controllers::view
         float bestGain = currentGain;
         float bestDist = 1e30f;
 
-        for (const auto& locus : loci)
+        auto searchBranch = [&](std::size_t branch)
         {
+            const auto& locus = loci[branch];
             for (std::size_t i = 0; i < locus.size() && i < gains.size(); ++i)
             {
                 float dist = std::abs(locus[i] - point);
@@ -784,6 +785,16 @@ namespace simulator::controllers::view
                     bestGain = gains[i];
                 }
             }
+        };
+
+        if (draggedPoleIndex >= 0 && static_cast<std::size_t>(draggedPoleIndex) < loci.size())
+        {
+            searchBranch(static_cast<std::size_t>(draggedPoleIndex));
+        }
+        else
+        {
+            for (std::size_t branch = 0; branch < loci.size(); ++branch)
+                searchBranch(branch);
         }
 
         return bestGain;

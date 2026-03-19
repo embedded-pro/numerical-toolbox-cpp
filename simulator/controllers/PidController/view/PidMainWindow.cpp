@@ -38,29 +38,40 @@ namespace simulator::controllers::view
 
         statusBar()->showMessage("Configure PID parameters and press Compute");
 
+        dragTimer = new QTimer(this);
+        dragTimer->setSingleShot(true);
+        dragTimer->setInterval(30);
+        connect(dragTimer, &QTimer::timeout, this, &PidMainWindow::RecomputeAndUpdateCharts);
+
         connect(configPanel, &PidConfigurationPanel::ComputeRequested, this, &PidMainWindow::OnComputeRequested);
         connect(rootLocusChart, &PidRootLocusWidget::PoleGainChanged, this, &PidMainWindow::OnPoleGainChanged);
     }
 
-    void PidMainWindow::OnComputeRequested()
+    void PidMainWindow::RecomputeAndUpdateCharts()
     {
         auto config = configPanel->GetConfiguration();
         pidSimulator.Configure(configPanel->CreatePlant(), config);
 
+        auto stepResult = pidSimulator.ComputeStepResponse();
+        stepChart->SetData(stepResult);
+
+        auto rampResult = pidSimulator.ComputeRampResponse();
+        rampChart->SetData(rampResult);
+
+        auto bodeResult = pidSimulator.ComputeBodeResponse();
+        bodeChart->SetData(bodeResult);
+
+        auto rootLocusResult = pidSimulator.ComputeRootLocus();
+        rootLocusChart->SetData(rootLocusResult);
+    }
+
+    void PidMainWindow::OnComputeRequested()
+    {
         try
         {
-            auto stepResult = pidSimulator.ComputeStepResponse();
-            stepChart->SetData(stepResult);
+            RecomputeAndUpdateCharts();
 
-            auto rampResult = pidSimulator.ComputeRampResponse();
-            rampChart->SetData(rampResult);
-
-            auto bodeResult = pidSimulator.ComputeBodeResponse();
-            bodeChart->SetData(bodeResult);
-
-            auto rootLocusResult = pidSimulator.ComputeRootLocus();
-            rootLocusChart->SetData(rootLocusResult);
-
+            auto config = configPanel->GetConfiguration();
             statusBar()->showMessage(
                 QString("PID: Kp=%1 Ki=%2 Kd=%3 | Plant: %4")
                     .arg(static_cast<double>(config.tunings.kp), 0, 'f', 3)
@@ -77,27 +88,10 @@ namespace simulator::controllers::view
 
     void PidMainWindow::OnPoleGainChanged(float gain)
     {
+        pendingGain = gain;
         configPanel->SetKp(gain);
 
-        auto config = configPanel->GetConfiguration();
-        pidSimulator.Configure(configPanel->CreatePlant(), config);
-
-        try
-        {
-            auto stepResult = pidSimulator.ComputeStepResponse();
-            stepChart->SetData(stepResult);
-
-            auto rampResult = pidSimulator.ComputeRampResponse();
-            rampChart->SetData(rampResult);
-
-            auto bodeResult = pidSimulator.ComputeBodeResponse();
-            bodeChart->SetData(bodeResult);
-
-            auto rootLocusResult = pidSimulator.ComputeRootLocus();
-            rootLocusChart->SetData(rootLocusResult);
-        }
-        catch (const std::exception&)
-        {
-        }
+        if (!dragTimer->isActive())
+            dragTimer->start();
     }
 }

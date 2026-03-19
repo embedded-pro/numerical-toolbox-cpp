@@ -1,7 +1,13 @@
 #pragma once
 
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
+
 #include "infra/util/BoundedVector.hpp"
 #include "infra/util/MemoryRange.hpp"
+#include "infra/util/ReallyAssert.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
 #include <algorithm>
 #include <cmath>
 #include <complex>
@@ -22,20 +28,83 @@ namespace solvers
 
         Roots Solve(infra::MemoryRange<const T> coefficients,
             std::size_t maxIterations = 200, T tolerance = T(1e-6)) const;
+
+    private:
+        static std::complex<T> EvaluatePolynomial(
+            infra::MemoryRange<const T> coefficients, std::complex<T> x);
+
+        static std::complex<T> ComputeDenominator(
+            const Roots& roots, std::size_t r, std::size_t order);
+
+        static bool Iterate(Roots& roots, infra::MemoryRange<const T> coefficients,
+            std::size_t order, T tolerance);
     };
 
     ////    Implementation    ////
 
     template<typename T, std::size_t MaxOrder>
-    typename DurandKerner<T, MaxOrder>::Roots
+    std::complex<T> DurandKerner<T, MaxOrder>::EvaluatePolynomial(
+        infra::MemoryRange<const T> coefficients, std::complex<T> x)
+    {
+        std::complex<T> result(coefficients[0], T(0));
+        for (std::size_t c = 1; c < coefficients.size(); ++c)
+            result = result * x + std::complex<T>(coefficients[c], T(0));
+        return result;
+    }
+
+    template<typename T, std::size_t MaxOrder>
+    std::complex<T> DurandKerner<T, MaxOrder>::ComputeDenominator(
+        const Roots& roots, std::size_t r, std::size_t order)
+    {
+        std::complex<T> product(T(1), T(0));
+        for (std::size_t j = 0; j < order; ++j)
+        {
+            if (j == r)
+                continue;
+            auto diff = roots[r] - roots[j];
+            if (std::abs(diff) > T(1e-15))
+                product *= diff;
+        }
+        return product;
+    }
+
+    template<typename T, std::size_t MaxOrder>
+    bool DurandKerner<T, MaxOrder>::Iterate(Roots& roots,
+        infra::MemoryRange<const T> coefficients, std::size_t order, T tolerance)
+    {
+        bool converged = true;
+
+        for (std::size_t r = 0; r < order; ++r)
+        {
+            auto pVal = EvaluatePolynomial(coefficients, roots[r]);
+            auto denominator = ComputeDenominator(roots, r, order);
+            auto correction = pVal / denominator;
+            roots[r] -= correction;
+
+            if (std::abs(correction) > tolerance)
+                converged = false;
+        }
+
+        return converged;
+    }
+
+    template<typename T, std::size_t MaxOrder>
+    OPTIMIZE_FOR_SPEED typename DurandKerner<T, MaxOrder>::Roots
     DurandKerner<T, MaxOrder>::Solve(infra::MemoryRange<const T> coefficients,
         std::size_t maxIterations, T tolerance) const
     {
-        std::size_t order = coefficients.size() - 1;
         Roots roots;
+
+        if (coefficients.empty())
+            return roots;
+
+        std::size_t order = coefficients.size() - 1;
 
         if (order == 0)
             return roots;
+
+        really_assert(std::abs(coefficients[0]) > T(0));
+        really_assert(order <= MaxOrder);
 
         if (order == 1)
         {
@@ -56,37 +125,11 @@ namespace solvers
 
         for (std::size_t iter = 0; iter < maxIterations; ++iter)
         {
-            bool converged = true;
-
-            for (std::size_t r = 0; r < order; ++r)
-            {
-                std::complex<T> pVal(coefficients[0], T(0));
-                for (std::size_t c = 1; c < coefficients.size(); ++c)
-                    pVal = pVal * roots[r] + std::complex<T>(coefficients[c], T(0));
-
-                std::complex<T> product(T(1), T(0));
-                for (std::size_t j = 0; j < order; ++j)
-                {
-                    if (j != r)
-                    {
-                        auto diff = roots[r] - roots[j];
-                        if (std::abs(diff) > T(1e-15))
-                            product *= diff;
-                    }
-                }
-
-                auto correction = pVal / product;
-                roots[r] -= correction;
-
-                if (std::abs(correction) > tolerance)
-                    converged = false;
-            }
-
-            if (converged)
+            if (Iterate(roots, coefficients, order, tolerance))
                 break;
         }
 
-        std::sort(roots.begin(), roots.end(),
+        std::ranges::sort(roots,
             [](const std::complex<T>& a, const std::complex<T>& b)
             {
                 if (std::abs(a.real() - b.real()) > T(0.01))

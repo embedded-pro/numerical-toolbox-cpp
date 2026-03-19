@@ -1,7 +1,13 @@
 #pragma once
 
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
+
 #include "infra/util/BoundedVector.hpp"
 #include "infra/util/MemoryRange.hpp"
+#include "infra/util/ReallyAssert.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/solvers/DurandKerner.hpp"
 #include <array>
 #include <cmath>
@@ -17,6 +23,8 @@ namespace analysis
     {
         static_assert(std::is_floating_point_v<T>,
             "RootLocus only supports floating-point types");
+        static_assert(MaxGainSteps > 1,
+            "MaxGainSteps must be greater than 1");
 
     public:
         using RootVector = typename infra::BoundedVector<std::complex<T>>::template WithMaxSize<MaxOrder>;
@@ -68,6 +76,8 @@ namespace analysis
         T scale,
         infra::MemoryRange<T> result)
     {
+        really_assert(base.size() >= addend.size());
+
         for (std::size_t i = 0; i < base.size(); ++i)
             result[i] = base[i];
 
@@ -77,7 +87,7 @@ namespace analysis
     }
 
     template<typename T, std::size_t MaxOrder, std::size_t MaxGainSteps>
-    typename RootLocus<T, MaxOrder, MaxGainSteps>::Result
+    OPTIMIZE_FOR_SPEED typename RootLocus<T, MaxOrder, MaxGainSteps>::Result
     RootLocus<T, MaxOrder, MaxGainSteps>::Calculate(
         infra::MemoryRange<const T> numerator,
         infra::MemoryRange<const T> denominator,
@@ -85,6 +95,9 @@ namespace analysis
         T gainMin,
         T gainMax) const
     {
+        really_assert(gainMin > T(0));
+        really_assert(gainMax > gainMin);
+
         Result result;
         result.currentGain = currentGain;
 
@@ -114,7 +127,7 @@ namespace analysis
                 result.loci[r].push_back(roots[r]);
         }
 
-        std::fill(charPolyStorage.begin(), charPolyStorage.end(), T(0));
+        std::ranges::fill(charPolyStorage, T(0));
         auto closedPoly = infra::MakeRange(charPolyStorage.data(), charPolyStorage.data() + denominator.size());
         PolyAdd(denominator, numerator, currentGain, closedPoly);
         result.closedLoopPoles = FindRoots(infra::MemoryRange<const T>(closedPoly));

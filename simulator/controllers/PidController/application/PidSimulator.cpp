@@ -222,7 +222,7 @@ namespace simulator::controllers
         auto rlResult = rootLocus.Calculate(
             infra::MemoryRange<const float>(openNum),
             infra::MemoryRange<const float>(openDen),
-            configuration.tunings.kp);
+            1.0f);
 
         RootLocusResult result;
         result.currentGain = rlResult.currentGain;

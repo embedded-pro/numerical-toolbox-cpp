@@ -6,6 +6,7 @@
 #include <QMainWindow>
 #include <QStatusBar>
 #include <QTabWidget>
+#include <QTimer>
 
 namespace simulator::controllers::view
 {
@@ -20,6 +21,7 @@ namespace simulator::controllers::view
     private:
         void OnComputeRequested();
         void OnPoleGainChanged(float gain);
+        void RecomputeAndUpdateCharts();
 
         PidSimulator pidSimulator;
         PidConfigurationPanel* configPanel;
@@ -28,5 +30,8 @@ namespace simulator::controllers::view
         PidRampResponseWidget* rampChart;
         PidBodeWidget* bodeChart;
         PidRootLocusWidget* rootLocusChart;
+
+        QTimer* dragTimer;
+        float pendingGain = 0.0f;
     };
 }
