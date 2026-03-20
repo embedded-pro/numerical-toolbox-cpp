@@ -42,11 +42,11 @@ For a layer with 128 inputs and 64 outputs: $P = 64 \times 129 = 8{,}256$ parame
 
 ## Complexity Analysis
 
-| Operation | Time | Space |
-|-----------|------|-------|
-| Forward ($W a + b$) | $O(m \cdot n)$ | $O(m)$ output + $O(m)$ cached $z$ |
-| Backward ($\delta$, $\nabla W$, $\nabla b$) | $O(m \cdot n)$ | $O(m \cdot n)$ weight gradient |
-| Total parameters | — | $O(m \cdot n + m)$ |
+| Operation                                   | Time           | Space                             |
+|---------------------------------------------|----------------|-----------------------------------|
+| Forward ($W a + b$)                         | $O(m \cdot n)$ | $O(m)$ output + $O(m)$ cached $z$ |
+| Backward ($\delta$, $\nabla W$, $\nabla b$) | $O(m \cdot n)$ | $O(m \cdot n)$ weight gradient    |
+| Total parameters                            | —              | $O(m \cdot n + m)$                |
 
 The matrix-vector product dominates both passes. For embedded networks (e.g. $n = 32, m = 16$), a single forward pass takes ~512 multiply-accumulate operations.
 
@@ -58,19 +58,19 @@ $$W = \begin{bmatrix} 0.5 & -0.3 & 0.8 \\ 0.1 & 0.7 & -0.2 \end{bmatrix}, \quad 
 
 **Forward:**
 
-| Step | Computation | Result |
-|------|-------------|--------|
-| $z = W a_{\text{in}} + b$ | $[0.5 - 0.15 - 0.8 + 0.1,\; 0.1 + 0.35 + 0.2 - 0.1]$ | $[-0.35,\; 0.55]^T$ |
-| $a_{\text{out}} = \text{ReLU}(z)$ | $[\max(0, -0.35),\; \max(0, 0.55)]$ | $[0.0,\; 0.55]^T$ |
+| Step                              | Computation                                          | Result              |
+|-----------------------------------|------------------------------------------------------|---------------------|
+| $z = W a_{\text{in}} + b$         | $[0.5 - 0.15 - 0.8 + 0.1,\; 0.1 + 0.35 + 0.2 - 0.1]$ | $[-0.35,\; 0.55]^T$ |
+| $a_{\text{out}} = \text{ReLU}(z)$ | $[\max(0, -0.35),\; \max(0, 0.55)]$                  | $[0.0,\; 0.55]^T$   |
 
 **Backward** with $\frac{\partial \mathcal{L}}{\partial a_{\text{out}}} = [0.2,\; -0.4]^T$:
 
-| Step | Computation | Result |
-|------|-------------|--------|
-| $\delta = \nabla a_{\text{out}} \odot \text{ReLU}'(z)$ | $[0.2 \cdot 0,\; -0.4 \cdot 1]$ | $[0,\; -0.4]^T$ |
-| $\nabla W = \delta \, a_{\text{in}}^T$ | row 1: all zeros; row 2: $-0.4 \times [1, 0.5, -1]$ | $\begin{bmatrix}0 & 0 & 0\\-0.4 & -0.2 & 0.4\end{bmatrix}$ |
-| $\nabla b = \delta$ | — | $[0,\; -0.4]^T$ |
-| $\nabla a_{\text{in}} = W^T \delta$ | $W^T [0, -0.4]^T$ | $[-0.04,\; -0.28,\; 0.08]^T$ |
+| Step                                                   | Computation                                         | Result                                                     |
+|--------------------------------------------------------|-----------------------------------------------------|------------------------------------------------------------|
+| $\delta = \nabla a_{\text{out}} \odot \text{ReLU}'(z)$ | $[0.2 \cdot 0,\; -0.4 \cdot 1]$                     | $[0,\; -0.4]^T$                                            |
+| $\nabla W = \delta \, a_{\text{in}}^T$                 | row 1: all zeros; row 2: $-0.4 \times [1, 0.5, -1]$ | $\begin{bmatrix}0 & 0 & 0\\-0.4 & -0.2 & 0.4\end{bmatrix}$ |
+| $\nabla b = \delta$                                    | —                                                   | $[0,\; -0.4]^T$                                            |
+| $\nabla a_{\text{in}} = W^T \delta$                    | $W^T [0, -0.4]^T$                                   | $[-0.04,\; -0.28,\; 0.08]^T$                               |
 
 ## Pitfalls & Edge Cases
 
@@ -82,13 +82,13 @@ $$W = \begin{bmatrix} 0.5 & -0.3 & 0.8 \\ 0.1 & 0.7 & -0.2 \end{bmatrix}, \quad 
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **Convolutional layer** | Weight sharing across spatial positions; $O(k^2 \cdot c)$ parameters per filter instead of $O(n \cdot m)$ |
-| **Recurrent layer** | Shares weights across time steps; adds a hidden state feedback connection |
-| **Batch normalization layer** | Normalizes activations to zero mean and unit variance; accelerates training |
-| **Dropout layer** | Randomly zeros activations during training; regularization effect |
-| **Sparse layer** | Only a subset of connections exist; reduces parameter count and computation |
+| Variant                       | Key Difference                                                                                            |
+|-------------------------------|-----------------------------------------------------------------------------------------------------------|
+| **Convolutional layer**       | Weight sharing across spatial positions; $O(k^2 \cdot c)$ parameters per filter instead of $O(n \cdot m)$ |
+| **Recurrent layer**           | Shares weights across time steps; adds a hidden state feedback connection                                 |
+| **Batch normalization layer** | Normalizes activations to zero mean and unit variance; accelerates training                               |
+| **Dropout layer**             | Randomly zeros activations during training; regularization effect                                         |
+| **Sparse layer**              | Only a subset of connections exist; reduces parameter count and computation                               |
 
 ## Applications
 
@@ -113,11 +113,11 @@ graph TD
     Layer -.->|"no activation, MSE loss"| LR
 ```
 
-| Component | Relationship |
-|-----------|-------------|
-| [Activation Functions](../activation/Activation.md) | Applied element-wise after the affine transformation |
-| [Model](../model/Model.md) | Chains multiple dense layers into a network |
-| [Optimizer](../optimizer/Optimizer.md) | Updates $W$ and $b$ using the computed gradients |
+| Component                                                 | Relationship                                                                           |
+|-----------------------------------------------------------|----------------------------------------------------------------------------------------|
+| [Activation Functions](../activation/Activation.md)       | Applied element-wise after the affine transformation                                   |
+| [Model](../model/Model.md)                                | Chains multiple dense layers into a network                                            |
+| [Optimizer](../optimizer/Optimizer.md)                    | Updates $W$ and $b$ using the computed gradients                                       |
 | [Linear Regression](../../estimators/LinearRegression.md) | A dense layer with identity activation and MSE loss is equivalent to linear regression |
 
 ## References & Further Reading

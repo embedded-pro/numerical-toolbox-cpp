@@ -49,12 +49,12 @@ $$\frac{\partial \mathcal{L}}{\partial \hat{y}_i} = -\frac{y_i}{\hat{y}_i}$$
 
 ## Complexity Analysis
 
-| Loss | Forward | Backward | Notes |
-|------|---------|----------|-------|
-| MSE | $O(m)$ | $O(m)$ | Cheapest; no transcendentals |
-| MAE | $O(m)$ | $O(m)$ | Requires `sign()` |
-| BCE | $O(m)$ | $O(m)$ | Requires `log()` |
-| CCE | $O(k)$ | $O(k)$ | Requires `log()` |
+| Loss | Forward | Backward | Notes                        |
+|------|---------|----------|------------------------------|
+| MSE  | $O(m)$  | $O(m)$   | Cheapest; no transcendentals |
+| MAE  | $O(m)$  | $O(m)$   | Requires `sign()`            |
+| BCE  | $O(m)$  | $O(m)$   | Requires `log()`             |
+| CCE  | $O(k)$  | $O(k)$   | Requires `log()`             |
 
 All losses are $O(m)$ where $m$ is the output dimension. The computational cost is negligible compared to the dense layer matrix products.
 
@@ -69,10 +69,10 @@ $$\mathcal{L} = -(0 \cdot \log 0.1 + 1 \cdot \log 0.7 + 0 \cdot \log 0.2) = -\lo
 **CCE Backward:**
 
 | $i$ | $y_i$ | $\hat{y}_i$ | $\partial \mathcal{L}/\partial \hat{y}_i = -y_i / \hat{y}_i$ |
-|-----|--------|-------------|----------------------------------------------|
-| 1 | 0 | 0.1 | $0$ |
-| 2 | 1 | 0.7 | $-1.429$ |
-| 3 | 0 | 0.2 | $0$ |
+|-----|-------|-------------|--------------------------------------------------------------|
+| 1   | 0     | 0.1         | $0$                                                          |
+| 2   | 1     | 0.7         | $-1.429$                                                     |
+| 3   | 0     | 0.2         | $0$                                                          |
 
 The gradient is non-zero only for the true class, and its magnitude $1/\hat{y}_2$ grows as the prediction *worsens* — providing a strong corrective signal.
 
@@ -92,13 +92,13 @@ MSE gives a much weaker signal and does not account for the probabilistic nature
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **Huber loss** | Quadratic for small errors, linear for large; robust regression |
-| **Focal loss** | Down-weights well-classified examples; addresses class imbalance |
-| **KL divergence** | Measures distance between two distributions; used in variational inference |
-| **Hinge loss** | Margin-based; used in SVMs and some neural classifiers |
-| **Contrastive loss** | Learns similarity metrics; used in Siamese networks |
+| Variant              | Key Difference                                                             |
+|----------------------|----------------------------------------------------------------------------|
+| **Huber loss**       | Quadratic for small errors, linear for large; robust regression            |
+| **Focal loss**       | Down-weights well-classified examples; addresses class imbalance           |
+| **KL divergence**    | Measures distance between two distributions; used in variational inference |
+| **Hinge loss**       | Margin-based; used in SVMs and some neural classifiers                     |
+| **Contrastive loss** | Learns similarity metrics; used in Siamese networks                        |
 
 ## Applications
 
@@ -125,12 +125,12 @@ graph TD
     Loss -.->|"MSE + normal equation"| LR
 ```
 
-| Component | Relationship |
-|-----------|-------------|
-| [Activation Functions](../activation/Activation.md) | Output activation must match: Sigmoid ↔ BCE, Softmax ↔ CCE, identity ↔ MSE |
-| [Optimizer](../optimizer/Optimizer.md) | Uses $\nabla \mathcal{L}$ to update parameters |
-| [Regularization](../regularization/Regularization.md) | Adds a penalty term to the loss: $\mathcal{L}_{\text{total}} = \mathcal{L} + \lambda \Omega(\theta)$ |
-| [Linear Regression](../../estimators/LinearRegression.md) | Solved analytically when the loss is MSE and the model is linear |
+| Component                                                 | Relationship                                                                                         |
+|-----------------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| [Activation Functions](../activation/Activation.md)       | Output activation must match: Sigmoid ↔ BCE, Softmax ↔ CCE, identity ↔ MSE                           |
+| [Optimizer](../optimizer/Optimizer.md)                    | Uses $\nabla \mathcal{L}$ to update parameters                                                       |
+| [Regularization](../regularization/Regularization.md)     | Adds a penalty term to the loss: $\mathcal{L}_{\text{total}} = \mathcal{L} + \lambda \Omega(\theta)$ |
+| [Linear Regression](../../estimators/LinearRegression.md) | Solved analytically when the loss is MSE and the model is linear                                     |
 
 ## References & Further Reading
 

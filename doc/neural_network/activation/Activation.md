@@ -16,10 +16,10 @@ The choice of activation function controls **gradient flow** during back-propaga
 
 Every activation function exposes two operations:
 
-| Operation | Definition | Purpose |
-|-----------|-----------|---------|
-| **Forward** | $a = f(z)$ | Transform the pre-activation |
-| **Backward** | $f'(z)$ | Provide the local derivative for back-propagation |
+| Operation    | Definition | Purpose                                           |
+|--------------|------------|---------------------------------------------------|
+| **Forward**  | $a = f(z)$ | Transform the pre-activation                      |
+| **Backward** | $f'(z)$    | Provide the local derivative for back-propagation |
 
 The chain rule connects them during training:
 
@@ -67,13 +67,13 @@ $$f(z_i) = \frac{e^{z_i}}{\sum_{j=1}^{k} e^{z_j}}$$
 
 ## Complexity Analysis
 
-| Activation | Forward (per element) | Backward (per element) | Notes |
-|-----------|----------------------|----------------------|-------|
-| ReLU | $O(1)$ — comparison | $O(1)$ — comparison | Fastest |
-| Leaky ReLU | $O(1)$ — comparison + multiply | $O(1)$ | Negligible overhead vs ReLU |
-| Sigmoid | $O(1)$ — exp + divide | $O(1)$ — reuse forward result | Requires `exp()` |
-| Tanh | $O(1)$ — exp (twice) | $O(1)$ — reuse forward result | Requires `exp()` |
-| Softmax | $O(k)$ — vector exp + sum | $O(k^2)$ — full Jacobian | Significantly more expensive |
+| Activation | Forward (per element)          | Backward (per element)        | Notes                        |
+|------------|--------------------------------|-------------------------------|------------------------------|
+| ReLU       | $O(1)$ — comparison            | $O(1)$ — comparison           | Fastest                      |
+| Leaky ReLU | $O(1)$ — comparison + multiply | $O(1)$                        | Negligible overhead vs ReLU  |
+| Sigmoid    | $O(1)$ — exp + divide          | $O(1)$ — reuse forward result | Requires `exp()`             |
+| Tanh       | $O(1)$ — exp (twice)           | $O(1)$ — reuse forward result | Requires `exp()`             |
+| Softmax    | $O(k)$ — vector exp + sum      | $O(k^2)$ — full Jacobian      | Significantly more expensive |
 
 ## Step-by-Step Walkthrough
 
@@ -81,19 +81,19 @@ $$f(z_i) = \frac{e^{z_i}}{\sum_{j=1}^{k} e^{z_j}}$$
 
 **Forward:**
 
-| Neuron | $z$ | $\text{ReLU}(z)$ |
-|--------|------|-------------------|
-| 1 | $-0.5$ | $0.0$ |
-| 2 | $1.2$ | $1.2$ |
-| 3 | $0.0$ | $0.0$ |
+| Neuron | $z$    | $\text{ReLU}(z)$ |
+|--------|--------|------------------|
+| 1      | $-0.5$ | $0.0$            |
+| 2      | $1.2$  | $1.2$            |
+| 3      | $0.0$  | $0.0$            |
 
 **Backward** with incoming gradient $\frac{\partial \mathcal{L}}{\partial a} = [0.3, \; -0.7, \; 0.1]$:
 
-| Neuron | $f'(z)$ | $\frac{\partial \mathcal{L}}{\partial z}$ |
-|--------|---------|---------------------------|
-| 1 | $0$ (dead) | $0.3 \times 0 = 0$ |
-| 2 | $1$ | $-0.7 \times 1 = -0.7$ |
-| 3 | $0$ (at boundary) | $0.1 \times 0 = 0$ |
+| Neuron | $f'(z)$           | $\frac{\partial \mathcal{L}}{\partial z}$ |
+|--------|-------------------|-------------------------------------------|
+| 1      | $0$ (dead)        | $0.3 \times 0 = 0$                        |
+| 2      | $1$               | $-0.7 \times 1 = -0.7$                    |
+| 3      | $0$ (at boundary) | $0.1 \times 0 = 0$                        |
 
 Neuron 1 is *dead* — its gradient is zero and its weights will not update. If this persists across all training samples, the neuron is permanently inactive.
 
@@ -107,13 +107,13 @@ Neuron 1 is *dead* — its gradient is zero and its weights will not update. If 
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **PReLU (Parametric ReLU)** | $\alpha$ is a learnable parameter per channel |
-| **ELU (Exponential LU)** | $\alpha(e^z - 1)$ for $z < 0$; smooth and zero-centered |
-| **GELU (Gaussian Error LU)** | $z \cdot \Phi(z)$; used in Transformers |
-| **Swish / SiLU** | $z \cdot \sigma(z)$; smooth, non-monotonic |
-| **Hard Sigmoid / Hard Tanh** | Piece-wise linear approximations; no transcendentals |
+| Variant                      | Key Difference                                          |
+|------------------------------|---------------------------------------------------------|
+| **PReLU (Parametric ReLU)**  | $\alpha$ is a learnable parameter per channel           |
+| **ELU (Exponential LU)**     | $\alpha(e^z - 1)$ for $z < 0$; smooth and zero-centered |
+| **GELU (Gaussian Error LU)** | $z \cdot \Phi(z)$; used in Transformers                 |
+| **Swish / SiLU**             | $z \cdot \sigma(z)$; smooth, non-monotonic              |
+| **Hard Sigmoid / Hard Tanh** | Piece-wise linear approximations; no transcendentals    |
 
 ## Applications
 
@@ -136,11 +136,11 @@ graph TD
     NN --> Loss
 ```
 
-| Component | Relationship |
-|-----------|-------------|
-| [Dense Layer](../layer/Layer.md) | Applies the activation function after the affine transformation |
+| Component                             | Relationship                                                                             |
+|---------------------------------------|------------------------------------------------------------------------------------------|
+| [Dense Layer](../layer/Layer.md)      | Applies the activation function after the affine transformation                          |
 | [Neural Network](../NeuralNetwork.md) | Activations enable the non-linear function approximation that makes deep networks useful |
-| [Loss Functions](../losses/Loss.md) | The output activation must match the loss: Sigmoid + BCE, Softmax + CCE |
+| [Loss Functions](../losses/Loss.md)   | The output activation must match the loss: Sigmoid + BCE, Softmax + CCE                  |
 
 ## References & Further Reading
 
