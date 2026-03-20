@@ -1,7 +1,7 @@
 #pragma once
 
 #include "numerical/controllers/interfaces/PidController.hpp"
-#include "simulator/controllers/PidController/application/Plant.hpp"
+#include "simulator/controllers/common/Plant.hpp"
 #include <complex>
 #include <cstddef>
 #include <memory>

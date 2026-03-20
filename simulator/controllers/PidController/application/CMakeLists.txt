@@ -8,12 +8,11 @@ target_include_directories(numerical.simulator.controllers.pid.application PUBLI
 target_link_libraries(numerical.simulator.controllers.pid.application PUBLIC
     numerical.analysis
     numerical.controllers.implementations
+    numerical.simulator.controllers.common
     numerical.solver
 )
 
 target_sources(numerical.simulator.controllers.pid.application PRIVATE
-    Plant.cpp
-    Plant.hpp
     PidSimulator.cpp
     PidSimulator.hpp
 )

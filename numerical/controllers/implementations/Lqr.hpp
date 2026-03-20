@@ -86,6 +86,7 @@ namespace controllers
     extern template class Lqr<float, 1, 1>;
     extern template class Lqr<float, 2, 1>;
     extern template class Lqr<float, 3, 1>;
+    extern template class Lqr<float, 4, 1>;
     extern template class Lqr<float, 2, 2>;
 
     extern template class Lqr<math::Q15, 1, 1>;

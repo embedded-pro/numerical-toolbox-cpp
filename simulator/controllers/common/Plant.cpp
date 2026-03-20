@@ -1,4 +1,4 @@
-#include "simulator/controllers/PidController/application/Plant.hpp"
+#include "simulator/controllers/common/Plant.hpp"
 #include <cmath>
 
 namespace simulator::controllers

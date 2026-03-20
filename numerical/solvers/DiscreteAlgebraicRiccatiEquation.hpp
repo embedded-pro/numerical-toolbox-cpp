@@ -82,4 +82,5 @@ namespace solvers
 
     extern template class DiscreteAlgebraicRiccatiEquation<float, 1, 1>;
     extern template class DiscreteAlgebraicRiccatiEquation<float, 2, 1>;
+    extern template class DiscreteAlgebraicRiccatiEquation<float, 4, 1>;
 }

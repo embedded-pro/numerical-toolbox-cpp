@@ -1,7 +1,7 @@
 #pragma once
 
 #include "simulator/controllers/PidController/application/PidSimulator.hpp"
-#include "simulator/controllers/PidController/application/Plant.hpp"
+#include "simulator/controllers/common/Plant.hpp"
 #include <QComboBox>
 #include <QDoubleSpinBox>
 #include <QGroupBox>
