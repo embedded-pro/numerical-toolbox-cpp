@@ -32,12 +32,12 @@ $$\frac{\partial \Omega_{L1}}{\partial \theta_i} = \operatorname{sign}(\theta_i)
 
 ### Comparison
 
-| Property | L1 | L2 |
-|----------|-----------|-----------|
-| Penalty shape | Diamond (corners at axes) | Sphere |
-| Sparsity | Promotes exact zeros | Shrinks toward zero but rarely reaches it |
-| Gradient at $\theta_i = 0$ | Undefined (sub-gradient) | Zero |
-| Best for | Feature selection, sparse models | General-purpose weight control |
+| Property                   | L1                               | L2                                        |
+|----------------------------|----------------------------------|-------------------------------------------|
+| Penalty shape              | Diamond (corners at axes)        | Sphere                                    |
+| Sparsity                   | Promotes exact zeros             | Shrinks toward zero but rarely reaches it |
+| Gradient at $\theta_i = 0$ | Undefined (sub-gradient)         | Zero                                      |
+| Best for                   | Feature selection, sparse models | General-purpose weight control            |
 
 ### Geometric Interpretation
 
@@ -49,12 +49,12 @@ where $c$ is determined by $\lambda$. L1 constrains $\theta$ to a diamond, so th
 
 ## Complexity Analysis
 
-| Operation | Time | Space |
-|-----------|------|-------|
+| Operation             | Time   | Space  |
+|-----------------------|--------|--------|
 | $\Omega_{L2}(\theta)$ | $O(P)$ | $O(1)$ |
-| $\nabla \Omega_{L2}$ | $O(P)$ | $O(P)$ |
+| $\nabla \Omega_{L2}$  | $O(P)$ | $O(P)$ |
 | $\Omega_{L1}(\theta)$ | $O(P)$ | $O(1)$ |
-| $\nabla \Omega_{L1}$ | $O(P)$ | $O(P)$ |
+| $\nabla \Omega_{L1}$  | $O(P)$ | $O(P)$ |
 
 Regularization adds negligible computational cost — one pass over the parameter vector per training iteration.
 
@@ -64,19 +64,19 @@ Regularization adds negligible computational cost — one pass over the paramete
 
 **L2 Regularization:**
 
-| Step | Computation | Result |
-|------|-------------|--------|
-| Penalty | $\frac{1}{2}(0.64 + 0.09 + 0.25) = 0.49$ | $\Omega_{L2} = 0.49$ |
-| Gradient | $[0.8, -0.3, 0.5]$ | Added to $\nabla\mathcal{L}$ |
-| Contribution to loss | $0.1 \times 0.49 = 0.049$ | |
+| Step                 | Computation                              | Result                       |
+|----------------------|------------------------------------------|------------------------------|
+| Penalty              | $\frac{1}{2}(0.64 + 0.09 + 0.25) = 0.49$ | $\Omega_{L2} = 0.49$         |
+| Gradient             | $[0.8, -0.3, 0.5]$                       | Added to $\nabla\mathcal{L}$ |
+| Contribution to loss | $0.1 \times 0.49 = 0.049$                |                              |
 
 **L1 Regularization:**
 
-| Step | Computation | Result |
-|------|-------------|--------|
-| Penalty | $0.8 + 0.3 + 0.5 = 1.6$ | $\Omega_{L1} = 1.6$ |
-| Gradient | $[1, -1, 1]$ | Added to $\nabla\mathcal{L}$ |
-| Contribution to loss | $0.1 \times 1.6 = 0.16$ | |
+| Step                 | Computation             | Result                       |
+|----------------------|-------------------------|------------------------------|
+| Penalty              | $0.8 + 0.3 + 0.5 = 1.6$ | $\Omega_{L1} = 1.6$          |
+| Gradient             | $[1, -1, 1]$            | Added to $\nabla\mathcal{L}$ |
+| Contribution to loss | $0.1 \times 1.6 = 0.16$ |                              |
 
 **After several L1 updates** ($\eta = 0.1$, $\lambda = 0.1$): the $\theta_2 = -0.3$ component, already small, is driven to exactly zero. The model effectively prunes that connection.
 
@@ -90,13 +90,13 @@ Regularization adds negligible computational cost — one pass over the paramete
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **Elastic Net** | $\Omega = \alpha \|\theta\|_1 + (1-\alpha)\|\theta\|_2^2$; combines L1 sparsity with L2 smoothness |
-| **Dropout** | Randomly zeroes activations during training; implicit ensemble regularization |
-| **Early stopping** | Halts training before overfitting; regularization without modifying the loss |
-| **Data augmentation** | Expands the training set with transformed copies; reduces overfitting by increasing data diversity |
-| **Spectral normalization** | Constrains the spectral norm of weight matrices; stabilizes GAN training |
+| Variant                    | Key Difference                                                                                     |
+|----------------------------|----------------------------------------------------------------------------------------------------|
+| **Elastic Net**            | $\Omega = \alpha \|\theta\|_1 + (1-\alpha)\|\theta\|_2^2$; combines L1 sparsity with L2 smoothness |
+| **Dropout**                | Randomly zeroes activations during training; implicit ensemble regularization                      |
+| **Early stopping**         | Halts training before overfitting; regularization without modifying the loss                       |
+| **Data augmentation**      | Expands the training set with transformed copies; reduces overfitting by increasing data diversity |
+| **Spectral normalization** | Constrains the spectral norm of weight matrices; stabilizes GAN training                           |
 | **Weight clipping** | Hard constraint: $|\theta_i| \le c$; used in Wasserstein GANs |
 
 ## Applications
@@ -122,11 +122,11 @@ graph TD
     Reg -.->|"L2 + MSE = Ridge regression"| LR
 ```
 
-| Component | Relationship |
-|-----------|-------------|
-| [Loss Functions](../losses/Loss.md) | Regularization is a penalty *added to* the loss: $\mathcal{L}_{\text{total}} = \mathcal{L} + \lambda\Omega$ |
-| [Optimizer](../optimizer/Optimizer.md) | Receives the combined gradient $\nabla\mathcal{L} + \lambda\nabla\Omega$ |
-| [Linear Regression](../../estimators/LinearRegression.md) | L2-regularized MSE with a linear model is **Ridge regression**; L1 is **Lasso** |
+| Component                                                 | Relationship                                                                                                |
+|-----------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| [Loss Functions](../losses/Loss.md)                       | Regularization is a penalty *added to* the loss: $\mathcal{L}_{\text{total}} = \mathcal{L} + \lambda\Omega$ |
+| [Optimizer](../optimizer/Optimizer.md)                    | Receives the combined gradient $\nabla\mathcal{L} + \lambda\nabla\Omega$                                    |
+| [Linear Regression](../../estimators/LinearRegression.md) | L2-regularized MSE with a linear model is **Ridge regression**; L1 is **Lasso**                             |
 
 ## References & Further Reading
 

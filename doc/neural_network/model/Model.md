@@ -55,12 +55,12 @@ graph TD
 
 ## Complexity Analysis
 
-| Operation | Time | Space |
-|-----------|------|-------|
-| Forward pass | $O(P)$ | $O(\sum n_\ell)$ cached activations |
-| Backward pass | $O(P)$ | $O(P)$ gradients |
-| `GetParameters()` | $O(P)$ | $O(P)$ flat vector |
-| `SetParameters()` | $O(P)$ | — |
+| Operation         | Time   | Space                               |
+|-------------------|--------|-------------------------------------|
+| Forward pass      | $O(P)$ | $O(\sum n_\ell)$ cached activations |
+| Backward pass     | $O(P)$ | $O(P)$ gradients                    |
+| `GetParameters()` | $O(P)$ | $O(P)$ flat vector                  |
+| `SetParameters()` | $O(P)$ | —                                   |
 
 All operations scale linearly with the total parameter count $P$.
 
@@ -70,21 +70,21 @@ All operations scale linearly with the total parameter count $P$.
 
 **Compile-time verification chain:**
 
-| Check | Condition | Status |
-|-------|-----------|--------|
-| Layer 1 input size = Model input size | $2 = 2$ | ✓ |
-| Layer 1 output size = Layer 2 input size | $3 = 3$ | ✓ |
-| Layer 2 output size = Model output size | $1 = 1$ | ✓ |
-| All types derive from `Layer` | type trait check | ✓ |
+| Check                                    | Condition        | Status |
+|------------------------------------------|------------------|--------|
+| Layer 1 input size = Model input size    | $2 = 2$          | ✓      |
+| Layer 1 output size = Layer 2 input size | $3 = 3$          | ✓      |
+| Layer 2 output size = Model output size  | $1 = 1$          | ✓      |
+| All types derive from `Layer`            | type trait check | ✓      |
 
 **Parameter layout** ($P = 3 \times 3 + 3 + 1 \times 4 + 1 = 16$):
 
-| Index | Parameter |
-|-------|-----------|
-| 0–5 | $W_1$ (3×2 = 6 elements) |
-| 6–8 | $b_1$ (3 elements) |
-| 9–11 | $W_2$ (1×3 = 3 elements) |
-| 12 | $b_2$ (1 element) |
+| Index | Parameter                |
+|-------|--------------------------|
+| 0–5   | $W_1$ (3×2 = 6 elements) |
+| 6–8   | $b_1$ (3 elements)       |
+| 9–11  | $W_2$ (1×3 = 3 elements) |
+| 12    | $b_2$ (1 element)        |
 
 **Forward pass** with $x = [1.0, 0.5]^T$:
 
@@ -108,12 +108,12 @@ All operations scale linearly with the total parameter count $P$.
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
+| Variant                        | Key Difference                                                                     |
+|--------------------------------|------------------------------------------------------------------------------------|
 | **Sequential model (dynamic)** | Layers stored in a container; dimension checked at runtime instead of compile time |
-| **Functional API** | Supports branching and merging (DAG topology instead of linear chain) |
-| **Residual model** | Adds skip connections: $a_{\ell+2} = f_{\ell+1}(a_\ell) + a_\ell$ |
-| **Recurrent model** | Unrolls the same layer across time steps |
+| **Functional API**             | Supports branching and merging (DAG topology instead of linear chain)              |
+| **Residual model**             | Adds skip connections: $a_{\ell+2} = f_{\ell+1}(a_\ell) + a_\ell$                  |
+| **Recurrent model**            | Unrolls the same layer across time steps                                           |
 
 ## Applications
 
@@ -140,12 +140,12 @@ graph TD
     Model --> NN
 ```
 
-| Component | Relationship |
-|-----------|-------------|
-| [Dense Layer](../layer/Layer.md) | The Model is a sequence of layers stored in a `std::tuple` |
-| [Loss Functions](../losses/Loss.md) | Measures prediction error; the Model delegates loss computation to a Loss object |
-| [Optimizer](../optimizer/Optimizer.md) | Receives the flat parameter/gradient vectors from the Model and returns updated parameters |
-| [Regularization](../regularization/Regularization.md) | Added to the loss before optimization |
+| Component                                             | Relationship                                                                               |
+|-------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| [Dense Layer](../layer/Layer.md)                      | The Model is a sequence of layers stored in a `std::tuple`                                 |
+| [Loss Functions](../losses/Loss.md)                   | Measures prediction error; the Model delegates loss computation to a Loss object           |
+| [Optimizer](../optimizer/Optimizer.md)                | Receives the flat parameter/gradient vectors from the Model and returns updated parameters |
+| [Regularization](../regularization/Regularization.md) | Added to the loss before optimization                                                      |
 
 ## References & Further Reading
 

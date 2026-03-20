@@ -25,11 +25,11 @@ where $W_\ell \in \mathbb{R}^{n_\ell \times n_{\ell-1}}$ are weights, $b_\ell \i
 
 Training minimizes a scalar loss $\mathcal{L}(\hat{y}, y)$ that measures how far the prediction $\hat{y}$ is from the target $y$. Common choices:
 
-| Loss | Formula | Use Case |
-|------|---------|----------|
-| MSE | $\frac{1}{m}\sum(\hat{y}_i - y_i)^2$ | Regression |
-| BCE | $-\sum[y_i \log \hat{y}_i + (1-y_i)\log(1-\hat{y}_i)]$ | Binary classification |
-| CCE | $-\sum y_i \log \hat{y}_i$ | Multi-class classification |
+| Loss | Formula                                                | Use Case                   |
+|------|--------------------------------------------------------|----------------------------|
+| MSE  | $\frac{1}{m}\sum(\hat{y}_i - y_i)^2$                   | Regression                 |
+| BCE  | $-\sum[y_i \log \hat{y}_i + (1-y_i)\log(1-\hat{y}_i)]$ | Binary classification      |
+| CCE  | $-\sum y_i \log \hat{y}_i$                             | Multi-class classification |
 
 ### Backpropagation
 
@@ -52,11 +52,11 @@ where $\eta$ is the learning rate. More sophisticated optimizers (momentum, Adam
 
 ## Complexity Analysis
 
-| Phase | Time | Space |
-|-------|------|-------|
-| Forward pass | $O\!\left(\sum_{\ell=1}^L n_\ell \cdot n_{\ell-1}\right)$ | $O\!\left(\sum n_\ell\right)$ activations |
-| Backward pass | Same as forward | Same + gradient storage |
-| Parameter update | $O(P)$ | $O(P)$ optimizer state |
+| Phase            | Time                                                      | Space                                     |
+|------------------|-----------------------------------------------------------|-------------------------------------------|
+| Forward pass     | $O\!\left(\sum_{\ell=1}^L n_\ell \cdot n_{\ell-1}\right)$ | $O\!\left(\sum n_\ell\right)$ activations |
+| Backward pass    | Same as forward                                           | Same + gradient storage                   |
+| Parameter update | $O(P)$                                                    | $O(P)$ optimizer state                    |
 
 where $P = \sum_\ell (n_\ell \cdot n_{\ell-1} + n_\ell)$ is the total parameter count. For small embedded networks ($P < 10{,}000$), both passes complete in microseconds.
 
@@ -78,22 +78,22 @@ graph LR
 
 **Epoch 0 — Forward pass** with input $x = [1, 0]^T$, target $y = 1$:
 
-| Step | Computation | Result |
-|------|-------------|--------|
-| Hidden pre-activation | $z_1 = W_1 x + b_1$ | $[0.3, -0.1]^T$ |
-| Hidden activation | $a_1 = \text{ReLU}(z_1)$ | $[0.3, 0.0]^T$ |
-| Output pre-activation | $z_2 = W_2 a_1 + b_2$ | $[0.15]$ |
-| Output activation | $\hat{y} = \sigma(z_2)$ | $[0.537]$ |
-| Loss | $\mathcal{L} = -(y\log\hat{y} + (1-y)\log(1-\hat{y}))$ | $0.621$ |
+| Step                  | Computation                                            | Result          |
+|-----------------------|--------------------------------------------------------|-----------------|
+| Hidden pre-activation | $z_1 = W_1 x + b_1$                                    | $[0.3, -0.1]^T$ |
+| Hidden activation     | $a_1 = \text{ReLU}(z_1)$                               | $[0.3, 0.0]^T$  |
+| Output pre-activation | $z_2 = W_2 a_1 + b_2$                                  | $[0.15]$        |
+| Output activation     | $\hat{y} = \sigma(z_2)$                                | $[0.537]$       |
+| Loss                  | $\mathcal{L} = -(y\log\hat{y} + (1-y)\log(1-\hat{y}))$ | $0.621$         |
 
 **Epoch 0 — Backward pass:**
 
-| Step | Computation | Result |
-|------|-------------|--------|
-| Output gradient | $\delta_2 = \hat{y} - y$ | $[-0.463]$ |
-| $\nabla W_2$ | $\delta_2 \cdot a_1^T$ | $[-0.139, 0]$ |
-| Hidden gradient | $\delta_1 = W_2^T \delta_2 \odot \text{ReLU}'(z_1)$ | $[-0.231, 0]^T$ |
-| $\nabla W_1$ | $\delta_1 \cdot x^T$ | $[[-0.231, 0], [0, 0]]$ |
+| Step            | Computation                                         | Result                  |
+|-----------------|-----------------------------------------------------|-------------------------|
+| Output gradient | $\delta_2 = \hat{y} - y$                            | $[-0.463]$              |
+| $\nabla W_2$    | $\delta_2 \cdot a_1^T$                              | $[-0.139, 0]$           |
+| Hidden gradient | $\delta_1 = W_2^T \delta_2 \odot \text{ReLU}'(z_1)$ | $[-0.231, 0]^T$         |
+| $\nabla W_1$    | $\delta_1 \cdot x^T$                                | $[[-0.231, 0], [0, 0]]$ |
 
 **Update:** $W \leftarrow W - 0.1 \cdot \nabla W$. After ~500 epochs, the network correctly classifies all four XOR inputs.
 
@@ -108,13 +108,13 @@ graph LR
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **Convolutional Neural Network (CNN)** | Layers share weights spatially; efficient for image/signal data |
-| **Recurrent Neural Network (RNN)** | Layers share weights across time steps; models sequences |
-| **Residual Network (ResNet)** | Skip connections mitigate vanishing gradients in very deep networks |
-| **Transformer** | Attention-based; no recurrence; state-of-the-art for sequences |
-| **Quantized Neural Network** | Weights and activations in low-bit integers; optimal for MCU deployment |
+| Variant                                | Key Difference                                                          |
+|----------------------------------------|-------------------------------------------------------------------------|
+| **Convolutional Neural Network (CNN)** | Layers share weights spatially; efficient for image/signal data         |
+| **Recurrent Neural Network (RNN)**     | Layers share weights across time steps; models sequences                |
+| **Residual Network (ResNet)**          | Skip connections mitigate vanishing gradients in very deep networks     |
+| **Transformer**                        | Attention-based; no recurrence; state-of-the-art for sequences          |
+| **Quantized Neural Network**           | Weights and activations in low-bit integers; optimal for MCU deployment |
 
 ## Applications
 
@@ -146,15 +146,15 @@ graph TD
     NN -.->|"single-layer, linear activation, MSE loss"| LR
 ```
 
-| Component | Relationship |
-|-----------|-------------|
-| [Dense Layer](layer/Layer.md) | The fundamental building block; computes affine transformations |
-| [Activation Functions](activation/Activation.md) | Introduce non-linearity after each layer |
-| [Loss Functions](losses/Loss.md) | Define the training objective |
-| [Optimizer](optimizer/Optimizer.md) | Drives parameter updates via gradient descent |
-| [Regularization](regularization/Regularization.md) | Penalizes complexity to prevent overfitting |
-| [Model](model/Model.md) | Composes layers into a trainable pipeline |
-| [Linear Regression](../estimators/LinearRegression.md) | Special case: single layer, identity activation, MSE loss |
+| Component                                              | Relationship                                                    |
+|--------------------------------------------------------|-----------------------------------------------------------------|
+| [Dense Layer](layer/Layer.md)                          | The fundamental building block; computes affine transformations |
+| [Activation Functions](activation/Activation.md)       | Introduce non-linearity after each layer                        |
+| [Loss Functions](losses/Loss.md)                       | Define the training objective                                   |
+| [Optimizer](optimizer/Optimizer.md)                    | Drives parameter updates via gradient descent                   |
+| [Regularization](regularization/Regularization.md)     | Penalizes complexity to prevent overfitting                     |
+| [Model](model/Model.md)                                | Composes layers into a trainable pipeline                       |
+| [Linear Regression](../estimators/LinearRegression.md) | Special case: single layer, identity activation, MSE loss       |
 
 ## References & Further Reading
 

@@ -28,11 +28,11 @@ For non-convex losses (typical in neural networks), gradient descent converges t
 
 ### Learning Rate Sensitivity
 
-| $\eta$ | Behavior |
-|--------|----------|
-| Too small ($\eta \ll 1/L$) | Slow convergence, many iterations wasted |
-| Optimal ($\eta \approx 1/L$) | Fastest reliable convergence |
-| Too large ($\eta > 2/L$) | Oscillation and divergence |
+| $\eta$                       | Behavior                                 |
+|------------------------------|------------------------------------------|
+| Too small ($\eta \ll 1/L$)   | Slow convergence, many iterations wasted |
+| Optimal ($\eta \approx 1/L$) | Fastest reliable convergence             |
+| Too large ($\eta > 2/L$)     | Oscillation and divergence               |
 
 ```mermaid
 graph LR
@@ -45,11 +45,11 @@ graph LR
 
 ## Complexity Analysis
 
-| Operation | Time | Space |
-|-----------|------|-------|
-| One gradient evaluation | $O(P)$ per parameter | $O(P)$ gradient vector |
-| One parameter update | $O(P)$ | In-place |
-| Total training (T iterations) | $O(T \cdot P)$ | $O(P)$ working memory |
+| Operation                     | Time                 | Space                  |
+|-------------------------------|----------------------|------------------------|
+| One gradient evaluation       | $O(P)$ per parameter | $O(P)$ gradient vector |
+| One parameter update          | $O(P)$               | In-place               |
+| Total training (T iterations) | $O(T \cdot P)$       | $O(P)$ working memory  |
 
 Memory overhead is minimal: only the current parameter vector, the gradient vector, and the optimizer result. No momentum buffers or second-moment estimates.
 
@@ -59,19 +59,19 @@ Memory overhead is minimal: only the current parameter vector, the gradient vect
 
 **Iteration 1:**
 
-| Step | Computation | Result |
-|------|-------------|--------|
-| Gradient | $\nabla \mathcal{L} = [2\theta_1, 2\theta_2]$ | $[4.0, -2.0]$ |
-| Update | $\theta_1 = \theta_0 - 0.1 \cdot \nabla\mathcal{L}$ | $[1.6, -0.8]$ |
-| Loss | $\mathcal{L}(\theta_1) = 1.6^2 + 0.8^2$ | $3.20$ |
+| Step     | Computation                                         | Result        |
+|----------|-----------------------------------------------------|---------------|
+| Gradient | $\nabla \mathcal{L} = [2\theta_1, 2\theta_2]$       | $[4.0, -2.0]$ |
+| Update   | $\theta_1 = \theta_0 - 0.1 \cdot \nabla\mathcal{L}$ | $[1.6, -0.8]$ |
+| Loss     | $\mathcal{L}(\theta_1) = 1.6^2 + 0.8^2$             | $3.20$        |
 
 **Iteration 2:**
 
-| Step | Computation | Result |
-|------|-------------|--------|
-| Gradient | $[3.2, -1.6]$ | |
-| Update | $[1.28, -0.64]$ | |
-| Loss | $2.048$ | |
+| Step     | Computation     | Result |
+|----------|-----------------|--------|
+| Gradient | $[3.2, -1.6]$   |        |
+| Update   | $[1.28, -0.64]$ |        |
+| Loss     | $2.048$         |        |
 
 **Pattern:** Each iteration multiplies the loss by $(1 - 2\eta)^2 = 0.64$. After 20 iterations, $\mathcal{L} \approx 0.0003$.
 
@@ -95,14 +95,14 @@ graph LR
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **SGD (Stochastic Gradient Descent)** | Uses a random mini-batch per iteration; noise helps escape local minima |
-| **SGD with Momentum** | Accumulates a velocity: $v_{t+1} = \mu v_t - \eta \nabla\mathcal{L}$; smooths out oscillations |
-| **Nesterov Momentum** | Evaluates gradient at the *lookahead* position $\theta + \mu v$; faster convergence |
-| **AdaGrad** | Per-parameter adaptive learning rate based on accumulated squared gradients |
-| **RMSProp** | Exponentially decaying average of squared gradients; handles non-stationary objectives |
-| **Adam** | Combines momentum and RMSProp with bias correction; most popular adaptive method |
+| Variant                               | Key Difference                                                                                 |
+|---------------------------------------|------------------------------------------------------------------------------------------------|
+| **SGD (Stochastic Gradient Descent)** | Uses a random mini-batch per iteration; noise helps escape local minima                        |
+| **SGD with Momentum**                 | Accumulates a velocity: $v_{t+1} = \mu v_t - \eta \nabla\mathcal{L}$; smooths out oscillations |
+| **Nesterov Momentum**                 | Evaluates gradient at the *lookahead* position $\theta + \mu v$; faster convergence            |
+| **AdaGrad**                           | Per-parameter adaptive learning rate based on accumulated squared gradients                    |
+| **RMSProp**                           | Exponentially decaying average of squared gradients; handles non-stationary objectives         |
+| **Adam**                              | Combines momentum and RMSProp with bias correction; most popular adaptive method               |
 
 ## Applications
 
@@ -127,11 +127,11 @@ graph TD
     Opt -.->|"analytical solution at η→∞, 1 step"| LR
 ```
 
-| Component | Relationship |
-|-----------|-------------|
-| [Loss Functions](../losses/Loss.md) | Provides the `Cost()` and `Gradient()` the optimizer calls each iteration |
-| [Model](../model/Model.md) | Passes initial parameters to the optimizer and receives optimized parameters back |
-| [Regularization](../regularization/Regularization.md) | Adds a penalty gradient to $\nabla\mathcal{L}$, biasing the optimizer toward simpler models |
+| Component                                                 | Relationship                                                                                      |
+|-----------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| [Loss Functions](../losses/Loss.md)                       | Provides the `Cost()` and `Gradient()` the optimizer calls each iteration                         |
+| [Model](../model/Model.md)                                | Passes initial parameters to the optimizer and receives optimized parameters back                 |
+| [Regularization](../regularization/Regularization.md)     | Adds a penalty gradient to $\nabla\mathcal{L}$, biasing the optimizer toward simpler models       |
 | [Linear Regression](../../estimators/LinearRegression.md) | For MSE on a linear model, gradient descent converges to the same solution as the normal equation |
 
 ## References & Further Reading
