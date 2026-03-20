@@ -41,9 +41,9 @@ If $|\mu_k| < 1$ for all $k$, the corresponding AR model is stable (all poles in
 
 ## Complexity Analysis
 
-| Case | Time | Space | Notes |
-|------|------|-------|-------|
-| All | $O(n^2)$ | $O(n)$ | Versus $O(n^3)$ for general solvers |
+| Case | Time     | Space  | Notes                               |
+|------|----------|--------|-------------------------------------|
+| All  | $O(n^2)$ | $O(n)$ | Versus $O(n^3)$ for general solvers |
 
 **Why $O(n^2)$:** At order $k$, computing $\mu_k$ costs $O(k)$ and updating the solution costs $O(k)$. Summing over $k = 1, \ldots, n$: $\sum k = n(n+1)/2 = O(n^2)$.
 
@@ -85,13 +85,13 @@ $\varphi^{(2)} = [0.5, 0, 0]$
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **Split Levinson** | Replaces the two-vector recursion with a single vector; slightly more efficient |
-| **Block Levinson** | Solves block-Toeplitz systems (matrix entries instead of scalars) |
-| **Burg's method** | Computes reflection coefficients from data rather than autocovariances; often more accurate for short records |
-| **Schur algorithm** | Computes reflection coefficients without forming the full solution; useful for VLSI implementations |
-| **Superfast Toeplitz solvers** | $O(n \log^2 n)$ algorithms based on FFT and divide-and-conquer |
+| Variant                        | Key Difference                                                                                                |
+|--------------------------------|---------------------------------------------------------------------------------------------------------------|
+| **Split Levinson**             | Replaces the two-vector recursion with a single vector; slightly more efficient                               |
+| **Block Levinson**             | Solves block-Toeplitz systems (matrix entries instead of scalars)                                             |
+| **Burg's method**              | Computes reflection coefficients from data rather than autocovariances; often more accurate for short records |
+| **Schur algorithm**            | Computes reflection coefficients without forming the full solution; useful for VLSI implementations           |
+| **Superfast Toeplitz solvers** | $O(n \log^2 n)$ algorithms based on FFT and divide-and-conquer                                                |
 
 ## Applications
 
@@ -114,10 +114,10 @@ graph LR
     LD -.->|"parametric PSD"| PSD
 ```
 
-| Algorithm | Relationship |
-|-----------|-------------|
-| [Yule-Walker](../estimators/YuleWalker.md) | Primary consumer — produces the Toeplitz system that Levinson-Durbin solves |
-| [Gaussian Elimination](GaussianElimination.md) | General $O(n^3)$ alternative that ignores Toeplitz structure |
+| Algorithm                                                     | Relationship                                                                                         |
+|---------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| [Yule-Walker](../estimators/YuleWalker.md)                    | Primary consumer — produces the Toeplitz system that Levinson-Durbin solves                          |
+| [Gaussian Elimination](GaussianElimination.md)                | General $O(n^3)$ alternative that ignores Toeplitz structure                                         |
 | [Power Spectral Density](../analysis/PowerDensitySpectrum.md) | Levinson-Durbin enables parametric PSD estimation as an alternative to Welch's non-parametric method |
 
 ## References & Further Reading

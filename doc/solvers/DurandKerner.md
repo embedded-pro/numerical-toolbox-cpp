@@ -40,10 +40,10 @@ with angular positions offset by 0.4 radians to break symmetry. If $R < 0.1$, it
 
 ## Complexity Analysis
 
-| Case | Time | Space | Notes |
-|------|------|-------|-------|
-| Per iteration | $O(n^2)$ | $O(n)$ | Evaluating $P$ and the denominator product for all $n$ roots |
-| Total | $O(n^2 k)$ | $O(n)$ | $k$ iterations until convergence (typically $k \ll n$) |
+| Case          | Time       | Space  | Notes                                                        |
+|---------------|------------|--------|--------------------------------------------------------------|
+| Per iteration | $O(n^2)$   | $O(n)$ | Evaluating $P$ and the denominator product for all $n$ roots |
+| Total         | $O(n^2 k)$ | $O(n)$ | $k$ iterations until convergence (typically $k \ll n$)       |
 
 **Why $O(n^2)$:** For each of the $n$ roots, computing the denominator product requires multiplying $n-1$ terms.
 
@@ -80,13 +80,13 @@ After ~15–20 iterations the roots converge to $z \approx \{1, 2, 3\}$ (imagina
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **Aberth-Ehrlich method** | Similar simultaneous iteration but includes a correction term that improves convergence for clustered roots |
-| **Jenkins-Traub** | Sequential algorithm (one root at a time) with superior convergence for difficult polynomials; standard in numerical libraries |
-| **Companion matrix + eigenvalues** | Converts to an eigenvalue problem; robust but $O(n^3)$ |
-| **Laguerre's method** | Converges cubically for simple roots; sequential (extracts one root at a time, then deflates) |
-| **Muller's method** | Uses quadratic interpolation; works for non-polynomial equations too |
+| Variant                            | Key Difference                                                                                                                 |
+|------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| **Aberth-Ehrlich method**          | Similar simultaneous iteration but includes a correction term that improves convergence for clustered roots                    |
+| **Jenkins-Traub**                  | Sequential algorithm (one root at a time) with superior convergence for difficult polynomials; standard in numerical libraries |
+| **Companion matrix + eigenvalues** | Converts to an eigenvalue problem; robust but $O(n^3)$                                                                         |
+| **Laguerre's method**              | Converges cubically for simple roots; sequential (extracts one root at a time, then deflates)                                  |
+| **Muller's method**                | Uses quadratic interpolation; works for non-polynomial equations too                                                           |
 
 ## Applications
 
@@ -106,9 +106,9 @@ graph LR
     GE -.->|"companion matrix alternative"| DK
 ```
 
-| Algorithm | Relationship |
-|-----------|-------------|
-| [Root Locus](../analysis/RootLocus.md) | Primary consumer — calls Durand-Kerner to find characteristic polynomial roots at each gain step |
+| Algorithm                                      | Relationship                                                                                          |
+|------------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| [Root Locus](../analysis/RootLocus.md)         | Primary consumer — calls Durand-Kerner to find characteristic polynomial roots at each gain step      |
 | [Gaussian Elimination](GaussianElimination.md) | Alternative approach: form the companion matrix and compute eigenvalues (requires a different solver) |
 
 ## References & Further Reading

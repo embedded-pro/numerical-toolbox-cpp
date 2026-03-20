@@ -45,10 +45,10 @@ $$K = \left(R + B^T P B\right)^{-1} B^T P A$$
 
 ## Complexity Analysis
 
-| Phase | Time | Space | Notes |
-|-------|------|-------|-------|
+| Phase         | Time                   | Space    | Notes                                                  |
+|---------------|------------------------|----------|--------------------------------------------------------|
 | Per iteration | $O(n^3 + n^2 m + m^3)$ | $O(n^2)$ | Matrix multiplications + one $m \times m$ linear solve |
-| Total solver | $O(I(n^3 + m^3))$ | $O(n^2)$ | $I$ iterations (typically 10–30) |
+| Total solver  | $O(I(n^3 + m^3))$      | $O(n^2)$ | $I$ iterations (typically 10–30)                       |
 
 **Why $O(n^3)$:** Each iteration involves $n \times n$ matrix products ($A^T P A$) and an $m \times m$ linear solve (for $S^{-1}$). When $m \ll n$, the matrix products dominate.
 
@@ -77,12 +77,12 @@ $$K = \left(R + B^T P B\right)^{-1} B^T P A$$
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **Continuous ARE (CARE)** | For continuous-time systems; different matrix equation |
-| **Newton's method for DARE** | Quadratic convergence but requires solving a Sylvester equation per iteration |
-| **Schur method** | Eigendecomposition-based; finds the solution in one pass but requires $O(n^3)$ eigenvalue computation |
-| **Doubling algorithm** | $O(\log I)$ convergence via matrix sign function; useful for large systems |
+| Variant                      | Key Difference                                                                                        |
+|------------------------------|-------------------------------------------------------------------------------------------------------|
+| **Continuous ARE (CARE)**    | For continuous-time systems; different matrix equation                                                |
+| **Newton's method for DARE** | Quadratic convergence but requires solving a Sylvester equation per iteration                         |
+| **Schur method**             | Eigendecomposition-based; finds the solution in one pass but requires $O(n^3)$ eigenvalue computation |
+| **Doubling algorithm**       | $O(\log I)$ convergence via matrix sign function; useful for large systems                            |
 
 ## Applications
 
@@ -104,11 +104,11 @@ graph LR
     DARE --> KF
 ```
 
-| Algorithm | Relationship |
-|-----------|-------------|
-| [Gaussian Elimination](GaussianElimination.md) | Used at each iteration to solve the $m \times m$ linear sub-system |
-| [LQR Controller](../controllers/Lqr.md) | Direct consumer — extracts optimal gain $K$ from the DARE solution matrix $P$ |
-| [Kalman Filter](../filters/active/KalmanFilter.md) | Dual problem — the steady-state Kalman gain is computed by a transposed DARE |
+| Algorithm                                          | Relationship                                                                  |
+|----------------------------------------------------|-------------------------------------------------------------------------------|
+| [Gaussian Elimination](GaussianElimination.md)     | Used at each iteration to solve the $m \times m$ linear sub-system            |
+| [LQR Controller](../controllers/Lqr.md)            | Direct consumer — extracts optimal gain $K$ from the DARE solution matrix $P$ |
+| [Kalman Filter](../filters/active/KalmanFilter.md) | Dual problem — the steady-state Kalman gain is computed by a transposed DARE  |
 
 ## References & Further Reading
 

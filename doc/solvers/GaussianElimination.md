@@ -37,11 +37,11 @@ For $AX = B$ where $B$ has $m$ columns, each column is solved independently.
 
 ## Complexity Analysis
 
-| Phase | Time | Space | Notes |
-|-------|------|-------|-------|
-| Forward elimination | $O(n^3)$ | $O(n^2)$ | In-place on copies of $A$ and $b$ |
-| Back-substitution | $O(n^2)$ | $O(n)$ | |
-| Multi-column solve | $O(n^3 + n^2 m)$ | $O(n^2)$ | $m$ back-substitutions |
+| Phase               | Time             | Space    | Notes                             |
+|---------------------|------------------|----------|-----------------------------------|
+| Forward elimination | $O(n^3)$         | $O(n^2)$ | In-place on copies of $A$ and $b$ |
+| Back-substitution   | $O(n^2)$         | $O(n)$   |                                   |
+| Multi-column solve  | $O(n^3 + n^2 m)$ | $O(n^2)$ | $m$ back-substitutions            |
 
 **Why $O(n^3)$:** The elimination has $n$ stages; stage $k$ performs $(n-k)^2$ multiplications. Summing: $\sum_{k=1}^{n} k^2 \approx n^3/3$.
 
@@ -86,13 +86,13 @@ Solve from the bottom up: $x_3 = 1$, $x_2 = 3$, $x_1 = 2$.
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **Full pivoting** | Pivots on both rows and columns; more stable but rarely needed in practice |
-| **LU factorization** | Stores the $L$ and $U$ factors for reuse; solves multiple right-hand sides efficiently |
-| **Cholesky factorization** | Specialized for symmetric positive-definite matrices; $O(n^3/6)$ instead of $O(n^3/3)$ |
-| **Gauss-Jordan elimination** | Reduces to reduced row echelon form (identity matrix); used for matrix inversion |
-| **Iterative refinement** | Solves once, then iteratively corrects the residual to improve accuracy |
+| Variant                      | Key Difference                                                                         |
+|------------------------------|----------------------------------------------------------------------------------------|
+| **Full pivoting**            | Pivots on both rows and columns; more stable but rarely needed in practice             |
+| **LU factorization**         | Stores the $L$ and $U$ factors for reuse; solves multiple right-hand sides efficiently |
+| **Cholesky factorization**   | Specialized for symmetric positive-definite matrices; $O(n^3/6)$ instead of $O(n^3/3)$ |
+| **Gauss-Jordan elimination** | Reduces to reduced row echelon form (identity matrix); used for matrix inversion       |
+| **Iterative refinement**     | Solves once, then iteratively corrects the residual to improve accuracy                |
 
 ## Applications
 
@@ -115,11 +115,11 @@ graph LR
     LD -.->|"Toeplitz-specialized alternative"| GE
 ```
 
-| Algorithm | Relationship |
-|-----------|-------------|
-| [Linear Regression](../estimators/LinearRegression.md) | Uses Gaussian elimination to solve the normal equation |
-| [DARE Solver](DiscreteAlgebraicRiccatiEquation.md) | Calls Gaussian elimination at each Riccati iteration |
-| [Levinson-Durbin](LevinsonDurbin.md) | Specialized $O(n^2)$ solver for Toeplitz systems; Gaussian elimination is the $O(n^3)$ fallback |
+| Algorithm                                              | Relationship                                                                                    |
+|--------------------------------------------------------|-------------------------------------------------------------------------------------------------|
+| [Linear Regression](../estimators/LinearRegression.md) | Uses Gaussian elimination to solve the normal equation                                          |
+| [DARE Solver](DiscreteAlgebraicRiccatiEquation.md)     | Calls Gaussian elimination at each Riccati iteration                                            |
+| [Levinson-Durbin](LevinsonDurbin.md)                   | Specialized $O(n^2)$ solver for Toeplitz systems; Gaussian elimination is the $O(n^3)$ fallback |
 
 ## References & Further Reading
 
