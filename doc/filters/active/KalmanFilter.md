@@ -48,11 +48,11 @@ The Kalman filter is the **minimum mean-square error (MMSE)** estimator among al
 
 ## Complexity Analysis
 
-| Operation | Time | Space | Notes |
-|-----------|------|-------|-------|
-| Predict | $O(n^2)$ | $O(n^2)$ | Matrix multiply $F P F^T$ |
-| Update | $O(n^2 m + m^3)$ | $O(nm)$ | Dominated by $S^{-1}$ ($m \times m$ inversion) and gain computation |
-| Total per step | $O(n^2 m + m^3)$ | $O(n^2 + nm)$ | For $m \ll n$, approximately $O(n^2)$ |
+| Operation      | Time             | Space         | Notes                                                               |
+|----------------|------------------|---------------|---------------------------------------------------------------------|
+| Predict        | $O(n^2)$         | $O(n^2)$      | Matrix multiply $F P F^T$                                           |
+| Update         | $O(n^2 m + m^3)$ | $O(nm)$       | Dominated by $S^{-1}$ ($m \times m$ inversion) and gain computation |
+| Total per step | $O(n^2 m + m^3)$ | $O(n^2 + nm)$ | For $m \ll n$, approximately $O(n^2)$                               |
 
 For typical embedded use with $n \leq 10$ and $m \leq 5$, each step completes in microseconds.
 
@@ -97,14 +97,14 @@ The filter quickly moves toward the measurement because the initial covariance $
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **Extended Kalman Filter (EKF)** | Linearizes nonlinear $f(x)$ and $h(x)$ around the current estimate |
-| **Unscented Kalman Filter (UKF)** | Propagates sigma points through nonlinearities; avoids explicit Jacobians |
-| **Square-root Kalman Filter** | Maintains $\sqrt{P}$ instead of $P$ for improved numerical stability |
-| **Information Filter** | Works with the inverse covariance (information matrix); better for multi-sensor fusion |
-| **Kalman Smoother** | Uses future measurements to refine past estimates (offline, non-causal) |
-| **Adaptive Kalman Filter** | Estimates $Q$ and $R$ online from innovation statistics |
+| Variant                           | Key Difference                                                                         |
+|-----------------------------------|----------------------------------------------------------------------------------------|
+| **Extended Kalman Filter (EKF)**  | Linearizes nonlinear $f(x)$ and $h(x)$ around the current estimate                     |
+| **Unscented Kalman Filter (UKF)** | Propagates sigma points through nonlinearities; avoids explicit Jacobians              |
+| **Square-root Kalman Filter**     | Maintains $\sqrt{P}$ instead of $P$ for improved numerical stability                   |
+| **Information Filter**            | Works with the inverse covariance (information matrix); better for multi-sensor fusion |
+| **Kalman Smoother**               | Uses future measurements to refine past estimates (offline, non-causal)                |
+| **Adaptive Kalman Filter**        | Estimates $Q$ and $R$ online from innovation statistics                                |
 
 ## Applications
 
@@ -128,11 +128,11 @@ graph LR
     KF -->|"filtered measurement"| PID
 ```
 
-| Algorithm | Relationship |
-|-----------|-------------|
-| [LQR Controller](../controllers/Lqr.md) | The Kalman filter + LQR = LQG (Linear Quadratic Gaussian), the separation principle |
-| [DARE Solver](../solvers/DiscreteAlgebraicRiccatiEquation.md) | The steady-state Kalman gain can be found by solving a DARE (dual of the LQR DARE) |
-| [PID Controller](../controllers/Pid.md) | Kalman-filtered measurements can serve as the PID's process variable input |
+| Algorithm                                                     | Relationship                                                                        |
+|---------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| [LQR Controller](../controllers/Lqr.md)                       | The Kalman filter + LQR = LQG (Linear Quadratic Gaussian), the separation principle |
+| [DARE Solver](../solvers/DiscreteAlgebraicRiccatiEquation.md) | The steady-state Kalman gain can be found by solving a DARE (dual of the LQR DARE)  |
+| [PID Controller](../controllers/Pid.md)                       | Kalman-filtered measurements can serve as the PID's process variable input          |
 
 ## References & Further Reading
 

@@ -39,9 +39,9 @@ At each gain step, the roots of $D(s) + K_i \cdot N(s) = 0$ are found using the 
 
 ## Complexity Analysis
 
-| Case | Time | Space | Notes |
-|------|------|-------|-------|
-| All | $O(N_g \cdot n^2 \cdot k)$ | $O(N_g \cdot n)$ | $N_g$ = gain steps, $n$ = polynomial order, $k$ = Durand-Kerner iterations per step |
+| Case | Time                       | Space            | Notes                                                                               |
+|------|----------------------------|------------------|-------------------------------------------------------------------------------------|
+| All  | $O(N_g \cdot n^2 \cdot k)$ | $O(N_g \cdot n)$ | $N_g$ = gain steps, $n$ = polynomial order, $k$ = Durand-Kerner iterations per step |
 
 **Why:** At each of the $N_g$ gain steps, a degree-$n$ polynomial is solved via Durand-Kerner, which performs $k$ iterations each costing $O(n^2)$ (evaluating the polynomial and computing the denominator product for all $n$ roots).
 
