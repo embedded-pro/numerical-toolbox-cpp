@@ -32,9 +32,9 @@ Cosine functions are **symmetric** (even functions). The DCT implicitly mirrors 
 
 ## Complexity Analysis
 
-| Case | Time | Space | Notes |
-|------|------|-------|-------|
-| All | $O(N \log N)$ | $O(N)$ | Dominated by the internal FFT; twiddle post-processing is $O(N)$ |
+| Case | Time          | Space  | Notes                                                            |
+|------|---------------|--------|------------------------------------------------------------------|
+| All  | $O(N \log N)$ | $O(N)$ | Dominated by the internal FFT; twiddle post-processing is $O(N)$ |
 
 The reordering step and twiddle multiplication are both linear, so the overall cost is determined by the FFT.
 
@@ -54,12 +54,12 @@ $$Y = \text{FFT}([1, 3, 4, 2]) = [10,\; -3+j,\; -2,\; -3-j]$$
 
 **Step 3 — Apply twiddle factors** $W[k] = e^{-j\pi k/8}$
 
-| $k$ | $W[k]$ | $W[k] \cdot Y[k]$ | $X[k] = 2 \cdot \text{Re}(\cdot)$ |
-|-----|---------|--------------------|------------------------------------|
-| 0 | 1 | 10 | 20 |
-| 1 | $e^{-j\pi/8}$ | ≈ −2.22 − 1.90j | ≈ −4.44 |
-| 2 | $e^{-j\pi/4}$ | ≈ −1.41 + 1.41j | ≈ −2.83 |
-| 3 | $e^{-j3\pi/8}$ | ≈ −0.24 + 3.07j | ≈ −0.47 |
+| $k$ | $W[k]$         | $W[k] \cdot Y[k]$ | $X[k] = 2 \cdot \text{Re}(\cdot)$ |
+|-----|----------------|-------------------|-----------------------------------|
+| 0   | 1              | 10                | 20                                |
+| 1   | $e^{-j\pi/8}$  | ≈ −2.22 − 1.90j   | ≈ −4.44                           |
+| 2   | $e^{-j\pi/4}$  | ≈ −1.41 + 1.41j   | ≈ −2.83                           |
+| 3   | $e^{-j3\pi/8}$ | ≈ −0.24 + 3.07j   | ≈ −0.47                           |
 
 **Output:** $X \approx [20, -4.44, -2.83, -0.47]$
 
@@ -75,13 +75,13 @@ Notice how most of the energy is in $X[0]$ (the DC component) — energy compact
 
 ## Variants & Generalizations
 
-| Variant | Description |
-|---------|-------------|
-| **DCT-I** | Symmetric extension; used in some filter bank designs |
-| **DCT-III (IDCT)** | Inverse of DCT-II; used for reconstruction in JPEG decoding |
-| **DCT-IV** | Self-inverse; basis of the MDCT used in MP3 and AAC |
-| **MDCT** | Modified DCT with 50 % overlap; foundation of modern audio codecs |
-| **2-D DCT** | Applied row-then-column for image compression (JPEG 8×8 blocks) |
+| Variant            | Description                                                       |
+|--------------------|-------------------------------------------------------------------|
+| **DCT-I**          | Symmetric extension; used in some filter bank designs             |
+| **DCT-III (IDCT)** | Inverse of DCT-II; used for reconstruction in JPEG decoding       |
+| **DCT-IV**         | Self-inverse; basis of the MDCT used in MP3 and AAC               |
+| **MDCT**           | Modified DCT with 50 % overlap; foundation of modern audio codecs |
+| **2-D DCT**        | Applied row-then-column for image compression (JPEG 8×8 blocks)   |
 
 ## Applications
 
@@ -102,10 +102,10 @@ graph LR
     WIN -.-> DCT
 ```
 
-| Algorithm | Relationship |
-|-----------|-------------|
+| Algorithm                                         | Relationship                                                              |
+|---------------------------------------------------|---------------------------------------------------------------------------|
 | [Fast Fourier Transform](FastFourierTransform.md) | DCT is computed via FFT with input reordering and twiddle post-processing |
-| [Window Functions](../windowing/window.md) | Some DCT applications use windowing to control boundary effects |
+| [Window Functions](../windowing/window.md)        | Some DCT applications use windowing to control boundary effects           |
 
 ## References & Further Reading
 
