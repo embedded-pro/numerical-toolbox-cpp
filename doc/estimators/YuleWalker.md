@@ -47,13 +47,13 @@ This gives a smooth, parametric spectral estimate.
 
 ## Complexity Analysis
 
-| Phase | Time | Space | Notes |
-|-------|------|-------|-------|
-| Autocovariance | $O(Np)$ | $O(p)$ | One pass per lag, $p+1$ lags |
-| Build Toeplitz matrix | $O(p^2)$ | $O(p^2)$ | Fill from autocovariance vector |
-| Solve (Levinson-Durbin) | $O(p^2)$ | $O(p)$ | Exploits Toeplitz structure |
-| Solve (Gaussian elim.) | $O(p^3)$ | $O(p^2)$ | General-purpose fallback |
-| Predict | $O(p)$ | $O(1)$ | Dot product with past samples |
+| Phase                   | Time     | Space    | Notes                           |
+|-------------------------|----------|----------|---------------------------------|
+| Autocovariance          | $O(Np)$  | $O(p)$   | One pass per lag, $p+1$ lags    |
+| Build Toeplitz matrix   | $O(p^2)$ | $O(p^2)$ | Fill from autocovariance vector |
+| Solve (Levinson-Durbin) | $O(p^2)$ | $O(p)$   | Exploits Toeplitz structure     |
+| Solve (Gaussian elim.)  | $O(p^3)$ | $O(p^2)$ | General-purpose fallback        |
+| Predict                 | $O(p)$   | $O(1)$   | Dot product with past samples   |
 
 ## Step-by-Step Walkthrough
 
@@ -89,13 +89,13 @@ $\varphi_1 \approx 0.478$, $\varphi_2 \approx -0.587$
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **Burg's method** | Estimates AR coefficients from forward + backward prediction errors; often more accurate for short records |
-| **Covariance method** | Uses the unbiased autocovariance; does not guarantee stability |
-| **ARMA models** | Extends AR to include moving-average terms; more flexible but requires iterative estimation |
-| **Vector autoregression (VAR)** | Multivariate extension for jointly modeling multiple time series |
-| **Recursive estimation** | Updates AR coefficients online as new data arrives |
+| Variant                         | Key Difference                                                                                             |
+|---------------------------------|------------------------------------------------------------------------------------------------------------|
+| **Burg's method**               | Estimates AR coefficients from forward + backward prediction errors; often more accurate for short records |
+| **Covariance method**           | Uses the unbiased autocovariance; does not guarantee stability                                             |
+| **ARMA models**                 | Extends AR to include moving-average terms; more flexible but requires iterative estimation                |
+| **Vector autoregression (VAR)** | Multivariate extension for jointly modeling multiple time series                                           |
+| **Recursive estimation**        | Updates AR coefficients online as new data arrives                                                         |
 
 ## Applications
 
@@ -120,12 +120,12 @@ graph LR
     LR -.->|"similar structure"| YW
 ```
 
-| Algorithm | Relationship |
-|-----------|-------------|
-| [Levinson-Durbin](../solvers/LevinsonDurbin.md) | Efficient $O(p^2)$ solver exploiting the Toeplitz structure of the Yule-Walker matrix |
-| [Gaussian Elimination](../solvers/GaussianElimination.md) | General-purpose $O(p^3)$ solver used as a fallback |
-| [Power Spectral Density](../analysis/PowerDensitySpectrum.md) | Non-parametric alternative; the AR model provides a parametric PSD estimate |
-| [Linear Regression](LinearRegression.md) | Structurally similar — both solve a linear system derived from data correlations |
+| Algorithm                                                     | Relationship                                                                          |
+|---------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| [Levinson-Durbin](../solvers/LevinsonDurbin.md)               | Efficient $O(p^2)$ solver exploiting the Toeplitz structure of the Yule-Walker matrix |
+| [Gaussian Elimination](../solvers/GaussianElimination.md)     | General-purpose $O(p^3)$ solver used as a fallback                                    |
+| [Power Spectral Density](../analysis/PowerDensitySpectrum.md) | Non-parametric alternative; the AR model provides a parametric PSD estimate           |
+| [Linear Regression](LinearRegression.md)                      | Structurally similar — both solve a linear system derived from data correlations      |
 
 ## References & Further Reading
 

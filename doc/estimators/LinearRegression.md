@@ -37,12 +37,12 @@ The prediction $\hat{\mathbf{y}} = \mathbf{X}\boldsymbol{\beta}$ is the **orthog
 
 ## Complexity Analysis
 
-| Phase | Time | Space | Notes |
-|-------|------|-------|-------|
+| Phase                    | Time       | Space    | Notes                        |
+|--------------------------|------------|----------|------------------------------|
 | $\mathbf{X}^T\mathbf{X}$ | $O(n p^2)$ | $O(p^2)$ | Dominated by matrix multiply |
-| $\mathbf{X}^T\mathbf{y}$ | $O(np)$ | $O(p)$ | Matrix-vector multiply |
-| Solve | $O(p^3)$ | $O(p^2)$ | Gaussian elimination |
-| Predict | $O(p)$ | $O(1)$ | Dot product |
+| $\mathbf{X}^T\mathbf{y}$ | $O(np)$    | $O(p)$   | Matrix-vector multiply       |
+| Solve                    | $O(p^3)$   | $O(p^2)$ | Gaussian elimination         |
+| Predict                  | $O(p)$     | $O(1)$   | Dot product                  |
 
 For embedded use with small $p$ (say $\leq 10$), the entire fit completes in microseconds.
 
@@ -52,9 +52,9 @@ For embedded use with small $p$ (say $\leq 10$), the entire fit completes in mic
 
 | $x$ | $y$ |
 |-----|-----|
-| 1 | 2 |
-| 2 | 4 |
-| 3 | 5 |
+| 1   | 2   |
+| 2   | 4   |
+| 3   | 5   |
 
 **Step 1 — Design matrix** (with bias column):
 
@@ -82,13 +82,13 @@ Forward elimination → back-substitution: $\beta_1 = 1.5$, $\beta_0 = 2/3 \appr
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **Ridge regression (L2)** | Adds $\lambda\|\boldsymbol{\beta}\|^2$ to the cost; solves $(\mathbf{X}^T\mathbf{X} + \lambda I)\boldsymbol{\beta} = \mathbf{X}^T\mathbf{y}$ |
-| **Lasso regression (L1)** | Adds $\lambda\|\boldsymbol{\beta}\|_1$; promotes sparsity but requires iterative optimization |
-| **Polynomial regression** | Adds powers of $x$ as new features; still linear in parameters |
-| **Weighted least squares** | Weights each sample differently; solves $(\mathbf{X}^T W \mathbf{X})\boldsymbol{\beta} = \mathbf{X}^T W \mathbf{y}$ |
-| **Recursive least squares** | Updates $\boldsymbol{\beta}$ incrementally as new data arrives; suited for online estimation |
+| Variant                     | Key Difference                                                                                                                               |
+|-----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| **Ridge regression (L2)**   | Adds $\lambda\|\boldsymbol{\beta}\|^2$ to the cost; solves $(\mathbf{X}^T\mathbf{X} + \lambda I)\boldsymbol{\beta} = \mathbf{X}^T\mathbf{y}$ |
+| **Lasso regression (L1)**   | Adds $\lambda\|\boldsymbol{\beta}\|_1$; promotes sparsity but requires iterative optimization                                                |
+| **Polynomial regression**   | Adds powers of $x$ as new features; still linear in parameters                                                                               |
+| **Weighted least squares**  | Weights each sample differently; solves $(\mathbf{X}^T W \mathbf{X})\boldsymbol{\beta} = \mathbf{X}^T W \mathbf{y}$                          |
+| **Recursive least squares** | Updates $\boldsymbol{\beta}$ incrementally as new data arrives; suited for online estimation                                                 |
 
 ## Applications
 
@@ -111,11 +111,11 @@ graph LR
     NN -.->|"single linear layer = regression"| LR
 ```
 
-| Algorithm | Relationship |
-|-----------|-------------|
-| [Gaussian Elimination](../solvers/GaussianElimination.md) | Used to solve the normal equation system |
-| [Yule-Walker](YuleWalker.md) | Structurally similar — also solves a linear system derived from correlations |
-| [Neural Network](../neural_network/NeuralNetwork.md) | A single-layer neural network with no activation and MSE loss reduces to linear regression |
+| Algorithm                                                 | Relationship                                                                               |
+|-----------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| [Gaussian Elimination](../solvers/GaussianElimination.md) | Used to solve the normal equation system                                                   |
+| [Yule-Walker](YuleWalker.md)                              | Structurally similar — also solves a linear system derived from correlations               |
+| [Neural Network](../neural_network/NeuralNetwork.md)      | A single-layer neural network with no activation and MSE loss reduces to linear regression |
 
 ## References & Further Reading
 
