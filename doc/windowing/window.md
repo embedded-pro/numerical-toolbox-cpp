@@ -14,12 +14,12 @@ A symmetric window of length $N$ is a sequence $w[n],\; n = 0, 1, \ldots, N-1$, 
 
 ### Common Windows
 
-| Window | Definition | Main-Lobe Width | Peak Side Lobe |
-|--------|-----------|-----------------|----------------|
-| **Rectangular** | $w[n] = 1$ | $2/N$ | $-13$ dB |
-| **Hamming** | $w[n] = 0.54 - 0.46\cos\!\left(\frac{2\pi n}{N-1}\right)$ | $4/N$ | $-43$ dB |
-| **Hann** | $w[n] = 0.5\left(1 - \cos\!\left(\frac{2\pi n}{N-1}\right)\right)$ | $4/N$ | $-32$ dB |
-| **Blackman** | $w[n] = 0.42 - 0.5\cos\!\left(\frac{2\pi n}{N-1}\right) + 0.08\cos\!\left(\frac{4\pi n}{N-1}\right)$ | $6/N$ | $-58$ dB |
+| Window          | Definition                                                                                           | Main-Lobe Width | Peak Side Lobe |
+|-----------------|------------------------------------------------------------------------------------------------------|-----------------|----------------|
+| **Rectangular** | $w[n] = 1$                                                                                           | $2/N$           | $-13$ dB       |
+| **Hamming**     | $w[n] = 0.54 - 0.46\cos\!\left(\frac{2\pi n}{N-1}\right)$                                            | $4/N$           | $-43$ dB       |
+| **Hann**        | $w[n] = 0.5\left(1 - \cos\!\left(\frac{2\pi n}{N-1}\right)\right)$                                   | $4/N$           | $-32$ dB       |
+| **Blackman**    | $w[n] = 0.42 - 0.5\cos\!\left(\frac{2\pi n}{N-1}\right) + 0.08\cos\!\left(\frac{4\pi n}{N-1}\right)$ | $6/N$           | $-58$ dB       |
 
 ### Frequency-Domain Perspective
 
@@ -39,20 +39,20 @@ The **processing gain** $PG$ compares the noise bandwidth of the window to the r
 
 $$PG = \frac{\left(\sum w[n]\right)^2}{N \sum w[n]^2}$$
 
-| Window | Processing Gain |
-|--------|----------------|
-| Rectangular | 1.00 |
-| Hamming | 0.73 |
-| Hann | 0.67 |
-| Blackman | 0.57 |
+| Window      | Processing Gain |
+|-------------|-----------------|
+| Rectangular | 1.00            |
+| Hamming     | 0.73            |
+| Hann        | 0.67            |
+| Blackman    | 0.57            |
 
 ## Complexity Analysis
 
-| Operation | Time | Space |
-|-----------|------|-------|
-| Generate $N$ window coefficients | $O(N)$ | $O(N)$ |
-| Apply window (element-wise multiply) | $O(N)$ | $O(1)$ extra |
-| Pre-computed lookup | $O(1)$ per sample | $O(N)$ |
+| Operation                            | Time              | Space        |
+|--------------------------------------|-------------------|--------------|
+| Generate $N$ window coefficients     | $O(N)$            | $O(N)$       |
+| Apply window (element-wise multiply) | $O(N)$            | $O(1)$ extra |
+| Pre-computed lookup                  | $O(1)$ per sample | $O(N)$       |
 
 Window generation is dominated by trigonometric evaluations ($\cos$). For repeated use at a fixed $N$, pre-compute and store the coefficients in a lookup table.
 
@@ -63,15 +63,15 @@ Window generation is dominated by trigonometric evaluations ($\cos$). For repeat
 **Step 1 — Generate the Hann window**
 
 | $n$ | $w[n] = 0.5(1 - \cos(2\pi n / 7))$ |
-|-----|--------------------------------------|
-| 0 | 0.000 |
-| 1 | 0.188 |
-| 2 | 0.611 |
-| 3 | 0.950 |
-| 4 | 0.950 |
-| 5 | 0.611 |
-| 6 | 0.188 |
-| 7 | 0.000 |
+|-----|------------------------------------|
+| 0   | 0.000                              |
+| 1   | 0.188                              |
+| 2   | 0.611                              |
+| 3   | 0.950                              |
+| 4   | 0.950                              |
+| 5   | 0.611                              |
+| 6   | 0.188                              |
+| 7   | 0.000                              |
 
 **Step 2 — Element-wise multiply**
 
@@ -108,13 +108,13 @@ graph LR
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **Kaiser window** | Parameterized by $\beta$; allows continuous trade-off between main-lobe width and side-lobe level |
-| **Flat-top window** | Near-zero amplitude error at the cost of very wide main lobe; used for calibration |
-| **Gaussian window** | Smooth, no side-lobe discontinuities; parameterized by $\sigma$ |
-| **Dolph–Chebyshev** | Equiripple side lobes at a prescribed level; optimal for a given main-lobe width |
-| **DPSS (Slepian)** | Maximum energy concentration in a given bandwidth; used in multi-taper spectral estimation |
+| Variant             | Key Difference                                                                                    |
+|---------------------|---------------------------------------------------------------------------------------------------|
+| **Kaiser window**   | Parameterized by $\beta$; allows continuous trade-off between main-lobe width and side-lobe level |
+| **Flat-top window** | Near-zero amplitude error at the cost of very wide main lobe; used for calibration                |
+| **Gaussian window** | Smooth, no side-lobe discontinuities; parameterized by $\sigma$                                   |
+| **Dolph–Chebyshev** | Equiripple side lobes at a prescribed level; optimal for a given main-lobe width                  |
+| **DPSS (Slepian)**  | Maximum energy concentration in a given bandwidth; used in multi-taper spectral estimation        |
 
 ## Applications
 
@@ -137,11 +137,11 @@ graph TD
     W --> DCT
 ```
 
-| Algorithm | Relationship |
-|-----------|-------------|
-| [FFT](../analysis/FastFourierTransform.md) | Window is applied *before* the FFT to reduce spectral leakage |
-| [Power Density Spectrum](../analysis/PowerDensitySpectrum.md) | Built-in windowing per segment in Welch's method |
-| [DCT](../analysis/DiscreteCosineTransform.md) | DCT's implicit symmetry provides partial leakage suppression, but windowing still helps |
+| Algorithm                                                     | Relationship                                                                            |
+|---------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| [FFT](../analysis/FastFourierTransform.md)                    | Window is applied *before* the FFT to reduce spectral leakage                           |
+| [Power Density Spectrum](../analysis/PowerDensitySpectrum.md) | Built-in windowing per segment in Welch's method                                        |
+| [DCT](../analysis/DiscreteCosineTransform.md)                 | DCT's implicit symmetry provides partial leakage suppression, but windowing still helps |
 
 ## References & Further Reading
 
