@@ -97,7 +97,7 @@ Regularization adds negligible computational cost — one pass over the paramete
 | **Early stopping**         | Halts training before overfitting; regularization without modifying the loss                       |
 | **Data augmentation**      | Expands the training set with transformed copies; reduces overfitting by increasing data diversity |
 | **Spectral normalization** | Constrains the spectral norm of weight matrices; stabilizes GAN training                           |
-| **Weight clipping** | Hard constraint: $|\theta_i| \le c$; used in Wasserstein GANs |
+| **Weight clipping**          | Hard constraint: $\left\|\theta_i\right\| \le c$; used in Wasserstein GANs                           |
 
 ## Applications
 

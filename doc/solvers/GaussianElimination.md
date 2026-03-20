@@ -59,8 +59,8 @@ $$\begin{bmatrix} -3 & -1 & 2 \\ 2 & 1 & -1 \\ -2 & 1 & 2 \end{bmatrix}, \quad b
 
 **Step 2 — Eliminate below pivot**
 
-- Row 1: $\ell = 2/(-3) = -2/3$. Row 1 += $(2/3)$ × Row 0 → $[0, 1/3, 1/3 \mid 14/3]$
-- Row 2: $\ell = -2/(-3) = 2/3$. Row 2 -= $(2/3)$ × Row 0 → $[0, 5/3, 2/3 \mid 13/3]$
+- Row 1: $\ell = 2/(-3) = -2/3$. Row 1 += $(2/3)$ × Row 0 → $[0,\; 1/3,\; 1/3 \mid 2/3]$
+- Row 2: $\ell = -2/(-3) = 2/3$. Row 2 -= $(2/3)$ × Row 0 → $[0,\; 5/3,\; 2/3 \mid 13/3]$
 
 **Step 3 — Column 1: pivot selection**
 
@@ -68,13 +68,13 @@ $|1/3| < |5/3|$. Swap rows 1 and 2.
 
 **Step 4 — Eliminate below:**
 
-Row 1 -= $(1/5)$ × Row 2 → upper-triangular form.
+$\ell = (1/3)/(5/3) = 1/5$. Row 2 -= $(1/5)$ × Row 1 → $[0,\; 0,\; 1/5 \mid -1/5]$. Upper-triangular form reached.
 
 **Step 5 — Back-substitution:**
 
-Solve from the bottom up: $x_3 = 1$, $x_2 = 3$, $x_1 = 2$.
+$$x_3 = \frac{-1/5}{1/5} = -1, \qquad x_2 = \frac{13/3 - (2/3)(-1)}{5/3} = 3, \qquad x_1 = \frac{-11 - (-1)(3) - 2(-1)}{-3} = 2$$
 
-**Verification:** $2(2) + 1(3) - 1(1) = 6 \neq 8$ — let's re-verify with the original system... $2 \cdot 2 + 3 - 1 = 6$. The correct solution is $x = [2, 3, -1]^T$, which satisfies $4 + 3 + 1 = 8$ ✓.
+**Verification:** $2(2) + 1(3) + (-1)(-1) = 8$ ✓, $\;-3(2) - 1(3) + 2(-1) = -11$ ✓, $\;-2(2) + 1(3) + 2(-1) = -3$ ✓.
 
 ## Pitfalls & Edge Cases
 

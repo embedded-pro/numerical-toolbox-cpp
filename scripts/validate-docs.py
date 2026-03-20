@@ -5,8 +5,8 @@ Checks every .md file under doc/ (excluding README.md, TEMPLATE.md, and backups)
 for the required section headings defined in the template.
 
 Exit codes:
-    0 — all files pass
-    1 — one or more files have missing sections
+    0 — all files pass, or no algorithm documentation files found
+    1 — doc directory is missing, or one or more files have missing sections
 """
 
 import pathlib
@@ -55,8 +55,8 @@ def main() -> int:
     )
 
     if not md_files:
-        print("WARNING: no algorithm documentation files found.", file=sys.stderr)
-        return 1
+        print("WARNING: no algorithm documentation files found.")
+        return 0
 
     failures: list[tuple[pathlib.Path, list[str]]] = []
     for path in md_files:

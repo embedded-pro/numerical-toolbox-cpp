@@ -77,7 +77,7 @@ All operations scale linearly with the total parameter count $P$.
 | Layer 2 output size = Model output size  | $1 = 1$          | ✓      |
 | All types derive from `Layer`            | type trait check | ✓      |
 
-**Parameter layout** ($P = 3 \times 3 + 3 + 1 \times 4 + 1 = 16$):
+**Parameter layout** ($P = 3(2 + 1) + 1(3 + 1) = 9 + 4 = 13$):
 
 | Index | Parameter                |
 |-------|--------------------------|
@@ -96,7 +96,7 @@ All operations scale linearly with the total parameter count $P$.
 1. Layer 2 backward → produces $\nabla W_2$, $\nabla b_2$, and $\delta_1 = W_2^T \delta_2 \odot \text{ReLU}'(z_1)$
 2. Layer 1 backward → produces $\nabla W_1$, $\nabla b_1$
 
-**Optimizer** receives the full $\nabla \theta \in \mathbb{R}^{16}$ and updates $\theta$.
+**Optimizer** receives the full $\nabla \theta \in \mathbb{R}^{13}$ and updates $\theta$.
 
 ## Pitfalls & Edge Cases
 
