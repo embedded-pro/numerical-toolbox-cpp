@@ -8,8 +8,8 @@ Digital filtering algorithms for noise reduction, state estimation, and signal c
 
 Filters that incorporate feedback and a dynamic internal model of the system.
 
-| Algorithm | Description |
-|-----------|-------------|
+| Algorithm                               | Description                                                              |
+|-----------------------------------------|--------------------------------------------------------------------------|
 | [Kalman Filter](active/KalmanFilter.md) | Optimal recursive state estimator for linear systems with Gaussian noise |
 
 ### Passive Filters
