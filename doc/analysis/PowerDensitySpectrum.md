@@ -52,9 +52,9 @@ Increasing segment size $N$ improves resolution but reduces the number of averag
 
 ## Complexity Analysis
 
-| Case | Time | Space | Notes |
-|------|------|-------|-------|
-| All | $O(K \cdot N \log N)$ | $O(N)$ | $K$ segments, each requiring one FFT |
+| Case | Time                  | Space  | Notes                                |
+|------|-----------------------|--------|--------------------------------------|
+| All  | $O(K \cdot N \log N)$ | $O(N)$ | $K$ segments, each requiring one FFT |
 
 Where $K = \lfloor (L - N) / S \rfloor + 1$ and $S = N \cdot (1 - \text{overlap fraction})$.
 
@@ -66,11 +66,11 @@ Where $K = \lfloor (L - N) / S \rfloor + 1$ and $S = N \cdot (1 - \text{overlap 
 
 **Step 1 — Segmentation** (step $S = 2$):
 
-| Segment | Indices | Values |
-|---------|---------|--------|
-| $x_0$ | 0–3 | $[1, 3, 5, 7]$ |
-| $x_1$ | 2–5 | $[5, 7, 6, 4]$ |
-| $x_2$ | 4–7 | $[6, 4, 2, 0]$ |
+| Segment | Indices | Values         |
+|---------|---------|----------------|
+| $x_0$   | 0–3     | $[1, 3, 5, 7]$ |
+| $x_1$   | 2–5     | $[5, 7, 6, 4]$ |
+| $x_2$   | 4–7     | $[6, 4, 2, 0]$ |
 
 **Step 2 — Window** (rectangular → no change)
 
@@ -95,12 +95,12 @@ Where $K = \lfloor (L - N) / S \rfloor + 1$ and $S = N \cdot (1 - \text{overlap 
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **Bartlett's method** | Non-overlapping segments, rectangular window (special case of Welch with 0 % overlap) |
-| **Modified periodogram** | Single segment with a non-rectangular window |
-| **Multitaper method** | Uses multiple orthogonal windows (tapers) per segment for lower bias |
-| **Cross-spectral density** | Computes $S_{xy}$ between two signals instead of the auto-spectrum |
+| Variant                    | Key Difference                                                                        |
+|----------------------------|---------------------------------------------------------------------------------------|
+| **Bartlett's method**      | Non-overlapping segments, rectangular window (special case of Welch with 0 % overlap) |
+| **Modified periodogram**   | Single segment with a non-rectangular window                                          |
+| **Multitaper method**      | Uses multiple orthogonal windows (tapers) per segment for lower bias                  |
+| **Cross-spectral density** | Computes $S_{xy}$ between two signals instead of the auto-spectrum                    |
 | **Coherence** | $|\gamma_{xy}|^2 = |S_{xy}|^2 / (S_{xx} S_{yy})$ — measures linear dependence between two signals at each frequency |
 
 ## Applications
@@ -121,11 +121,11 @@ graph LR
     PSD --> YW["Yule-Walker (parametric alternative)"]
 ```
 
-| Algorithm | Relationship |
-|-----------|-------------|
-| [Fast Fourier Transform](FastFourierTransform.md) | Core building block — each segment is transformed via FFT |
-| [Window Functions](../windowing/window.md) | Applied to each segment before FFT to control leakage |
-| [Yule-Walker](../estimators/YuleWalker.md) | Parametric alternative — estimates PSD from an AR model instead of averaging periodograms |
+| Algorithm                                         | Relationship                                                                              |
+|---------------------------------------------------|-------------------------------------------------------------------------------------------|
+| [Fast Fourier Transform](FastFourierTransform.md) | Core building block — each segment is transformed via FFT                                 |
+| [Window Functions](../windowing/window.md)        | Applied to each segment before FFT to control leakage                                     |
+| [Yule-Walker](../estimators/YuleWalker.md)        | Parametric alternative — estimates PSD from an AR model instead of averaging periodograms |
 
 ## References & Further Reading
 
