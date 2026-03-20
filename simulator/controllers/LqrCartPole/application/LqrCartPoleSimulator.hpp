@@ -1,0 +1,46 @@
+#pragma once
+
+#include "numerical/controllers/implementations/Lqr.hpp"
+#include "simulator/controllers/LqrCartPole/application/CartPolePlant.hpp"
+#include <memory>
+
+namespace simulator::controllers::lqr
+{
+    using LqrController = ::controllers::Lqr<float, stateSize, inputSize>;
+
+    struct LqrCartPoleConfig
+    {
+        CartPoleParameters plantParams;
+        float dt = 0.01f;
+        float qX = 1.0f;
+        float qXDot = 1.0f;
+        float qTheta = 100.0f;
+        float qThetaDot = 10.0f;
+        float rForce = 0.01f;
+        float forceLimit = 50.0f;
+    };
+
+    class LqrCartPoleSimulator
+    {
+    public:
+        LqrCartPoleSimulator();
+
+        void Configure(const LqrCartPoleConfig& config);
+        void Reset();
+        void Step(float externalForce = 0.0f);
+        void SetState(const CartPoleState& state);
+
+        [[nodiscard]] float ComputeControlForce() const;
+        [[nodiscard]] const CartPoleState& GetState() const;
+        [[nodiscard]] const CartPoleParameters& GetPlantParameters() const;
+        [[nodiscard]] float GetDt() const;
+        [[nodiscard]] float GetForceLimit() const;
+
+    private:
+        void RecomputeGain();
+
+        LqrCartPoleConfig configuration;
+        CartPolePlant plant;
+        std::unique_ptr<LqrController> lqr;
+    };
+}

@@ -1,3 +1,5 @@
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
+
 add_library(numerical.simulator.utils STATIC)
 
 target_include_directories(numerical.simulator.utils PUBLIC
@@ -7,11 +9,18 @@ target_include_directories(numerical.simulator.utils PUBLIC
 
 target_link_libraries(numerical.simulator.utils PUBLIC
     numerical.analysis
+    Qt6::Widgets
+)
+
+set_target_properties(numerical.simulator.utils PROPERTIES
+    AUTOMOC ON
 )
 
 target_sources(numerical.simulator.utils PRIVATE
     SignalGenerator.cpp
     SignalGenerator.hpp
+    TimeSeriesChartWidget.cpp
+    TimeSeriesChartWidget.hpp
     TwiddleFactorsTable.hpp
 )
 
