@@ -13,6 +13,8 @@ target_link_libraries(numerical.solver PUBLIC
 target_sources(numerical.solver PRIVATE
     DiscreteAlgebraicRiccatiEquation.cpp
     DiscreteAlgebraicRiccatiEquation.hpp
+    DurandKerner.cpp
+    DurandKerner.hpp
     GaussianElimination.cpp
     GaussianElimination.hpp
     LevinsonDurbin.hpp

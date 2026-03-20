@@ -9,6 +9,7 @@ target_link_libraries(numerical.solvers_test PUBLIC
 
 target_sources(numerical.solvers_test PRIVATE
     TestDiscreteAlgebraicRiccatiEquation.cpp
+    TestDurandKerner.cpp
     TestGaussianElimination.cpp
     TestLevinsonDurbin.cpp
 )

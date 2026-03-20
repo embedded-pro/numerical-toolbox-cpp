@@ -118,19 +118,90 @@ When implementing or modifying algorithms:
 - Aim for high code coverage, especially in numerical algorithms
 - Verify numerical accuracy and stability
 - Test edge cases and boundary conditions
-- Example typed test pattern:
+
+#### Test Macro Rules (cppcheck compliance)
+
+- **NEVER use plain `TEST()` macro** — cppcheck cannot parse it and will report `syntaxError`
+- **Use `TYPED_TEST`** when testing with multiple numeric types
+- **Use `TEST_F`** when testing with a single type or a fixture
+- Fixture class and type aliases go inside an anonymous `namespace {}`
+- Test macros (`TEST_F`, `TYPED_TEST`) go **outside** the anonymous namespace
+- Include `<gtest/gtest.h>` (not `<gmock/gmock.h>`) unless gmock matchers are needed
+
+#### Typed Test Pattern (multiple types)
+
   ```cpp
-  template<typename T>
-  class TestAlgorithm : public testing::Test {};
-  
-  using TestedTypes = ::testing::Types<float, math::Q15, math::Q31>;
-  TYPED_TEST_SUITE(TestAlgorithm, TestedTypes);
-  
+  #include "numerical/solvers/GaussianElimination.hpp"
+  #include <gtest/gtest.h>
+
+  namespace
+  {
+      template<typename T>
+      class TestAlgorithm : public ::testing::Test
+      {
+      protected:
+          solvers::GaussianElimination<T, 3> solver;
+      };
+
+      using TestTypes = ::testing::Types<float, math::Q15, math::Q31>;
+      TYPED_TEST_SUITE(TestAlgorithm, TestTypes);
+  }
+
   TYPED_TEST(TestAlgorithm, computes_correct_result)
   {
-      // Test with TypeParam
+      // Use TypeParam for the type, this->solver for fixture members
   }
   ```
+
+#### Fixture Test Pattern (single type)
+
+  ```cpp
+  #include "numerical/solvers/DiscreteAlgebraicRiccatiEquation.hpp"
+  #include <gtest/gtest.h>
+
+  namespace
+  {
+      class TestDare : public ::testing::Test
+      {
+      protected:
+          solvers::DiscreteAlgebraicRiccatiEquation<float, 2, 1> solver;
+      };
+  }
+
+  TEST_F(TestDare, solves_simple_system)
+  {
+      // Use this->solver for fixture members
+  }
+  ```
+
+#### Coverage for Template Code
+
+Header-only templates are compiled into test executables, which do **not** have `--coverage` flags.
+To get coverage, template code must be explicitly instantiated in a `.cpp` file that is part of the library (which **does** have coverage flags).
+
+1. **Add `extern template` declarations** at the bottom of the header (prevents implicit instantiation in other TUs):
+   ```cpp
+   // In Algorithm.hpp, at the bottom of the namespace, after all template definitions
+       extern template class Algorithm<float, 3>;
+       extern template class Algorithm<math::Q15, 3>;
+   }
+   ```
+
+2. **Create a matching `.cpp` file** with explicit instantiation (compiled with `--coverage` as part of the library):
+   ```cpp
+   // Algorithm.cpp
+   #include "numerical/domain/Algorithm.hpp"
+
+   namespace domain
+   {
+       template class Algorithm<float, 3>;
+       template class Algorithm<math::Q15, 3>;
+   }
+   ```
+
+3. **Add the `.cpp` file to `CMakeLists.txt`** in `target_sources`
+
+4. **Instantiate all specializations used by tests** — each `extern template` in the header must have a matching `template class` in the `.cpp` file
 
 ## Common Patterns
 
@@ -273,14 +344,41 @@ When implementing a new algorithm:
 
 ## Compiler Optimizations and SIMD
 
+### Mandatory Optimizations for `numerical/` Headers
+
+All header files under `numerical/` that contain algorithm implementations **must** include both:
+
+1. **File-level `#pragma GCC optimize`** — placed immediately after `#pragma once` and includes:
+   ```cpp
+   #pragma once
+
+   #if defined(__GNUC__) || defined(__clang__)
+   #pragma GCC optimize("O3", "fast-math")
+   #endif
+   ```
+
+2. **`OPTIMIZE_FOR_SPEED` macro** on hot-path method definitions (e.g., `Filter()`, `Compute()`, `Calculate()`, `Solve()`):
+   ```cpp
+   #include "numerical/math/CompilerOptimizations.hpp"
+
+   template<typename T, std::size_t N>
+   OPTIMIZE_FOR_SPEED T Algorithm<T, N>::Compute(T input)
+   {
+       // performance-critical implementation
+   }
+   ```
+
+The `#pragma GCC optimize` applies `-O3` and `-ffast-math` to the entire translation unit even in Debug builds, while `OPTIMIZE_FOR_SPEED` additionally forces inlining and marks functions as hot for the linker.
+
 ### Optimization Macros
 
-The library provides compiler-specific optimization hints:
+Defined in `numerical/math/CompilerOptimizations.hpp`:
 
 - **OPTIMIZE_FOR_SPEED**: For performance-critical algorithms (PID, filters)
-  - GCC: `-O3`, `-ffast-math`, `hot`, `flatten` attributes
-  - Clang: `hot`, `flatten` attributes
-  - Enables aggressive inlining and optimization
+  - GCC: `-O3`, `-ffast-math`, `hot`, `always_inline` attributes
+  - Clang: `hot`, `always_inline` attributes
+  - MSVC/other: no-op
+  - Only active when `NumericalToolbox_ENABLE_OPTIMIZATIONS` is defined
 - **ALWAYS_INLINE_HOT**: Forces inlining for frequently-called hot-path code
 - **ALWAYS_INLINE**: Forces inlining without hot attribute
 
