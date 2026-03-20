@@ -1,261 +1,124 @@
-# Linear Regression Implementation Guide
+# Linear Regression
 
-## Process Overview
+## Overview & Motivation
 
-The following diagram illustrates the key steps in the Linear Regression implementation:
+Given a set of observations $\{(x_i, y_i)\}$, we often want to find the *best-fit* linear relationship between features $x$ and target $y$. **Linear regression** does this by finding the coefficients $\beta$ that minimize the sum of squared residuals — the gap between predicted and observed values.
 
-```mermaid
-graph TD
-    A[Input Features X & Target y] --> B[Create Design Matrix]
-    B --> C[Add Bias Term]
-    C --> D[Calculate X^T * X]
-    D --> E[Calculate X^T * y]
-    E --> F[Solve Linear System]
-    F --> G[Get Coefficients]
-    G --> H[Make Predictions]
-```
+The approach is fundamental because:
+- It has a **closed-form solution** (the normal equation), so no iterative optimization is needed.
+- It provides a **baseline model** against which more complex methods are measured.
+- The solution is the **maximum likelihood estimator** under Gaussian noise assumptions.
 
-## Mathematical Background
+This library solves the normal equation directly using Gaussian elimination, making it suitable for small-to-moderate feature counts typical in embedded estimation tasks.
 
-### Linear Regression Model
+## Mathematical Theory
 
-Linear regression models the relationship between a dependent variable y and one or more independent variables X by fitting a linear equation:
+### The Model
 
-```
-y = β₀ + β₁x₁ + β₂x₂ + ... + βₙxₙ + ε
-```
+$$y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots + \beta_p x_p + \varepsilon$$
 
-where:
-- y is the target variable
-- β₀ is the bias term (intercept)
-- βᵢ are the coefficients
-- xᵢ are the features
-- ε is the error term
+In matrix form, augmenting $X$ with a column of ones for the intercept:
+
+$$\mathbf{y} = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\varepsilon}$$
+
+where $\mathbf{X} \in \mathbb{R}^{n \times (p+1)}$, $\boldsymbol{\beta} \in \mathbb{R}^{p+1}$, $\mathbf{y} \in \mathbb{R}^n$.
 
 ### Normal Equation
 
-Our implementation uses the normal equation method to find the optimal coefficients:
+Minimizing $\|\mathbf{y} - \mathbf{X}\boldsymbol{\beta}\|^2$ with respect to $\boldsymbol{\beta}$ yields:
 
-```
-β = (X^T * X)^(-1) * X^T * y
-```
+$$\boldsymbol{\beta} = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y}$$
 
-where:
-- X is the design matrix (with added bias column)
-- y is the target vector
-- β is the coefficient vector
-- X^T is the transpose of X
+This is solved in practice by forming $\mathbf{X}^T\mathbf{X}$ and $\mathbf{X}^T\mathbf{y}$, then using Gaussian elimination to solve the $(p+1) \times (p+1)$ system.
 
-## Implementation Details
+### Geometric Interpretation
 
-### Class Structure
+The prediction $\hat{\mathbf{y}} = \mathbf{X}\boldsymbol{\beta}$ is the **orthogonal projection** of $\mathbf{y}$ onto the column space of $\mathbf{X}$. The residual $\mathbf{y} - \hat{\mathbf{y}}$ is perpendicular to every column of $\mathbf{X}$.
 
-```cpp
-template<typename T, std::size_t Samples, std::size_t Features>
-class LinearRegression : public Estimator<T, Samples, Features> {
-public:
-    using CoefficientsMatrix = typename Estimator<T, Samples, Features>::CoefficientsMatrix;
-    using DesignMatrix = typename Estimator<T, Samples, Features>::DesignMatrix;
-    using InputMatrix = typename Estimator<T, Samples, Features>::InputMatrix;
+## Complexity Analysis
 
-    void Fit(const Matrix<T, Samples, Features>& X, const Matrix<T, Samples, 1>& y);
-    T Predict(const InputMatrix& X) const;
-    const CoefficientsMatrix& Coefficients() const;
-};
-```
+| Phase | Time | Space | Notes |
+|-------|------|-------|-------|
+| $\mathbf{X}^T\mathbf{X}$ | $O(n p^2)$ | $O(p^2)$ | Dominated by matrix multiply |
+| $\mathbf{X}^T\mathbf{y}$ | $O(np)$ | $O(p)$ | Matrix-vector multiply |
+| Solve | $O(p^3)$ | $O(p^2)$ | Gaussian elimination |
+| Predict | $O(p)$ | $O(1)$ | Dot product |
 
-### Key Components
+For embedded use with small $p$ (say $\leq 10$), the entire fit completes in microseconds.
 
-1. **Design Matrix Creation**:
-   - Adds bias term (1.0) as first column
-   - Incorporates feature matrix X
-   - Results in augmented matrix [1|X]
+## Step-by-Step Walkthrough
 
-2. **Matrix Operations**:
-   - Computes X^T * X
-   - Computes X^T * y
-   - Solves system using Gaussian elimination
+**Data:** 3 samples, 1 feature.
 
-3. **Coefficient Storage**:
-   - Stores β₀ (bias) and feature coefficients
-   - Accessible via Coefficients() method
+| $x$ | $y$ |
+|-----|-----|
+| 1 | 2 |
+| 2 | 4 |
+| 3 | 5 |
 
-4. **Prediction**:
-   - Implements y = Xβ for new data
-   - Includes bias term automatically
+**Step 1 — Design matrix** (with bias column):
 
-## Usage Guide
+$$\mathbf{X} = \begin{bmatrix} 1 & 1 \\ 1 & 2 \\ 1 & 3 \end{bmatrix}$$
 
-### Basic Usage
+**Step 2 — Compute $\mathbf{X}^T\mathbf{X}$ and $\mathbf{X}^T\mathbf{y}$:**
 
-```cpp
-// Define system parameters
-constexpr std::size_t samples = 100;    // Number of training samples
-constexpr std::size_t features = 2;     // Number of features
-using FloatType = float;                // Numeric type
+$$\mathbf{X}^T\mathbf{X} = \begin{bmatrix} 3 & 6 \\ 6 & 14 \end{bmatrix}, \quad \mathbf{X}^T\mathbf{y} = \begin{bmatrix} 11 \\ 23 \end{bmatrix}$$
 
-// Create regressor
-LinearRegression<FloatType, samples, features> regressor;
+**Step 3 — Solve** $\begin{bmatrix} 3 & 6 \\ 6 & 14 \end{bmatrix} \boldsymbol{\beta} = \begin{bmatrix} 11 \\ 23 \end{bmatrix}$:
 
-// Prepare training data
-Matrix<FloatType, samples, features> X;  // Feature matrix
-Matrix<FloatType, samples, 1> y;         // Target vector
-// ... fill X and y with data ...
+Forward elimination → back-substitution: $\beta_1 = 1.5$, $\beta_0 = 2/3 \approx 0.667$
 
-// Train the model
-regressor.Fit(X, y);
+**Result:** $\hat{y} = 0.667 + 1.5x$
 
-// Make predictions
-Matrix<FloatType, features, 1> new_data;
-// ... fill new_data ...
-FloatType prediction = regressor.Predict(new_data);
-```
+**Prediction at $x = 4$:** $\hat{y} = 0.667 + 6.0 = 6.667$
 
-### Example: House Price Prediction
+## Pitfalls & Edge Cases
 
-```cpp
-// Create regressor for house price prediction
-constexpr std::size_t samples = 1000;
-constexpr std::size_t features = 3;  // size, bedrooms, age
-LinearRegression<float, samples, features> house_price_model;
+- **Multicollinearity.** If features are nearly linearly dependent, $\mathbf{X}^T\mathbf{X}$ is ill-conditioned and the solution is unstable. Consider regularization (Ridge/Lasso) or removing redundant features.
+- **Fewer samples than features** ($n < p+1$). The system is underdetermined and $\mathbf{X}^T\mathbf{X}$ is singular. At a minimum, $n \geq p+1$.
+- **Outliers** have outsized influence because the squared loss amplifies large residuals. Robust alternatives (Huber loss, RANSAC) exist outside this library.
+- **Extrapolation danger.** The linear model has no mechanism to detect when it is being queried far from the training data range.
+- **Fixed-point precision.** For Q15/Q31 types, features should be scaled to $[-1, 1)$ to avoid overflow in $\mathbf{X}^T\mathbf{X}$.
 
-// Prepare training data
-Matrix<float, samples, features> houses;
-Matrix<float, samples, 1> prices;
-// ... load house data ...
+## Variants & Generalizations
 
-// Train model
-house_price_model.Fit(houses, prices);
+| Variant | Key Difference |
+|---------|---------------|
+| **Ridge regression (L2)** | Adds $\lambda\|\boldsymbol{\beta}\|^2$ to the cost; solves $(\mathbf{X}^T\mathbf{X} + \lambda I)\boldsymbol{\beta} = \mathbf{X}^T\mathbf{y}$ |
+| **Lasso regression (L1)** | Adds $\lambda\|\boldsymbol{\beta}\|_1$; promotes sparsity but requires iterative optimization |
+| **Polynomial regression** | Adds powers of $x$ as new features; still linear in parameters |
+| **Weighted least squares** | Weights each sample differently; solves $(\mathbf{X}^T W \mathbf{X})\boldsymbol{\beta} = \mathbf{X}^T W \mathbf{y}$ |
+| **Recursive least squares** | Updates $\boldsymbol{\beta}$ incrementally as new data arrives; suited for online estimation |
 
-// Predict new house price
-Matrix<float, features, 1> new_house;
-new_house.at(0, 0) = 2000.0f;  // size in sq ft
-new_house.at(1, 0) = 3.0f;     // bedrooms
-new_house.at(2, 0) = 5.0f;     // age in years
-float predicted_price = house_price_model.Predict(new_house);
+## Applications
+
+- **Sensor calibration** — Fitting a linear transfer function between raw ADC counts and physical units.
+- **Trend estimation** — Extracting linear trends from noisy time series (temperature, voltage drift).
+- **System identification** — Estimating static gain or simple dynamic relationships.
+- **Feature importance** — The magnitude of $\beta_i$ indicates the influence of feature $i$ (after feature scaling).
+- **Predictive maintenance** — Modeling degradation rate from operating-condition features.
+
+## Connections to Other Algorithms
+
+```mermaid
+graph LR
+    LR["Linear Regression"]
+    GE["Gaussian Elimination"]
+    YW["Yule-Walker"]
+    NN["Neural Network"]
+    LR --> GE
+    YW -.->|"similar normal-equation structure"| LR
+    NN -.->|"single linear layer = regression"| LR
 ```
 
-## Best Practices
+| Algorithm | Relationship |
+|-----------|-------------|
+| [Gaussian Elimination](../solvers/GaussianElimination.md) | Used to solve the normal equation system |
+| [Yule-Walker](YuleWalker.md) | Structurally similar — also solves a linear system derived from correlations |
+| [Neural Network](../neural_network/NeuralNetwork.md) | A single-layer neural network with no activation and MSE loss reduces to linear regression |
 
-1. **Data Preparation**:
-   - Scale features to similar ranges
-   - Remove or handle missing values
-   - Check for multicollinearity
+## References & Further Reading
 
-2. **Model Validation**:
-   - Split data into train/test sets
-   - Use cross-validation when possible
-   - Check residuals distribution
-
-3. **Numerical Stability**:
-   - Use appropriate numeric types
-   - Consider conditioning of X^T * X
-   - Monitor for overflow/underflow
-
-4. **Feature Selection**:
-   - Choose relevant features
-   - Avoid redundant features
-   - Consider feature interactions
-
-## Common Applications
-
-1. **Prediction Tasks**:
-   - Price estimation
-   - Demand forecasting
-   - Performance prediction
-
-2. **Analysis**:
-   - Feature importance
-   - Trend analysis
-   - System modeling
-
-3. **Control Systems**:
-   - System identification
-   - Parameter estimation
-   - Process control
-
-## Performance Considerations
-
-1. **Template Parameters**:
-   - Fixed sizes enable compile-time optimizations
-   - Stack allocation for small matrices
-   - Type flexibility (float/double)
-
-2. **Memory Usage**:
-   - Efficient matrix operations
-   - No dynamic allocation
-   - Reuse of temporary matrices
-
-3. **Computation Efficiency**:
-   - In-place operations where possible
-   - Optimized matrix multiplication
-   - Efficient system solver
-
-## Limitations and Future Improvements
-
-1. Current limitations:
-   - Fixed sample/feature size
-   - Basic Gaussian elimination solver
-   - No regularization support
-   - Limited to linear relationships
-
-2. Possible extensions:
-   - Dynamic sizing
-   - Ridge/Lasso regularization
-   - QR decomposition solver
-   - Polynomial features
-   - Online learning support
-   - Standard error estimation
-   - Feature importance scores
-   - Cross-validation utilities
-
-## Error Handling
-
-1. Static assertions verify:
-   - Valid numeric types
-   - Sufficient sample size
-   - Matrix dimension compatibility
-
-2. Runtime checks:
-   - Matrix singularity
-   - Numerical stability
-   - Solution convergence
-
-## Performance Metrics
-
-To evaluate the model's performance, consider implementing:
-
-1. **Regression Metrics**:
-   - Mean Squared Error (MSE)
-   - R-squared (R²)
-   - Mean Absolute Error (MAE)
-   - Root Mean Squared Error (RMSE)
-
-2. **Diagnostic Tools**:
-   - Residual plots
-   - Q-Q plots
-   - Leverage statistics
-   - Cook's distance
-
-## Mathematical Details
-
-### Gaussian Elimination
-
-The implementation uses Gaussian elimination with partial pivoting to solve the normal equations:
-
-1. Forward elimination:
-   ```
-   for i = 1 to n
-       pivot = max_element(i to n)
-       swap_rows(i, pivot)
-       for j = i+1 to n
-           eliminate(row[j], row[i])
-   ```
-
-2. Back substitution:
-   ```
-   for i = n to 1
-       x[i] = (b[i] - Σ(j=i+1 to n) a[i,j]x[j]) / a[i,i]
-   ```
-
-This provides a stable solution for well-conditioned problems.
+- Hastie, T., Tibshirani, R. and Friedman, J., *The Elements of Statistical Learning*, 2nd ed., Springer, 2009 — Chapter 3.
+- Bishop, C.M., *Pattern Recognition and Machine Learning*, Springer, 2006 — Chapter 3.
+- Strang, G., *Linear Algebra and Its Applications*, 4th ed., Thomson, 2006 — Section 4.3.

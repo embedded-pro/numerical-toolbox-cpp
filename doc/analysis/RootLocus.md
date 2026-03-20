@@ -1,120 +1,121 @@
-# Root Locus Analysis
+# Root Locus
 
-## Process Overview
+## Overview & Motivation
 
-```mermaid
-graph TD
-    A[Input: Open-Loop Numerator N(s), Denominator D(s)] --> B[Find Open-Loop Poles and Zeros]
-    B --> C[Generate Logarithmic Gain Sweep]
-    C --> D[For Each Gain K]
-    D --> E[Form Characteristic Polynomial: D(s) + K·N(s)]
-    E --> F[Find Roots using Durand-Kerner]
-    F --> G[Store Roots as Locus Branches]
-    G --> H{More Gain Steps?}
-    H -->|Yes| D
-    H -->|No| I[Compute Closed-Loop Poles at Current Gain]
-    I --> J[Return Result]
-```
+When designing a feedback control system, a fundamental question is: *how do the closed-loop poles move as I change the loop gain?* The **root locus** answers this by plotting the trajectories of the closed-loop poles in the complex plane as a scalar gain $K$ varies from $K_{\min}$ to $K_{\max}$.
 
-## Mathematical Background
+This visualization immediately reveals whether increasing gain will drive the system unstable (poles crossing into the right half-plane), where oscillatory modes appear (complex pole pairs), and which gain ranges produce acceptable damping. It is one of the oldest and most intuitive tools in classical control design.
 
-### Root Locus Definition
+## Mathematical Theory
 
-The root locus shows how the closed-loop poles of a feedback system move in the complex plane as a scalar gain $K$ varies. Given an open-loop transfer function:
+### Closed-Loop Characteristic Equation
+
+Given an open-loop transfer function:
 
 $$G(s) = K \cdot \frac{N(s)}{D(s)}$$
 
-the closed-loop characteristic equation is:
+the closed-loop characteristic equation (for unity feedback) is:
 
 $$D(s) + K \cdot N(s) = 0$$
 
-The root locus plots the solutions of this equation for $K \in [K_{\min}, K_{\max}]$.
+The **root locus** is the set of all roots of this equation as $K$ varies over $[K_{\min}, K_{\max}]$.
 
-### Properties
+### Key Properties
 
-- **Starting points** ($K \to 0$): Roots converge to the open-loop poles (roots of $D(s)$)
-- **Ending points** ($K \to \infty$): Roots converge to the open-loop zeros (roots of $N(s)$) or diverge to infinity
-- **Number of branches**: Equal to the order of $D(s)$
-- **Symmetry**: Complex roots appear in conjugate pairs for real-coefficient polynomials
+- **Starting points** ($K \to 0$): Roots begin at the open-loop poles (roots of $D(s)$).
+- **Ending points** ($K \to \infty$): Roots converge to the open-loop zeros (roots of $N(s)$) or diverge to infinity along asymptotes.
+- **Number of branches:** Equal to the order of $D(s)$.
+- **Symmetry:** For real-coefficient polynomials, complex roots always appear in conjugate pairs.
 
 ### Gain Sweep
 
-The gain is swept logarithmically to provide even resolution across decades:
+The gain is swept logarithmically to provide uniform resolution across decades:
 
-$$K_i = 10^{\log_{10}(K_{\min}) + \frac{i}{N-1} \cdot (\log_{10}(K_{\max}) - \log_{10}(K_{\min}))}$$
+$$K_i = 10^{\,\log_{10}(K_{\min}) \;+\; \frac{i}{N-1}\left(\log_{10}(K_{\max}) - \log_{10}(K_{\min})\right)}$$
 
-where $N$ is `MaxGainSteps` and $i \in [0, N-1]$.
+where $N$ is the number of gain steps and $i \in [0, N-1]$.
 
-## API
+At each gain step, the roots of $D(s) + K_i \cdot N(s) = 0$ are found using the [Durand-Kerner](../solvers/DurandKerner.md) polynomial root-finder.
 
-```cpp
-#include "numerical/analysis/RootLocus.hpp"
+## Complexity Analysis
 
-analysis::RootLocus<float, 5, 100> rootLocus;
+| Case | Time | Space | Notes |
+|------|------|-------|-------|
+| All | $O(N_g \cdot n^2 \cdot k)$ | $O(N_g \cdot n)$ | $N_g$ = gain steps, $n$ = polynomial order, $k$ = Durand-Kerner iterations per step |
 
-// Open-loop transfer function: K * (s + 1) / (s^3 + 3s^2 + 2s)
-std::array<float, 2> numerator = { 1.0f, 1.0f };      // s + 1
-std::array<float, 4> denominator = { 1.0f, 3.0f, 2.0f, 0.0f }; // s^3 + 3s^2 + 2s
+**Why:** At each of the $N_g$ gain steps, a degree-$n$ polynomial is solved via Durand-Kerner, which performs $k$ iterations each costing $O(n^2)$ (evaluating the polynomial and computing the denominator product for all $n$ roots).
 
-auto result = rootLocus.Calculate(
-    infra::MakeRange(numerator),
-    infra::MakeRange(denominator),
-    1.0f,    // currentGain
-    0.001f,  // gainMin
-    50.0f);  // gainMax
+## Step-by-Step Walkthrough
 
-// result.openLoopPoles:  roots of denominator
-// result.openLoopZeros:  roots of numerator
-// result.closedLoopPoles: roots of D(s) + currentGain * N(s)
-// result.loci[branch][step]: complex root at each gain step
-// result.gains[step]: gain value at each step
+**System:** $G(s) = K \cdot \frac{s + 1}{s(s + 2)}$, sweep $K$ from 0.01 to 10.
+
+**Step 1 — Identify poles and zeros**
+
+- Open-loop poles: $s = 0$, $s = -2$ (roots of $D(s) = s^2 + 2s$)
+- Open-loop zero: $s = -1$ (root of $N(s) = s + 1$)
+
+**Step 2 — Form characteristic polynomial at $K = 1$**
+
+$$D(s) + K \cdot N(s) = s^2 + 2s + 1 \cdot (s + 1) = s^2 + 3s + 1$$
+
+**Step 3 — Solve** using Durand-Kerner:
+
+$$s = \frac{-3 \pm \sqrt{9 - 4}}{2} = \frac{-3 \pm \sqrt{5}}{2} \approx -0.382,\; -2.618$$
+
+Both poles are real and negative → system is stable at $K = 1$.
+
+**Step 4 — Repeat** for each gain step and plot all root positions in the complex plane.
+
+```
+Im(s)
+  |
+  |     × zero (-1)
+--●-----×------●--> Re(s)
+  0    -1     -2
+ pole         pole
 ```
 
-### Template Parameters
+As $K$ increases: the two poles approach each other on the real axis, meet between 0 and −2, then split into a complex conjugate pair. One branch eventually converges to the zero at $s = -1$; the other diverges to $-\infty$.
 
-| Parameter | Description |
+## Pitfalls & Edge Cases
+
+- **Strictly positive gains required** — the logarithmic sweep cannot handle $K \leq 0$. For negative feedback analysis, negate the numerator.
+- **Proper transfer function assumed** — $\deg(D) \geq \deg(N)$. Improper transfer functions (more zeros than poles) are not supported.
+- **Branch tracking ambiguity** — Durand-Kerner returns roots sorted by real part, not by branch identity. For smooth visualization, apply nearest-neighbor matching between consecutive gain steps.
+- **Clustered or repeated roots** cause slower convergence in Durand-Kerner; increase the maximum iteration count if the locus appears jagged.
+
+## Variants & Generalizations
+
+| Variant | Key Difference |
+|---------|---------------|
+| **Complementary root locus** | Traces roots for $K < 0$ (positive feedback) |
+| **Root contour** | Varies two or more parameters simultaneously |
+| **Discrete root locus** | Same concept applied to $z$-domain polynomials for digital control |
+| **Evans rules** | Analytical rules for sketching the root locus by hand (angle/magnitude criteria) |
+
+## Applications
+
+- **Gain selection** — Choosing the operating gain that meets damping and bandwidth specifications.
+- **Compensator design** — Adding poles/zeros (lead/lag networks) and observing how the locus reshapes.
+- **Stability analysis** — Determining the gain margin (gain at which the locus crosses the imaginary axis).
+- **Educational tool** — Developing intuition about how feedback affects system dynamics.
+
+## Connections to Other Algorithms
+
+```mermaid
+graph LR
+    RL["Root Locus"] --> DK["Durand-Kerner"]
+    RL --> LQR["LQR (pole placement alternative)"]
+    DK --> RL
+```
+
+| Algorithm | Relationship |
 |-----------|-------------|
-| `T` | Floating-point type (`float` or `double`) |
-| `MaxOrder` | Maximum polynomial order (number of branches) |
-| `MaxGainSteps` | Number of gain steps in the sweep (must be > 1) |
+| [Durand-Kerner](../solvers/DurandKerner.md) | Used at each gain step to find the roots of the characteristic polynomial |
+| [LQR](../controllers/Lqr.md) | Alternative approach to pole placement — LQR optimizes a cost rather than manually selecting gain via root locus |
 
-### Calculate Parameters
+## References & Further Reading
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `numerator` | — | Open-loop numerator polynomial coefficients (descending power) |
-| `denominator` | — | Open-loop denominator polynomial coefficients (descending power) |
-| `currentGain` | — | Gain at which to compute closed-loop poles |
-| `gainMin` | 0.001 | Minimum gain for the sweep (must be > 0) |
-| `gainMax` | 50 | Maximum gain for the sweep (must be > gainMin) |
-
-### Preconditions
-
-- `gainMin > 0` (logarithmic sweep requires positive gains)
-- `gainMax > gainMin`
-- `denominator.size() >= numerator.size()` (proper or strictly proper transfer function)
-- `MaxGainSteps > 1` (enforced at compile time)
-
-### Result Structure
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `loci` | `array<LociBranch, MaxOrder>` | Root positions for each branch at each gain step |
-| `activeBranches` | `size_t` | Number of active locus branches (= denominator order) |
-| `gains` | `GainVector` | Gain values at each step |
-| `openLoopPoles` | `RootVector` | Poles of the open-loop system |
-| `openLoopZeros` | `RootVector` | Zeros of the open-loop system |
-| `closedLoopPoles` | `RootVector` | Poles at `currentGain` |
-| `currentGain` | `T` | The current gain value |
-
-### Complexity
-
-- **Time**: $O(N \cdot n^2 \cdot k)$ where $N$ = gain steps, $n$ = polynomial order, $k$ = Durand-Kerner iterations
-- **Space**: $O(N \cdot n)$ for storing all locus branches
-
-## Numerical Considerations
-
-- **Logarithmic gain sweep**: Provides uniform resolution across gain decades; requires strictly positive gains
-- **Branch tracking**: Roots at each gain step are sorted by Durand-Kerner's default ordering (real part ascending). For smooth branch visualization, the UI may need to apply additional nearest-neighbor matching between consecutive steps
-- **Polynomial addition**: `PolyAdd` pads the shorter polynomial (numerator) with leading zeros to align with the longer one (denominator), requiring `denominator.size() >= numerator.size()`
-- **Root finding accuracy**: Inherits convergence properties from the Durand-Kerner solver; see [DurandKerner.md](DurandKerner.md) for details
+- Evans, W.R., "Graphical Analysis of Control Systems", *Transactions of the AIEE*, 67(1), 1948.
+- Franklin, G.F., Powell, J.D. and Emami-Naeini, A., *Feedback Control of Dynamic Systems*, 8th ed., Pearson, 2019 — Chapter 5.
+- Ogata, K., *Modern Control Engineering*, 5th ed., Prentice Hall, 2010 — Chapter 6.

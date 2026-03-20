@@ -1,268 +1,135 @@
-# Regularization Implementation Guide
+# Regularization
 
-## Process Overview
+## Overview & Motivation
 
-The following diagram illustrates how regularization affects neural network training:
+**Regularization** adds a penalty term $\Omega(\theta)$ to the loss function that discourages overly complex models:
 
-![Regularization Methods](RegularizationMethods.svg)
+$$\mathcal{L}_{\text{total}} = \mathcal{L}(\hat{y}, y) + \lambda \, \Omega(\theta)$$
 
-The diagram shows how regularization:
-1. Penalizes model complexity to prevent overfitting
-2. Modifies the loss landscape to find more generalizable solutions
-3. Creates different effects on model parameters (L1 vs L2)
-4. Influences the optimization process during training
+where $\lambda > 0$ controls the strength of the penalty. Without regularization, a neural network with enough parameters can memorize the training data perfectly yet generalize poorly to new inputs — a phenomenon called **overfitting**. Regularization biases the optimizer toward simpler solutions that tend to generalize better.
 
-## Mathematical Background
+## Mathematical Theory
 
-### Regularization Purpose
+### L2 Regularization (Ridge / Weight Decay)
 
-Regularization adds a penalty term to the loss function to discourage overly complex models. For a model with parameters θ and loss function L, the regularized loss L_reg is:
+$$\Omega_{L2}(\theta) = \frac{1}{2}\sum_{i=1}^{P} \theta_i^2 = \frac{1}{2}\|\theta\|_2^2$$
 
-$$L_{reg}(θ) = L(θ) + \lambda R(θ)$$
+$$\frac{\partial \Omega_{L2}}{\partial \theta_i} = \theta_i$$
 
-where:
-- L(θ) is the original loss function
-- R(θ) is the regularization term
-- λ (lambda) is the regularization strength
+**Effect on update rule:**
 
-### Types of Regularization
+$$\theta_{t+1} = \theta_t - \eta(\nabla_\theta \mathcal{L} + \lambda \theta_t) = (1 - \eta\lambda)\theta_t - \eta \nabla_\theta \mathcal{L}$$
 
-Different regularization methods create different effects on model parameters:
+The factor $(1 - \eta\lambda)$ shrinks weights toward zero each step — hence the name **weight decay**. Large weights are penalized quadratically, keeping the model smooth.
 
-**L1 Regularization (Lasso):**
-$$R_{L1}(θ) = \sum_{i=1}^{n} |θ_i|$$
+### L1 Regularization (Lasso)
 
-**L2 Regularization (Ridge):**
-$$R_{L2}(θ) = \frac{1}{2}\sum_{i=1}^{n} θ_i^2$$
+$$\Omega_{L1}(\theta) = \sum_{i=1}^{P} |\theta_i| = \|\theta\|_1$$
 
-## Implementation Details
+$$\frac{\partial \Omega_{L1}}{\partial \theta_i} = \operatorname{sign}(\theta_i)$$
 
-### Class Structure
+**Effect:** L1 drives small weights exactly to zero, producing a **sparse** model. This is useful for feature selection — irrelevant connections are pruned automatically.
 
-```cpp
-template<typename QNumberType, std::size_t Size>
-class Regularization
-{
-public:
-    using Vector = math::Vector<QNumberType, Size>;
-    virtual QNumberType Calculate(const Vector& parameters) const = 0;
-};
+### Comparison
+
+| Property | L1 | L2 |
+|----------|-----------|-----------|
+| Penalty shape | Diamond (corners at axes) | Sphere |
+| Sparsity | Promotes exact zeros | Shrinks toward zero but rarely reaches it |
+| Gradient at $\theta_i = 0$ | Undefined (sub-gradient) | Zero |
+| Best for | Feature selection, sparse models | General-purpose weight control |
+
+### Geometric Interpretation
+
+The regularized loss can be viewed as constrained optimization:
+
+$$\min_\theta \mathcal{L}(\theta) \quad \text{subject to} \quad \Omega(\theta) \le c$$
+
+where $c$ is determined by $\lambda$. L1 constrains $\theta$ to a diamond, so the optimal point tends to lie at a corner (sparse). L2 constrains to a sphere, so the optimal point balances all dimensions.
+
+## Complexity Analysis
+
+| Operation | Time | Space |
+|-----------|------|-------|
+| $\Omega_{L2}(\theta)$ | $O(P)$ | $O(1)$ |
+| $\nabla \Omega_{L2}$ | $O(P)$ | $O(P)$ |
+| $\Omega_{L1}(\theta)$ | $O(P)$ | $O(1)$ |
+| $\nabla \Omega_{L1}$ | $O(P)$ | $O(P)$ |
+
+Regularization adds negligible computational cost — one pass over the parameter vector per training iteration.
+
+## Step-by-Step Walkthrough
+
+**Scenario:** 3 parameters, $\theta = [0.8, -0.3, 0.5]$, $\lambda = 0.1$.
+
+**L2 Regularization:**
+
+| Step | Computation | Result |
+|------|-------------|--------|
+| Penalty | $\frac{1}{2}(0.64 + 0.09 + 0.25) = 0.49$ | $\Omega_{L2} = 0.49$ |
+| Gradient | $[0.8, -0.3, 0.5]$ | Added to $\nabla\mathcal{L}$ |
+| Contribution to loss | $0.1 \times 0.49 = 0.049$ | |
+
+**L1 Regularization:**
+
+| Step | Computation | Result |
+|------|-------------|--------|
+| Penalty | $0.8 + 0.3 + 0.5 = 1.6$ | $\Omega_{L1} = 1.6$ |
+| Gradient | $[1, -1, 1]$ | Added to $\nabla\mathcal{L}$ |
+| Contribution to loss | $0.1 \times 1.6 = 0.16$ | |
+
+**After several L1 updates** ($\eta = 0.1$, $\lambda = 0.1$): the $\theta_2 = -0.3$ component, already small, is driven to exactly zero. The model effectively prunes that connection.
+
+## Pitfalls & Edge Cases
+
+- **$\lambda$ too large.** The model underfits — weights are driven so close to zero that the network cannot represent the function. Cross-validate $\lambda$.
+- **$\lambda$ too small.** Negligible effect; overfitting persists.
+- **L1 non-differentiability.** At $\theta_i = 0$, the L1 gradient is undefined. Use sub-gradient $\operatorname{sign}(0) = 0$ or proximal operators for exact handling.
+- **Regularizing biases.** Conventionally, bias parameters are excluded from regularization because they do not contribute to model complexity. This library regularizes all parameters in the flat vector — be aware of this if bias control matters.
+- **Fixed-point precision.** The regularization term can be much smaller than the main loss when $\lambda$ is small. In low-precision fixed-point, it may round to zero. Scale $\lambda$ or use a wider accumulator.
+
+## Variants & Generalizations
+
+| Variant | Key Difference |
+|---------|---------------|
+| **Elastic Net** | $\Omega = \alpha \|\theta\|_1 + (1-\alpha)\|\theta\|_2^2$; combines L1 sparsity with L2 smoothness |
+| **Dropout** | Randomly zeroes activations during training; implicit ensemble regularization |
+| **Early stopping** | Halts training before overfitting; regularization without modifying the loss |
+| **Data augmentation** | Expands the training set with transformed copies; reduces overfitting by increasing data diversity |
+| **Spectral normalization** | Constrains the spectral norm of weight matrices; stabilizes GAN training |
+| **Weight clipping** | Hard constraint: $|\theta_i| \le c$; used in Wasserstein GANs |
+
+## Applications
+
+- **Preventing overfitting** — The primary use case for any neural network trained on limited data (common in embedded scenarios).
+- **Feature selection** — L1 regularization identifies and prunes irrelevant input connections.
+- **Model compression** — Sparse models (via L1) require less storage and computation for deployment on MCUs.
+- **Transfer learning** — L2 regularization keeps fine-tuned weights close to pre-trained values.
+
+## Connections to Other Algorithms
+
+```mermaid
+graph TD
+    Reg["Regularization"]
+    Loss["Loss Functions"]
+    Opt["Optimizer"]
+    Model["Model"]
+    LR["Linear Regression"]
+
+    Reg -->|"λ Ω(θ) added to ℒ"| Loss
+    Loss --> Opt
+    Opt --> Model
+    Reg -.->|"L2 + MSE = Ridge regression"| LR
 ```
 
-### Key Implementations
+| Component | Relationship |
+|-----------|-------------|
+| [Loss Functions](../losses/Loss.md) | Regularization is a penalty *added to* the loss: $\mathcal{L}_{\text{total}} = \mathcal{L} + \lambda\Omega$ |
+| [Optimizer](../optimizer/Optimizer.md) | Receives the combined gradient $\nabla\mathcal{L} + \lambda\nabla\Omega$ |
+| [Linear Regression](../../estimators/LinearRegression.md) | L2-regularized MSE with a linear model is **Ridge regression**; L1 is **Lasso** |
 
-1. **L1 Regularization (Lasso)**:
-   - Encourages sparse models by driving some parameters to zero
-   - Feature selection effect by eliminating irrelevant features
-   - Sum of absolute parameter values
-   **Mathematical Definition:**
-   $$R_{L1}(θ) = \lambda \sum_{i=1}^{n} |θ_i|$$
-   **Gradient with respect to parameters:**
-   $$\frac{\partial R_{L1}}{\partial θ_i} = \lambda \cdot \text{sign}(θ_i)$$
-   ```cpp
-   template<typename QNumberType, std::size_t Size>
-   class L1 : public Regularization<QNumberType, Size>
-   {
-   public:
-       using Vector = typename Regularization<QNumberType, Size>::Vector;
+## References & Further Reading
 
-       explicit L1(QNumberType lambda);
-       
-       QNumberType Calculate(const Vector& parameters) const override
-       {
-           QNumberType sum = QNumberType(0.0f);
-
-           for (std::size_t i = 0; i < Size; ++i)
-               sum += parameters[i] < QNumberType(0.0f) ? 
-                      -parameters[i] : parameters[i];
-
-           return lambda * sum;
-       }
-
-   private:
-       QNumberType lambda;
-   };
-   ```
-
-2. **L2 Regularization (Ridge)**:
-   - Penalizes large parameter values
-   - Promotes more uniform weight distributions
-   - Sum of squared parameter values
-   **Mathematical Definition:**
-   $$R_{L2}(θ) = \frac{\lambda}{2} \sum_{i=1}^{n} θ_i^2$$
-   **Gradient with respect to parameters:**
-   $$\frac{\partial R_{L2}}{\partial θ_i} = \lambda \cdot θ_i$$
-   ```cpp
-   template<typename QNumberType, std::size_t Size>
-   class L2 : public Regularization<QNumberType, Size>
-   {
-   public:
-       using Vector = typename Regularization<QNumberType, Size>::Vector;
-
-       explicit L2(QNumberType lambda);
-       
-       QNumberType Calculate(const Vector& parameters) const override
-       {
-           QNumberType sum = QNumberType(0.0f);
-
-           for (std::size_t i = 0; i < Size; ++i)
-               sum += parameters[i] * parameters[i];
-
-           return QNumberType(math::ToFloat(lambda * sum) / 2.0f);
-       }
-
-   private:
-       QNumberType lambda;
-   };
-   ```
-
-## Usage Guide
-
-### Basic Usage
-
-```cpp
-// Define parameter size
-constexpr std::size_t parameterSize = 100;
-using FloatType = float;
-
-// Create regularization objects with different strengths
-L1<FloatType, parameterSize> l1Regularization(0.01f);  // Sparse model
-L2<FloatType, parameterSize> l2Regularization(0.01f);  // Smooth model
-
-// Create parameter vector
-math::Vector<FloatType, parameterSize> parameters;
-// Fill parameters with model weights...
-
-// Calculate regularization penalty
-FloatType l1Penalty = l1Regularization.Calculate(parameters);
-FloatType l2Penalty = l2Regularization.Calculate(parameters);
-```
-
-### Integration with Loss Functions
-
-```cpp
-// Create model and loss components
-Model<FloatType, inputSize, outputSize, ...> model;
-auto parameters = model.GetParameters();
-
-// Create loss function
-MeanSquaredError<FloatType, model.TotalParameters> lossFunction(target);
-
-// Create regularization
-L2<FloatType, model.TotalParameters> regularization(0.01f);
-
-// Compute total loss (original loss + regularization)
-FloatType totalLoss = lossFunction.Cost(parameters) + 
-                      regularization.Calculate(parameters);
-
-// When computing gradients for optimization
-auto lossGradient = lossFunction.Gradient(parameters);
-auto regularizationGradient = regularization.Gradient(parameters);
-
-// Combined gradient for parameter updates
-Vector<FloatType, model.TotalParameters> totalGradient;
-for (std::size_t i = 0; i < model.TotalParameters; ++i)
-    totalGradient[i] = lossGradient[i] + regularizationGradient[i];
-```
-
-### Choosing Lambda Values
-
-```cpp
-// Weak regularization (prioritize fitting training data)
-L2<FloatType, parameterSize> weakRegularization(0.0001f);
-
-// Moderate regularization (balance fit and complexity)
-L2<FloatType, parameterSize> moderateRegularization(0.01f);
-
-// Strong regularization (prioritize model simplicity)
-L2<FloatType, parameterSize> strongRegularization(0.1f);
-```
-
-## Best Practices
-
-1. **Regularization Selection**:
-   - L1 regularization when sparse models are desired (feature selection)
-   - L2 regularization for general model stability and preventing large weights
-   - Combined L1+L2 (Elastic Net) for a mix of both effects
-
-2. **Lambda Selection**:
-   - Use cross-validation to find optimal lambda values
-   - Start with small values (0.0001-0.001) and gradually increase
-   - Different model sizes may require different lambda scales
-
-3. **Implementation Considerations**:
-   - Scale lambda based on dataset size
-   - Apply regularization only to weights, not biases
-   - Consider learning rate interaction with regularization strength
-
-## L1 vs L2 Regularization Comparison
-
-| Aspect            | L1 Regularization                                   | L2 Regularization                     |
-|-------------------|-----------------------------------------------------|---------------------------------------|
-| Effect on Weights | Many weights become exactly zero                    | All weights become smaller, non-zero  |
-| Sparsity          | Creates sparse models                               | Creates dense, small-weight models    |
-| Feature Selection | Effectively removes irrelevant features             | Keeps all features but reduces impact |
-| Loss Surface      | Non-differentiable at zero                          | Smooth, differentiable everywhere     |
-| Best Use Case     | High-dimensional data with many irrelevant features | General purpose, prevents overfitting |
-| Computational     | More complex optimization problem                   | Simpler, more stable optimization     |
-
-## Performance Considerations
-
-1. **Computation Efficiency**:
-   - L2 regularization is computationally simpler than L1
-   - Both can be vectorized for performance
-   - Regularization computation is generally inexpensive compared to loss functions
-
-2. **Numeric Stability**:
-   - L1 requires special handling at zero (non-differentiable)
-   - Both can be implemented with stable numeric operations
-
-3. **Memory Usage**:
-   - Both L1 and L2 regularization have minimal memory requirements
-   - Only need to store the lambda parameter
-
-## Other Regularization Techniques
-
-Though not implemented in the provided code, other common regularization techniques include:
-
-1. **Elastic Net**:
-   - Combines L1 and L2 regularization
-   - $$R_{elastic}(θ) = \lambda_1 \sum |θ_i| + \lambda_2 \sum θ_i^2$$
-   - Balances sparsity and smoothness
-
-2. **Dropout**:
-   - Randomly deactivates neurons during training
-   - Acts as an implicit ensemble method
-   - Prevents co-adaptation of neurons
-
-3. **Early Stopping**:
-   - Stop training when validation performance degrades
-   - Implicit regularization by limiting training iterations
-   - Prevents memorization of training data
-
-## Limitations and Future Improvements
-
-1. Current limitations:
-   - Limited to L1 and L2 regularization
-   - Fixed parameter size at compile time
-   - No gradient method in base class
-   - Fixed lambda during training
-
-2. Possible extensions:
-   - Elastic Net implementation (combined L1+L2)
-   - Parameter-specific regularization strengths
-   - Adaptive regularization during training
-   - Structured regularization for specific parameter groups
-   - Regularization schedules that vary lambda over time
-   - Support for other regularization techniques (orthogonal, spectral)
-
-## Error Handling
-
-1. Static assertions verify:
-   - Valid numeric types
-   - Appropriate parameter sizes
-
-2. Implementation considerations:
-   - Ensure lambda values are positive
-   - Handle numeric overflow for very large parameters or lambda values
-   - Consider NaN and infinity checks for robustness
+- Goodfellow, I., Bengio, Y., and Courville, A., *Deep Learning*, MIT Press, 2016 — Chapter 7 (regularization).
+- Tibshirani, R., "Regression shrinkage and selection via the lasso", *JRSS-B*, 58(1), 1996.
+- Krogh, A. and Hertz, J.A., "A simple weight decay can improve generalization", *NeurIPS*, 1991.

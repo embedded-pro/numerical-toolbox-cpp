@@ -12,29 +12,19 @@ This library provides a comprehensive collection of digital signal processing (D
 
 Refer to the documentation and example scripts to quickly integrate and utilize the library's signal processing and control algorithms in your projects.
 
-## Theory and How to use
+## Documentation
 
-1. Control Systems
-    - [PID](doc/controllers/Pid.md)
-    - [LQR](doc/controllers/Lqr.md)
+| Category | Description |
+|----------|-------------|
+| [Analysis](doc/analysis/README.md) | FFT, Power Spectral Density, DCT, Root Locus |
+| [Controllers](doc/controllers/README.md) | PID, LQR |
+| [Estimators](doc/estimators/README.md) | Linear Regression, Yule-Walker |
+| [Filters](doc/filters/README.md) | Kalman Filter |
+| [Solvers](doc/solvers/README.md) | Gaussian Elimination, Levinson-Durbin, Durand-Kerner, DARE |
+| [Windowing](doc/windowing/README.md) | Rectangular, Hamming, Hann, Blackman |
+| [Neural Network](doc/neural_network/README.md) | Layers, activations, losses, optimizers, regularization |
 
-2. Analysis
-    - [Fast Fourier Transform](doc/analysis/FastFourierTransform.md)
-    - [Power Density Spectrum](doc/analysis/PowerDensitySpectrum.md)
-    - [Discrete Cosine Transform](doc/analysis/DiscreteCosineTransform.md)
-
-3. Filter
-    - [Windowing](doc/windowing/window.md)
-    - [Kalman Filter](doc/filters/active/KalmanFilter.md)
-
-4. Estimators and Solvers
-    - [Linear Regression](doc/estimators/LinearRegression.md)
-    - [Yule-Walker (for AR and MA models)](doc/estimators/YuleWalker.md)
-    - [Levinson-Durbin (Ax + B = 0 matrix solver)](doc/solvers/LevinsonDurbin.md)
-    - [Gaussian Elimination](doc/solvers/GaussianElimination.md)
-    - [Discrete Algebraic Riccati Equation](doc/solvers/DiscreteAlgebraicRiccatiEquation.md)
-
-5. [Neural Network](doc/neural_network/NeuralNetwork.md)
+Each category page lists its algorithms with a brief description and links to the detailed documentation.
 
 ## Simulator
 

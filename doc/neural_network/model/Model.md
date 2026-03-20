@@ -1,368 +1,154 @@
-# Model Implementation Guide
+# Model (Neural Network Composition)
 
-## Process Overview
+## Overview & Motivation
 
-The following diagram illustrates the structure and functionality of the neural network model:
+A **Model** composes a sequence of [dense layers](../layer/Layer.md) into a single trainable function $f: \mathbb{R}^n \to \mathbb{R}^m$. It is the orchestrator that:
 
-![Neural Network Model](Model.svg)
+1. Chains layers so the output of each feeds into the next (**forward pass**).
+2. Propagates gradients backward through the chain (**backward pass**).
+3. Flattens all layer parameters into a single vector for the [optimizer](../optimizer/Optimizer.md).
+4. Verifies dimensional compatibility **at compile time** using variadic templates.
 
-The diagram shows how the model:
-1. Organizes multiple layers into a coherent architecture
-2. Manages the flow of data through the network
-3. Handles parameter management and training
-4. Connects with optimizers and loss functions
+In this library, the Model is fully statically typed — layer dimensions, parameter counts, and memory footprints are all known at compile time, enabling zero-overhead abstraction on embedded targets.
 
-## Mathematical Background
+## Mathematical Theory
 
-### Model Architecture
+### Composition
 
-A neural network model consists of a sequence of layers, transforming an input vector through multiple transformations:
+For $L$ layers with transformations $f_1, f_2, \ldots, f_L$:
 
-$$\mathbf{y} = f_n(f_{n-1}(...f_1(\mathbf{x})...))$$
+$$\hat{y} = (f_L \circ f_{L-1} \circ \cdots \circ f_1)(x) = f_L(f_{L-1}(\ldots f_1(x) \ldots))$$
 
-where:
-- x is the input vector
-- y is the output vector
-- f₁, f₂, ..., fₙ are the layer transformations
+Each $f_\ell$ is a dense layer: $f_\ell(a) = \sigma_\ell(W_\ell a + b_\ell)$.
 
-### Training Process
+### Parameter Vector
 
-The model's training process involves:
-1. Forward propagation to compute predictions
-2. Loss calculation to measure error
-3. Backward propagation to compute gradients
-4. Parameter updates using an optimizer
+All weights and biases are concatenated into a single vector:
 
-During training, parameters θ are updated to minimize a loss function L:
+$$\theta = [\text{vec}(W_1), b_1, \text{vec}(W_2), b_2, \ldots, \text{vec}(W_L), b_L] \in \mathbb{R}^P$$
 
-$$\theta_{t+1} = \theta_t - \eta \nabla_\theta L(\theta_t)$$
+where $P = \sum_{\ell=1}^L m_\ell(n_\ell + 1)$.
 
-## Implementation Details
+### Forward Pass (Chained Evaluation)
 
-### Class Structure
-
-```cpp
-template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
-class Model
-{
-    // Static assertions to verify types and dimensions
-    static_assert(math::is_qnumber<QNumberType>::value || std::is_floating_point<QNumberType>::value,
-        "Model can only be instantiated with math::QNumber types or floating point types.");
-    static_assert(detail::all_are_layers<QNumberType, Layers...>::value,
-        "All types in Layers must derive from Layer");
-    static_assert(sizeof...(Layers) > 0, "Model must have at least one layer");
-    static_assert(detail::verify_layer_sizes<InputSize, Layers...>::value &&
-                  std::tuple_element_t<sizeof...(Layers) - 1,
-                      std::tuple<Layers...>>::OutputSize == OutputSize,
-        "Layer sizes do not match");
-
-public:
-    using InputVector = math::Matrix<QNumberType, InputSize, 1>;
-    using OutputVector = math::Matrix<QNumberType, OutputSize, 1>;
-    static constexpr std::size_t TotalParameters = detail::calculate_total_parameters<QNumberType, Layers...>();
-
-    Model();
-    template<typename... FactoryFuncs>
-    Model(FactoryFuncs&&... factories);
-    
-    OutputVector Forward(const InputVector& input);
-    InputVector Backward(const OutputVector& output_gradient);
-    void Train(Optimizer<QNumberType, TotalParameters>& optimizer, 
-               Loss<QNumberType, TotalParameters>& loss, 
-               const math::Vector<QNumberType, TotalParameters>& initialParameters);
-    void SetParameters(const math::Vector<QNumberType, TotalParameters>& parameters);
-    math::Vector<QNumberType, TotalParameters> GetParameters() const;
-
-private:
-    // Implementation details
-    std::tuple<Layers...> layers;
-    InputVector currentInput;
-};
+```mermaid
+graph LR
+    X["x ∈ ℝⁿ"] --> L1["Layer 1"] --> L2["Layer 2"] --> Ldots["⋯"] --> LL["Layer L"] --> Y["ŷ ∈ ℝᵐ"]
 ```
 
-### Key Components
+### Backward Pass (Reverse Chain Rule)
 
-1. **Layer Management**:
-   - Stores layers in a std::tuple
-   - Verifies layer compatibility at compile time
-   - Manages data flow between layers
-2. **Parameter Handling**:
-   - Collects parameters from all layers
-   - Distributes updated parameters to layers
-   - Manages parameter vector with correct dimensions
-3. **Forward and Backward Pass**:
-   - Chains layer operations for forward propagation
-   - Implements backpropagation for gradient computation
-   - Maintains intermediate values for backpropagation
-4. **Training Process**:
-   - Connects model with optimizer and loss function
-   - Handles parameter updates during training
-   - Manages the training workflow
+$$\frac{\partial \mathcal{L}}{\partial \theta_\ell} = \frac{\partial \mathcal{L}}{\partial a_L} \cdot \frac{\partial a_L}{\partial a_{L-1}} \cdots \frac{\partial a_{\ell+1}}{\partial a_\ell} \cdot \frac{\partial a_\ell}{\partial \theta_\ell}$$
 
-### Layer Factory Helper
+Each layer stores its input $a_{\ell-1}$ during the forward pass so it can compute $\nabla W_\ell$ and $\nabla b_\ell$ during the backward pass.
 
-```cpp
-template<typename Layer, typename... Args>
-auto make_layer(Args&&... args)
-{
-    return [args = std::make_tuple(std::forward<Args>(args)...)]() mutable
-    {
-        return std::apply([](auto&&... params)
-            {
-                return Layer(std::forward<decltype(params)>(params)...);
-            },
-            std::move(args));
-    };
-}
+### Training Loop
+
+```mermaid
+graph TD
+    FP["Forward pass: ŷ = Model(x)"]
+    LC["Loss: ℒ(ŷ, y)"]
+    BP["Backward pass: ∇θ ℒ"]
+    UP["Update: θ ← θ − η ∇θ ℒ"]
+    FP --> LC --> BP --> UP --> FP
 ```
 
-This helper function creates a factory lambda that constructs a layer with given arguments, enabling deferred layer construction during model initialization.
+## Complexity Analysis
 
-### Compile-Time Verification
+| Operation | Time | Space |
+|-----------|------|-------|
+| Forward pass | $O(P)$ | $O(\sum n_\ell)$ cached activations |
+| Backward pass | $O(P)$ | $O(P)$ gradients |
+| `GetParameters()` | $O(P)$ | $O(P)$ flat vector |
+| `SetParameters()` | $O(P)$ | — |
 
-Several static assertions and template metaprogramming constructs ensure layers are compatible:
+All operations scale linearly with the total parameter count $P$.
 
-```cpp
-// Check if a type is a layer
-template<typename QNumberType, typename T>
-struct is_layer
-{
-    static constexpr bool value = std::is_base_of_v<
-        Layer<QNumberType,
-            T::InputSize,
-            T::OutputSize,
-            T::ParameterSize>,
-        T>;
-};
+## Step-by-Step Walkthrough
 
-// Verify all types are layers
-template<typename QNumberType, typename... Layers>
-struct all_are_layers;
+**Model:** 2 → 3 → 1 (two layers).
 
-// Verify layer dimensions match
-template<std::size_t InputSize, typename... Layers>
-struct verify_layer_sizes;
+**Compile-time verification chain:**
 
-// Calculate total parameters
-template<typename QNumberType, typename... Layers>
-constexpr std::size_t calculate_total_parameters()
-{
-    return (... + Layers::ParameterSize);
-}
+| Check | Condition | Status |
+|-------|-----------|--------|
+| Layer 1 input size = Model input size | $2 = 2$ | ✓ |
+| Layer 1 output size = Layer 2 input size | $3 = 3$ | ✓ |
+| Layer 2 output size = Model output size | $1 = 1$ | ✓ |
+| All types derive from `Layer` | type trait check | ✓ |
+
+**Parameter layout** ($P = 3 \times 3 + 3 + 1 \times 4 + 1 = 16$):
+
+| Index | Parameter |
+|-------|-----------|
+| 0–5 | $W_1$ (3×2 = 6 elements) |
+| 6–8 | $b_1$ (3 elements) |
+| 9–11 | $W_2$ (1×3 = 3 elements) |
+| 12 | $b_2$ (1 element) |
+
+**Forward pass** with $x = [1.0, 0.5]^T$:
+
+1. Layer 1: $a_1 = \text{ReLU}(W_1 x + b_1) = [0.0, 0.8, 0.3]^T$
+2. Layer 2: $\hat{y} = \sigma(W_2 a_1 + b_2) = [0.62]$
+
+**Backward pass** with loss gradient $\delta_{\text{out}} = [0.12]$:
+
+1. Layer 2 backward → produces $\nabla W_2$, $\nabla b_2$, and $\delta_1 = W_2^T \delta_2 \odot \text{ReLU}'(z_1)$
+2. Layer 1 backward → produces $\nabla W_1$, $\nabla b_1$
+
+**Optimizer** receives the full $\nabla \theta \in \mathbb{R}^{16}$ and updates $\theta$.
+
+## Pitfalls & Edge Cases
+
+- **Dimension mismatch caught at compile time.** If layer $\ell$ outputs $m$ but layer $\ell+1$ expects $n \ne m$, a `static_assert` fires during compilation.
+- **Empty model.** The variadic template requires at least one layer. `static_assert(sizeof...(Layers) > 0)`.
+- **Parameter ordering.** `GetParameters()` and `SetParameters()` must use the same concatenation order. The implementation iterates layers via `std::index_sequence` to guarantee consistency.
+- **Training with wrong optimizer size.** The optimizer's parameter count template argument must equal `Model::TotalParameters`. A mismatch is also caught at compile time.
+- **Large parameter vectors.** All parameters live on the stack. A model with $P > 10{,}000$ floats consumes 40 KB — verify this fits the target's stack.
+
+## Variants & Generalizations
+
+| Variant | Key Difference |
+|---------|---------------|
+| **Sequential model (dynamic)** | Layers stored in a container; dimension checked at runtime instead of compile time |
+| **Functional API** | Supports branching and merging (DAG topology instead of linear chain) |
+| **Residual model** | Adds skip connections: $a_{\ell+2} = f_{\ell+1}(a_\ell) + a_\ell$ |
+| **Recurrent model** | Unrolls the same layer across time steps |
+
+## Applications
+
+- **Embedded inference** — A pre-trained model's parameters are loaded via `SetParameters()` and only `Forward()` is called at runtime.
+- **On-device training** — The full forward → loss → backward → update loop runs on the MCU for online learning/adaptation.
+- **System identification** — A small model (2–3 layers) learns the plant dynamics from input-output data.
+- **Sensor fusion** — Multiple sensor inputs are mapped to a unified state estimate through a trained model.
+
+## Connections to Other Algorithms
+
+```mermaid
+graph TD
+    Model["Model"]
+    Layer["Dense Layer"]
+    Loss["Loss Functions"]
+    Opt["Optimizer"]
+    Reg["Regularization"]
+    NN["Neural Network"]
+
+    Layer --> Model
+    Model --> Opt
+    Model --> Loss
+    Reg --> Loss
+    Model --> NN
 ```
 
-## Usage Guide
+| Component | Relationship |
+|-----------|-------------|
+| [Dense Layer](../layer/Layer.md) | The Model is a sequence of layers stored in a `std::tuple` |
+| [Loss Functions](../losses/Loss.md) | Measures prediction error; the Model delegates loss computation to a Loss object |
+| [Optimizer](../optimizer/Optimizer.md) | Receives the flat parameter/gradient vectors from the Model and returns updated parameters |
+| [Regularization](../regularization/Regularization.md) | Added to the loss before optimization |
 
-### Creating a Model
+## References & Further Reading
 
-```cpp
-// Define dimensions
-constexpr std::size_t inputSize = 784;    // MNIST input
-constexpr std::size_t hiddenSize = 128;   // Hidden layer size
-constexpr std::size_t outputSize = 10;    // 10 digits
-using FloatType = float;
-
-// Create activation functions
-ReLU<FloatType> relu;
-Softmax<FloatType> softmax;
-
-// Initialize weights
-math::Matrix<FloatType, hiddenSize, inputSize> weights1;
-math::Matrix<FloatType, outputSize, hiddenSize> weights2;
-// Fill weights with random values...
-
-// Create layer factory functions
-auto layer1 = make_layer<Dense<FloatType, inputSize, hiddenSize>>(weights1, relu);
-auto layer2 = make_layer<Dense<FloatType, hiddenSize, outputSize>>(weights2, softmax);
-
-// Create model
-Model<FloatType, inputSize, outputSize, 
-    Dense<FloatType, inputSize, hiddenSize>,
-    Dense<FloatType, hiddenSize, outputSize>
-> model(layer1, layer2);
-```
-
-### Forward and Backward Passes
-
-```cpp
-// Forward pass
-auto input = math::Vector<FloatType, inputSize>{/* input data */};
-auto prediction = model.Forward(input);
-
-// Backward pass
-auto outputGradient = math::Vector<FloatType, outputSize>{/* gradient */};
-auto inputGradient = model.Backward(outputGradient);
-```
-
-### Training the Model
-
-```cpp
-// Create optimizer
-GradientDescent<FloatType, model.TotalParameters>::Parameters gdParams;
-gdParams.learningRate = 0.01f;
-gdParams.maxIterations = 1000;
-GradientDescent<FloatType, model.TotalParameters> optimizer(gdParams);
-
-// Create loss function
-auto target = math::Vector<FloatType, outputSize>{/* target data */};
-MeanSquaredError<FloatType, model.TotalParameters> loss(target);
-
-// Get initial parameters
-auto initialParameters = model.GetParameters();
-
-// Train model
-model.Train(optimizer, loss, initialParameters);
-```
-
-### Parameter Management
-
-```cpp
-// Get current parameters
-auto parameters = model.GetParameters();
-
-// Modify parameters if needed
-// ...
-
-// Set updated parameters
-model.SetParameters(parameters);
-```
-
-## Best Practices
-
-1. **Architecture Design**:
-   - Match layer dimensions carefully
-   - Start with simple architectures and add complexity
-   - Consider the problem structure when designing
-
-2. **Model Initialization**:
-   - Use appropriate weight initialization for each layer
-   - Consider layer-specific initialization requirements
-   - Ensure bias terms are properly initialized
-
-3. **Training Strategies**:
-   - Select appropriate optimizers for the problem
-   - Monitor training progress and adjust hyperparameters
-   - Consider regularization to prevent overfitting
-
-4. **Parameter Management**:
-   - Maintain proper parameter ordering across layers
-   - Understand parameter dimensionality requirements
-   - Consider parameter constraints if necessary
-
-## Variadic Templates and Type Safety
-
-The Model implementation makes heavy use of variadic templates and compile-time verification:
-
-1. **Variadic Layer Types**:
-   - Allows for arbitrary number of layers
-   - Each layer can have different dimensions
-   - Compile-time dimension checking
-
-2. **Type Safety**:
-   - Static assertions verify layer compatibility
-   - Type traits ensure proper parameter types
-   - Dimensional validation prevents mismatched layers
-
-3. **SFINAE Techniques**:
-   - Enable/disable template specializations based on constraints
-   - Provide better error messages for misuse
-   - Ensure type correctness at compile time
-
-## Performance Considerations
-
-1. **Computation Efficiency**:
-   - Parameter management done at compile time when possible
-   - Layer-specific optimizations possible through template specialization
-   - Intermediate value storage minimizes recomputation
-
-2. **Memory Usage**:
-   - Fixed-size vectors and matrices reduce dynamic allocations
-   - Parameter packing/unpacking done efficiently
-   - Tuple-based storage for heterogeneous layer types
-
-3. **Compile-Time Optimizations**:
-   - Template metaprogramming enables compile-time computations
-   - Static assertions catch errors at compile time rather than runtime
-   - Inline expansion potential for small layer operations
-
-## Forward and Backward Implementation
-
-The model uses recursive template expansion to implement forward and backward passes:
-
-```cpp
-template<std::size_t... Is>
-OutputVector ForwardImpl(const InputVector& input, std::index_sequence<Is...>)
-{
-    // Implementation handles chaining of layer operations
-    // using parameter pack expansion
-}
-
-template<std::size_t... Is>
-InputVector BackwardImpl(const OutputVector& output_gradient, std::index_sequence<Is...>)
-{
-    // Implementation handles reverse chaining of gradient flow
-    // using parameter pack expansion
-}
-```
-
-## Parameter Distribution
-
-Parameters are managed through careful packing and unpacking:
-
-```cpp
-template<std::size_t... Is>
-void SetParametersImpl(
-    const math::Vector<QNumberType, TotalParameters>& parameters,
-    std::index_sequence<Is...>)
-{
-    std::size_t offset = 0;
-    (SetLayerParameters(std::get<Is>(layers), parameters, offset), ...);
-}
-
-template<typename Layer>
-void SetLayerParameters(
-    Layer& layer,
-    const math::Vector<QNumberType, TotalParameters>& parameters,
-    std::size_t& offset)
-{
-    const std::size_t layerParameterSize = Layer::ParameterSize;
-    math::Vector<QNumberType, layerParameterSize> layerParameters;
-
-    for (std::size_t i = 0; i < layerParameterSize; ++i)
-        layerParameters[i] = parameters[offset + i];
-
-    layer.SetParameters(layerParameters);
-    offset += layerParameterSize;
-}
-```
-
-## Limitations and Future Improvements
-
-1. Current limitations:
-   - Fixed-size architecture at compile time
-   - Limited to feed-forward architectures
-   - No built-in serialization/deserialization
-   - Missing implementation for ForwardImpl and BackwardImpl
-
-2. Possible extensions:
-   - Dynamic layer addition/removal
-   - Runtime-configurable dimensions
-   - Support for recurrent architectures
-   - Built-in training loops with callbacks
-   - Integration with data loaders
-   - Batch processing support
-   - Model serialization for persistence
-   - Checkpointing during training
-
-## Error Handling
-
-1. Static assertions verify:
-   - Valid numeric types
-   - Layer-derived types in parameter pack
-   - At least one layer present
-   - Matching layer dimensions
-
-2. Implementation considerations:
-   - Parameter validation during training
-   - Gradient checking capabilities
-   - Vector size validation for inputs/outputs
+- Goodfellow, I., Bengio, Y., and Courville, A., *Deep Learning*, MIT Press, 2016 — Chapter 6 (deep feedforward networks).
+- Paszke, A. et al., "PyTorch: An imperative style, high-performance deep learning library", *NeurIPS*, 2019 — inspiration for the sequential/functional model API.
+- Abadi, M. et al., "TensorFlow: A system for large-scale machine learning", *OSDI*, 2016.

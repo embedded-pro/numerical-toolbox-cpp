@@ -1,197 +1,116 @@
-# PID Controller Implementation Guide
+# PID Controller
 
-## Mathematical Background
+## Overview & Motivation
 
-### The PID Control Law
+The **Proportional-Integral-Derivative (PID) controller** is the workhorse of industrial feedback control. It continuously computes an error $e(t)$ — the difference between a desired setpoint and a measured process variable — and applies a correction based on three terms: one proportional to the current error, one to its accumulated history, and one to its rate of change.
 
-A Proportional-Integral-Derivative (PID) controller is a control loop feedback mechanism widely used in industrial control systems. The controller continuously calculates an error value e(t) as the difference between a desired setpoint and a measured process variable, and applies a correction based on proportional, integral, and derivative terms.
+Despite its simplicity, PID handles a remarkably wide range of plants — from temperature regulation to motor speed control — because each term addresses a different aspect of the transient response:
 
-The continuous-time PID control law is:
+- **P** reacts immediately to the current error.
+- **I** eliminates steady-state offset by integrating past errors.
+- **D** anticipates future error by acting on the rate of change.
 
-```
-u(t) = Kp*e(t) + Ki*∫e(t)dt + Kd*de(t)/dt
-```
+This library implements a **discrete recursive form** suitable for fixed-sample-rate embedded loops, where the output is computed incrementally rather than from scratch at every step.
 
-where:
-- u(t) is the control signal
-- e(t) is the error value
-- Kp is the proportional gain
-- Ki is the integral gain
-- Kd is the derivative gain
+## Mathematical Theory
 
-### Digital Implementation
+### Continuous-Time PID
 
-In digital systems, we need to discretize the continuous PID equation. Our implementation uses a discrete-time approximation where:
+$$u(t) = K_p \, e(t) + K_i \int_0^t e(\tau)\,d\tau + K_d \frac{de(t)}{dt}$$
 
-1. The integral term is approximated using numerical integration
-2. The derivative term is approximated using finite differences
-3. The control output is computed recursively
+### Discrete Recursive Form
 
-The discrete form implemented in the code is:
+Discretizing with sampling period $T_s$ and applying the difference approximation:
 
-```
-y[n] = y[n-1] + a0*x[n] + a1*x[n-1] + a2*x[n-2]
-```
+$$u[n] = u[n-1] + a_0 \, e[n] + a_1 \, e[n-1] + a_2 \, e[n-2]$$
 
 where:
-- y[n] is the current output
-- x[n] is the current error
-- a0 = Kp + Ki + Kd
-- a1 = -(Kp + 2Kd)
-- a2 = Kd
 
-## Implementation Details
+$$a_0 = K_p + K_i + K_d$$
+$$a_1 = -(K_p + 2K_d)$$
+$$a_2 = K_d$$
 
-### Class Structure
+This incremental (velocity) form has two key advantages:
 
-```cpp
-template<typename QNumberType>
-class Pid {
-public:
-    struct Tunings {
-        QNumberType kp;
-        QNumberType ki;
-        QNumberType kd;
-    };
+1. **No integral accumulator** — the integral action is implicit in the recursion, reducing overflow risk.
+2. **Bumpless mode switching** — toggling between auto/manual mode does not cause output jumps because the output is updated incrementally.
 
-    struct Limits {
-        QNumberType min;
-        QNumberType max;
-    };
+### Output Saturation
 
-    Pid(Tunings tunings, Limits limits, bool autoMode = true);
-    
-    // Core functionality
-    void SetPoint(QNumberType setPoint);
-    QNumberType Process(QNumberType measuredProcessVariable);
-    
-    // Configuration methods
-    void Enable();
-    void Disable();
-    void SetLimits(Limits limits);
-    void SetTunings(Tunings tunings);
-    void Reset();
-};
+The output is clamped to $[u_{\min}, u_{\max}]$ after each computation, which also provides implicit **anti-windup**: the integral term cannot drive the output beyond the saturation limits.
+
+## Complexity Analysis
+
+| Case | Time | Space | Notes |
+|------|------|-------|-------|
+| Per sample | $O(1)$ | $O(1)$ | 3 multiplications, 3 additions, 1 clamp |
+
+The algorithm uses a fixed-size recursive buffer storing $e[n-1]$, $e[n-2]$, and $u[n-1]$. No loops, no dynamic allocation, fully deterministic execution time.
+
+## Step-by-Step Walkthrough
+
+**Parameters:** $K_p = 2$, $K_i = 0.5$, $K_d = 0.1$, limits $[-10, 10]$, setpoint $= 5$.
+
+**Coefficients:**
+- $a_0 = 2 + 0.5 + 0.1 = 2.6$
+- $a_1 = -(2 + 0.2) = -2.2$
+- $a_2 = 0.1$
+
+| Step | Measured | $e[n]$ | $e[n-1]$ | $e[n-2]$ | $\Delta u$ | $u[n]$ (clamped) |
+|------|----------|--------|-----------|-----------|------------|-------------------|
+| 0 | 0.0 | 5.0 | 0 | 0 | $2.6 \times 5 = 13$ | **10.0** (clamped) |
+| 1 | 2.0 | 3.0 | 5.0 | 0 | $2.6(3) - 2.2(5) + 0.1(0) = -3.2$ | **6.8** |
+| 2 | 4.0 | 1.0 | 3.0 | 5.0 | $2.6(1) - 2.2(3) + 0.1(5) = -3.5$ | **3.3** |
+| 3 | 4.8 | 0.2 | 1.0 | 3.0 | $2.6(0.2) - 2.2(1) + 0.1(3) = -1.38$ | **1.92** |
+
+The output converges toward the steady-state value needed to maintain the setpoint.
+
+## Pitfalls & Edge Cases
+
+- **Derivative kick.** A sudden change in setpoint causes a spike in $e[n] - e[n-1]$. Mitigate by differentiating the process variable instead of the error, or by filtering the derivative term.
+- **Integral windup.** Although the recursive form provides implicit anti-windup through output clamping, very aggressive $K_i$ values can still cause sluggish recovery from saturation. Monitor the output rail time.
+- **Sample rate dependency.** The gains $K_i$ and $K_d$ are implicitly scaled by $T_s$. Changing the control loop rate without retuning will alter the effective integral and derivative contributions.
+- **Fixed-point saturation.** For Q15/Q31 types, the intermediate products $a_0 \cdot e[n]$ etc. can overflow. Ensure gains and error ranges are scaled to stay within the representable range.
+- **Setpoint jumps.** Call `Reset()` after large setpoint changes to clear stale error history.
+
+## Variants & Generalizations
+
+| Variant | Key Difference |
+|---------|---------------|
+| **Standard (positional) PID** | Computes $u[n]$ from scratch each step using an explicit integral accumulator |
+| **PI controller** | $K_d = 0$; simpler, no derivative noise issues |
+| **PD controller** | $K_i = 0$; no steady-state error correction, used when offset is acceptable |
+| **PID with derivative filter** | Low-passes the derivative term to reject high-frequency noise |
+| **Gain-scheduled PID** | Tuning parameters vary as a function of operating point |
+| **Cascade PID** | Inner and outer loops, each with its own PID — common in motor control |
+
+## Applications
+
+- **Temperature control** — Maintaining oven, room, or process temperatures via heater/cooler actuation.
+- **Motor speed/position control** — Servo drives, robotics joints, CNC machines.
+- **Flow and pressure regulation** — Industrial process control (chemical plants, water treatment).
+- **Voltage/current regulation** — Power supply output regulation, battery charging.
+- **Attitude control** — Drone stabilization, satellite pointing.
+
+## Connections to Other Algorithms
+
+```mermaid
+graph LR
+    PID["PID Controller"]
+    LQR["LQR Controller"]
+    KF["Kalman Filter"]
+    PID -.->|"alternative"| LQR
+    KF -->|"state estimate"| LQR
+    KF -->|"filtered measurement"| PID
 ```
 
-### Key Components
+| Algorithm | Relationship |
+|-----------|-------------|
+| [LQR Controller](Lqr.md) | Optimal alternative when a state-space model is available; PID is model-free. |
+| [Kalman Filter](../filters/active/KalmanFilter.md) | Can provide filtered state estimates as input to either PID or LQR |
 
-1. **Tunings Structure**: Holds the PID gains (Kp, Ki, Kd)
-2. **Limits Structure**: Defines output saturation limits
-3. **RecursiveBuffer**: Stores historical values for error and output
-4. **Process Method**: Implements the core PID algorithm
-5. **Auto/Manual Mode**: Supports switching between automatic and manual control
+## References & Further Reading
 
-## Usage Guide
-
-### Basic Usage
-
-```cpp
-// Create a PID instance
-Pid<float>::Tunings tunings{
-    .kp = 1.0f,
-    .ki = 0.1f,
-    .kd = 0.05f
-};
-
-Pid<float>::Limits limits{
-    .min = -100.0f,
-    .max = 100.0f
-};
-
-Pid<float> pid(tunings, limits);
-
-// Set the desired setpoint
-pid.SetPoint(50.0f);
-
-// In control loop
-while (true) {
-    float measuredValue = getMeasurement();
-    float controlOutput = pid.Process(measuredValue);
-    applyControl(controlOutput);
-}
-```
-
-### Tuning the Controller
-
-The PID gains affect the system response:
-1. **Proportional (Kp)**: Provides quick response to error
-2. **Integral (Ki)**: Eliminates steady-state error
-3. **Derivative (Kd)**: Provides damping and reduces overshoot
-
-Tuning guidelines:
-1. Start with Ki = Kd = 0, and adjust Kp until acceptable response
-2. Gradually increase Ki to eliminate steady-state error
-3. Add Kd if needed to reduce overshoot
-4. Always test with actual process dynamics
-
-## Best Practices
-
-1. **Output Limiting**: Always use appropriate min/max limits to prevent integral windup
-2. **Numerical Precision**: Use appropriate QNumberType based on application needs
-3. **Mode Handling**: Use Enable()/Disable() to switch between auto/manual modes
-4. **Reset Handling**: Call Reset() when making significant changes to setpoint
-
-## Common Applications
-
-1. **Temperature Control**: Maintaining precise temperature in industrial processes
-2. **Motor Control**: Speed and position control in robotics
-3. **Process Control**: Flow rate, pressure, and level control
-4. **Motion Control**: Precise positioning systems
-
-## Example: Temperature Control
-
-```cpp
-// Configure PID for temperature control
-Pid<float>::Tunings tunings{
-    .kp = 2.0f,    // Aggressive proportional for quick response
-    .ki = 0.1f,    // Small integral to eliminate steady state error
-    .kd = 0.5f     // Moderate derivative to prevent overshoot
-};
-
-Pid<float>::Limits limits{
-    .min = 0.0f,   // Cannot cool below ambient
-    .max = 100.0f  // Maximum heater power
-};
-
-Pid<float> temperatureController(tunings, limits);
-
-// Set desired temperature
-temperatureController.SetPoint(75.0f);
-
-// Control loop
-while (true) {
-    float currentTemp = readTemperature();
-    float heaterPower = temperatureController.Process(currentTemp);
-    setHeaterPower(heaterPower);
-    wait(100ms);
-}
-```
-
-## Performance Considerations
-
-1. **Recursive Buffers**: Efficient storage of historical values
-2. **Template Implementation**: Compile-time optimizations
-3. **Output Clamping**: Prevents integral windup
-4. **Auto/Manual Mode**: Zero overhead when disabled
-
-## Limitations and Future Improvements
-
-1. Current implementation could be extended to support:
-   - Anti-windup mechanisms
-   - Derivative filter
-   - Auto-tuning capabilities
-   - Gain scheduling
-   - Feed-forward control
-2. Additional features that could be added:
-   - Parameter validation
-   - Runtime performance metrics
-   - Adaptive control
-   - Cascade control support
-
-## Safety Considerations
-
-1. **Output Limiting**: Always use appropriate limits to protect the process
-2. **Mode Transitions**: Implement bumpless transfer between auto/manual modes
-3. **Numerical Stability**: Monitor for overflow in integral term
-4. **Fail-Safe Behavior**: Implement appropriate behavior for sensor failures
+- Åström, K.J. and Murray, R.M., *Feedback Systems: An Introduction for Scientists and Engineers*, Princeton University Press, 2008 — Chapter 10.
+- Åström, K.J. and Hägglund, T., *Advanced PID Control*, ISA, 2006.
+- Ziegler, J.G. and Nichols, N.B., "Optimum settings for automatic controllers", *Transactions of the ASME*, 64, 1942.

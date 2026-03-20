@@ -1,289 +1,134 @@
-# Yule-Walker Implementation Guide
+# Yule-Walker Estimation
 
-## Process Overview
+## Overview & Motivation
 
-The following diagram illustrates the key steps in the Yule-Walker method implementation:
+Many signals — vibration data, speech waveforms, financial time series — exhibit short-term correlations. An **autoregressive (AR) model** captures these correlations by expressing the current sample as a linear combination of the previous $p$ samples plus white noise. The **Yule-Walker method** estimates the AR coefficients directly from the signal's autocovariance structure.
 
-```mermaid
-graph TD
-    A[Input Time Series] --> B[Compute Mean]
-    B --> C[Center Time Series]
-    C --> D[Compute Autocovariances]
-    D --> E[Build Toeplitz Matrix]
-    D --> F[Build RHS Vector]
-    E --> G[Solve Linear System]
-    F --> G
-    G --> H[Get AR Coefficients]
-    H --> I[Make Predictions]
-```
+The appeal is threefold:
+1. The resulting system of equations has **Toeplitz structure**, enabling efficient $O(p^2)$ solvers.
+2. The method is guaranteed to produce a **stable model** (all poles inside the unit circle) when the autocovariance matrix is positive definite.
+3. It provides a **parametric spectral estimate** — the PSD is a smooth rational function rather than a noisy periodogram.
 
-## Mathematical Background
+## Mathematical Theory
 
 ### Autoregressive Model
 
-The Yule-Walker method estimates the parameters of an autoregressive (AR) model of order p:
+An AR($p$) process:
 
-```
-x[t] = c + φ₁x[t-1] + φ₂x[t-2] + ... + φₚx[t-p] + ε[t]
-```
+$$x[t] = \varphi_1 x[t-1] + \varphi_2 x[t-2] + \cdots + \varphi_p x[t-p] + \varepsilon[t]$$
 
-where:
-- x[t] is the time series value at time t
-- c is a constant (related to the mean)
-- φᵢ are the AR coefficients
-- p is the order of the model
-- ε[t] is white noise
+where $\varepsilon[t]$ is white noise with variance $\sigma^2$.
 
 ### Yule-Walker Equations
 
-The method solves the following system of equations:
+Multiplying both sides by $x[t-k]$ and taking expectations:
 
-```
-R[k] = φ₁R[k-1] + φ₂R[k-2] + ... + φₚR[k-p]  for k = 1,2,...,p
-```
+$$R[k] = \varphi_1 R[k-1] + \varphi_2 R[k-2] + \cdots + \varphi_p R[k-p], \quad k = 1, \ldots, p$$
 
-where R[k] is the autocovariance function at lag k. This can be written in matrix form:
+where $R[k] = E[x[t] \cdot x[t-k]]$ is the autocovariance at lag $k$. In matrix form:
 
-```
-[R[0]    R[1]    ... R[p-1]] [φ₁]   [R[1]]
-[R[1]    R[0]    ... R[p-2]] [φ₂]   [R[2]]
-[  ⋮       ⋮     ⋱    ⋮   ] [ ⋮ ] = [ ⋮ ]
-[R[p-1]  R[p-2]  ... R[0] ] [φₚ]   [R[p]]
-```
+$$\underbrace{\begin{bmatrix} R[0] & R[1] & \cdots & R[p-1] \\ R[1] & R[0] & \cdots & R[p-2] \\ \vdots & & \ddots & \vdots \\ R[p-1] & R[p-2] & \cdots & R[0] \end{bmatrix}}_{\mathbf{R} \text{ (Toeplitz)}} \begin{bmatrix} \varphi_1 \\ \varphi_2 \\ \vdots \\ \varphi_p \end{bmatrix} = \begin{bmatrix} R[1] \\ R[2] \\ \vdots \\ R[p] \end{bmatrix}$$
 
-## Implementation Details
+### Autocovariance Estimation
 
-### Class Structure
+The biased estimator is used:
 
-```cpp
-template<typename T, std::size_t Samples, std::size_t Order>
-class YuleWalker {
-public:
-    using CoefficientsMatrix = typename math::Matrix<T, Order, 1>;
-    using DesignMatrix = math::Matrix<T, Order, Order>;
-    using InputMatrix = math::Matrix<T, Order, 1>;
-    using TimeSeriesVector = math::Matrix<T, Samples, 1>;
+$$\hat{R}[k] = \frac{1}{N} \sum_{t=k}^{N-1} x[t] \cdot x[t-k]$$
 
-    explicit YuleWalker(solvers::Solver<T, Order>& solver);
-    void Fit(const Matrix<T, Samples, Order>& X, const Matrix<T, Samples, 1>& y);
-    T Predict(const InputMatrix& X) const;
-    const CoefficientsMatrix& Coefficients() const;
-};
-```
+after centering the series by subtracting its mean. The biased estimator (dividing by $N$ instead of $N-k$) guarantees the Toeplitz matrix is positive semi-definite.
 
-### Key Components
+### Spectral Interpretation
 
-1. **Mean Computation and Centering**:
-   - Calculates series mean
-   - Centers time series by subtracting mean
-   - Improves numerical stability
+The PSD of the estimated AR model is:
 
-2. **Autocovariance Calculation**:
-   - Computes autocovariances for lags 0 to p
-   - Uses biased estimator (divided by N)
-   - Implements two-pass algorithm for stability
+$$S(f) = \frac{\sigma^2}{\left|1 - \sum_{i=1}^{p} \varphi_i \, e^{-j2\pi fi}\right|^2}$$
 
-3. **Toeplitz Matrix Formation**:
-   - Creates symmetric Toeplitz matrix from autocovariances
-   - Ensures matrix properties for solver
+This gives a smooth, parametric spectral estimate.
 
-4. **System Solution**:
-   - Uses provided solver for linear system
-   - Returns AR coefficients
-   - Handles prediction with mean adjustment
+## Complexity Analysis
 
-## Usage Guide
+| Phase | Time | Space | Notes |
+|-------|------|-------|-------|
+| Autocovariance | $O(Np)$ | $O(p)$ | One pass per lag, $p+1$ lags |
+| Build Toeplitz matrix | $O(p^2)$ | $O(p^2)$ | Fill from autocovariance vector |
+| Solve (Levinson-Durbin) | $O(p^2)$ | $O(p)$ | Exploits Toeplitz structure |
+| Solve (Gaussian elim.) | $O(p^3)$ | $O(p^2)$ | General-purpose fallback |
+| Predict | $O(p)$ | $O(1)$ | Dot product with past samples |
 
-### Basic Usage
+## Step-by-Step Walkthrough
 
-```cpp
-// Define system parameters
-constexpr std::size_t samples = 1000;  // Length of time series
-constexpr std::size_t order = 3;       // AR model order
-using FloatType = float;               // Numeric type
+**Input:** $x = [2, 4, 6, 5, 3, 1]$, AR order $p = 2$.
 
-// Create solver (e.g., Levinson recursion)
-solvers::LevinsonSolver<FloatType, order> solver;
+**Step 1 — Compute mean and center:**
 
-// Create Yule-Walker estimator
-YuleWalker<FloatType, samples, order> yw(solver);
+$\bar{x} = 3.5$, centered: $x' = [-1.5, 0.5, 2.5, 1.5, -0.5, -2.5]$
 
-// Prepare training data
-Matrix<FloatType, samples, order> X;    // Lagged values
-Matrix<FloatType, samples, 1> y;        // Target values
-// ... fill X and y with time series data ...
+**Step 2 — Autocovariances** (biased, divide by $N = 6$):
 
-// Estimate AR coefficients
-yw.Fit(X, y);
+- $R[0] = \frac{(-1.5)^2 + 0.5^2 + 2.5^2 + 1.5^2 + (-0.5)^2 + (-2.5)^2}{6} = \frac{2.25 + 0.25 + 6.25 + 2.25 + 0.25 + 6.25}{6} = 2.917$
+- $R[1] = \frac{(-1.5)(0.5) + (0.5)(2.5) + (2.5)(1.5) + (1.5)(-0.5) + (-0.5)(-2.5)}{6} = \frac{-0.75 + 1.25 + 3.75 - 0.75 + 1.25}{6} = 0.792$
+- $R[2] = \frac{(-1.5)(2.5) + (0.5)(1.5) + (2.5)(-0.5) + (1.5)(-2.5)}{6} = \frac{-3.75 + 0.75 - 1.25 - 3.75}{6} = -1.333$
 
-// Make predictions
-Matrix<FloatType, order, 1> new_data;
-// ... fill new_data with latest values ...
-FloatType prediction = yw.Predict(new_data);
-```
+**Step 3 — Build Toeplitz system:**
 
-### Example: Temperature Forecasting
+$$\begin{bmatrix} 2.917 & 0.792 \\ 0.792 & 2.917 \end{bmatrix} \begin{bmatrix} \varphi_1 \\ \varphi_2 \end{bmatrix} = \begin{bmatrix} 0.792 \\ -1.333 \end{bmatrix}$$
 
-```cpp
-// Create AR model for temperature forecasting
-constexpr std::size_t samples = 8760;  // Hourly data for one year
-constexpr std::size_t order = 24;      // 24-hour seasonality
+**Step 4 — Solve** (e.g., via Levinson-Durbin or Gaussian elimination):
 
-// Create solver
-solvers::LevinsonSolver<float, order> solver;
-YuleWalker<float, samples, order> temperature_model(solver);
+$\varphi_1 \approx 0.478$, $\varphi_2 \approx -0.587$
 
-// Prepare training data
-Matrix<float, samples, order> temp_history;
-Matrix<float, samples, 1> temp_target;
-// ... load temperature data ...
+**Prediction:** $\hat{x}[6] = \bar{x} + \varphi_1 (x[5] - \bar{x}) + \varphi_2 (x[4] - \bar{x})$
 
-// Train model
-temperature_model.Fit(temp_history, temp_target);
+## Pitfalls & Edge Cases
 
-// Predict next temperature
-Matrix<float, order, 1> recent_temps;
-// ... fill with last 24 hours ...
-float next_temp = temperature_model.Predict(recent_temps);
+- **Non-stationary data.** The Yule-Walker method assumes wide-sense stationarity. Trends, seasonal components, or varying variance must be removed first.
+- **Model order selection.** Choosing $p$ too small misses important dynamics; too large overfits noise. Use AIC or BIC criteria.
+- **Near-singular autocovariance matrix.** Happens when $p$ is too large relative to $N$, or the signal contains very little variation. The solver may fail or produce unreliable coefficients.
+- **Fixed-point range.** Autocovariance values can be large (proportional to signal variance squared). Scale the input signal to prevent overflow.
+- **Biased vs. unbiased estimator.** The biased estimator (dividing by $N$) is deliberately chosen to guarantee positive semi-definiteness; the unbiased estimator (dividing by $N-k$) does not.
+
+## Variants & Generalizations
+
+| Variant | Key Difference |
+|---------|---------------|
+| **Burg's method** | Estimates AR coefficients from forward + backward prediction errors; often more accurate for short records |
+| **Covariance method** | Uses the unbiased autocovariance; does not guarantee stability |
+| **ARMA models** | Extends AR to include moving-average terms; more flexible but requires iterative estimation |
+| **Vector autoregression (VAR)** | Multivariate extension for jointly modeling multiple time series |
+| **Recursive estimation** | Updates AR coefficients online as new data arrives |
+
+## Applications
+
+- **Speech analysis** — AR models underlie linear predictive coding (LPC), the foundation of speech codecs.
+- **Spectral estimation** — Parametric PSD estimation via the AR model gives smoother spectra than periodograms, especially for short records.
+- **System identification** — Estimating transfer function poles from input-output data.
+- **Time series forecasting** — Predicting next values in economic, meteorological, or sensor data.
+- **Vibration analysis** — Extracting resonant frequencies from structural vibration measurements.
+
+## Connections to Other Algorithms
+
+```mermaid
+graph LR
+    YW["Yule-Walker"]
+    LD["Levinson-Durbin"]
+    GE["Gaussian Elimination"]
+    PSD["Power Spectral Density"]
+    LR["Linear Regression"]
+    YW --> LD
+    YW --> GE
+    YW -.->|"parametric alternative"| PSD
+    LR -.->|"similar structure"| YW
 ```
 
-## Best Practices
+| Algorithm | Relationship |
+|-----------|-------------|
+| [Levinson-Durbin](../solvers/LevinsonDurbin.md) | Efficient $O(p^2)$ solver exploiting the Toeplitz structure of the Yule-Walker matrix |
+| [Gaussian Elimination](../solvers/GaussianElimination.md) | General-purpose $O(p^3)$ solver used as a fallback |
+| [Power Spectral Density](../analysis/PowerDensitySpectrum.md) | Non-parametric alternative; the AR model provides a parametric PSD estimate |
+| [Linear Regression](LinearRegression.md) | Structurally similar — both solve a linear system derived from data correlations |
 
-1. **Model Order Selection**:
-   - Use AIC/BIC criteria
-   - Consider domain knowledge
-   - Balance complexity vs. fit
+## References & Further Reading
 
-2. **Data Preparation**:
-   - Remove trends if present
-   - Handle seasonality
-   - Check for stationarity
-
-3. **Numerical Considerations**:
-   - Use appropriate solver
-   - Monitor condition number
-   - Check for stability
-
-4. **Validation**:
-   - Use hold-out data
-   - Check residuals
-   - Validate predictions
-
-## Common Applications
-
-1. **Time Series Analysis**:
-   - Economic forecasting
-   - Signal processing
-   - Weather prediction
-
-2. **Signal Processing**:
-   - Speech analysis
-   - Spectral estimation
-   - System identification
-
-3. **Control Systems**:
-   - Process control
-   - System modeling
-   - Feedback systems
-
-## Performance Considerations
-
-1. **Template Parameters**:
-   - Compile-time optimization
-   - Static memory allocation
-   - Type flexibility
-
-2. **Computation Efficiency**:
-   - Efficient autocovariance calculation
-   - Toeplitz matrix structure
-   - Solver selection
-
-3. **Memory Usage**:
-   - Fixed-size matrices
-   - No dynamic allocation
-   - Buffer reuse
-
-## Limitations and Future Improvements
-
-1. Current limitations:
-   - Fixed sample size
-   - Fixed model order
-   - Basic AR model only
-   - Single variable
-
-2. Possible extensions:
-   - Dynamic sizing
-   - ARMA models
-   - Multivariate support
-   - Online estimation
-   - Confidence intervals
-   - Model diagnostics
-   - Seasonal components
-   - Non-stationary support
-
-## Error Handling
-
-1. Static assertions verify:
-   - Valid numeric types
-   - Sufficient sample size
-   - Order constraints
-
-2. Runtime checks:
-   - Data validity
-   - Numerical stability
-   - Solution convergence
-
-## Advanced Topics
-
-### Stability Analysis
-
-The AR model is stable if all roots of the characteristic polynomial lie outside the unit circle:
-
-```
-1 - φ₁z⁻¹ - φ₂z⁻² - ... - φₚz⁻ᵖ = 0
-```
-
-### Spectral Properties
-
-The power spectral density of an AR(p) process is:
-
-```
-S(f) = σ²/|1 - Σφᵢe⁻²ᵖⁱᶠᵗ|²
-```
-
-where σ² is the innovation variance.
-
-### Confidence Intervals
-
-Asymptotic standard errors for the AR coefficients can be computed using:
-
-```
-SE(φᵢ) = √((1-R²)/N) * √(C[i,i])
-```
-
-where C is the covariance matrix of the estimates.
-
-## Implementation Notes
-
-### Autocovariance Computation
-
-The implementation uses a numerically stable two-pass algorithm:
-
-```cpp
-T ComputeAutocovariance(const TimeSeriesVector& timeSeries, size_t lag) const {
-    T covariance{};
-    size_t n = 0;
-    
-    for (size_t i = lag; i < Samples; ++i) {
-        covariance += timeSeries.at(i, 0) * timeSeries.at(i - lag, 0);
-        n++;
-    }
-    
-    return covariance / T(Samples);
-}
-```
-
-This approach:
-- Maintains numerical precision
-- Handles large datasets efficiently
-- Provides biased estimates for better stability
+- Kay, S.M., *Modern Spectral Estimation: Theory and Application*, Prentice Hall, 1988 — Chapter 7.
+- Stoica, P. and Moses, R.L., *Spectral Analysis of Signals*, Prentice Hall, 2005 — Chapter 3.
+- Box, G.E.P., Jenkins, G.M. and Reinsel, G.C., *Time Series Analysis: Forecasting and Control*, 5th ed., Wiley, 2015.
