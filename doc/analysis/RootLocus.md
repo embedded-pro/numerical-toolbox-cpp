@@ -86,12 +86,12 @@ As $K$ increases: the two poles approach each other on the real axis, meet betwe
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **Complementary root locus** | Traces roots for $K < 0$ (positive feedback) |
-| **Root contour** | Varies two or more parameters simultaneously |
-| **Discrete root locus** | Same concept applied to $z$-domain polynomials for digital control |
-| **Evans rules** | Analytical rules for sketching the root locus by hand (angle/magnitude criteria) |
+| Variant                      | Key Difference                                                                   |
+|------------------------------|----------------------------------------------------------------------------------|
+| **Complementary root locus** | Traces roots for $K < 0$ (positive feedback)                                     |
+| **Root contour**             | Varies two or more parameters simultaneously                                     |
+| **Discrete root locus**      | Same concept applied to $z$-domain polynomials for digital control               |
+| **Evans rules**              | Analytical rules for sketching the root locus by hand (angle/magnitude criteria) |
 
 ## Applications
 
