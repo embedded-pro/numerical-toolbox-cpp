@@ -41,9 +41,9 @@ The recursive decomposition reorders input by bit-reversing the sample indices. 
 
 ## Complexity Analysis
 
-| Case | Time | Space | Notes |
-|------|------|-------|-------|
-| All | $O(N \log_2 N)$ | $O(N)$ | $N$ must be a power of 2 |
+| Case | Time            | Space  | Notes                    |
+|------|-----------------|--------|--------------------------|
+| All  | $O(N \log_2 N)$ | $O(N)$ | $N$ must be a power of 2 |
 
 **Why $O(N \log N)$:** There are $\log_2 N$ butterfly stages, each performing $N/2$ butterfly operations (one complex multiply + two complex adds). Total: $\frac{N}{2} \log_2 N$ complex multiplications.
 
@@ -57,10 +57,10 @@ Twiddle factors are **pre-computed** and stored in a lookup table of size $N/2$,
 
 | Index (binary) | Reversed | Value |
 |----------------|----------|-------|
-| 0 (00) | 0 (00) | 1 |
-| 1 (01) | 2 (10) | 3 |
-| 2 (10) | 1 (01) | 2 |
-| 3 (11) | 3 (11) | 4 |
+| 0 (00)         | 0 (00)   | 1     |
+| 1 (01)         | 2 (10)   | 3     |
+| 2 (10)         | 1 (01)   | 2     |
+| 3 (11)         | 3 (11)   | 4     |
 
 Reordered: $[1, 3, 2, 4]$
 
@@ -92,13 +92,13 @@ Verification: $X[0] = 1+2+3+4 = 10$ ✓
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **Mixed-radix FFT** | Supports arbitrary composite $N$ using radix-2, -3, -5, etc. stages |
-| **Split-radix FFT** | Reduces multiplications by ~33 % compared to standard radix-2 |
-| **Real-valued FFT** | Exploits conjugate symmetry of real inputs to halve work and memory |
-| **Bluestein's algorithm** | Handles arbitrary $N$ by converting DFT to a circular convolution |
-| **Inverse FFT** | Same structure; negate twiddle exponents and scale by $1/N$ |
+| Variant                   | Key Difference                                                      |
+|---------------------------|---------------------------------------------------------------------|
+| **Mixed-radix FFT**       | Supports arbitrary composite $N$ using radix-2, -3, -5, etc. stages |
+| **Split-radix FFT**       | Reduces multiplications by ~33 % compared to standard radix-2       |
+| **Real-valued FFT**       | Exploits conjugate symmetry of real inputs to halve work and memory |
+| **Bluestein's algorithm** | Handles arbitrary $N$ by converting DFT to a circular convolution   |
+| **Inverse FFT**           | Same structure; negate twiddle exponents and scale by $1/N$         |
 
 ## Applications
 
@@ -119,11 +119,11 @@ graph LR
     FFT -.-> DK["Durand-Kerner (polynomial eval)"]
 ```
 
-| Algorithm | Relationship |
-|-----------|-------------|
-| [Power Spectral Density](PowerDensitySpectrum.md) | Calls FFT internally on each windowed segment |
+| Algorithm                                               | Relationship                                                                 |
+|---------------------------------------------------------|------------------------------------------------------------------------------|
+| [Power Spectral Density](PowerDensitySpectrum.md)       | Calls FFT internally on each windowed segment                                |
 | [Discrete Cosine Transform](DiscreteCosineTransform.md) | Computed via FFT with input rearrangement and twiddle-factor post-processing |
-| [Window Functions](../windowing/window.md) | Applied before FFT to reduce spectral leakage |
+| [Window Functions](../windowing/window.md)              | Applied before FFT to reduce spectral leakage                                |
 
 ## References & Further Reading
 
