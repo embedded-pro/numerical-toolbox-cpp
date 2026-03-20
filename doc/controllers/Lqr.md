@@ -50,10 +50,10 @@ $$Q_{ii} = \frac{1}{(\text{max acceptable } x_i)^2}, \qquad R_{jj} = \frac{1}{(\
 
 ## Complexity Analysis
 
-| Phase | Time | Space | Notes |
-|-------|------|-------|-------|
-| DARE solve (offline) | $O(I \cdot n^3)$ | $O(n^2)$ | $I$ iterations, each involving $n \times n$ matrix operations |
-| Control step (online) | $O(n \cdot m)$ | $O(n \cdot m)$ | Single matrix-vector multiply $u = -Kx$ |
+| Phase                 | Time             | Space          | Notes                                                         |
+|-----------------------|------------------|----------------|---------------------------------------------------------------|
+| DARE solve (offline)  | $O(I \cdot n^3)$ | $O(n^2)$       | $I$ iterations, each involving $n \times n$ matrix operations |
+| Control step (online) | $O(n \cdot m)$   | $O(n \cdot m)$ | Single matrix-vector multiply $u = -Kx$                       |
 
 The DARE iteration is the expensive part, but it is done **once** (offline or at initialization). The per-sample cost is just a matrix-vector product.
 
@@ -90,14 +90,14 @@ $$Q = \begin{bmatrix} 100 & 0 \\ 0 & 1 \end{bmatrix}, \quad R = [1]$$
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **Continuous-time LQR** | Solves the Continuous ARE instead of DARE; used for continuous-time plant models |
-| **LQG (Linear Quadratic Gaussian)** | Combines LQR with Kalman filter for systems with noisy, partial observations |
-| **LQR with integral action** | Augments the state with integral of tracking error to eliminate steady-state offset |
-| **Finite-horizon LQR** | Time-varying gain $K[k]$ for finite-duration tasks |
-| **Robust LQR (H∞)** | Accounts for model uncertainty by optimizing the worst-case cost |
-| **Pre-computed gain** | $K$ is computed offline (e.g., in MATLAB with `dlqr`) and hard-coded for embedded targets |
+| Variant                             | Key Difference                                                                            |
+|-------------------------------------|-------------------------------------------------------------------------------------------|
+| **Continuous-time LQR**             | Solves the Continuous ARE instead of DARE; used for continuous-time plant models          |
+| **LQG (Linear Quadratic Gaussian)** | Combines LQR with Kalman filter for systems with noisy, partial observations              |
+| **LQR with integral action**        | Augments the state with integral of tracking error to eliminate steady-state offset       |
+| **Finite-horizon LQR**              | Time-varying gain $K[k]$ for finite-duration tasks                                        |
+| **Robust LQR (H∞)**                 | Accounts for model uncertainty by optimizing the worst-case cost                          |
+| **Pre-computed gain**               | $K$ is computed offline (e.g., in MATLAB with `dlqr`) and hard-coded for embedded targets |
 
 ## Applications
 
@@ -122,12 +122,12 @@ graph LR
     PID -.->|"model-free alternative"| LQR
 ```
 
-| Algorithm | Relationship |
-|-----------|-------------|
-| [DARE Solver](../solvers/DiscreteAlgebraicRiccatiEquation.md) | Computes the cost-to-go matrix $P$ from which $K$ is derived |
-| [Gaussian Elimination](../solvers/GaussianElimination.md) | Used inside DARE iteration to solve linear sub-systems |
-| [Kalman Filter](../filters/active/KalmanFilter.md) | Provides state estimates when direct measurement is unavailable (forming LQG) |
-| [PID Controller](Pid.md) | Model-free alternative; simpler to deploy but not optimal |
+| Algorithm                                                     | Relationship                                                                  |
+|---------------------------------------------------------------|-------------------------------------------------------------------------------|
+| [DARE Solver](../solvers/DiscreteAlgebraicRiccatiEquation.md) | Computes the cost-to-go matrix $P$ from which $K$ is derived                  |
+| [Gaussian Elimination](../solvers/GaussianElimination.md)     | Used inside DARE iteration to solve linear sub-systems                        |
+| [Kalman Filter](../filters/active/KalmanFilter.md)            | Provides state estimates when direct measurement is unavailable (forming LQG) |
+| [PID Controller](Pid.md)                                      | Model-free alternative; simpler to deploy but not optimal                     |
 
 ## References & Further Reading
 

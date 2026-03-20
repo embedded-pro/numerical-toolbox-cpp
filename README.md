@@ -14,15 +14,15 @@ Refer to the documentation and example scripts to quickly integrate and utilize 
 
 ## Documentation
 
-| Category | Description |
-|----------|-------------|
-| [Analysis](doc/analysis/README.md) | FFT, Power Spectral Density, DCT, Root Locus |
-| [Controllers](doc/controllers/README.md) | PID, LQR |
-| [Estimators](doc/estimators/README.md) | Linear Regression, Yule-Walker |
-| [Filters](doc/filters/README.md) | Kalman Filter |
-| [Solvers](doc/solvers/README.md) | Gaussian Elimination, Levinson-Durbin, Durand-Kerner, DARE |
-| [Windowing](doc/windowing/README.md) | Rectangular, Hamming, Hann, Blackman |
-| [Neural Network](doc/neural_network/README.md) | Layers, activations, losses, optimizers, regularization |
+| Category                                       | Description                                                |
+|------------------------------------------------|------------------------------------------------------------|
+| [Analysis](doc/analysis/README.md)             | FFT, Power Spectral Density, DCT, Root Locus               |
+| [Controllers](doc/controllers/README.md)       | PID, LQR                                                   |
+| [Estimators](doc/estimators/README.md)         | Linear Regression, Yule-Walker                             |
+| [Filters](doc/filters/README.md)               | Kalman Filter                                              |
+| [Solvers](doc/solvers/README.md)               | Gaussian Elimination, Levinson-Durbin, Durand-Kerner, DARE |
+| [Windowing](doc/windowing/README.md)           | Rectangular, Hamming, Hann, Blackman                       |
+| [Neural Network](doc/neural_network/README.md) | Layers, activations, losses, optimizers, regularization    |
 
 Each category page lists its algorithms with a brief description and links to the detailed documentation.
 

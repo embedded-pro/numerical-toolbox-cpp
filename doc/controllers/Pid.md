@@ -41,8 +41,8 @@ The output is clamped to $[u_{\min}, u_{\max}]$ after each computation, which al
 
 ## Complexity Analysis
 
-| Case | Time | Space | Notes |
-|------|------|-------|-------|
+| Case       | Time   | Space  | Notes                                   |
+|------------|--------|--------|-----------------------------------------|
 | Per sample | $O(1)$ | $O(1)$ | 3 multiplications, 3 additions, 1 clamp |
 
 The algorithm uses a fixed-size recursive buffer storing $e[n-1]$, $e[n-2]$, and $u[n-1]$. No loops, no dynamic allocation, fully deterministic execution time.
@@ -56,12 +56,12 @@ The algorithm uses a fixed-size recursive buffer storing $e[n-1]$, $e[n-2]$, and
 - $a_1 = -(2 + 0.2) = -2.2$
 - $a_2 = 0.1$
 
-| Step | Measured | $e[n]$ | $e[n-1]$ | $e[n-2]$ | $\Delta u$ | $u[n]$ (clamped) |
-|------|----------|--------|-----------|-----------|------------|-------------------|
-| 0 | 0.0 | 5.0 | 0 | 0 | $2.6 \times 5 = 13$ | **10.0** (clamped) |
-| 1 | 2.0 | 3.0 | 5.0 | 0 | $2.6(3) - 2.2(5) + 0.1(0) = -3.2$ | **6.8** |
-| 2 | 4.0 | 1.0 | 3.0 | 5.0 | $2.6(1) - 2.2(3) + 0.1(5) = -3.5$ | **3.3** |
-| 3 | 4.8 | 0.2 | 1.0 | 3.0 | $2.6(0.2) - 2.2(1) + 0.1(3) = -1.38$ | **1.92** |
+| Step | Measured | $e[n]$ | $e[n-1]$ | $e[n-2]$ | $\Delta u$                           | $u[n]$ (clamped)   |
+|------|----------|--------|----------|----------|--------------------------------------|--------------------|
+| 0    | 0.0      | 5.0    | 0        | 0        | $2.6 \times 5 = 13$                  | **10.0** (clamped) |
+| 1    | 2.0      | 3.0    | 5.0      | 0        | $2.6(3) - 2.2(5) + 0.1(0) = -3.2$    | **6.8**            |
+| 2    | 4.0      | 1.0    | 3.0      | 5.0      | $2.6(1) - 2.2(3) + 0.1(5) = -3.5$    | **3.3**            |
+| 3    | 4.8      | 0.2    | 1.0      | 3.0      | $2.6(0.2) - 2.2(1) + 0.1(3) = -1.38$ | **1.92**           |
 
 The output converges toward the steady-state value needed to maintain the setpoint.
 
@@ -75,14 +75,14 @@ The output converges toward the steady-state value needed to maintain the setpoi
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **Standard (positional) PID** | Computes $u[n]$ from scratch each step using an explicit integral accumulator |
-| **PI controller** | $K_d = 0$; simpler, no derivative noise issues |
-| **PD controller** | $K_i = 0$; no steady-state error correction, used when offset is acceptable |
-| **PID with derivative filter** | Low-passes the derivative term to reject high-frequency noise |
-| **Gain-scheduled PID** | Tuning parameters vary as a function of operating point |
-| **Cascade PID** | Inner and outer loops, each with its own PID — common in motor control |
+| Variant                        | Key Difference                                                                |
+|--------------------------------|-------------------------------------------------------------------------------|
+| **Standard (positional) PID**  | Computes $u[n]$ from scratch each step using an explicit integral accumulator |
+| **PI controller**              | $K_d = 0$; simpler, no derivative noise issues                                |
+| **PD controller**              | $K_i = 0$; no steady-state error correction, used when offset is acceptable   |
+| **PID with derivative filter** | Low-passes the derivative term to reject high-frequency noise                 |
+| **Gain-scheduled PID**         | Tuning parameters vary as a function of operating point                       |
+| **Cascade PID**                | Inner and outer loops, each with its own PID — common in motor control        |
 
 ## Applications
 
@@ -104,10 +104,10 @@ graph LR
     KF -->|"filtered measurement"| PID
 ```
 
-| Algorithm | Relationship |
-|-----------|-------------|
-| [LQR Controller](Lqr.md) | Optimal alternative when a state-space model is available; PID is model-free. |
-| [Kalman Filter](../filters/active/KalmanFilter.md) | Can provide filtered state estimates as input to either PID or LQR |
+| Algorithm                                          | Relationship                                                                  |
+|----------------------------------------------------|-------------------------------------------------------------------------------|
+| [LQR Controller](Lqr.md)                           | Optimal alternative when a state-space model is available; PID is model-free. |
+| [Kalman Filter](../filters/active/KalmanFilter.md) | Can provide filtered state estimates as input to either PID or LQR            |
 
 ## References & Further Reading
 

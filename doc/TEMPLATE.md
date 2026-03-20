@@ -27,11 +27,11 @@ Use LaTeX ($$..$$) for block equations and ($...$) for inline math.
 Time and space complexity WITH justification — not just Big-O, but WHY.
 Include best, average, and worst cases where applicable.
 
-| Case    | Time         | Space   | Notes                        |
-|---------|--------------|---------|------------------------------|
-| Best    | ...          | ...     | ...                          |
-| Average | ...          | ...     | ...                          |
-| Worst   | ...          | ...     | ...                          |
+| Case    | Time | Space | Notes |
+|---------|------|-------|-------|
+| Best    | ...  | ...   | ...   |
+| Average | ...  | ...   | ...   |
+| Worst   | ...  | ...   | ...   |
 -->
 
 ## Step-by-Step Walkthrough
