@@ -2,6 +2,8 @@
 
 namespace solvers
 {
+    template class GaussianElimination<float, 1>;
+    template class GaussianElimination<float, 2>;
     template class GaussianElimination<float, 3>;
 
     template class GaussianElimination<math::Q15, 3>;
