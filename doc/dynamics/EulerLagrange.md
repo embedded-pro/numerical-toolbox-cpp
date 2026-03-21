@@ -66,11 +66,11 @@ where $V(q)$ is the total potential energy of the system.
 
 ## Complexity Analysis
 
-| Operation | Time | Space | Notes |
-|-----------|------|-------|-------|
-| Forward dynamics | $O(n^3)$ | $O(n^2)$ | Dominated by $M^{-1}$ solve via Gaussian elimination |
-| Inverse dynamics | $O(n^2)$ | $O(n^2)$ | Matrix-vector multiplication $M \ddot{q}$ |
-| Model evaluation | Model-dependent | $O(n^2)$ | Computing $M(q)$, $C(q,\dot{q})$, $g(q)$ |
+| Operation        | Time            | Space    | Notes                                                |
+|------------------|-----------------|----------|------------------------------------------------------|
+| Forward dynamics | $O(n^3)$        | $O(n^2)$ | Dominated by $M^{-1}$ solve via Gaussian elimination |
+| Inverse dynamics | $O(n^2)$        | $O(n^2)$ | Matrix-vector multiplication $M \ddot{q}$            |
+| Model evaluation | Model-dependent | $O(n^2)$ | Computing $M(q)$, $C(q,\dot{q})$, $g(q)$             |
 
 For systems with $n \leq 6$ DOF (typical robotic manipulators), the $O(n^3)$ cost of Gaussian elimination is negligible. For larger systems, consider the Recursive Newton-Euler Algorithm (RNEA) which achieves $O(n)$ inverse dynamics.
 
@@ -114,13 +114,13 @@ For a 2-DOF arm with equal links ($m_1 = m_2 = 1\,\text{kg}$, $l_1 = l_2 = 1\,\t
 
 ## Variants & Generalizations
 
-| Variant | Trade-off | Use Case |
-|---------|-----------|----------|
-| **Euler-Lagrange** (this) | $O(n^3)$ forward, closed-form, intuitive | Small systems ($n \leq 6$), control design, analysis |
-| **Newton-Euler** | Body-by-body force balance | Single rigid bodies, intuitive for simple systems |
-| **Recursive Newton-Euler (RNEA)** | $O(n)$ inverse dynamics | Large kinematic chains, real-time control |
-| **Articulated Body Algorithm (ABA)** | $O(n)$ forward dynamics | Large chains, simulation |
-| **Hamiltonian formulation** | Phase-space, symplectic integration | Long-horizon simulation, energy preservation |
+| Variant                              | Trade-off                                | Use Case                                             |
+|--------------------------------------|------------------------------------------|------------------------------------------------------|
+| **Euler-Lagrange** (this)            | $O(n^3)$ forward, closed-form, intuitive | Small systems ($n \leq 6$), control design, analysis |
+| **Newton-Euler**                     | Body-by-body force balance               | Single rigid bodies, intuitive for simple systems    |
+| **Recursive Newton-Euler (RNEA)**    | $O(n)$ inverse dynamics                  | Large kinematic chains, real-time control            |
+| **Articulated Body Algorithm (ABA)** | $O(n)$ forward dynamics                  | Large chains, simulation                             |
+| **Hamiltonian formulation**          | Phase-space, symplectic integration      | Long-horizon simulation, energy preservation         |
 
 ## Applications
 

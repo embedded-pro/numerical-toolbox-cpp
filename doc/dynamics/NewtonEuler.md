@@ -68,11 +68,11 @@ $$\tau_z = I_{zz}\dot{\omega}_z + (I_{yy} - I_{xx})\omega_x\omega_y$$
 
 ## Complexity Analysis
 
-| Operation | Time | Space | Notes |
-|-----------|------|-------|-------|
+| Operation        | Time   | Space  | Notes                                                |
+|------------------|--------|--------|------------------------------------------------------|
 | Forward dynamics | $O(1)$ | $O(1)$ | Fixed 3×3 system; Gaussian elimination on 3×3 matrix |
-| Inverse dynamics | $O(1)$ | $O(1)$ | Matrix-vector multiply + cross products |
-| Cross product | $O(1)$ | $O(1)$ | 6 multiplications and 3 subtractions |
+| Inverse dynamics | $O(1)$ | $O(1)$ | Matrix-vector multiply + cross products              |
+| Cross product    | $O(1)$ | $O(1)$ | 6 multiplications and 3 subtractions                 |
 
 All operations are constant-time since the spatial dimension is fixed at 3. The $3 \times 3$ Gaussian elimination is effectively a small constant cost.
 
@@ -111,12 +111,12 @@ The body accelerates about the z-axis despite no external torque — this is the
 
 ## Variants & Generalizations
 
-| Variant | Key Difference | Use Case |
-|---------|---------------|----------|
-| **Newton-Euler (this)** | Single rigid body, Cartesian space | Spacecraft attitude, single-body simulation |
-| **Recursive Newton-Euler (RNEA)** | Multi-body recursive algorithm, $O(n)$ | Robot inverse dynamics, real-time control |
-| **Euler-Lagrange** | Generalized coordinates, joint space | Control design, analytical derivations |
-| **Spatial vector algebra** | 6D twist/wrench representation | Compact multi-body formulations |
+| Variant                           | Key Difference                         | Use Case                                    |
+|-----------------------------------|----------------------------------------|---------------------------------------------|
+| **Newton-Euler (this)**           | Single rigid body, Cartesian space     | Spacecraft attitude, single-body simulation |
+| **Recursive Newton-Euler (RNEA)** | Multi-body recursive algorithm, $O(n)$ | Robot inverse dynamics, real-time control   |
+| **Euler-Lagrange**                | Generalized coordinates, joint space   | Control design, analytical derivations      |
+| **Spatial vector algebra**        | 6D twist/wrench representation         | Compact multi-body formulations             |
 
 ## Applications
 

@@ -68,12 +68,12 @@ where $[\hat{u}]_\times$ is the skew-symmetric matrix of $\hat{u}$.
 
 ## Complexity Analysis
 
-| Operation | Time | Space | Notes |
-|-----------|------|-------|-------|
-| Inverse dynamics | $O(n)$ | $O(n)$ | Two linear passes over $n$ links |
-| Per-link forward pass | $O(1)$ | $O(1)$ | Fixed 3×3 matrix-vector operations |
-| Per-link backward pass | $O(1)$ | $O(1)$ | Cross products and additions |
-| Rotation matrix | $O(1)$ | $O(1)$ | Rodrigues' formula: trig functions + 3×3 matrix |
+| Operation              | Time   | Space  | Notes                                           |
+|------------------------|--------|--------|-------------------------------------------------|
+| Inverse dynamics       | $O(n)$ | $O(n)$ | Two linear passes over $n$ links                |
+| Per-link forward pass  | $O(1)$ | $O(1)$ | Fixed 3×3 matrix-vector operations              |
+| Per-link backward pass | $O(1)$ | $O(1)$ | Cross products and additions                    |
+| Rotation matrix        | $O(1)$ | $O(1)$ | Rodrigues' formula: trig functions + 3×3 matrix |
 
 Compared to Euler-Lagrange $O(n^3)$ inverse dynamics, RNEA is dramatically faster for large $n$. For $n = 6$ (typical robot arm), RNEA performs roughly 780 floating-point operations vs. ~14,000 for the matrix approach.
 
@@ -111,13 +111,13 @@ This matches $I_{\text{end}} \cdot \ddot{q} = \frac{ml^2}{3} \cdot 1 = 0.667$.
 
 ## Variants & Generalizations
 
-| Variant | Key Difference | Use Case |
-|---------|---------------|----------|
-| **RNEA (this)** | $O(n)$ inverse dynamics, serial chain | Real-time robot control, computed torque |
-| **RNEA + mass matrix** | Call RNEA $n+1$ times to build $M(q)$ | Forward dynamics via $\ddot{q} = M^{-1}(\tau - h)$ |
-| **Articulated Body Algorithm (ABA)** | $O(n)$ forward dynamics directly | Simulation without forming $M$ |
-| **Extended RNEA** | Includes friction, motor inertia | Realistic robot modeling |
-| **RNEA for trees** | Handles branching chains | Humanoid robots, multi-fingered hands |
+| Variant                              | Key Difference                        | Use Case                                           |
+|--------------------------------------|---------------------------------------|----------------------------------------------------|
+| **RNEA (this)**                      | $O(n)$ inverse dynamics, serial chain | Real-time robot control, computed torque           |
+| **RNEA + mass matrix**               | Call RNEA $n+1$ times to build $M(q)$ | Forward dynamics via $\ddot{q} = M^{-1}(\tau - h)$ |
+| **Articulated Body Algorithm (ABA)** | $O(n)$ forward dynamics directly      | Simulation without forming $M$                     |
+| **Extended RNEA**                    | Includes friction, motor inertia      | Realistic robot modeling                           |
+| **RNEA for trees**                   | Handles branching chains              | Humanoid robots, multi-fingered hands              |
 
 ## Applications
 
