@@ -15,8 +15,8 @@ namespace dynamics
     template<typename T, std::size_t NumLinks>
     class RecursiveNewtonEuler
     {
-        static_assert(math::detail::is_supported_type_v<T>,
-            "RecursiveNewtonEuler only supports float or QNumber types");
+        static_assert(std::is_floating_point_v<T>,
+            "RecursiveNewtonEuler only supports floating-point types");
         static_assert(NumLinks > 0, "Number of links must be positive");
 
     public:
@@ -56,8 +56,8 @@ namespace dynamics
     typename RecursiveNewtonEuler<T, NumLinks>::Matrix3
     RecursiveNewtonEuler<T, NumLinks>::RotationAboutAxis(const Vector3& axis, T angle)
     {
-        T c = static_cast<T>(std::cos(math::ToFloat(angle)));
-        T s = static_cast<T>(std::sin(math::ToFloat(angle)));
+        T c = std::cos(angle);
+        T s = std::sin(angle);
         T t = T(1.0f) - c;
 
         T x = axis.at(0, 0);

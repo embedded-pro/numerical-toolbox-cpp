@@ -11,8 +11,8 @@ namespace dynamics
     template<typename T>
     class NewtonEulerBody
     {
-        static_assert(math::detail::is_supported_type_v<T>,
-            "NewtonEulerBody only supports float or QNumber types");
+        static_assert(std::is_floating_point_v<T>,
+            "NewtonEulerBody only supports floating-point types");
 
     public:
         using Vector3 = math::Vector<T, 3>;

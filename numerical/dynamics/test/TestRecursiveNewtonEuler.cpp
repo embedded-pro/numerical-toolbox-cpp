@@ -67,8 +67,21 @@ namespace
 
 TEST_F(TestRecursiveNewtonEuler, single_link_gravity_torque_at_horizontal)
 {
-    // Pendulum horizontal (q=0 → link along x-axis), at rest
-    auto link = MakePendulumLink(1.0f, 1.0f);
+    // Pendulum rotating about y-axis in x-z plane, horizontal at q=0 (link along x)
+    float mass = 1.0f;
+    float length = 1.0f;
+    float I = mass * length * length / 12.0f;
+
+    dynamics::RevoluteJointLink<float> link{
+        mass,
+        math::SquareMatrix<float, 3>{
+            { 0.0f, 0.0f, 0.0f },
+            { 0.0f, I, 0.0f },
+            { 0.0f, 0.0f, I } },
+        math::Vector<float, 3>{ 0.0f, 1.0f, 0.0f },         // y-axis rotation
+        math::Vector<float, 3>{},                           // joint at parent origin
+        math::Vector<float, 3>{ length / 2.0f, 0.0f, 0.0f } // CoM at half-length
+    };
     std::array<dynamics::RevoluteJointLink<float>, 1> links = { link };
 
     math::Vector<float, 1> q{ 0.0f };
@@ -77,15 +90,12 @@ TEST_F(TestRecursiveNewtonEuler, single_link_gravity_torque_at_horizontal)
 
     auto tau = rnea1.InverseDynamics(links, q, qDot, qDDot, gravityVec);
 
-    // Gravity torque = m * g * lc * cos(q) about z-axis (with gravity in -z)
-    // At q=0 horizontal, gravity is -z, link along x → torque about z = m*g*lc
-    // But gravity is in -z and we're rotating about z in x-y plane
-    // Force on CoM = [0, 0, -mg], r_CoM = [0.5, 0, 0]
-    // torque = r x F = [0.5, 0, 0] x [0, 0, -mg] = [0*(-mg)-0*0, 0*0-0.5*(-mg), 0.5*0-0*0]
-    //        = [0, 0.5*mg, 0] → z-component = 0
-    // Actually for a planar arm moving in the x-z plane rotating about y-axis... let's just check consistency
-    // The sign and magnitude depend on frame conventions; verify with roundtrip instead
-    EXPECT_TRUE(std::abs(tau.at(0, 0)) > 0.0f || true); // gravity may or may not produce z-torque depending on config
+    // At q=0: link along x, gravity in -z, rotating about y-axis
+    // Fictitious base acceleration = [0, 0, g], force on CoM = [0, 0, mg]
+    // Torque = rCoM x force = [l/2, 0, 0] x [0, 0, mg] = [0, -mg*l/2, 0]
+    // Projected on y-axis: tau = -m*g*l/2
+    float expected = -mass * gravity * (length / 2.0f);
+    EXPECT_NEAR(tau.at(0, 0), expected, 0.01f);
 }
 
 TEST_F(TestRecursiveNewtonEuler, single_link_zero_gravity_zero_motion_gives_zero_torque)

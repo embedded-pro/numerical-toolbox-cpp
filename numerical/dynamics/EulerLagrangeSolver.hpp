@@ -14,8 +14,8 @@ namespace dynamics
     template<typename T, std::size_t Dof>
     class EulerLagrangeSolver
     {
-        static_assert(math::detail::is_supported_type_v<T>,
-            "EulerLagrangeSolver only supports float or QNumber types");
+        static_assert(std::is_floating_point_v<T>,
+            "EulerLagrangeSolver only supports floating-point types");
         static_assert(math::detail::is_valid_dimensions_v<Dof, Dof>,
             "Degrees of freedom must be positive");
 

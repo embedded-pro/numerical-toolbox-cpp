@@ -12,6 +12,9 @@ namespace dynamics
     template<typename T>
     struct RevoluteJointLink
     {
+        static_assert(std::is_floating_point_v<T>,
+            "RevoluteJointLink only supports floating-point types");
+
         T mass;
         math::SquareMatrix<T, 3> inertia; // inertia tensor at center of mass, in link frame
         math::Vector<T, 3> jointAxis;     // joint rotation axis in link frame (unit vector)

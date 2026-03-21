@@ -28,8 +28,8 @@ namespace dynamics
     template<typename T>
     class NewtonEulerSolver
     {
-        static_assert(math::detail::is_supported_type_v<T>,
-            "NewtonEulerSolver only supports float or QNumber types");
+        static_assert(std::is_floating_point_v<T>,
+            "NewtonEulerSolver only supports floating-point types");
 
     public:
         using Vector3 = math::Vector<T, 3>;
