@@ -9,6 +9,7 @@ This is a numerical algorithms library providing digital signal processing (DSP)
 - **numerical/**: Core implementation of algorithms organized by domain:
   - `analysis/`: Signal analysis (FFT, PSD, DCT)
   - `controllers/`: Control algorithms (PID controllers)
+  - `dynamics/`: Dynamics and modeling (Euler-Lagrange)
   - `estimators/`: Estimation algorithms (Linear Regression, Yule-Walker)
   - `filters/`: Digital filters (FIR, IIR, Kalman)
   - `math/`: Mathematical foundations (QNumber, Matrix, Complex, Trigonometric functions)
@@ -61,7 +62,7 @@ Place code here when it is:
 - Estimators and solvers
 - Neural network components
 - Hardware-agnostic and reusable across projects
-- Organized by domain (analysis, controllers, filters, estimators, math, neural_network, solvers, windowing)
+- Organized by domain (analysis, controllers, dynamics, filters, estimators, math, neural_network, solvers, windowing)
 
 ### Examples (`examples/`)
 
@@ -244,6 +245,7 @@ class Algorithm
 - **NAMESPACE**: Use appropriate namespaces by domain:
   - `analysis::` - Signal analysis algorithms
   - `controllers::` - Control system algorithms
+  - `dynamics::` - Dynamics and modeling algorithms
   - `estimators::` - Estimation algorithms
   - `filters::passive::` - Passive filters (FIR, IIR)
   - `filters::active::` - Active filters (Kalman)
@@ -417,6 +419,16 @@ Defined in `numerical/math/CompilerOptimizations.hpp`:
 - **Saturation**: Clamp outputs to prevent actuator saturation issues
 - **Derivative Filtering**: Consider derivative kick prevention techniques
 - **Discretization**: Document the discretization method used (Tustin, forward Euler, etc.)
+
+### Dynamics & Modeling (Euler-Lagrange, Newton-Euler)
+
+- **Generalized Coordinates**: Use radians for revolute joints, meters for prismatic joints
+- **Mass Matrix**: Must be symmetric positive definite; verify in tests
+- **Coriolis Convention**: Interface returns $C(q,\dot{q})\dot{q}$ (the product), not the matrix $C$ alone
+- **Units**: Torques in N·m, forces in N, angles in radians, angular velocities in rad/s
+- **Float Only**: Dynamics values typically exceed Q15/Q31 range; use `float` unless inputs are scaled
+- **Forward Dynamics**: Use `GaussianElimination` for the $M^{-1}$ solve; avoid explicit matrix inversion
+- **DOF Sizes**: Explicitly instantiate for Dof = 1, 2, 3 (pendulum, planar arm, 3-link)
 
 ### Neural Networks
 

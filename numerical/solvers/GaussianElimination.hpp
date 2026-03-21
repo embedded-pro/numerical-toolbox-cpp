@@ -153,6 +153,8 @@ namespace solvers
         return GaussianElimination<T, N>();
     }
 
+    extern template class GaussianElimination<float, 1>;
+    extern template class GaussianElimination<float, 2>;
     extern template class GaussianElimination<float, 3>;
 
     extern template class GaussianElimination<math::Q15, 3>;
