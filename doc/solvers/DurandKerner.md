@@ -1,96 +1,119 @@
 # Durand-Kerner Polynomial Root Finder
 
-## Process Overview
+## Overview & Motivation
 
-```mermaid
-graph TD
-    A[Input Polynomial Coefficients] --> B{Empty or Zero-Order?}
-    B -->|Yes| C[Return Empty Roots]
-    B -->|No| D{First-Order?}
-    D -->|Yes| E[Direct Solution: -c₁/c₀]
-    D -->|No| F[Initialize Roots on Circle]
-    F --> G[Iterative Refinement]
-    G --> H{Converged or Max Iterations?}
-    H -->|No| G
-    H -->|Yes| I[Sort Roots by Real Part]
-    I --> J[Return Roots]
-```
+Given a polynomial $P(z) = c_0 z^n + c_1 z^{n-1} + \cdots + c_n$, finding all roots (real and complex) is a fundamental problem in control theory, signal processing, and numerical analysis. Analytical formulas exist only for degree $\leq 4$; beyond that, iterative methods are required.
 
-## Mathematical Background
+The **Durand-Kerner method** (also known as the Weierstrass iteration) simultaneously refines approximations to *all* roots at once. Each root estimate is updated using Newton's method, but instead of computing the derivative of $P$, the other root estimates are used to factor out known roots. This avoids **polynomial deflation** — a process that accumulates errors as roots are extracted sequentially.
 
-### Polynomial Representation
+The method is elegant, easy to implement, and works for polynomials with complex coefficients and complex roots.
 
-The polynomial is represented in descending power order:
+## Mathematical Theory
 
-$$P(z) = c_0 z^n + c_1 z^{n-1} + \cdots + c_{n-1} z + c_n$$
+### Update Rule
 
-where the coefficients array is `[c₀, c₁, ..., cₙ]` with `c₀ ≠ 0` (leading coefficient).
+Given current root estimates $z_0, z_1, \ldots, z_{n-1}$, each is updated simultaneously:
 
-### Durand-Kerner Method
+$$z_r^{(k+1)} = z_r^{(k)} - \frac{P(z_r^{(k)})}{\displaystyle\prod_{j \neq r} \left(z_r^{(k)} - z_j^{(k)}\right)}$$
 
-The Durand-Kerner method (also known as Weierstrass iteration) simultaneously refines all roots of a polynomial. Given current root estimates $z_0, z_1, \ldots, z_{n-1}$, each root is updated:
+### Relationship to Newton's Method
 
-$$z_r^{(k+1)} = z_r^{(k)} - \frac{P(z_r^{(k)})}{\prod_{j \neq r} (z_r^{(k)} - z_j^{(k)})}$$
+For a polynomial $P(z) = c_0 \prod_{j=0}^{n-1}(z - z_j)$, the derivative is:
 
-This is equivalent to applying Newton's method but using the other root estimates to factor out known roots from the denominator, avoiding explicit polynomial deflation.
+$$P'(z_r) = c_0 \prod_{j \neq r}(z_r - z_j)$$
+
+So the Durand-Kerner update is exactly Newton's: $z_r - P(z_r)/P'(z_r)$, but with $P'$ approximated using the current root estimates rather than computed from coefficients.
 
 ### Initial Root Placement
 
-Roots are initialized uniformly on a circle of radius:
+Roots are initialized on a circle of radius:
 
-$$R = \left| \frac{c_n}{c_0} \right|^{1/n}$$
+$$R = \left|\frac{c_n}{c_0}\right|^{1/n}$$
 
-with an angular offset of 0.4 radians to break symmetry. If $R < 0.1$, it defaults to 1.0.
+with angular positions offset by 0.4 radians to break symmetry. If $R < 0.1$, it defaults to 1.0.
 
 ### Convergence
 
-- **Quadratic convergence** when roots are well-separated
-- **Linear convergence** near repeated roots
-- Terminates when all corrections $|z_r^{(k+1)} - z_r^{(k)}| < \epsilon$ (default $\epsilon = 10^{-6}$)
-- Maximum iteration limit (default 200) prevents infinite loops
+- **Quadratic convergence** when roots are well-separated.
+- **Linear convergence** near repeated (multiple) roots.
+- Terminates when all corrections satisfy $|z_r^{(k+1)} - z_r^{(k)}| < \varepsilon$.
 
-## API
+## Complexity Analysis
 
-```cpp
-#include "numerical/solvers/DurandKerner.hpp"
+| Case          | Time       | Space  | Notes                                                        |
+|---------------|------------|--------|--------------------------------------------------------------|
+| Per iteration | $O(n^2)$   | $O(n)$ | Evaluating $P$ and the denominator product for all $n$ roots |
+| Total         | $O(n^2 k)$ | $O(n)$ | $k$ iterations until convergence (typically $k \ll n$)       |
 
-solvers::DurandKerner<float, 10> solver;
+**Why $O(n^2)$:** For each of the $n$ roots, computing the denominator product requires multiplying $n-1$ terms.
 
-// Coefficients for z^3 - 6z^2 + 11z - 6 = (z-1)(z-2)(z-3)
-std::array<float, 4> coeffs = { 1.0f, -6.0f, 11.0f, -6.0f };
-auto roots = solver.Solve(infra::MakeRange(coeffs));
-// roots ≈ {1+0j, 2+0j, 3+0j}
+## Step-by-Step Walkthrough
+
+**Polynomial:** $P(z) = z^3 - 6z^2 + 11z - 6 = (z-1)(z-2)(z-3)$
+
+**Step 1 — Initialize** on radius $R = |{-6}/{1}|^{1/3} = 6^{1/3} \approx 1.817$:
+
+- $z_0 = 1.817 \, e^{j \cdot 0.4} \approx 1.670 + 0.708j$
+- $z_1 = 1.817 \, e^{j \cdot 2.494} \approx -1.458 + 1.082j$
+- $z_2 = 1.817 \, e^{j \cdot 4.589} \approx -0.212 - 1.805j$
+
+**Step 2 — Iteration 1 (for $z_0$):**
+
+1. Evaluate $P(z_0) = z_0^3 - 6z_0^2 + 11z_0 - 6$
+2. Compute denominator: $(z_0 - z_1)(z_0 - z_2)$
+3. Update: $z_0 \leftarrow z_0 - P(z_0) / \text{denom}$
+
+**Step 3 — Repeat** for $z_1$ and $z_2$ (using the latest values).
+
+**Step 4 — Iterate** until $\max_r |z_r^{(k+1)} - z_r^{(k)}| < 10^{-6}$.
+
+After ~15–20 iterations the roots converge to $z \approx \{1, 2, 3\}$ (imaginary parts $< 10^{-6}$).
+
+## Pitfalls & Edge Cases
+
+- **Repeated roots.** Convergence degrades from quadratic to linear. Higher tolerance or more iterations may be needed.
+- **Near-degenerate denominators.** When two root estimates are very close ($|z_r - z_j| < 10^{-15}$), the denominator product approaches zero. The implementation excludes such terms to avoid division by near-zero.
+- **Leading coefficient must be non-zero.** The polynomial degree is determined by the first coefficient.
+- **Complex arithmetic required.** This algorithm operates entirely in $\mathbb{C}$, so it is limited to floating-point types (`float`, `double`). Fixed-point types are not supported.
+- **No convergence guarantee for all polynomials.** Wilkinson's polynomial and other pathological cases may require higher precision or alternative methods.
+- **Root ordering.** Results are sorted by real part (ascending), which may not correspond to meaningful branch ordering in applications like [Root Locus](../analysis/RootLocus.md).
+
+## Variants & Generalizations
+
+| Variant                            | Key Difference                                                                                                                 |
+|------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| **Aberth-Ehrlich method**          | Similar simultaneous iteration but includes a correction term that improves convergence for clustered roots                    |
+| **Jenkins-Traub**                  | Sequential algorithm (one root at a time) with superior convergence for difficult polynomials; standard in numerical libraries |
+| **Companion matrix + eigenvalues** | Converts to an eigenvalue problem; robust but $O(n^3)$                                                                         |
+| **Laguerre's method**              | Converges cubically for simple roots; sequential (extracts one root at a time, then deflates)                                  |
+| **Muller's method**                | Uses quadratic interpolation; works for non-polynomial equations too                                                           |
+
+## Applications
+
+- **Root locus analysis** — The [Root Locus](../analysis/RootLocus.md) algorithm calls Durand-Kerner at each gain step to find the closed-loop poles.
+- **Stability analysis** — Determining whether all roots of a characteristic polynomial lie inside the unit circle (discrete) or left half-plane (continuous).
+- **Filter design** — Finding pole and zero locations of transfer functions.
+- **Control system design** — Evaluating characteristic equations to check stability margins.
+
+## Connections to Other Algorithms
+
+```mermaid
+graph LR
+    DK["Durand-Kerner"]
+    RL["Root Locus"]
+    GE["Gaussian Elimination"]
+    RL --> DK
+    GE -.->|"companion matrix alternative"| DK
 ```
 
-### Template Parameters
+| Algorithm                                      | Relationship                                                                                          |
+|------------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| [Root Locus](../analysis/RootLocus.md)         | Primary consumer — calls Durand-Kerner to find characteristic polynomial roots at each gain step      |
+| [Gaussian Elimination](GaussianElimination.md) | Alternative approach: form the companion matrix and compute eigenvalues (requires a different solver) |
 
-| Parameter | Description |
-|-----------|-------------|
-| `T` | Floating-point type (`float` or `double`) |
-| `MaxOrder` | Maximum polynomial degree supported |
+## References & Further Reading
 
-### Solve Parameters
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `coefficients` | — | Polynomial coefficients in descending power order |
-| `maxIterations` | 200 | Maximum number of Durand-Kerner iterations |
-| `tolerance` | 1e-6 | Convergence threshold for root corrections |
-
-### Preconditions
-
-- `coefficients` must not be empty
-- Leading coefficient `coefficients[0]` must be non-zero
-- Polynomial order must not exceed `MaxOrder`
-
-### Complexity
-
-- **Time**: $O(n^2 \cdot k)$ where $n$ is polynomial order and $k$ is iteration count
-- **Space**: $O(n)$ — roots stored in `BoundedVector`
-
-## Numerical Considerations
-
-- **Near-degenerate denominators**: When two root estimates are very close ($|z_r - z_j| < 10^{-15}$), the difference is excluded from the denominator product to avoid division by near-zero
-- **Root sorting**: Results are sorted by real part (ascending), with imaginary part as tiebreaker
-- **Fixed-point**: Only floating-point types (`float`, `double`) are supported due to the complex arithmetic requirements
-- **Ill-conditioned polynomials**: Polynomials with clustered or repeated roots may converge slowly; increase `maxIterations` if needed
+- Durand, E., *Solutions numériques des équations algébriques*, Masson, 1960.
+- Kerner, I.O., "Ein Gesamtschrittverfahren zur Berechnung der Nullstellen von Polynomen", *Numerische Mathematik*, 8, 1966.
+- Aberth, O., "Iteration methods for finding all zeros of a polynomial simultaneously", *Mathematics of Computation*, 27(122), 1973.
+- Press, W.H. et al., *Numerical Recipes*, 3rd ed., Cambridge University Press, 2007 — Section 9.5.

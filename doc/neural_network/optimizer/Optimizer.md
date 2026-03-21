@@ -1,306 +1,141 @@
-# Optimizer Implementation Guide
+# Gradient Descent Optimizer
 
-## Process Overview
+## Overview & Motivation
 
-The following diagram illustrates the optimization process in neural networks:
+An **optimizer** adjusts a model's parameter vector $\theta \in \mathbb{R}^P$ to minimize a [loss function](../losses/Loss.md) $\mathcal{L}(\theta)$. The simplest and most fundamental strategy is **gradient descent**: repeatedly step in the direction of steepest descent:
 
-![Optimization Methods](OptimizationMethods.svg)
+$$\theta_{t+1} = \theta_t - \eta \, \nabla_\theta \mathcal{L}(\theta_t)$$
 
-The diagram shows how optimizers:
-1. Navigate the loss landscape to find parameter values that minimize the loss
-2. Use different strategies to approach the minimum efficiently
-3. Adjust parameters based on gradient information
-4. Influence convergence speed and stability during training
+where $\eta$ is the **learning rate** — the single most important hyper-parameter in neural network training.
 
-## Mathematical Background
+This library provides a batch gradient descent optimizer with a fixed learning rate and maximum iteration count, suitable for small embedded models where training data fits in memory and simplicity is paramount.
 
-### Optimization Purpose
+## Mathematical Theory
 
-Neural network training is fundamentally an optimization problem. For a model with parameters θ and loss function L(θ), we aim to find:
+### The Gradient
 
-$$\theta^* = \arg\min_{\theta} L(\theta)$$
+The gradient $\nabla_\theta \mathcal{L}$ is obtained via [back-propagation](../NeuralNetwork.md). Each component $\frac{\partial \mathcal{L}}{\partial \theta_i}$ tells how much the loss changes when $\theta_i$ is perturbed by a small amount. The gradient points **uphill**; subtracting it moves **downhill**.
 
-Most optimization algorithms for neural networks use gradient information to iteratively update parameters:
+### Convergence Conditions
 
-$$\theta_{t+1} = \theta_t + \Delta\theta_t$$
+For a convex loss with Lipschitz-continuous gradient ($L$-smooth):
 
-where Δθ₍ₜ₎ is the parameter update at step t.
+$$\mathcal{L}(\theta_T) - \mathcal{L}(\theta^*) \le \frac{\|\theta_0 - \theta^*\|^2}{2 \eta T}$$
 
-### Gradient Descent
+provided $\eta < \frac{1}{L}$. This gives a convergence rate of $O(1/T)$.
 
-Gradient Descent is the fundamental optimization algorithm that updates parameters in the direction of steepest descent:
+For non-convex losses (typical in neural networks), gradient descent converges to a **stationary point** ($\|\nabla \mathcal{L}\| \approx 0$) which may be a local minimum or saddle point — not necessarily the global minimum.
 
-$$\theta_{t+1} = \theta_t - \eta \nabla L(\theta_t)$$
+### Learning Rate Sensitivity
 
-where:
-- η (eta) is the learning rate
-- ∇L(θₜ) is the gradient of the loss function with respect to parameters
+| $\eta$                       | Behavior                                 |
+|------------------------------|------------------------------------------|
+| Too small ($\eta \ll 1/L$)   | Slow convergence, many iterations wasted |
+| Optimal ($\eta \approx 1/L$) | Fastest reliable convergence             |
+| Too large ($\eta > 2/L$)     | Oscillation and divergence               |
 
-## Implementation Details
-
-### Class Structure
-
-```cpp
-template<typename QNumberType, std::size_t NumberOfFeatures>
-class Optimizer
-{
-    static_assert(math::is_qnumber<QNumberType>::value || std::is_floating_point<QNumberType>::value,
-        "Optimizer can only be instantiated with math::QNumber types.");
-
-public:
-    using Vector = typename Loss<QNumberType, NumberOfFeatures>::Vector;
-
-    struct Result
-    {
-        Result(Vector parameters, QNumberType finalCost, size_t iterations)
-            : parameters(parameters)
-            , finalCost(finalCost)
-            , iterations(iterations)
-        {}
-
-        Vector parameters;
-        QNumberType finalCost;
-        std::size_t iterations;
-    };
-
-    virtual const Result& Minimize(const Vector& initialGuess, Loss<QNumberType, NumberOfFeatures>& loss) = 0;
-};
+```mermaid
+graph LR
+    subgraph "Learning Rate Effect"
+        A["η too small<br/>crawls to minimum"] 
+        B["η just right<br/>smooth convergence"]
+        C["η too large<br/>oscillates / diverges"]
+    end
 ```
 
-### Key Implementations
+## Complexity Analysis
 
-1. **Gradient Descent**:
-   - Simplest optimization algorithm
-   - Updates parameters directly proportional to negative gradient
-   - Controlled by learning rate parameter
-   **Mathematical Update Rule:**
-   $$\theta_{t+1} = \theta_t - \eta \nabla L(\theta_t)$$
-   where:
-   - θₜ are the parameters at step t
-   - η is the learning rate
-   - ∇L(θₜ) is the gradient at step t
-   ```cpp
-   template<typename QNumberType, size_t NumberOfFeatures>
-   class GradientDescent : public Optimizer<QNumberType, NumberOfFeatures>
-   {
-   public:
-       using Result = typename Optimizer<QNumberType, NumberOfFeatures>::Result;
-       using Vector = typename Loss<QNumberType, NumberOfFeatures>::Vector;
+| Operation                     | Time                 | Space                  |
+|-------------------------------|----------------------|------------------------|
+| One gradient evaluation       | $O(P)$ per parameter | $O(P)$ gradient vector |
+| One parameter update          | $O(P)$               | In-place               |
+| Total training (T iterations) | $O(T \cdot P)$       | $O(P)$ working memory  |
 
-       struct Parameters
-       {
-           QNumberType learningRate;
-           size_t maxIterations;
-       };
+Memory overhead is minimal: only the current parameter vector, the gradient vector, and the optimizer result. No momentum buffers or second-moment estimates.
 
-       explicit GradientDescent(const Parameters& params);
-       
-       const Result& Minimize(const Vector& initialGuess, 
-                            Loss<QNumberType, NumberOfFeatures>& loss) override
-       {
-           auto currentParams = initialGuess;
-           auto currentCost = loss.Cost(currentParams);
-           Vector previousParams;
-           size_t iteration = 0;
+## Step-by-Step Walkthrough
 
-           while (iteration < parameters.maxIterations)
-           {
-               previousParams = currentParams;
+**Setup:** 2 parameters, $\theta_0 = [2.0, -1.0]^T$, $\eta = 0.1$, loss $\mathcal{L}(\theta) = \theta_1^2 + \theta_2^2$ (quadratic bowl).
 
-               // Compute gradient and update parameters
-               auto gradient = loss.Gradient(currentParams);
-               currentParams = currentParams - (gradient * parameters.learningRate);
+**Iteration 1:**
 
-               currentCost = loss.Cost(currentParams);
-               ++iteration;
-           }
+| Step     | Computation                                         | Result        |
+|----------|-----------------------------------------------------|---------------|
+| Gradient | $\nabla \mathcal{L} = [2\theta_1, 2\theta_2]$       | $[4.0, -2.0]$ |
+| Update   | $\theta_1 = \theta_0 - 0.1 \cdot \nabla\mathcal{L}$ | $[1.6, -0.8]$ |
+| Loss     | $\mathcal{L}(\theta_1) = 1.6^2 + 0.8^2$             | $3.20$        |
 
-           result.emplace(currentParams, currentCost, iteration);
-           return *result;
-       }
+**Iteration 2:**
 
-   private:
-       Parameters parameters;
-       std::optional<Result> result;
-   };
-   ```
+| Step     | Computation     | Result |
+|----------|-----------------|--------|
+| Gradient | $[3.2, -1.6]$   |        |
+| Update   | $[1.28, -0.64]$ |        |
+| Loss     | $2.048$         |        |
 
-## Usage Guide
+**Pattern:** Each iteration multiplies the loss by $(1 - 2\eta)^2 = 0.64$. After 20 iterations, $\mathcal{L} \approx 0.0003$.
 
-### Basic Usage
+**Convergence trace:**
 
-```cpp
-// Define optimization parameters
-constexpr std::size_t parameterSize = 100;
-using FloatType = float;
-
-// Configure gradient descent
-GradientDescent<FloatType, parameterSize>::Parameters gdParams;
-gdParams.learningRate = 0.01f;
-gdParams.maxIterations = 1000;
-
-// Create optimizer
-GradientDescent<FloatType, parameterSize> optimizer(gdParams);
-
-// Create initial parameter vector
-math::Vector<FloatType, parameterSize> initialParameters;
-// Initialize parameters...
-
-// Create loss function
-MeanSquaredError<FloatType, parameterSize> lossFunction(target);
-
-// Run optimization
-const auto& result = optimizer.Minimize(initialParameters, lossFunction);
-
-// Access optimization results
-auto optimizedParameters = result.parameters;
-auto finalLoss = result.finalCost;
-auto iterationsUsed = result.iterations;
+```mermaid
+graph LR
+    I0["θ₀ = (2, -1)<br/>ℒ = 5.0"] --> I1["θ₁ = (1.6, -0.8)<br/>ℒ = 3.2"]
+    I1 --> I2["θ₂ = (1.28, -0.64)<br/>ℒ = 2.05"]
+    I2 --> Idots["⋯"]
+    Idots --> I20["θ₂₀ ≈ (0.01, -0.005)<br/>ℒ ≈ 0.0003"]
 ```
 
-### Integration with Neural Network Model
+## Pitfalls & Edge Cases
 
-```cpp
-// Create model
-Model<FloatType, inputSize, outputSize, ...> model;
+- **Learning rate too high.** The loss oscillates or increases. Start with $\eta = 0.01$ and decrease if unstable.
+- **Flat regions / saddle points.** Gradient descent stalls when $\|\nabla \mathcal{L}\| \approx 0$ at non-optimal points. Momentum-based methods escape saddle points faster.
+- **Ill-conditioned loss landscape.** When eigenvalues of the Hessian span many orders of magnitude, gradient descent oscillates along steep directions while barely progressing along flat ones. Adaptive methods (Adam) handle this better.
+- **Max iterations reached.** The optimizer returns whatever parameters it has at `maxIterations` — always check `result.finalCost` to assess convergence quality.
+- **Fixed-point gradients.** In Q15/Q31, multiply-accumulate in the gradient can overflow. Scale the learning rate to keep weight updates within representable range.
 
-// Configure gradient descent
-GradientDescent<FloatType, model.TotalParameters>::Parameters gdParams;
-gdParams.learningRate = 0.01f;
-gdParams.maxIterations = 1000;
+## Variants & Generalizations
 
-// Create optimizer and loss function
-GradientDescent<FloatType, model.TotalParameters> optimizer(gdParams);
-MeanSquaredError<FloatType, model.TotalParameters> loss(target);
+| Variant                               | Key Difference                                                                                 |
+|---------------------------------------|------------------------------------------------------------------------------------------------|
+| **SGD (Stochastic Gradient Descent)** | Uses a random mini-batch per iteration; noise helps escape local minima                        |
+| **SGD with Momentum**                 | Accumulates a velocity: $v_{t+1} = \mu v_t - \eta \nabla\mathcal{L}$; smooths out oscillations |
+| **Nesterov Momentum**                 | Evaluates gradient at the *lookahead* position $\theta + \mu v$; faster convergence            |
+| **AdaGrad**                           | Per-parameter adaptive learning rate based on accumulated squared gradients                    |
+| **RMSProp**                           | Exponentially decaying average of squared gradients; handles non-stationary objectives         |
+| **Adam**                              | Combines momentum and RMSProp with bias correction; most popular adaptive method               |
 
-// Get initial parameters from model
-auto initialParameters = model.GetParameters();
+## Applications
 
-// Train model
-model.Train(optimizer, loss, initialParameters);
+- **On-device neural network training** — Gradient descent trains small models directly on the microcontroller.
+- **Online adaptation** — Updating model parameters in real-time as new sensor data arrives.
+- **Calibration** — Minimizing calibration error for sensor linearization.
+- **System identification** — Fitting model parameters to measured input-output data.
+
+## Connections to Other Algorithms
+
+```mermaid
+graph TD
+    Opt["Optimizer<br/>(Gradient Descent)"]
+    Loss["Loss Functions"]
+    Model["Model"]
+    Reg["Regularization"]
+    LR["Linear Regression"]
+
+    Loss -->|"∇ℒ"| Opt
+    Model -->|"θ, ∇θ"| Opt
+    Reg -->|"penalty gradient"| Loss
+    Opt -.->|"analytical solution at η→∞, 1 step"| LR
 ```
 
-### Learning Rate Selection
+| Component                                                 | Relationship                                                                                      |
+|-----------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| [Loss Functions](../losses/Loss.md)                       | Provides the `Cost()` and `Gradient()` the optimizer calls each iteration                         |
+| [Model](../model/Model.md)                                | Passes initial parameters to the optimizer and receives optimized parameters back                 |
+| [Regularization](../regularization/Regularization.md)     | Adds a penalty gradient to $\nabla\mathcal{L}$, biasing the optimizer toward simpler models       |
+| [Linear Regression](../../estimators/LinearRegression.md) | For MSE on a linear model, gradient descent converges to the same solution as the normal equation |
 
-```cpp
-// Low learning rate (slow but stable convergence)
-GradientDescent<FloatType, parameterSize>::Parameters slowParams;
-slowParams.learningRate = 0.001f;
-slowParams.maxIterations = 5000;
+## References & Further Reading
 
-// Medium learning rate (balanced convergence)
-GradientDescent<FloatType, parameterSize>::Parameters mediumParams;
-mediumParams.learningRate = 0.01f;
-mediumParams.maxIterations = 1000;
-
-// High learning rate (fast but potentially unstable convergence)
-GradientDescent<FloatType, parameterSize>::Parameters fastParams;
-fastParams.learningRate = 0.1f;
-fastParams.maxIterations = 500;
-```
-
-## Best Practices
-
-1. **Learning Rate Selection**:
-   - Too small: slow convergence
-   - Too large: unstable or divergent behavior
-   - Start with 0.01 and adjust based on loss behavior
-   - Consider learning rate schedules for better convergence
-
-2. **Initialization Considerations**:
-   - Parameter initialization affects optimization path
-   - Multiple random initializations can help avoid local minima
-   - Consider scaling based on network architecture
-
-3. **Convergence Monitoring**:
-   - Track loss over iterations to assess convergence
-   - Implement early stopping if loss plateaus
-   - Monitor for oscillations or divergence
-
-## Advanced Optimization Techniques
-
-While the current implementation includes basic Gradient Descent, several advanced optimization algorithms are common in neural network training:
-
-1. **Stochastic Gradient Descent (SGD)**:
-   - Uses subsets of data (mini-batches) for each update
-   - Adds noise to escape local minima
-   - Often faster convergence than batch gradient descent
-
-2. **SGD with Momentum**:
-   - Accumulates a velocity vector to smooth updates
-   - Helps navigate narrow ravines in the loss landscape
-   - Update rule: v₊₁ = μv - η∇L(θ), θ₊₁ = θ + v₊₁
-
-3. **Adaptive Methods**:
-   - AdaGrad: Adapts learning rates per-parameter based on historical gradients
-   - RMSProp: Uses exponentially weighted moving average of squared gradients
-   - Adam: Combines momentum and RMSProp with bias correction
-
-## Performance Considerations
-
-1. **Computation Efficiency**:
-   - Gradient computation is typically the bottleneck
-   - Consider vectorized operations for parameter updates
-   - Mini-batch processing can improve performance
-
-2. **Numeric Stability**:
-   - Check for NaN or Infinity in parameters and gradients
-   - Clip gradients to prevent explosion
-   - Use stable parameter update implementations
-
-3. **Memory Usage**:
-   - Basic gradient descent has minimal memory overhead
-   - Advanced optimizers require additional state variables
-   - Consider memory implications for very large models
-
-## Convergence Properties
-
-1. **Convergence Rate**:
-   - Linear convergence for well-conditioned problems
-   - Slower convergence for ill-conditioned loss landscapes
-   - Affected by learning rate and problem structure
-
-2. **Local vs. Global Minima**:
-   - Basic gradient descent may get trapped in local minima
-   - No guarantee of finding global optimum for non-convex problems
-   - Multiple runs with different initializations can help
-
-3. **Oscillations and Overshooting**:
-   - Can occur with high learning rates
-   - May require learning rate adjustment or momentum
-   - Monitor loss trajectory for stability
-
-## Limitations and Future Improvements
-
-1. Current limitations:
-   - Only basic gradient descent implemented
-   - Fixed learning rate throughout training
-   - No convergence criteria beyond max iterations
-   - Fixed-size parameter vectors
-
-2. Possible extensions:
-   - Momentum-based gradient descent
-   - Adaptive optimizers (Adam, RMSProp, AdaGrad)
-   - Learning rate schedules
-   - Convergence-based stopping criteria
-   - Mini-batch processing support
-   - Line search for optimal step size
-   - Second-order methods (L-BFGS, Newton's method)
-   - Distributed optimization for large models
-
-## Error Handling
-
-1. Static assertions verify:
-   - Valid numeric types
-   - Appropriate parameter sizes
-
-2. Runtime checks:
-   - Positive learning rate
-   - Reasonable maximum iterations
-   - Parameter initialization validity
-   - Gradient validity during updates
-
-3. Considerations:
-   - Implement gradient clipping to prevent exploding gradients
-   - Add checks for NaN and infinity values
-   - Monitor loss for unexpected increases
+- Ruder, S., "An overview of gradient descent optimization algorithms", *arXiv:1609.04747*, 2016.
+- Bottou, L., Curtis, F.E., and Nocedal, J., "Optimization methods for large-scale machine learning", *SIAM Review*, 60(2), 2018.
+- Kingma, D.P. and Ba, J., "Adam: A method for stochastic optimization", *ICLR*, 2015.
