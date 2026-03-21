@@ -10,4 +10,5 @@ target_link_libraries(numerical.dynamics_test PUBLIC
 target_sources(numerical.dynamics_test PRIVATE
     TestEulerLagrangeSolver.cpp
     TestNewtonEulerSolver.cpp
+    TestRecursiveNewtonEuler.cpp
 )

@@ -18,6 +18,9 @@ target_sources(numerical.dynamics PRIVATE
     NewtonEulerBody.hpp
     NewtonEulerSolver.cpp
     NewtonEulerSolver.hpp
+    RecursiveNewtonEuler.cpp
+    RecursiveNewtonEuler.hpp
+    RevoluteJointLink.hpp
 )
 
 add_subdirectory(test)
