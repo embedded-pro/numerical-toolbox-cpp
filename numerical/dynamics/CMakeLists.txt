@@ -15,6 +15,9 @@ target_sources(numerical.dynamics PRIVATE
     EulerLagrangeDynamics.hpp
     EulerLagrangeSolver.cpp
     EulerLagrangeSolver.hpp
+    NewtonEulerBody.hpp
+    NewtonEulerSolver.cpp
+    NewtonEulerSolver.hpp
 )
 
 add_subdirectory(test)
