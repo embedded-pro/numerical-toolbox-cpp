@@ -104,6 +104,14 @@ The UKF naturally captures the curvature of $-\sin\theta$ without computing $\co
 - **Non-Gaussian distributions.** The UKF assumes a Gaussian approximation. For multi-modal or heavily skewed distributions, consider particle filters.
 - **Computational cost.** For large state dimensions ($n > 20$), the $2n+1$ sigma points and $O(n^3)$ Cholesky become significant. Consider sparsification or reduced-rank approximations.
 
+## Variants & Generalizations
+
+- **Square-Root UKF (SR-UKF).** Propagates the Cholesky factor $S$ (where $P = SS^T$) instead of $P$ directly, using QR decompositions and rank-1 Cholesky updates. Guarantees positive-definiteness and improves numerical stability.
+- **Augmented UKF.** Augments the state vector with the process and measurement noise vectors, generating sigma points in the joint space. Captures correlations between state and noise at the cost of more sigma points ($2(n + n_w + n_v) + 1$).
+- **Reduced Sigma Point Filters.** Use fewer than $2n + 1$ sigma points (e.g., the Spherical Simplex UKF uses $n + 2$ points) to reduce computation for large state dimensions.
+- **UKF with Control Input.** The state transition becomes $f(x, u)$ and each sigma point is propagated as $f(\sigma_i, u)$. Supported in the implementation via the `ControlSize` template parameter.
+- **Cubature Kalman Filter (CKF).** A special case of the UKF with $\alpha = 1$, $\beta = 0$, $\kappa = 0$, using third-degree spherical-radial cubature rules. Simpler weight computation with no negative weights.
+
 ## Comparison with Other Filters
 
 | Filter        | Jacobian Required? | Accuracy Order | Handles High Nonlinearity? | Computational Cost |

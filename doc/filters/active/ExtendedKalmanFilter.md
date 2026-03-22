@@ -85,6 +85,14 @@ After 50 iterations the EKF tracks the true pendulum oscillation closely, despit
 - **Large time steps.** For stiff or fast dynamics, large $\Delta t$ amplifies linearization errors. Reduce the step size or use a higher-order integration scheme.
 - **Covariance symmetry.** Numerical drift can break symmetry of $P$; the Joseph form of the covariance update is more robust for long runs.
 
+## Variants & Generalizations
+
+- **Iterated EKF (IEKF).** Re-linearizes the measurement function at the updated state estimate and repeats the update step until convergence. Reduces linearization error in the measurement model at the cost of multiple Jacobian evaluations per time step.
+- **Second-Order EKF.** Includes second-order terms of the Taylor expansion in the prediction and update equations. Improves accuracy for moderately nonlinear systems but requires Hessians of $f$ and $h$.
+- **Error-State EKF.** Tracks a small error state $\delta x$ rather than the full state. Popular in inertial navigation where the nominal trajectory is integrated separately and the filter corrects deviations.
+- **EKF with Joseph Form.** Replaces the standard covariance update $P = (I - KH)P^-$ with the symmetric Joseph form $P = (I - KH)P^-(I - KH)^T + KRK^T$ to guarantee positive-definiteness under finite-precision arithmetic.
+- **EKF with Control Input.** When the control $u$ is present, the state transition becomes $f(x, u)$ and the Jacobian is $\partial f / \partial x$ evaluated at $(\hat{x}, u)$. This variant is supported directly in the implementation via the `ControlSize` template parameter.
+
 ## Comparison with Other Filters
 
 | Filter        | Jacobian Required? | Accuracy for Nonlinear Systems | Computational Cost |
