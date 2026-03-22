@@ -17,6 +17,8 @@ target_sources(numerical.dynamics PRIVATE
     EulerLagrangeDynamics.hpp
     EulerLagrangeSolver.cpp
     EulerLagrangeSolver.hpp
+    ForwardKinematics.cpp
+    ForwardKinematics.hpp
     NewtonEulerBody.hpp
     NewtonEulerSolver.cpp
     NewtonEulerSolver.hpp
