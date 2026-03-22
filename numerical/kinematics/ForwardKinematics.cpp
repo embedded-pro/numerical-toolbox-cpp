@@ -1,6 +1,6 @@
-#include "numerical/dynamics/ForwardKinematics.hpp"
+#include "numerical/kinematics/ForwardKinematics.hpp"
 
-namespace dynamics
+namespace kinematics
 {
     template class ForwardKinematics<float, 1>;
     template class ForwardKinematics<float, 2>;

@@ -7,6 +7,7 @@ target_include_directories(numerical.simulator.dynamics.robotarm.application PUB
 
 target_link_libraries(numerical.simulator.dynamics.robotarm.application PUBLIC
     numerical.dynamics
+    numerical.kinematics
 )
 
 target_sources(numerical.simulator.dynamics.robotarm.application PRIVATE

@@ -10,7 +10,7 @@
 #include <array>
 #include <cmath>
 
-namespace dynamics
+namespace kinematics
 {
     template<typename T, std::size_t NumLinks>
     class ForwardKinematics
@@ -23,7 +23,7 @@ namespace dynamics
         using Vector3 = math::Vector<T, 3>;
         using Matrix3 = math::SquareMatrix<T, 3>;
         using JointVector = math::Vector<T, NumLinks>;
-        using LinkArray = std::array<RevoluteJointLink<T>, NumLinks>;
+        using LinkArray = std::array<dynamics::RevoluteJointLink<T>, NumLinks>;
         using PositionArray = std::array<Vector3, NumLinks + 1>;
 
         ForwardKinematics() = default;

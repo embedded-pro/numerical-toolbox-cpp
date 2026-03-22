@@ -1,9 +1,9 @@
 #pragma once
 
 #include "numerical/dynamics/ArticulatedBodyAlgorithm.hpp"
-#include "numerical/dynamics/ForwardKinematics.hpp"
 #include "numerical/dynamics/RecursiveNewtonEuler.hpp"
 #include "numerical/dynamics/RevoluteJointLink.hpp"
+#include "numerical/kinematics/ForwardKinematics.hpp"
 #include <array>
 #include <cstddef>
 #include <vector>
@@ -58,8 +58,8 @@ namespace simulator::dynamics
         ::dynamics::ArticulatedBodyAlgorithm<float, 3> aba3;
         ::dynamics::RecursiveNewtonEuler<float, 2> rnea2;
         ::dynamics::RecursiveNewtonEuler<float, 3> rnea3;
-        ::dynamics::ForwardKinematics<float, 2> fk2;
-        ::dynamics::ForwardKinematics<float, 3> fk3;
+        ::kinematics::ForwardKinematics<float, 2> fk2;
+        ::kinematics::ForwardKinematics<float, 3> fk3;
 
         RobotArmConfig config;
         RobotArmState state;
