@@ -6,9 +6,9 @@
 
 #include "numerical/dynamics/RevoluteJointLink.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Geometry3D.hpp"
 #include "numerical/math/Matrix.hpp"
 #include <array>
-#include <cmath>
 
 namespace dynamics
 {
@@ -34,41 +34,156 @@ namespace dynamics
             const Vector3& gravity) const;
 
     private:
-        static Vector3 CrossProduct(const Vector3& a, const Vector3& b);
-        static Matrix3 RotationAboutAxis(const Vector3& axis, T angle);
+        struct LinkState
+        {
+            Vector3 omega;
+            Vector3 omegaDot;
+            Vector3 linAccCoM;
+            Matrix3 R;
+        };
+
+        static void ComputeBaseLinkState(
+            LinkState& state, const RevoluteJointLink<T>& link,
+            T qDot_i, T qDDot_i, const Vector3& gravity);
+
+        static void PropagateStateFromParent(
+            LinkState& state, const LinkState& parent,
+            const RevoluteJointLink<T>& link, const RevoluteJointLink<T>& parentLink,
+            T qDot_i, T qDDot_i);
+
+        static std::array<LinkState, NumLinks> ComputeForwardPass(
+            const LinkArray& links, const JointVector& q,
+            const JointVector& qDot, const JointVector& qDDot,
+            const Vector3& gravity);
+
+        static void ComputeLinkWrench(
+            Vector3& force, Vector3& torque,
+            const RevoluteJointLink<T>& link, const LinkState& state);
+
+        static void AccumulateChildWrench(
+            Vector3& parentForce, Vector3& parentTorque,
+            const Vector3& childForce, const Vector3& childTorque,
+            const Matrix3& childR, const Vector3& rToChild);
+
+        static JointVector ComputeBackwardPass(
+            const LinkArray& links, const std::array<LinkState, NumLinks>& states);
     };
 
     template<typename T, std::size_t NumLinks>
-    typename RecursiveNewtonEuler<T, NumLinks>::Vector3
-    RecursiveNewtonEuler<T, NumLinks>::CrossProduct(const Vector3& a, const Vector3& b)
+    void RecursiveNewtonEuler<T, NumLinks>::ComputeBaseLinkState(
+        LinkState& state, const RevoluteJointLink<T>& link,
+        T qDot_i, T qDDot_i, const Vector3& gravity)
     {
-        return Vector3{
-            a.at(1, 0) * b.at(2, 0) - a.at(2, 0) * b.at(1, 0),
-            a.at(2, 0) * b.at(0, 0) - a.at(0, 0) * b.at(2, 0),
-            a.at(0, 0) * b.at(1, 0) - a.at(1, 0) * b.at(0, 0)
-        };
+        auto Rt = state.R.Transpose();
+
+        state.omega = link.jointAxis * qDot_i;
+
+        auto qDotAxis = link.jointAxis * qDot_i;
+        state.omegaDot = link.jointAxis * qDDot_i + math::CrossProduct(state.omega, qDotAxis);
+
+        auto baseLinAcc = Rt * (gravity * T(-1));
+        auto rCoM = link.jointToCoM;
+        state.linAccCoM = baseLinAcc + math::CrossProduct(state.omegaDot, rCoM) + math::CrossProduct(state.omega, math::CrossProduct(state.omega, rCoM));
     }
 
-    // Rodrigues' rotation formula: R(axis, angle) * v
-    // R = I + sin(theta)*K + (1 - cos(theta))*K^2
-    // where K is the skew-symmetric matrix of 'axis'
     template<typename T, std::size_t NumLinks>
-    typename RecursiveNewtonEuler<T, NumLinks>::Matrix3
-    RecursiveNewtonEuler<T, NumLinks>::RotationAboutAxis(const Vector3& axis, T angle)
+    void RecursiveNewtonEuler<T, NumLinks>::PropagateStateFromParent(
+        LinkState& state, const LinkState& parent,
+        const RevoluteJointLink<T>& link, const RevoluteJointLink<T>& parentLink,
+        T qDot_i, T qDDot_i)
     {
-        T c = std::cos(angle);
-        T s = std::sin(angle);
-        T t = T(1.0f) - c;
+        auto Rt = state.R.Transpose();
+        auto qDotAxis = link.jointAxis * qDot_i;
 
-        T x = axis.at(0, 0);
-        T y = axis.at(1, 0);
-        T z = axis.at(2, 0);
+        state.omega = Rt * parent.omega + qDotAxis;
+        state.omegaDot = Rt * parent.omegaDot + math::CrossProduct(state.omega, qDotAxis) + link.jointAxis * qDDot_i;
 
-        return Matrix3{
-            { t * x * x + c, t * x * y - s * z, t * x * z + s * y },
-            { t * x * y + s * z, t * y * y + c, t * y * z - s * x },
-            { t * x * z - s * y, t * y * z + s * x, t * z * z + c }
-        };
+        auto rParentCoM = parentLink.jointToCoM;
+        auto parentJointAcc = parent.linAccCoM - math::CrossProduct(parent.omegaDot, rParentCoM) - math::CrossProduct(parent.omega, math::CrossProduct(parent.omega, rParentCoM));
+
+        auto rToJoint = link.parentToJoint;
+        auto accAtParentEnd = parentJointAcc + math::CrossProduct(parent.omegaDot, rToJoint) + math::CrossProduct(parent.omega, math::CrossProduct(parent.omega, rToJoint));
+
+        auto accJointInLink = Rt * accAtParentEnd;
+        auto rCoM = link.jointToCoM;
+        state.linAccCoM = accJointInLink + math::CrossProduct(state.omegaDot, rCoM) + math::CrossProduct(state.omega, math::CrossProduct(state.omega, rCoM));
+    }
+
+    template<typename T, std::size_t NumLinks>
+    std::array<typename RecursiveNewtonEuler<T, NumLinks>::LinkState, NumLinks>
+    RecursiveNewtonEuler<T, NumLinks>::ComputeForwardPass(
+        const LinkArray& links, const JointVector& q,
+        const JointVector& qDot, const JointVector& qDDot,
+        const Vector3& gravity)
+    {
+        std::array<LinkState, NumLinks> states{};
+
+        for (std::size_t i = 0; i < NumLinks; ++i)
+        {
+            states[i].R = math::RotationAboutAxis(links[i].jointAxis, q.at(i, 0));
+
+            if (i == 0)
+                ComputeBaseLinkState(states[i], links[i], qDot.at(i, 0), qDDot.at(i, 0), gravity);
+            else
+                PropagateStateFromParent(states[i], states[i - 1], links[i], links[i - 1], qDot.at(i, 0), qDDot.at(i, 0));
+        }
+
+        return states;
+    }
+
+    template<typename T, std::size_t NumLinks>
+    void RecursiveNewtonEuler<T, NumLinks>::ComputeLinkWrench(
+        Vector3& force, Vector3& torque,
+        const RevoluteJointLink<T>& link, const LinkState& state)
+    {
+        force = state.linAccCoM * link.mass;
+
+        auto Iw = link.inertia * state.omega;
+        torque = link.inertia * state.omegaDot + math::CrossProduct(state.omega, Iw);
+
+        torque = torque + math::CrossProduct(link.jointToCoM, force);
+    }
+
+    template<typename T, std::size_t NumLinks>
+    void RecursiveNewtonEuler<T, NumLinks>::AccumulateChildWrench(
+        Vector3& parentForce, Vector3& parentTorque,
+        const Vector3& childForce, const Vector3& childTorque,
+        const Matrix3& childR, const Vector3& rToChild)
+    {
+        auto childForceInParent = childR * childForce;
+        auto childTorqueInParent = childR * childTorque;
+
+        parentForce = parentForce + childForceInParent;
+        parentTorque = parentTorque + childTorqueInParent + math::CrossProduct(rToChild, childForceInParent);
+    }
+
+    template<typename T, std::size_t NumLinks>
+    typename RecursiveNewtonEuler<T, NumLinks>::JointVector
+    RecursiveNewtonEuler<T, NumLinks>::ComputeBackwardPass(
+        const LinkArray& links, const std::array<LinkState, NumLinks>& states)
+    {
+        std::array<Vector3, NumLinks> force;
+        std::array<Vector3, NumLinks> torque;
+
+        for (std::size_t j = NumLinks; j > 0; --j)
+        {
+            std::size_t i = j - 1;
+
+            ComputeLinkWrench(force[i], torque[i], links[i], states[i]);
+
+            if (i + 1 < NumLinks)
+                AccumulateChildWrench(force[i], torque[i], force[i + 1], torque[i + 1],
+                    states[i + 1].R, links[i + 1].parentToJoint);
+        }
+
+        JointVector tau;
+        for (std::size_t i = 0; i < NumLinks; ++i)
+        {
+            auto dotProduct = links[i].jointAxis.Transpose() * torque[i];
+            tau.at(i, 0) = dotProduct.at(0, 0);
+        }
+
+        return tau;
     }
 
     template<typename T, std::size_t NumLinks>
@@ -78,124 +193,8 @@ namespace dynamics
             const JointVector& q, const JointVector& qDot, const JointVector& qDDot,
             const Vector3& gravity) const
     {
-        // Per-link spatial velocity and acceleration (in link frame)
-        std::array<Vector3, NumLinks> omega;     // angular velocity
-        std::array<Vector3, NumLinks> omegaDot;  // angular acceleration
-        std::array<Vector3, NumLinks> linAccCoM; // linear acceleration at CoM
-
-        // Rotation matrices from link i to parent (i-1)
-        std::array<Matrix3, NumLinks> R; // R[i] rotates from link i frame to parent frame
-
-        // ── Forward pass: propagate velocities and accelerations (base → tip) ──
-
-        for (std::size_t i = 0; i < NumLinks; ++i)
-        {
-            const auto& link = links[i];
-
-            // Rotation from link i frame to parent frame
-            R[i] = RotationAboutAxis(link.jointAxis, q.at(i, 0));
-            auto Rt = R[i].Transpose(); // parent-to-link rotation
-
-            if (i == 0)
-            {
-                // Base link: parent is the fixed world frame
-                // omega_0 = R_0^T * 0 + qDot_0 * axis_0
-                omega[i] = link.jointAxis * qDot.at(i, 0);
-
-                // omegaDot_0 = R_0^T * 0 + qDDot_0 * axis_0 + omega_0 x (qDot_0 * axis_0)
-                auto qDotAxis = link.jointAxis * qDot.at(i, 0);
-                omegaDot[i] = link.jointAxis * qDDot.at(i, 0) + CrossProduct(omega[i], qDotAxis);
-
-                // Linear acceleration at joint origin (transform gravity into link frame)
-                // a_0 = R_0^T * (-gravity) + omegaDot_0 x r_joint_to_origin + omega_0 x (omega_0 x r_joint_to_origin)
-                // Since joint is at link origin, we propagate from the base:
-                auto baseLinAcc = Rt * (gravity * T(-1.0f));
-
-                // Acceleration at CoM
-                auto rCoM = link.jointToCoM;
-                linAccCoM[i] = baseLinAcc + CrossProduct(omegaDot[i], rCoM) + CrossProduct(omega[i], CrossProduct(omega[i], rCoM));
-            }
-            else
-            {
-                // Propagate from parent link i-1
-                auto omegaParent = omega[i - 1];
-                auto omegaDotParent = omegaDot[i - 1];
-
-                // Transform parent angular velocity to this link frame
-                auto omegaInLink = Rt * omegaParent;
-                auto qDotAxis = link.jointAxis * qDot.at(i, 0);
-                omega[i] = omegaInLink + qDotAxis;
-
-                // Angular acceleration
-                auto omegaDotInLink = Rt * omegaDotParent;
-                omegaDot[i] = omegaDotInLink + CrossProduct(omega[i], qDotAxis) + link.jointAxis * qDDot.at(i, 0);
-
-                // Linear acceleration at joint origin of link i
-                // First get parent's joint-origin acceleration
-                // Parent acceleration at its own joint origin
-                auto rParentCoM = links[i - 1].jointToCoM;
-                auto parentJointAcc = linAccCoM[i - 1] - CrossProduct(omegaDotParent, rParentCoM) - CrossProduct(omegaParent, CrossProduct(omegaParent, rParentCoM));
-
-                // Acceleration at parent's joint + offset to this joint
-                auto rToJoint = link.parentToJoint;
-                auto accAtParentEnd = parentJointAcc + CrossProduct(omegaDotParent, rToJoint) + CrossProduct(omegaParent, CrossProduct(omegaParent, rToJoint));
-
-                // Transform to link i frame
-                auto accJointInLink = Rt * accAtParentEnd;
-
-                // Acceleration at CoM of link i
-                auto rCoM = link.jointToCoM;
-                linAccCoM[i] = accJointInLink + CrossProduct(omegaDot[i], rCoM) + CrossProduct(omega[i], CrossProduct(omega[i], rCoM));
-            }
-        }
-
-        // ── Backward pass: accumulate forces and torques (tip → base) ──
-
-        std::array<Vector3, NumLinks> force;  // net force on link i (in link i frame)
-        std::array<Vector3, NumLinks> torque; // net torque on link i (in link i frame)
-
-        for (std::size_t j = NumLinks; j > 0; --j)
-        {
-            std::size_t i = j - 1;
-            const auto& link = links[i];
-
-            // Newton: F_i = m_i * a_CoM_i
-            force[i] = linAccCoM[i] * link.mass;
-
-            // Euler: tau_i = I_i * omegaDot_i + omega_i x (I_i * omega_i)
-            auto Iw = link.inertia * omega[i];
-            torque[i] = link.inertia * omegaDot[i] + CrossProduct(omega[i], Iw);
-
-            // Shift torque to joint origin: n_i = N_i + rCoM x F_i
-            auto rCoM = link.jointToCoM;
-            torque[i] = torque[i] + CrossProduct(rCoM, force[i]);
-
-            // Add contribution from child link (if any)
-            if (i + 1 < NumLinks)
-            {
-                auto rToChild = links[i + 1].parentToJoint;
-
-                // Rotate child force/torque from child frame to this frame
-                auto childForceInParent = R[i + 1] * force[i + 1];
-                auto childTorqueInParent = R[i + 1] * torque[i + 1];
-
-                force[i] = force[i] + childForceInParent;
-                torque[i] = torque[i] + childTorqueInParent + CrossProduct(rToChild, childForceInParent);
-            }
-        }
-
-        // ── Extract joint torques: project torque onto joint axis ──
-
-        JointVector tau;
-        for (std::size_t i = 0; i < NumLinks; ++i)
-        {
-            // tau_i = axis_i^T * torque_i (dot product)
-            auto axisT = links[i].jointAxis.Transpose();
-            auto dotProduct = axisT * torque[i];
-            tau.at(i, 0) = dotProduct.at(0, 0);
-        }
-
-        return tau;
+        auto states = ComputeForwardPass(links, q, qDot, qDDot, gravity);
+        return ComputeBackwardPass(links, states);
     }
 
     extern template class RecursiveNewtonEuler<float, 1>;

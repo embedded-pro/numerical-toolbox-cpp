@@ -6,9 +6,9 @@
 
 #include "numerical/dynamics/RevoluteJointLink.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Geometry3D.hpp"
 #include "numerical/math/Matrix.hpp"
 #include <array>
-#include <cmath>
 
 namespace kinematics
 {
@@ -33,29 +33,7 @@ namespace kinematics
         // joint angles.
         OPTIMIZE_FOR_SPEED PositionArray Compute(const LinkArray& links,
             const JointVector& q) const;
-
-    private:
-        static Matrix3 RotationAboutAxis(const Vector3& axis, T angle);
     };
-
-    template<typename T, std::size_t NumLinks>
-    typename ForwardKinematics<T, NumLinks>::Matrix3
-    ForwardKinematics<T, NumLinks>::RotationAboutAxis(const Vector3& axis, T angle)
-    {
-        T c = std::cos(angle);
-        T s = std::sin(angle);
-        T t = T(1) - c;
-
-        T x = axis.at(0, 0);
-        T y = axis.at(1, 0);
-        T z = axis.at(2, 0);
-
-        return Matrix3{
-            { t * x * x + c, t * x * y - s * z, t * x * z + s * y },
-            { t * x * y + s * z, t * y * y + c, t * y * z - s * x },
-            { t * x * z - s * y, t * y * z + s * x, t * z * z + c }
-        };
-    }
 
     template<typename T, std::size_t NumLinks>
     OPTIMIZE_FOR_SPEED
@@ -64,33 +42,21 @@ namespace kinematics
             const JointVector& q) const
     {
         PositionArray positions{};
-
-        // Base position at origin
         positions[0] = Vector3{};
 
-        // Accumulated rotation from world to current link frame
-        Matrix3 R{};
-        R.at(0, 0) = T(1);
-        R.at(1, 1) = T(1);
-        R.at(2, 2) = T(1);
+        auto R = Matrix3::Identity();
 
         for (std::size_t i = 0; i < NumLinks; ++i)
         {
-            auto Ri = RotationAboutAxis(links[i].jointAxis, q.at(i, 0));
-            R = R * Ri;
+            R = R * math::RotationAboutAxis(links[i].jointAxis, q.at(i, 0));
 
-            // The link extends from its joint to the next joint.
-            // parentToJoint of the next link gives the offset from this joint
-            // to the next. For the last link, we use jointToCoM * 2 as an
-            // approximation (end of link = joint + full link extent).
             Vector3 linkExtent;
             if (i + 1 < NumLinks)
                 linkExtent = links[i + 1].parentToJoint;
             else
                 linkExtent = links[i].jointToCoM * T(2);
 
-            auto worldExtent = R * linkExtent;
-            positions[i + 1] = positions[i] + worldExtent;
+            positions[i + 1] = positions[i] + R * linkExtent;
         }
 
         return positions;

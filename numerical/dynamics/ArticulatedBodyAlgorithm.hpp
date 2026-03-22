@@ -6,9 +6,9 @@
 
 #include "numerical/dynamics/RevoluteJointLink.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Geometry3D.hpp"
 #include "numerical/math/Matrix.hpp"
 #include <array>
-#include <cmath>
 
 namespace dynamics
 {
@@ -65,18 +65,14 @@ namespace dynamics
             Vector3 UaLin;
         };
 
-        // ── Linear algebra primitives ──
-
-        static Vector3 CrossProduct(const Vector3& a, const Vector3& b);
-        static Matrix3 RotationAboutAxis(const Vector3& axis, T angle);
-        static Matrix3 SkewSymmetric(const Vector3& v);
-        static Matrix3 ScaledIdentity(T value);
-        static Matrix3 OuterProduct(const Vector3& a, const Vector3& b);
-
         // ── Pass 1: Forward kinematics ──
 
         static std::array<LinkKinematics, NumLinks> ComputeForwardKinematics(
             const LinkArray& links, const JointVector& q, const JointVector& qDot);
+
+        static void PropagateKinematicsFromParent(
+            LinkKinematics& current, const LinkKinematics& parent,
+            const RevoluteJointLink<T>& link, T qDot_i);
 
         // ── Pass 2: Backward articulated-body inertias ──
 
@@ -106,77 +102,48 @@ namespace dynamics
             const BiasWrench& wrench, const Matrix3& R,
             const Vector3& parentToJoint);
 
+        static void AccumulateChildContribution(
+            const LinkArray& links, std::size_t childIndex,
+            std::array<SpatialInertia, NumLinks>& Ia,
+            std::array<BiasWrench, NumLinks>& pA,
+            const std::array<LinkKinematics, NumLinks>& kin,
+            const std::array<JointProjection, NumLinks>& proj);
+
+        static void ComputeArticulatedBodyInertias(
+            const LinkArray& links, const JointVector& tau,
+            const std::array<LinkKinematics, NumLinks>& kin,
+            std::array<SpatialInertia, NumLinks>& Ia,
+            std::array<BiasWrench, NumLinks>& pA,
+            std::array<JointProjection, NumLinks>& proj);
+
         // ── Pass 3: Forward accelerations ──
 
         static T ComputeJointAcceleration(
             const JointProjection& proj,
             const Vector3& aHatAng, const Vector3& aHatLin);
+
+        static JointVector ComputeJointAccelerations(
+            const LinkArray& links, const Vector3& gravity,
+            const std::array<LinkKinematics, NumLinks>& kin,
+            const std::array<JointProjection, NumLinks>& proj);
     };
 
     template<typename T, std::size_t NumLinks>
-    typename ArticulatedBodyAlgorithm<T, NumLinks>::Vector3
-    ArticulatedBodyAlgorithm<T, NumLinks>::CrossProduct(const Vector3& a, const Vector3& b)
+    void ArticulatedBodyAlgorithm<T, NumLinks>::PropagateKinematicsFromParent(
+        LinkKinematics& current, const LinkKinematics& parent,
+        const RevoluteJointLink<T>& link, T qDot_i)
     {
-        return Vector3{
-            a.at(1, 0) * b.at(2, 0) - a.at(2, 0) * b.at(1, 0),
-            a.at(2, 0) * b.at(0, 0) - a.at(0, 0) * b.at(2, 0),
-            a.at(0, 0) * b.at(1, 0) - a.at(1, 0) * b.at(0, 0)
-        };
+        auto Rt = current.R.Transpose();
+        auto qDotAxis = link.jointAxis * qDot_i;
+
+        current.omega = Rt * parent.omega + qDotAxis;
+
+        auto parentLinVelAtJoint = parent.linVelJ + math::CrossProduct(parent.omega, link.parentToJoint);
+        current.linVelJ = Rt * parentLinVelAtJoint;
+
+        current.cJ = math::CrossProduct(current.omega, qDotAxis);
+        current.cJLin = math::CrossProduct(current.linVelJ, qDotAxis);
     }
-
-    template<typename T, std::size_t NumLinks>
-    typename ArticulatedBodyAlgorithm<T, NumLinks>::Matrix3
-    ArticulatedBodyAlgorithm<T, NumLinks>::RotationAboutAxis(const Vector3& axis, T angle)
-    {
-        T c = std::cos(angle);
-        T s = std::sin(angle);
-        T t = T(1) - c;
-
-        T x = axis.at(0, 0);
-        T y = axis.at(1, 0);
-        T z = axis.at(2, 0);
-
-        return Matrix3{
-            { t * x * x + c, t * x * y - s * z, t * x * z + s * y },
-            { t * x * y + s * z, t * y * y + c, t * y * z - s * x },
-            { t * x * z - s * y, t * y * z + s * x, t * z * z + c }
-        };
-    }
-
-    template<typename T, std::size_t NumLinks>
-    typename ArticulatedBodyAlgorithm<T, NumLinks>::Matrix3
-    ArticulatedBodyAlgorithm<T, NumLinks>::SkewSymmetric(const Vector3& v)
-    {
-        return Matrix3{
-            { T(0), -v.at(2, 0), v.at(1, 0) },
-            { v.at(2, 0), T(0), -v.at(0, 0) },
-            { -v.at(1, 0), v.at(0, 0), T(0) }
-        };
-    }
-
-    template<typename T, std::size_t NumLinks>
-    typename ArticulatedBodyAlgorithm<T, NumLinks>::Matrix3
-    ArticulatedBodyAlgorithm<T, NumLinks>::ScaledIdentity(T value)
-    {
-        Matrix3 result{};
-        result.at(0, 0) = value;
-        result.at(1, 1) = value;
-        result.at(2, 2) = value;
-        return result;
-    }
-
-    template<typename T, std::size_t NumLinks>
-    typename ArticulatedBodyAlgorithm<T, NumLinks>::Matrix3
-    ArticulatedBodyAlgorithm<T, NumLinks>::OuterProduct(const Vector3& a, const Vector3& b)
-    {
-        Matrix3 result{};
-        for (std::size_t r = 0; r < 3; ++r)
-            for (std::size_t c = 0; c < 3; ++c)
-                result.at(r, c) = a.at(r, 0) * b.at(c, 0);
-        return result;
-    }
-
-    // ── Pass 1: Forward kinematics ──
 
     template<typename T, std::size_t NumLinks>
     std::array<typename ArticulatedBodyAlgorithm<T, NumLinks>::LinkKinematics, NumLinks>
@@ -187,44 +154,29 @@ namespace dynamics
 
         for (std::size_t i = 0; i < NumLinks; ++i)
         {
-            kin[i].R = RotationAboutAxis(links[i].jointAxis, q.at(i, 0));
-            auto Rt = kin[i].R.Transpose();
+            kin[i].R = math::RotationAboutAxis(links[i].jointAxis, q.at(i, 0));
 
             if (i == 0)
-            {
                 kin[i].omega = links[i].jointAxis * qDot.at(i, 0);
-            }
             else
-            {
-                auto omegaInLink = Rt * kin[i - 1].omega;
-                auto qDotAxis = links[i].jointAxis * qDot.at(i, 0);
-                kin[i].omega = omegaInLink + qDotAxis;
-
-                auto parentLinVelAtJoint = kin[i - 1].linVelJ + CrossProduct(kin[i - 1].omega, links[i].parentToJoint);
-                kin[i].linVelJ = Rt * parentLinVelAtJoint;
-
-                kin[i].cJ = CrossProduct(kin[i].omega, qDotAxis);
-                kin[i].cJLin = CrossProduct(kin[i].linVelJ, qDotAxis);
-            }
+                PropagateKinematicsFromParent(kin[i], kin[i - 1], links[i], qDot.at(i, 0));
         }
 
         return kin;
     }
-
-    // ── Pass 2 helpers ──
 
     template<typename T, std::size_t NumLinks>
     typename ArticulatedBodyAlgorithm<T, NumLinks>::SpatialInertia
     ArticulatedBodyAlgorithm<T, NumLinks>::ComputeRigidBodyInertia(
         const RevoluteJointLink<T>& link)
     {
-        auto rSkew = SkewSymmetric(link.jointToCoM);
+        auto rSkew = math::SkewSymmetric(link.jointToCoM);
         auto rSkewT = rSkew.Transpose();
 
         return SpatialInertia{
             link.inertia + rSkewT * rSkew * link.mass,
             rSkew * link.mass,
-            ScaledIdentity(link.mass)
+            math::ScaledIdentity(link.mass)
         };
     }
 
@@ -235,14 +187,14 @@ namespace dynamics
         const LinkKinematics& kin)
     {
         auto rCoM = link.jointToCoM;
-        auto velCoM = kin.linVelJ + CrossProduct(kin.omega, rCoM);
-        auto biasForce = CrossProduct(kin.omega, velCoM) * link.mass;
+        auto velCoM = kin.linVelJ + math::CrossProduct(kin.omega, rCoM);
+        auto biasForce = math::CrossProduct(kin.omega, velCoM) * link.mass;
         auto Iw = link.inertia * kin.omega;
-        auto biasTorque = CrossProduct(kin.omega, Iw);
+        auto biasTorque = math::CrossProduct(kin.omega, Iw);
 
         return BiasWrench{
             biasForce,
-            biasTorque + CrossProduct(rCoM, biasForce)
+            biasTorque + math::CrossProduct(rCoM, biasForce)
         };
     }
 
@@ -273,9 +225,9 @@ namespace dynamics
         T invD = T(1) / proj.D;
 
         return SpatialInertia{
-            Ia.rot - OuterProduct(proj.Ua, proj.Ua) * invD,
-            Ia.cross - OuterProduct(proj.Ua, proj.UaLin) * invD,
-            Ia.lin - OuterProduct(proj.UaLin, proj.UaLin) * invD
+            Ia.rot - math::OuterProduct(proj.Ua, proj.Ua) * invD,
+            Ia.cross - math::OuterProduct(proj.Ua, proj.UaLin) * invD,
+            Ia.lin - math::OuterProduct(proj.UaLin, proj.UaLin) * invD
         };
     }
 
@@ -304,7 +256,7 @@ namespace dynamics
         auto IaCrossP = R * Ia.cross * Rt;
         auto IaLinP = R * Ia.lin * Rt;
 
-        auto rSkew = SkewSymmetric(parentToJoint);
+        auto rSkew = math::SkewSymmetric(parentToJoint);
 
         return SpatialInertia{
             IaRotP - IaCrossP * rSkew + rSkew * IaCrossP.Transpose() - rSkew * IaLinP * rSkew,
@@ -324,7 +276,7 @@ namespace dynamics
 
         return BiasWrench{
             forceP,
-            torqueP + CrossProduct(parentToJoint, forceP)
+            torqueP + math::CrossProduct(parentToJoint, forceP)
         };
     }
 
@@ -338,22 +290,36 @@ namespace dynamics
     }
 
     template<typename T, std::size_t NumLinks>
-    OPTIMIZE_FOR_SPEED
-        typename ArticulatedBodyAlgorithm<T, NumLinks>::JointVector
-        ArticulatedBodyAlgorithm<T, NumLinks>::ForwardDynamics(const LinkArray& links,
-            const JointVector& q, const JointVector& qDot, const JointVector& tau,
-            const Vector3& gravity) const
+    void ArticulatedBodyAlgorithm<T, NumLinks>::AccumulateChildContribution(
+        const LinkArray& links, std::size_t childIndex,
+        std::array<SpatialInertia, NumLinks>& Ia,
+        std::array<BiasWrench, NumLinks>& pA,
+        const std::array<LinkKinematics, NumLinks>& kin,
+        const std::array<JointProjection, NumLinks>& proj)
     {
-        // ── Pass 1: Forward kinematics (base → tip) ──
+        auto parentIndex = childIndex - 1;
 
-        auto kin = ComputeForwardKinematics(links, q, qDot);
+        auto IaA = ArticulatedBodyDowndate(Ia[childIndex], proj[childIndex]);
+        auto pAA = ComputeArticulatedBiasWrench(pA[childIndex], IaA, kin[childIndex], proj[childIndex]);
 
-        // ── Pass 2: Backward pass — articulated-body inertias (tip → base) ──
+        auto IaParent = TransformInertiaToParent(IaA, kin[childIndex].R, links[childIndex].parentToJoint);
+        auto pAParent = TransformWrenchToParent(pAA, kin[childIndex].R, links[childIndex].parentToJoint);
 
-        std::array<SpatialInertia, NumLinks> Ia;
-        std::array<BiasWrench, NumLinks> pA;
-        std::array<JointProjection, NumLinks> proj;
+        Ia[parentIndex].rot = Ia[parentIndex].rot + IaParent.rot;
+        Ia[parentIndex].cross = Ia[parentIndex].cross + IaParent.cross;
+        Ia[parentIndex].lin = Ia[parentIndex].lin + IaParent.lin;
+        pA[parentIndex].force = pA[parentIndex].force + pAParent.force;
+        pA[parentIndex].torque = pA[parentIndex].torque + pAParent.torque;
+    }
 
+    template<typename T, std::size_t NumLinks>
+    void ArticulatedBodyAlgorithm<T, NumLinks>::ComputeArticulatedBodyInertias(
+        const LinkArray& links, const JointVector& tau,
+        const std::array<LinkKinematics, NumLinks>& kin,
+        std::array<SpatialInertia, NumLinks>& Ia,
+        std::array<BiasWrench, NumLinks>& pA,
+        std::array<JointProjection, NumLinks>& proj)
+    {
         for (std::size_t i = 0; i < NumLinks; ++i)
         {
             Ia[i] = ComputeRigidBodyInertia(links[i]);
@@ -366,23 +332,17 @@ namespace dynamics
             proj[i] = ComputeJointProjection(links[i].jointAxis, Ia[i], pA[i], tau.at(i, 0));
 
             if (i > 0)
-            {
-                auto IaA = ArticulatedBodyDowndate(Ia[i], proj[i]);
-                auto pAA = ComputeArticulatedBiasWrench(pA[i], IaA, kin[i], proj[i]);
-
-                auto IaParent = TransformInertiaToParent(IaA, kin[i].R, links[i].parentToJoint);
-                auto pAParent = TransformWrenchToParent(pAA, kin[i].R, links[i].parentToJoint);
-
-                Ia[i - 1].rot = Ia[i - 1].rot + IaParent.rot;
-                Ia[i - 1].cross = Ia[i - 1].cross + IaParent.cross;
-                Ia[i - 1].lin = Ia[i - 1].lin + IaParent.lin;
-                pA[i - 1].force = pA[i - 1].force + pAParent.force;
-                pA[i - 1].torque = pA[i - 1].torque + pAParent.torque;
-            }
+                AccumulateChildContribution(links, i, Ia, pA, kin, proj);
         }
+    }
 
-        // ── Pass 3: Forward pass — joint accelerations (base → tip) ──
-
+    template<typename T, std::size_t NumLinks>
+    typename ArticulatedBodyAlgorithm<T, NumLinks>::JointVector
+    ArticulatedBodyAlgorithm<T, NumLinks>::ComputeJointAccelerations(
+        const LinkArray& links, const Vector3& gravity,
+        const std::array<LinkKinematics, NumLinks>& kin,
+        const std::array<JointProjection, NumLinks>& proj)
+    {
         JointVector qDDot;
         std::array<Vector3, NumLinks> angAcc;
         std::array<Vector3, NumLinks> linAcc;
@@ -400,10 +360,9 @@ namespace dynamics
             }
             else
             {
-                // Spatial acceleration transform: a'_i = X_i * a_{λ(i)}
                 auto rToJoint = links[i].parentToJoint;
                 aPrimeAng = Rt * angAcc[i - 1];
-                aPrimeLin = Rt * (linAcc[i - 1] + CrossProduct(angAcc[i - 1], rToJoint));
+                aPrimeLin = Rt * (linAcc[i - 1] + math::CrossProduct(angAcc[i - 1], rToJoint));
             }
 
             auto aHatAng = aPrimeAng + kin[i].cJ;
@@ -416,6 +375,23 @@ namespace dynamics
         }
 
         return qDDot;
+    }
+
+    template<typename T, std::size_t NumLinks>
+    OPTIMIZE_FOR_SPEED
+        typename ArticulatedBodyAlgorithm<T, NumLinks>::JointVector
+        ArticulatedBodyAlgorithm<T, NumLinks>::ForwardDynamics(const LinkArray& links,
+            const JointVector& q, const JointVector& qDot, const JointVector& tau,
+            const Vector3& gravity) const
+    {
+        auto kin = ComputeForwardKinematics(links, q, qDot);
+
+        std::array<SpatialInertia, NumLinks> Ia;
+        std::array<BiasWrench, NumLinks> pA;
+        std::array<JointProjection, NumLinks> proj;
+        ComputeArticulatedBodyInertias(links, tau, kin, Ia, pA, proj);
+
+        return ComputeJointAccelerations(links, gravity, kin, proj);
     }
 
     extern template class ArticulatedBodyAlgorithm<float, 1>;
