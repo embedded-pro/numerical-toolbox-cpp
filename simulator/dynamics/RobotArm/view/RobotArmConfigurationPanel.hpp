@@ -46,10 +46,12 @@ namespace simulator::dynamics::view
 
         std::vector<QSlider*> torqueSliders;
         std::vector<QLabel*> torqueLabels;
+        std::vector<QWidget*> torqueRows;
         QGroupBox* torqueGroup;
 
         std::vector<QSlider*> positionSliders;
         std::vector<QLabel*> positionLabels;
+        std::vector<QWidget*> positionRows;
         QGroupBox* positionGroup;
 
         QDoubleSpinBox* dampingSpin;

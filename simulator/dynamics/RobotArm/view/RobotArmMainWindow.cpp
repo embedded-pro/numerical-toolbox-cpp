@@ -1,5 +1,6 @@
 #include "simulator/dynamics/RobotArm/view/RobotArmMainWindow.hpp"
 #include <QSplitter>
+#include <cmath>
 
 namespace simulator::dynamics::view
 {
@@ -25,7 +26,6 @@ namespace simulator::dynamics::view
         setCentralWidget(splitter);
 
         simulationTimer = new QTimer(this);
-        simulationTimer->setInterval(8); // ~120 Hz display, matches simulation dt
         connect(simulationTimer, &QTimer::timeout, this, &RobotArmMainWindow::OnSimulationStep);
 
         connect(configPanel, &RobotArmConfigurationPanel::StartRequested, this, &RobotArmMainWindow::OnStartRequested);
@@ -42,6 +42,7 @@ namespace simulator::dynamics::view
         auto config = configPanel->GetConfiguration();
         simulator.Configure(config);
         simulator.SetInitialPositions(configPanel->GetInitialPositions());
+        simulationTimer->setInterval(static_cast<int>(std::round(1000.0f * config.dt)));
         view3D->SetState(simulator.GetState(), config.dof);
     }
 

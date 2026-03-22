@@ -14,3 +14,5 @@ target_sources(numerical.kinematics PRIVATE
     ForwardKinematics.cpp
     ForwardKinematics.hpp
 )
+
+add_subdirectory(test)

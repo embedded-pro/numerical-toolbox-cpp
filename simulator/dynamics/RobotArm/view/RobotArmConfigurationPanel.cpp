@@ -1,6 +1,7 @@
 #include "simulator/dynamics/RobotArm/view/RobotArmConfigurationPanel.hpp"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <array>
 #include <cmath>
 
 namespace simulator::dynamics::view
@@ -68,24 +69,27 @@ namespace simulator::dynamics::view
 
         for (int i = 0; i < maxDof; ++i)
         {
-            auto* rowLayout = new QHBoxLayout();
-            rowLayout->addWidget(new QLabel(QString("τ%1:").arg(i + 1), this));
+            auto* rowWidget = new QWidget(torqueGroup);
+            auto* rowLayout = new QHBoxLayout(rowWidget);
+            rowLayout->setContentsMargins(0, 0, 0, 0);
+            rowLayout->addWidget(new QLabel(QString("τ%1:").arg(i + 1), rowWidget));
 
-            auto* slider = new QSlider(Qt::Horizontal, this);
+            auto* slider = new QSlider(Qt::Horizontal, rowWidget);
             slider->setRange(-200, 200);
             slider->setValue(0);
             slider->setTickPosition(QSlider::TicksBelow);
             slider->setTickInterval(50);
             rowLayout->addWidget(slider);
 
-            auto* label = new QLabel("0.0", this);
+            auto* label = new QLabel("0.0", rowWidget);
             label->setFixedWidth(55);
             label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
             rowLayout->addWidget(label);
 
             torqueSliders.push_back(slider);
             torqueLabels.push_back(label);
-            torqueLayout->addLayout(rowLayout);
+            torqueRows.push_back(rowWidget);
+            torqueLayout->addWidget(rowWidget);
 
             connect(slider, &QSlider::valueChanged, this, &RobotArmConfigurationPanel::UpdateTorqueLabels);
         }
@@ -97,24 +101,27 @@ namespace simulator::dynamics::view
 
         for (int i = 0; i < maxDof; ++i)
         {
-            auto* rowLayout = new QHBoxLayout();
-            rowLayout->addWidget(new QLabel(QString("q%1:").arg(i + 1), this));
+            auto* rowWidget = new QWidget(positionGroup);
+            auto* rowLayout = new QHBoxLayout(rowWidget);
+            rowLayout->setContentsMargins(0, 0, 0, 0);
+            rowLayout->addWidget(new QLabel(QString("q%1:").arg(i + 1), rowWidget));
 
-            auto* slider = new QSlider(Qt::Horizontal, this);
+            auto* slider = new QSlider(Qt::Horizontal, rowWidget);
             slider->setRange(-180, 180);
             slider->setValue(0);
             slider->setTickPosition(QSlider::TicksBelow);
             slider->setTickInterval(45);
             rowLayout->addWidget(slider);
 
-            auto* label = new QLabel("0°", this);
+            auto* label = new QLabel("0°", rowWidget);
             label->setFixedWidth(45);
             label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
             rowLayout->addWidget(label);
 
             positionSliders.push_back(slider);
             positionLabels.push_back(label);
-            posLayout->addLayout(rowLayout);
+            positionRows.push_back(rowWidget);
+            posLayout->addWidget(rowWidget);
 
             connect(slider, &QSlider::valueChanged, this, &RobotArmConfigurationPanel::UpdatePositionLabels);
         }
@@ -165,8 +172,8 @@ namespace simulator::dynamics::view
         {
             bool visible = (i < dof);
             linkGroups[i]->setVisible(visible);
-            torqueSliders[i]->parentWidget()->setVisible(visible);
-            positionSliders[i]->parentWidget()->setVisible(visible);
+            torqueRows[i]->setVisible(visible);
+            positionRows[i]->setVisible(visible);
         }
 
         emit ConfigurationChanged();
