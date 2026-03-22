@@ -1,17 +1,24 @@
-add_library(numerical.filters.active ${EMIL_EXCLUDE_FROM_ALL} INTERFACE)
+add_library(numerical.filters.active ${EMIL_EXCLUDE_FROM_ALL})
 
-target_include_directories(numerical.filters.active INTERFACE
+target_include_directories(numerical.filters.active PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../../>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-target_link_libraries(numerical.filters.active INTERFACE
+target_link_libraries(numerical.filters.active PUBLIC
     infra.util
     numerical.math
+    numerical.solver
 )
 
 target_sources(numerical.filters.active PRIVATE
+    ExtendedKalmanFilter.cpp
+    ExtendedKalmanFilter.hpp
+    KalmanFilter.cpp
     KalmanFilter.hpp
+    KalmanFilterBase.hpp
+    UnscentedKalmanFilter.cpp
+    UnscentedKalmanFilter.hpp
 )
 
 add_subdirectory(test)

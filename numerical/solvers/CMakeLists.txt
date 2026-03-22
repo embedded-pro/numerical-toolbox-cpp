@@ -11,6 +11,7 @@ target_link_libraries(numerical.solver PUBLIC
 )
 
 target_sources(numerical.solver PRIVATE
+    CholeskyDecomposition.hpp
     DiscreteAlgebraicRiccatiEquation.cpp
     DiscreteAlgebraicRiccatiEquation.hpp
     DurandKerner.cpp
