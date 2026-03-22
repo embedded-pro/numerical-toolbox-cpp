@@ -29,6 +29,9 @@ namespace simulator::filters::view
 
         QString chartTitle;
         SimulationResult data;
+        std::vector<float> kfError;
+        std::vector<float> ekfError;
+        std::vector<float> ukfError;
         float minValue = 0.0f;
         float maxValue = 0.0f;
         float maxTime = 0.0f;

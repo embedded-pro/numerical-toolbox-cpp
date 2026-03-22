@@ -2,6 +2,7 @@
 #include <QPainter>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 namespace simulator::filters::view
 {
@@ -19,9 +20,8 @@ namespace simulator::filters::view
         if (!data.time.empty())
             maxTime = data.time.back();
 
-        // Compute y-axis range from all available series
-        minValue = 0.0f;
-        maxValue = 0.0f;
+        minValue = std::numeric_limits<float>::max();
+        maxValue = std::numeric_limits<float>::lowest();
 
         auto updateRange = [this](const std::vector<float>& values)
         {
@@ -55,13 +55,23 @@ namespace simulator::filters::view
         }
         else if (chartTitle.contains("Error"))
         {
+            kfError.clear();
+            ekfError.clear();
+            ukfError.clear();
+            kfError.reserve(data.trueTheta.size());
+            ekfError.reserve(data.trueTheta.size());
+            ukfError.reserve(data.trueTheta.size());
+
             for (std::size_t i = 0; i < data.trueTheta.size(); ++i)
             {
-                float kfErr = std::abs(data.kf.theta[i] - data.trueTheta[i]);
-                float ekfErr = std::abs(data.ekf.theta[i] - data.trueTheta[i]);
-                float ukfErr = std::abs(data.ukf.theta[i] - data.trueTheta[i]);
-                maxValue = std::max({ maxValue, kfErr, ekfErr, ukfErr });
+                kfError.push_back(std::abs(data.kf.theta[i] - data.trueTheta[i]));
+                ekfError.push_back(std::abs(data.ekf.theta[i] - data.trueTheta[i]));
+                ukfError.push_back(std::abs(data.ukf.theta[i] - data.trueTheta[i]));
             }
+
+            updateRange(kfError);
+            updateRange(ekfError);
+            updateRange(ukfError);
         }
 
         float margin = (maxValue - minValue) * 0.1f;
@@ -110,16 +120,9 @@ namespace simulator::filters::view
         }
         else if (chartTitle.contains("Error"))
         {
-            std::vector<float> kfErr, ekfErr, ukfErr;
-            for (std::size_t i = 0; i < data.trueTheta.size(); ++i)
-            {
-                kfErr.push_back(std::abs(data.kf.theta[i] - data.trueTheta[i]));
-                ekfErr.push_back(std::abs(data.ekf.theta[i] - data.trueTheta[i]));
-                ukfErr.push_back(std::abs(data.ukf.theta[i] - data.trueTheta[i]));
-            }
-            DrawTimeSeries(painter, plotArea, data.time, kfErr, Qt::blue, 2);
-            DrawTimeSeries(painter, plotArea, data.time, ekfErr, Qt::red, 2);
-            DrawTimeSeries(painter, plotArea, data.time, ukfErr, QColor(0, 150, 0), 2);
+            DrawTimeSeries(painter, plotArea, data.time, kfError, Qt::blue, 2);
+            DrawTimeSeries(painter, plotArea, data.time, ekfError, Qt::red, 2);
+            DrawTimeSeries(painter, plotArea, data.time, ukfError, QColor(0, 150, 0), 2);
         }
 
         DrawLegend(painter, plotArea);

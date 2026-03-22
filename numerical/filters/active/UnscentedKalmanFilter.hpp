@@ -51,6 +51,7 @@ namespace filters
             StateTransitionWithControlFn f, MeasurementFn h,
             UkfParameters params = UkfParameters{});
 
+        template<std::size_t C = ControlSize, typename = std::enable_if_t<(C == 0)>>
         void Predict();
 
         template<std::size_t C = ControlSize, typename = std::enable_if_t<(C > 0)>>
@@ -224,6 +225,7 @@ namespace filters
     }
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
+    template<std::size_t C, typename>
     OPTIMIZE_FOR_SPEED void UnscentedKalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::Predict()
     {
         std::array<StateVector, SigmaPointCount> sigmaPoints;
