@@ -32,6 +32,19 @@ For the last link, the offset to the end-effector is approximated as $2 \cdot r_
 |------|--------|--------|------------------------|
 | All  | $O(n)$ | $O(n)$ | Single pass over chain |
 
+## Variants & Generalizations
+
+- **Planar vs. spatial chains**: In purely planar manipulators, all joint axes are parallel and rotations reduce to 2D trigonometry, but the algorithmic structure (one pass accumulating transforms) remains the same.
+- **Prismatic joints**: For prismatic joints, $R_k(q_k)$ stays constant while $r_{i \to i+1}$ becomes a function of the joint displacement; the same forward sweep still applies.
+- **Different parameterizations**: Denavit–Hartenberg, modified DH, or product-of-exponentials (PoE) formulations all map to the same core idea: recursively compose transforms along the chain.
+- **Multiple end-effectors**: For branched chains, the same routine can be run per branch by choosing different terminal joints while reusing shared prefixes.
+
+## Applications
+
+- **Visualization**: Rendering joint frames and links in 3D for debugging controllers, planners, and estimators.
+- **Collision detection & workspace analysis**: Computing link poses to test against environment geometry and to sample reachable workspaces.
+- **Control & planning**: Providing end-effector pose and intermediate joint positions to inverse kinematics solvers, trajectory planners, and constraint checkers.
+- **Dynamics algorithms**: Supplying link transforms to dynamics routines such as ABA and RNEA that require consistent kinematic states.
 ## Step-by-Step Walkthrough
 
 Consider a 2-link planar arm with link lengths $L_1 = 1$, $L_2 = 0.8$, Y-axis joints, and $q = [\pi/4, -\pi/6]$.
