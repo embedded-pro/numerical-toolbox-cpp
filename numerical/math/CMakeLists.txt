@@ -12,6 +12,7 @@ target_link_libraries(numerical.math PUBLIC
 target_sources(numerical.math PRIVATE
     AdvancedFunctions.hpp
     ComplexNumber.hpp
+    Geometry3D.hpp
     HyperbolicFunctions.hpp
     Matrix.cpp
     Matrix.hpp

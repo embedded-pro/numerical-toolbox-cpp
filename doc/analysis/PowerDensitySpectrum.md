@@ -1,239 +1,134 @@
-# Power Spectral Density (PSD) Implementation Guide
+# Power Spectral Density (Welch's Method)
 
-## Process Overview
+## Overview & Motivation
 
-The following diagram illustrates the key steps in the Welch's method implementation:
+Given a noisy signal, a natural question is: *how is the signal's power distributed across frequencies?* A single FFT of the entire record gives a very noisy estimate — the variance of the periodogram does not decrease as the record grows. **Welch's method** trades frequency resolution for statistical reliability by dividing the signal into overlapping, windowed segments, computing a periodogram for each, and averaging them. The result is a smooth, consistent estimate of the Power Spectral Density (PSD).
 
-![PSD Diagram](PsdSegments.svg)
+This is the standard approach in vibration analysis, audio engineering, communication system design, and any domain where reliable spectral estimates matter more than the finest possible frequency resolution.
 
-The diagram shows the main processing steps:
-1. Input signal is received
-2. Signal is divided into overlapping segments
-3. Window function is applied to each segment
-4. FFT is computed for each windowed segment
-5. Power spectrum is calculated and averaged
+## Mathematical Theory
 
-## Mathematical Background
+### Power Spectral Density Definition
 
-### Power Spectral Density
+For a wide-sense stationary process $x(t)$, the PSD is the Fourier transform of the autocorrelation function (Wiener-Khinchin theorem):
 
-The Power Spectral Density (PSD) describes how the power of a signal is distributed across different frequencies. For a continuous-time signal x(t), the PSD is defined as:
+$$S_{xx}(f) = \int_{-\infty}^{\infty} R_{xx}(\tau) \, e^{-j2\pi f\tau} \, d\tau$$
 
-```
-Sxx(f) = lim[T→∞] (1/T) |X(f)|²
-```
+In practice we estimate $S_{xx}$ from a finite record.
 
-where X(f) is the Fourier transform of the signal and T is the observation time.
+### The Periodogram
+
+The periodogram of a length-$N$ segment $x[n]$ is:
+
+$$\hat{P}(f_k) = \frac{1}{N} \left| \sum_{n=0}^{N-1} x[n] \, e^{-j2\pi kn/N} \right|^2 = \frac{1}{N} |X[k]|^2$$
+
+This is an unbiased but **inconsistent** estimator — its variance does not shrink as $N \to \infty$.
 
 ### Welch's Method
 
-Our implementation uses Welch's method, which:
-1. Divides the signal into overlapping segments
-2. Windows each segment
-3. Computes the periodogram of each segment
-4. Averages the periodograms
+1. **Segment** the signal of length $L$ into $K$ overlapping segments of length $N$ with step size $S = N - \text{overlap}$:
 
-The mathematical steps are:
-```
-1. Segment the signal: xi[n] = x[n + iL], i = 0,1,...,K-1
-2. Apply window: wi[n] = w[n]xi[n]
-3. Compute FFT: Wi[k] = FFT{wi[n]}
-4. Calculate periodogram: Pi[k] = (1/N)|Wi[k]|²
-5. Average periodograms: P[k] = (1/K)Σ(i=0 to K-1) Pi[k]
-```
+$$x_i[n] = x[n + iS], \quad i = 0, 1, \ldots, K-1$$
 
-where:
-- N is the segment size
-- L is the step size between segments
-- K is the number of segments
-- w[n] is the window function
+2. **Window** each segment:
 
-## Implementation Details
+$$w_i[n] = w[n] \cdot x_i[n]$$
 
-### Class Structure
+3. **Compute the periodogram** of each windowed segment:
 
-```cpp
-template<
-    typename QNumberType,
-    std::size_t SegmentSize,
-    typename Fft,
-    typename TwindleFactor,
-    std::size_t Overlap
->
-class PowerSpectralDensity {
-public:
-    explicit PowerSpectralDensity(
-        windowing::Window<QNumberType>& window,
-        QNumberType samplingTimeInSeconds);
-        
-    VectorReal& Calculate(const VectorReal& input);
-};
-```
+$$P_i[k] = \frac{1}{N} |W_i[k]|^2$$
 
-### Key Components
+4. **Average** across all segments:
 
-1. **Segmentation**:
-   - Fixed segment size (must be even)
-   - Configurable overlap (0%, 25%, 50%, or 75%)
-   - Step size calculated as: `step = SegmentSize - overlapSize`
+$$\hat{S}_{xx}[k] = \frac{1}{K} \sum_{i=0}^{K-1} P_i[k]$$
 
-2. **Windowing**:
-   - User-provided window function
-   - Reduces spectral leakage
-   - Applied to each segment before FFT
+The averaging reduces variance by a factor of approximately $K$ (slightly less due to overlap correlation).
 
-3. **FFT Processing**:
-   - Uses templated FFT implementation
-   - Computes spectrum for each segment
-   - Handles complex conjugate symmetry
+### Frequency Resolution
 
-4. **Averaging**:
-   - Accumulates power from all segments
-   - Applies frequency resolution scaling
-   - Returns one-sided spectrum
+$$\Delta f = \frac{f_s}{N}$$
 
-## Usage Guide
+Increasing segment size $N$ improves resolution but reduces the number of averages $K$ for a fixed-length record.
 
-### Basic Usage
+## Complexity Analysis
 
-```cpp
-// Define system parameters
-constexpr std::size_t N = 1024;          // Segment size
-constexpr std::size_t overlap = 50;       // 50% overlap
-using FloatType = float;
+| Case | Time                  | Space  | Notes                                |
+|------|-----------------------|--------|--------------------------------------|
+| All  | $O(K \cdot N \log N)$ | $O(N)$ | $K$ segments, each requiring one FFT |
 
-// Create window function
-windowing::Hanning<FloatType> window;
+Where $K = \lfloor (L - N) / S \rfloor + 1$ and $S = N \cdot (1 - \text{overlap fraction})$.
 
-// Create PSD analyzer
-PowerSpectralDensity<
-    FloatType,
-    N,
-    FastFourierTransformRadix2Impl<FloatType, N>,
-    TwiddleFactorsImpl<FloatType, N/2>,
-    overlap
-> psd(window, samplingTime);
+**Why:** Each segment requires an $O(N \log N)$ FFT, and there are $K$ segments. The averaging and magnitude-squared operations are $O(N)$ per segment.
 
-// Prepare input data
-infra::BoundedVector<FloatType>::WithMaxSize<N> signal;
-// ... fill signal with data ...
+## Step-by-Step Walkthrough
 
-// Calculate PSD
-auto& spectrum = psd.Calculate(signal);
+**Input:** $x = [1, 3, 5, 7, 6, 4, 2, 0]$, segment size $N=4$, 50 % overlap, rectangular window.
 
-// Access results
-for (std::size_t i = 0; i <= N/2; ++i) {
-    float frequency = i * (1.0f / samplingTime) / N;
-    float power = spectrum[i];
-    // Process spectrum...
-}
+**Step 1 — Segmentation** (step $S = 2$):
+
+| Segment | Indices | Values         |
+|---------|---------|----------------|
+| $x_0$   | 0–3     | $[1, 3, 5, 7]$ |
+| $x_1$   | 2–5     | $[5, 7, 6, 4]$ |
+| $x_2$   | 4–7     | $[6, 4, 2, 0]$ |
+
+**Step 2 — Window** (rectangular → no change)
+
+**Step 3 — FFT and periodogram** for $x_0 = [1, 3, 5, 7]$:
+
+- $X_0 = [16, \; -4+4j, \; -4, \; -4-4j]$
+- $P_0 = \frac{1}{4}[256, \; 32, \; 16, \; 32] = [64, \; 8, \; 4, \; 8]$
+
+*(Repeat for $x_1$ and $x_2$.)*
+
+**Step 4 — Average** the three periodograms element-wise.
+
+**Output:** One-sided PSD estimate at frequencies $0, \frac{f_s}{4}, \frac{f_s}{2}$.
+
+## Pitfalls & Edge Cases
+
+- **Too few segments.** If the signal is short relative to the segment size, $K$ is small and the variance reduction is limited. Reduce $N$ or increase overlap.
+- **Overlap > 75 %** gives diminishing returns — the segments become highly correlated and additional averages barely reduce variance.
+- **Window choice** affects both the main-lobe width and sidelobe level. A Hanning window is a safe default; use Blackman for better dynamic range at the cost of resolution.
+- **Segment size must be even** (and a power of 2 for the FFT). Odd or non-power-of-2 sizes are rejected at compile time.
+- **DC and Nyquist bins** appear only once in the one-sided spectrum; all other bins are doubled. Omitting this correction distorts the total power.
+
+## Variants & Generalizations
+
+| Variant                    | Key Difference                                                                        |
+|----------------------------|---------------------------------------------------------------------------------------|
+| **Bartlett's method**      | Non-overlapping segments, rectangular window (special case of Welch with 0 % overlap) |
+| **Modified periodogram**   | Single segment with a non-rectangular window                                          |
+| **Multitaper method**      | Uses multiple orthogonal windows (tapers) per segment for lower bias                  |
+| **Cross-spectral density** | Computes $S_{xy}$ between two signals instead of the auto-spectrum                    |
+| **Coherence** | $|\gamma_{xy}|^2 = |S_{xy}|^2 / (S_{xx} S_{yy})$ — measures linear dependence between two signals at each frequency |
+
+## Applications
+
+- **Vibration analysis** — Identifying resonant frequencies and tracking their amplitude over time.
+- **Noise characterization** — Determining white, pink, or brown noise profiles in electronic circuits or sensors.
+- **Communication systems** — Measuring occupied bandwidth and interference levels.
+- **Audio engineering** — Equalizer design, room acoustics analysis.
+- **Biomedical signal processing** — EEG, EMG spectral analysis for clinical diagnostics.
+
+## Connections to Other Algorithms
+
+```mermaid
+graph LR
+    SIG["Input Signal"] --> WIN["Window Functions"]
+    WIN --> FFT["Fast Fourier Transform"]
+    FFT --> PSD["Power Spectral Density"]
+    PSD --> YW["Yule-Walker (parametric alternative)"]
 ```
 
-### Example: Signal Analysis
+| Algorithm                                         | Relationship                                                                              |
+|---------------------------------------------------|-------------------------------------------------------------------------------------------|
+| [Fast Fourier Transform](FastFourierTransform.md) | Core building block — each segment is transformed via FFT                                 |
+| [Window Functions](../windowing/window.md)        | Applied to each segment before FFT to control leakage                                     |
+| [Yule-Walker](../estimators/YuleWalker.md)        | Parametric alternative — estimates PSD from an AR model instead of averaging periodograms |
 
-```cpp
-// Create analyzer with Hanning window
-constexpr float samplingRate = 1000.0f;  // Hz
-constexpr float samplingTime = 1.0f / samplingRate;
-windowing::Hanning<float> window;
+## References & Further Reading
 
-PowerSpectralDensity<float, 1024, FFT, Twiddle, 50> psd(
-    window, samplingTime);
-
-// Generate test signal
-auto signal = GenerateSignal(samplingRate);
-
-// Calculate PSD
-auto& spectrum = psd.Calculate(signal);
-
-// Convert to dB
-std::vector<float> powerDb(spectrum.size());
-for (std::size_t i = 0; i < spectrum.size(); ++i) {
-    float power = spectrum[i];
-    powerDb[i] = 10.0f * std::log10(power);
-}
-```
-
-## Best Practices
-
-1. **Segment Size**:
-   - Use power of 2 for efficient FFT
-   - Balance frequency resolution vs. time averaging
-   - Typically 256 to 4096 points
-
-2. **Overlap**:
-   - Higher overlap increases averaging but requires more computation
-   - 50% is a common choice
-   - Supported values: 0%, 25%, 50%, 75%
-
-3. **Window Selection**:
-   - Hanning/Hamming for general purpose
-   - Blackman for better sidelobe suppression
-   - Rectangle for transient analysis
-
-4. **Frequency Resolution**:
-   - Determined by: Δf = 1/(N * samplingTime)
-   - Trade-off with temporal resolution
-
-## Common Applications
-
-1. **Spectrum Analysis**:
-   - Frequency content analysis
-   - Harmonic identification
-   - Noise characterization
-
-2. **Signal Processing**:
-   - Vibration analysis
-   - Audio processing
-   - Communication systems
-
-3. **System Identification**:
-   - Transfer function estimation
-   - Coherence analysis
-   - Cross-spectral density
-
-## Performance Considerations
-
-1. **Template Parameters**:
-   - Fixed sizes enable compile-time optimizations
-   - Stack allocation for small segments
-
-2. **Memory Usage**:
-   - Uses BoundedVector to prevent heap allocation
-   - Reuses FFT buffers across segments
-
-3. **Computation Efficiency**:
-   - In-place FFT operations
-   - Optimized window application
-   - Efficient buffer management
-
-## Limitations and Future Improvements
-
-1. Current limitations:
-   - Fixed segment size
-   - Limited overlap options
-   - One-sided spectrum only
-   - Real-valued input only
-
-2. Possible extensions:
-   - Variable segment size
-   - Arbitrary overlap percentage
-   - Two-sided spectrum option
-   - Complex input support
-   - Cross-spectral density
-   - Coherence estimation
-   - Confidence interval calculation
-   - Multi-channel analysis
-
-## Error Handling
-
-1. Static assertions verify:
-   - Valid numeric types
-   - Even segment size
-   - Valid overlap percentage
-   - FFT type compatibility
-
-2. Runtime checks:
-   - Input size adequacy
-   - Window function validity
-   - Numerical overflow prevention
+- Welch, P.D., "The use of fast Fourier transform for the estimation of power spectra", *IEEE Transactions on Audio and Electroacoustics*, 15(2), 1967.
+- Oppenheim, A.V. and Schafer, R.W., *Discrete-Time Signal Processing*, 3rd ed., Pearson, 2009 — Chapter 10.
+- Stoica, P. and Moses, R.L., *Spectral Analysis of Signals*, Prentice Hall, 2005.

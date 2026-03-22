@@ -1,239 +1,114 @@
-# Discrete Cosine Transform (DCT) Implementation Guide
+# Discrete Cosine Transform (DCT)
 
-## Process Overview
+## Overview & Motivation
 
-The DCT transforms a sequence of data points into a sum of cosine functions oscillating at different frequencies. Our implementation specifically focuses on DCT-II, which is the most commonly used variant, especially in signal compression applications.
+The Discrete Cosine Transform projects a real-valued signal onto a set of cosine basis functions at different frequencies. Unlike the DFT, the DCT produces **purely real coefficients** and exhibits superior **energy compaction** — most of the signal's energy concentrates in a few low-frequency coefficients. This property makes it the backbone of lossy compression standards (JPEG, MPEG, AAC).
 
-The following diagram illustrates the key steps in our DCT implementation:
+This library implements **DCT-II** (the most common variant) by leveraging the FFT: the input is rearranged, transformed via a real-valued FFT, and post-processed with twiddle factors. This approach inherits the FFT's $O(N \log N)$ efficiency rather than requiring a dedicated $O(N^2)$ computation.
 
-![DCT Processing Flow](doc/analysis/DctFlow.svg)
+## Mathematical Theory
 
-The above diagram shows the main processing stages:
-1. Input signal preprocessing (reordering and scaling)
-2. FFT computation on preprocessed data
-3. Post-processing to obtain DCT coefficients
+### DCT-II Definition
 
-The DCT decomposes signals into different frequency components using cosine basis functions:
+For a length-$N$ sequence $x[n]$, the DCT-II is defined as:
 
-![DCT Basis Functions](doc/analysis/DctBasis.svg)
+$$X[k] = \sum_{n=0}^{N-1} x[n] \cos\!\left(\frac{\pi}{N}\left(n + \tfrac{1}{2}\right) k\right), \quad k = 0, 1, \ldots, N-1$$
 
-The diagram shows how different frequency components (k=0,1,2,3) contribute to the final signal representation. The k=0 component represents the DC (average) value, while higher k values represent increasingly higher frequency oscillations.
+The inverse (DCT-III, also called IDCT) recovers $x[n]$:
 
-The key processing steps are:
-1. Input signal preprocessing
-2. FFT computation
-3. Post-processing to obtain DCT coefficients
-4. (For inverse) Reverse process to recover the original signal
+$$x[n] = \frac{1}{N}\left[\frac{X[0]}{2} + \sum_{k=1}^{N-1} X[k] \cos\!\left(\frac{\pi}{N}\left(n + \tfrac{1}{2}\right) k\right)\right]$$
 
-## Mathematical Background
+### FFT-Based Computation
 
-### Discrete Cosine Transform
+The DCT can be computed via the DFT of a reordered sequence:
 
-The DCT-II of a sequence x[n] of length N is defined as:
+1. Form a new sequence $y[n]$ by interleaving even-indexed and reverse odd-indexed samples of $x$.
+2. Compute the $N$-point FFT: $Y[k] = \text{FFT}\{y\}$.
+3. Apply twiddle factors: $X[k] = 2 \cdot \text{Re}\!\left(W[k] \cdot Y[k]\right)$, where $W[k] = e^{-j\pi k / 2N}$.
 
-```
-X[k] = Σ(n=0 to N-1) x[n] * cos(π/N * (n + 1/2) * k)
-```
+### Why Cosine Basis?
 
-where:
-- x[n] is the input sequence
-- X[k] are the DCT coefficients
-- N is the sequence length
-- k is the frequency index
+Cosine functions are **symmetric** (even functions). The DCT implicitly mirrors the signal rather than making it periodic, avoiding the boundary discontinuities that cause spectral leakage in the DFT. This is why DCT coefficients decay faster and energy compaction is better.
 
-### FFT-Based Implementation
+## Complexity Analysis
 
-Our implementation uses FFT to compute DCT efficiently. The process involves:
+| Case | Time          | Space  | Notes                                                            |
+|------|---------------|--------|------------------------------------------------------------------|
+| All  | $O(N \log N)$ | $O(N)$ | Dominated by the internal FFT; twiddle post-processing is $O(N)$ |
 
-1. Rearranging the input sequence
-2. Computing FFT
-3. Multiplying with twiddle factors
+The reordering step and twiddle multiplication are both linear, so the overall cost is determined by the FFT.
 
-The mathematical relationship is:
-```
-DCT[k] = 2 * Real{W[k] * F[k]}
-```
-where:
-- F[k] is the FFT of the rearranged sequence
-- W[k] = exp(-jπk/2N) is the twiddle factor
-- Real{} denotes the real part
+## Step-by-Step Walkthrough
 
-## Implementation Details
+**Input:** $x = [1, 2, 3, 4]$, $N = 4$
 
-### Class Structure
+**Step 1 — Reorder for FFT**
 
-```cpp
-template<typename QNumberType, std::size_t Length>
-class DiscreteConsineTransform {
-public:
-    explicit DiscreteConsineTransform(
-        FastFourierTransform<QNumberType>& fft);
-        
-    VectorReal& Forward(VectorReal& input);
-    VectorReal& Inverse(VectorReal& input);
-};
-```
+Even-indexed positions filled left-to-right, odd-indexed filled right-to-left:
 
-### Key Components
+$$y = [x[0],\; x[2],\; x[3],\; x[1]] = [1, 3, 4, 2]$$
 
-1. **Input Processing**:
-   - Reorders input for FFT compatibility
-   - Ensures fixed-point range compliance
-   - Handles boundary conditions
+**Step 2 — Compute FFT**
 
-2. **FFT Interface**:
-   - Uses templated FFT implementation
-   - Manages complex intermediate results
-   - Optimizes memory usage
+$$Y = \text{FFT}([1, 3, 4, 2]) = [10,\; -3+j,\; -2,\; -3-j]$$
 
-3. **Scaling Management**:
-   - Maintains fixed-point range [-1, 1)
-   - Applies appropriate scaling factors
-   - Handles normalization
+**Step 3 — Apply twiddle factors** $W[k] = e^{-j\pi k/8}$
 
-4. **Fixed-Point Considerations**:
-   - Pre-computed trigonometric tables
-   - Optimized multiplication sequences
-   - Range-checked operations
+| $k$ | $W[k]$         | $W[k] \cdot Y[k]$ | $X[k] = 2 \cdot \text{Re}(\cdot)$ |
+|-----|----------------|-------------------|-----------------------------------|
+| 0   | 1              | 10                | 20                                |
+| 1   | $e^{-j\pi/8}$  | ≈ −2.22 − 1.90j   | ≈ −4.44                           |
+| 2   | $e^{-j\pi/4}$  | ≈ −1.41 + 1.41j   | ≈ −2.83                           |
+| 3   | $e^{-j3\pi/8}$ | ≈ −0.24 + 3.07j   | ≈ −0.47                           |
 
-## Usage Guide
+**Output:** $X \approx [20, -4.44, -2.83, -0.47]$
 
-### Basic Usage
+Notice how most of the energy is in $X[0]$ (the DC component) — energy compaction in action.
 
-```cpp
-// Define system parameters
-constexpr std::size_t N = 1024;          // Transform size
-using NumberType = math::Q15;             // Fixed-point type
+## Pitfalls & Edge Cases
 
-// Create FFT instance
-TwiddleFactors<NumberType, N/2> twiddleFactors;
-FastFourierTransformRadix2Impl<NumberType, N> fft(twiddleFactors);
+- **Power-of-2 length required** — inherited from the underlying FFT constraint.
+- **Normalization convention.** Different references use different scaling (some include $\sqrt{2/N}$). Verify which convention the consumer expects.
+- **Fixed-point overflow.** The reordering and FFT steps must preserve range; apply the 0.9999 scaling factor used throughout this library.
+- **Inverse accuracy.** Rounding errors accumulate in the forward-then-inverse round-trip, especially for Q15 types.
+- **Real input only.** Complex inputs are not supported by the reordering trick.
 
-// Create DCT analyzer
-DiscreteConsineTransform<NumberType, N> dct(fft);
+## Variants & Generalizations
 
-// Prepare input data
-infra::BoundedVector<NumberType>::WithMaxSize<N> signal;
-// ... fill signal with data ...
+| Variant            | Description                                                       |
+|--------------------|-------------------------------------------------------------------|
+| **DCT-I**          | Symmetric extension; used in some filter bank designs             |
+| **DCT-III (IDCT)** | Inverse of DCT-II; used for reconstruction in JPEG decoding       |
+| **DCT-IV**         | Self-inverse; basis of the MDCT used in MP3 and AAC               |
+| **MDCT**           | Modified DCT with 50 % overlap; foundation of modern audio codecs |
+| **2-D DCT**        | Applied row-then-column for image compression (JPEG 8×8 blocks)   |
 
-// Calculate DCT
-auto& coefficients = dct.Forward(signal);
+## Applications
 
-// Process coefficients
-for (std::size_t i = 0; i < N; ++i) {
-    // Process DCT coefficients...
-}
+- **Image compression** — JPEG applies DCT to 8×8 pixel blocks; quantizing high-frequency coefficients achieves compression.
+- **Audio compression** — MDCT (a DCT variant) is the core transform in MP3, AAC, and Opus codecs.
+- **Feature extraction** — Mel-frequency cepstral coefficients (MFCCs) used in speech recognition are derived from a DCT.
+- **Data reduction** — Truncating small DCT coefficients provides a compact signal representation for embedded storage.
+- **Numerical methods** — DCT is used in fast solvers for certain partial differential equations (Poisson's equation on regular grids).
 
-// Inverse transform if needed
-auto& reconstructed = dct.Inverse(coefficients);
+## Connections to Other Algorithms
+
+```mermaid
+graph LR
+    DCT["Discrete Cosine Transform"]
+    FFT["Fast Fourier Transform"]
+    WIN["Window Functions"]
+    FFT --> DCT
+    WIN -.-> DCT
 ```
 
-### Example: Image Compression
+| Algorithm                                         | Relationship                                                              |
+|---------------------------------------------------|---------------------------------------------------------------------------|
+| [Fast Fourier Transform](FastFourierTransform.md) | DCT is computed via FFT with input reordering and twiddle post-processing |
+| [Window Functions](../windowing/window.md)        | Some DCT applications use windowing to control boundary effects           |
 
-```cpp
-// Create DCT processor for 8x8 blocks
-constexpr std::size_t blockSize = 8;
-DiscreteConsineTransform<float, blockSize> dct(fft);
+## References & Further Reading
 
-// Process image block
-BoundedVector<float>::WithMaxSize<blockSize> block;
-// ... fill block with pixel data ...
-
-// Transform
-auto& dctCoeffs = dct.Forward(block);
-
-// Quantize coefficients (compression)
-for (auto& coeff : dctCoeffs) {
-    coeff = Quantize(coeff, quantizationMatrix[i]);
-}
-
-// Inverse transform
-auto& reconstructed = dct.Inverse(dctCoeffs);
-```
-
-## Best Practices
-
-1. **Input Preparation**:
-   - Ensure data is within fixed-point range
-   - Pre-scale values if necessary
-   - Consider block size requirements
-
-2. **Type Selection**:
-   - Use Q15/Q31 for embedded systems
-   - Float for desktop applications
-   - Consider precision requirements
-
-3. **Performance Optimization**:
-   - Use power-of-2 lengths
-   - Reuse transform instances
-   - Leverage pre-computed tables
-
-4. **Memory Management**:
-   - Use BoundedVector for static allocation
-   - Minimize temporary buffers
-   - Consider alignment requirements
-
-## Common Applications
-
-1. **Data Compression**:
-   - Image compression (JPEG)
-   - Audio compression
-   - Video encoding
-
-2. **Signal Processing**:
-   - Feature extraction
-   - Pattern recognition
-   - Spectral analysis
-
-3. **Scientific Computing**:
-   - Numerical solutions
-   - Fast convolution
-   - Data reduction
-
-## Performance Considerations
-
-1. **Compile-Time Optimization**:
-   - Fixed sizes known at compile time
-   - Template specialization
-   - Inline expansion
-
-2. **Memory Efficiency**:
-   - Static allocation
-   - Minimal working buffers
-   - In-place operations where possible
-
-3. **Computational Efficiency**:
-   - FFT-based implementation
-   - Pre-computed tables
-   - Optimized fixed-point math
-
-## Limitations and Future Improvements
-
-1. Current limitations:
-   - Power-of-2 size requirement
-   - Real-valued input only
-   - Single precision support
-   - Basic DCT-II variant only
-
-2. Possible extensions:
-   - Other DCT variants (I, III, IV)
-   - Arbitrary size support
-   - Multi-dimensional transform
-   - Parallel processing
-   - SIMD optimization
-   - Streaming interface
-   - Block processing
-
-## Error Handling
-
-1. Static assertions verify:
-   - Power-of-2 length
-   - Valid numeric types
-   - Size constraints
-   - FFT compatibility
-
-2. Runtime checks:
-   - Input range validation
-   - Buffer management
-   - Overflow prevention
-   - Error propagation
+- Ahmed, N., Natarajan, T. and Rao, K.R., "Discrete Cosine Transform", *IEEE Transactions on Computers*, C-23(1), 1974.
+- Rao, K.R. and Yip, P., *Discrete Cosine Transform: Algorithms, Advantages, Applications*, Academic Press, 1990.
+- Makhoul, J., "A fast cosine transform in one and two dimensions", *IEEE Transactions on ASSP*, 28(1), 1980.
