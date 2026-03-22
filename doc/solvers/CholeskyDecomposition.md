@@ -16,9 +16,9 @@ $$L_{ij} = \frac{1}{L_{jj}} \left( A_{ij} - \sum_{k=0}^{j-1} L_{ik} L_{jk} \righ
 
 ## Complexity Analysis
 
-| Operation     | Time       | Space    | Notes                                        |
-|---------------|------------|----------|----------------------------------------------|
-| Decomposition | $O(n^3/6)$ | $O(n^2)$ | Half the cost of general LU decomposition   |
+| Operation     | Time       | Space    | Notes                                     |
+|---------------|------------|----------|-------------------------------------------|
+| Decomposition | $O(n^3/6)$ | $O(n^2)$ | Half the cost of general LU decomposition |
 
 ## Pitfalls & Edge Cases
 
@@ -28,10 +28,10 @@ $$L_{ij} = \frac{1}{L_{jj}} \left( A_{ij} - \sum_{k=0}^{j-1} L_{ik} L_{jk} \righ
 
 ## Connections to Other Algorithms
 
-| Algorithm                                                       | Relationship                                                             |
-|-----------------------------------------------------------------|--------------------------------------------------------------------------|
+| Algorithm                                                             | Relationship                                                      |
+|-----------------------------------------------------------------------|-------------------------------------------------------------------|
 | [Unscented Kalman Filter](../filters/active/UnscentedKalmanFilter.md) | Uses Cholesky to generate sigma points from the covariance matrix |
-| [Gaussian Elimination](GaussianElimination.md)                  | General-purpose alternative; does not exploit symmetry                    |
+| [Gaussian Elimination](GaussianElimination.md)                        | General-purpose alternative; does not exploit symmetry            |
 
 ## References & Further Reading
 

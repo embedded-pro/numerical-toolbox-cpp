@@ -50,12 +50,12 @@ $$P_k = (I - K_k H_k) P_k^-$$
 
 ## Complexity Analysis
 
-| Operation      | Time                   | Space         | Notes                                                            |
-|----------------|------------------------|---------------|------------------------------------------------------------------|
-| Jacobian eval  | $O(n^2)$ (user-defined)| $O(n^2)$      | Depends on the specific nonlinear functions                      |
-| Predict        | $O(n^2)$               | $O(n^2)$      | Matrix multiply $F P F^T$ plus nonlinear state propagation       |
-| Update         | $O(n^2 m + m^3)$       | $O(nm)$       | Same as standard Kalman — the linearized equations are identical |
-| Total per step | $O(n^2 m + m^3)$       | $O(n^2 + nm)$ | Dominated by Jacobian evaluation for complex models              |
+| Operation      | Time                    | Space         | Notes                                                            |
+|----------------|-------------------------|---------------|------------------------------------------------------------------|
+| Jacobian eval  | $O(n^2)$ (user-defined) | $O(n^2)$      | Depends on the specific nonlinear functions                      |
+| Predict        | $O(n^2)$                | $O(n^2)$      | Matrix multiply $F P F^T$ plus nonlinear state propagation       |
+| Update         | $O(n^2 m + m^3)$        | $O(nm)$       | Same as standard Kalman — the linearized equations are identical |
+| Total per step | $O(n^2 m + m^3)$        | $O(n^2 + nm)$ | Dominated by Jacobian evaluation for complex models              |
 
 ## Step-by-Step Walkthrough
 
@@ -88,11 +88,11 @@ After 50 iterations the EKF tracks the true pendulum oscillation closely, despit
 ## Comparison with Other Filters
 
 | Filter        | Jacobian Required? | Accuracy for Nonlinear Systems | Computational Cost |
-|---------------|-------------------|-------------------------------|-------------------|
-| Kalman Filter | No (linear only)  | Exact for linear              | Lowest            |
-| **EKF**       | Yes               | First-order approximation     | Low               |
-| UKF           | No                | Second-order approximation    | Moderate          |
-| Particle      | No                | Arbitrary (Monte Carlo)       | High              |
+|---------------|--------------------|--------------------------------|--------------------|
+| Kalman Filter | No (linear only)   | Exact for linear               | Lowest             |
+| **EKF**       | Yes                | First-order approximation      | Low                |
+| UKF           | No                 | Second-order approximation     | Moderate           |
+| Particle      | No                 | Arbitrary (Monte Carlo)        | High               |
 
 ## Applications
 
@@ -115,11 +115,11 @@ graph LR
     EL -->|"plant model"| EKF
 ```
 
-| Algorithm                                                     | Relationship                                                           |
-|---------------------------------------------------------------|------------------------------------------------------------------------|
-| [Kalman Filter](KalmanFilter.md)                              | The EKF reduces to the standard KF when $f$ and $h$ are linear        |
-| [Unscented Kalman Filter](UnscentedKalmanFilter.md)           | Avoids Jacobians using sigma points; better for highly nonlinear cases |
-| [Euler-Lagrange](../../dynamics/EulerLagrange.md)             | Provides the nonlinear dynamics model $f(x)$ for mechanical systems   |
+| Algorithm                                           | Relationship                                                           |
+|-----------------------------------------------------|------------------------------------------------------------------------|
+| [Kalman Filter](KalmanFilter.md)                    | The EKF reduces to the standard KF when $f$ and $h$ are linear         |
+| [Unscented Kalman Filter](UnscentedKalmanFilter.md) | Avoids Jacobians using sigma points; better for highly nonlinear cases |
+| [Euler-Lagrange](../../dynamics/EulerLagrange.md)   | Provides the nonlinear dynamics model $f(x)$ for mechanical systems    |
 
 ## References & Further Reading
 
