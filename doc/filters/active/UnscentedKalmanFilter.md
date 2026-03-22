@@ -69,13 +69,13 @@ $$P_k = P_k^- - K_k S_k K_k^T$$
 
 ## Complexity Analysis
 
-| Operation            | Time                | Space              | Notes                                                        |
-|----------------------|---------------------|--------------------|--------------------------------------------------------------|
-| Sigma point gen      | $O(n^3)$            | $O(n^2)$           | Dominated by Cholesky decomposition                          |
-| State propagation    | $O((2n+1) \cdot c_f)$ | $O(n^2)$        | $c_f$ = cost of evaluating $f(x)$                            |
-| Mean/cov reconstruct | $O(n^2 \cdot (2n+1))$ | $O(n^2)$        | Weighted outer products                                      |
-| Update               | $O(n^2 m + m^3)$    | $O(nm)$            | Same as standard Kalman for the gain computation             |
-| Total per step       | $O(n^3 + n^2 m)$    | $O(n^2 + nm)$      | Cholesky and sigma point propagation dominate                |
+| Operation            | Time                  | Space         | Notes                                            |
+|----------------------|-----------------------|---------------|--------------------------------------------------|
+| Sigma point gen      | $O(n^3)$              | $O(n^2)$      | Dominated by Cholesky decomposition              |
+| State propagation    | $O((2n+1) \cdot c_f)$ | $O(n^2)$      | $c_f$ = cost of evaluating $f(x)$                |
+| Mean/cov reconstruct | $O(n^2 \cdot (2n+1))$ | $O(n^2)$      | Weighted outer products                          |
+| Update               | $O(n^2 m + m^3)$      | $O(nm)$       | Same as standard Kalman for the gain computation |
+| Total per step       | $O(n^3 + n^2 m)$      | $O(n^2 + nm)$ | Cholesky and sigma point propagation dominate    |
 
 For $n \leq 10$, the additional cost over EKF is small — and the elimination of Jacobian derivation is a significant engineering benefit.
 
@@ -115,11 +115,11 @@ The UKF naturally captures the curvature of $-\sin\theta$ without computing $\co
 ## Comparison with Other Filters
 
 | Filter        | Jacobian Required? | Accuracy Order | Handles High Nonlinearity? | Computational Cost |
-|---------------|-------------------|---------------|---------------------------|-------------------|
-| Kalman Filter | No (linear only)  | Exact (linear) | No                        | Lowest            |
-| EKF           | Yes               | 1st order      | Moderate                  | Low               |
-| **UKF**       | No                | 2nd order      | Good                      | Moderate          |
-| Particle      | No                | Arbitrary      | Excellent                 | High              |
+|---------------|--------------------|----------------|----------------------------|--------------------|
+| Kalman Filter | No (linear only)   | Exact (linear) | No                         | Lowest             |
+| EKF           | Yes                | 1st order      | Moderate                   | Low                |
+| **UKF**       | No                 | 2nd order      | Good                       | Moderate           |
+| Particle      | No                 | Arbitrary      | Excellent                  | High               |
 
 ## Applications
 
@@ -142,11 +142,11 @@ graph LR
     CHO -->|"sigma points"| UKF
 ```
 
-| Algorithm                                                     | Relationship                                                                          |
-|---------------------------------------------------------------|---------------------------------------------------------------------------------------|
-| [Kalman Filter](KalmanFilter.md)                              | The UKF reduces to the standard KF when $f$ and $h$ are linear                       |
-| [Extended Kalman Filter](ExtendedKalmanFilter.md)             | Uses Jacobians instead of sigma points; simpler but less accurate for nonlinear cases |
-| [Cholesky Decomposition](../../solvers/CholeskyDecomposition.md) | Used internally to generate sigma points from the covariance matrix                |
+| Algorithm                                                        | Relationship                                                                          |
+|------------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| [Kalman Filter](KalmanFilter.md)                                 | The UKF reduces to the standard KF when $f$ and $h$ are linear                        |
+| [Extended Kalman Filter](ExtendedKalmanFilter.md)                | Uses Jacobians instead of sigma points; simpler but less accurate for nonlinear cases |
+| [Cholesky Decomposition](../../solvers/CholeskyDecomposition.md) | Used internally to generate sigma points from the covariance matrix                   |
 
 ## References & Further Reading
 
