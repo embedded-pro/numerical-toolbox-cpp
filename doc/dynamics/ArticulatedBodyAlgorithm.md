@@ -48,9 +48,9 @@ where $u_i = \tau_i - s_i^T p^A_i$ and $\hat{a}_i$ is the spatial acceleration c
 
 ## Complexity Analysis
 
-| Case    | Time   | Space  | Notes                              |
-|---------|--------|--------|------------------------------------|
-| All     | $O(n)$ | $O(n)$ | Three linear passes over the chain |
+| Case | Time   | Space  | Notes                              |
+|------|--------|--------|------------------------------------|
+| All  | $O(n)$ | $O(n)$ | Three linear passes over the chain |
 
 Each pass visits every link exactly once, performing constant-time spatial algebra (3×3 matrix operations) per link.
 
