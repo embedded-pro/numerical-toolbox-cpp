@@ -12,6 +12,8 @@ target_link_libraries(numerical.dynamics PUBLIC
 )
 
 target_sources(numerical.dynamics PRIVATE
+    ArticulatedBodyAlgorithm.cpp
+    ArticulatedBodyAlgorithm.hpp
     EulerLagrangeDynamics.hpp
     EulerLagrangeSolver.cpp
     EulerLagrangeSolver.hpp

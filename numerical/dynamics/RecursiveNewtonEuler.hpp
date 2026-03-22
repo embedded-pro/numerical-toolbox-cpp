@@ -166,6 +166,10 @@ namespace dynamics
             auto Iw = link.inertia * omega[i];
             torque[i] = link.inertia * omegaDot[i] + CrossProduct(omega[i], Iw);
 
+            // Shift torque to joint origin: n_i = N_i + rCoM x F_i
+            auto rCoM = link.jointToCoM;
+            torque[i] = torque[i] + CrossProduct(rCoM, force[i]);
+
             // Add contribution from child link (if any)
             if (i + 1 < NumLinks)
             {
@@ -178,10 +182,6 @@ namespace dynamics
                 force[i] = force[i] + childForceInParent;
                 torque[i] = torque[i] + childTorqueInParent + CrossProduct(rToChild, childForceInParent);
             }
-
-            // Shift torque reference from CoM to joint
-            auto rCoM = link.jointToCoM;
-            torque[i] = torque[i] + CrossProduct(rCoM, force[i]);
         }
 
         // ── Extract joint torques: project torque onto joint axis ──

@@ -8,6 +8,7 @@ target_link_libraries(numerical.dynamics_test PUBLIC
 )
 
 target_sources(numerical.dynamics_test PRIVATE
+    TestArticulatedBodyAlgorithm.cpp
     TestEulerLagrangeSolver.cpp
     TestNewtonEulerSolver.cpp
     TestRecursiveNewtonEuler.cpp
