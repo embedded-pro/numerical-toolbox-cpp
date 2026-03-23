@@ -146,6 +146,76 @@ TYPED_TEST(ExtendedKalmanFilterTest, LinearSystemMatchesKalmanFilter)
     EXPECT_NEAR(math::ToFloat(finalState.at(1, 0)), trueVel, 0.4f);
 }
 
+TYPED_TEST(ExtendedKalmanFilterTest, ThreeStateSystemTracksAcceleration)
+{
+    using StateVec3 = math::Vector<TypeParam, 3>;
+    using StateMat3 = math::SquareMatrix<TypeParam, 3>;
+    using MeasVec = math::Vector<TypeParam, 1>;
+    using MeasCov = math::SquareMatrix<TypeParam, 1>;
+    using MeasMat = math::Matrix<TypeParam, 1, 3>;
+    using Ekf3 = filters::ExtendedKalmanFilter<TypeParam, 3, 1, 0>;
+
+    auto transition = [](const StateVec3& x) -> StateVec3
+    {
+        return StateVec3{
+            { TypeParam(math::ToFloat(x.at(0, 0)) + math::ToFloat(x.at(1, 0)) * dt) },
+            { TypeParam(math::ToFloat(x.at(1, 0)) + math::ToFloat(x.at(2, 0)) * dt) },
+            { x.at(2, 0) }
+        };
+    };
+
+    auto jacobian = [](const StateVec3& /*x*/) -> StateMat3
+    {
+        return StateMat3{
+            { TypeParam(1.0f), TypeParam(dt), TypeParam(0.0f) },
+            { TypeParam(0.0f), TypeParam(1.0f), TypeParam(dt) },
+            { TypeParam(0.0f), TypeParam(0.0f), TypeParam(1.0f) }
+        };
+    };
+
+    auto measurementFn = [](const StateVec3& x) -> MeasVec
+    {
+        return MeasVec{ { x.at(0, 0) } };
+    };
+
+    auto measurementJac = [](const StateVec3& /*x*/) -> MeasMat
+    {
+        return MeasMat{ { TypeParam(1.0f), TypeParam(0.0f), TypeParam(0.0f) } };
+    };
+
+    auto initialState = StateVec3{ { TypeParam(0.0f) }, { TypeParam(0.0f) }, { TypeParam(0.0f) } };
+    auto initialP = StateMat3{
+        { TypeParam(1.0f), TypeParam(0.0f), TypeParam(0.0f) },
+        { TypeParam(0.0f), TypeParam(1.0f), TypeParam(0.0f) },
+        { TypeParam(0.0f), TypeParam(0.0f), TypeParam(1.0f) }
+    };
+
+    Ekf3 ekf(initialState, initialP, transition, jacobian, measurementFn, measurementJac);
+    ekf.SetProcessNoise(StateMat3{
+        { TypeParam(0.01f), TypeParam(0.0f), TypeParam(0.0f) },
+        { TypeParam(0.0f), TypeParam(0.01f), TypeParam(0.0f) },
+        { TypeParam(0.0f), TypeParam(0.0f), TypeParam(0.01f) } });
+    ekf.SetMeasurementNoise(MeasCov{ { TypeParam(0.1f) } });
+
+    float trueAcc = 0.5f;
+    float trueVel3 = 0.0f;
+    float truePos3 = 0.0f;
+
+    for (int i = 0; i < 30; ++i)
+    {
+        trueVel3 += trueAcc * dt;
+        truePos3 += trueVel3 * dt;
+
+        ekf.Predict();
+        ekf.Update(MeasVec{ { TypeParam(truePos3) } });
+    }
+
+    auto finalState3 = ekf.GetState();
+    EXPECT_NEAR(math::ToFloat(finalState3.at(0, 0)), truePos3, 0.15f);
+    EXPECT_NEAR(math::ToFloat(finalState3.at(1, 0)), trueVel3, 0.3f);
+    EXPECT_NEAR(math::ToFloat(finalState3.at(2, 0)), trueAcc, 0.5f);
+}
+
 TYPED_TEST(ExtendedKalmanFilterTest, NonlinearPredictionUpdatesState)
 {
     using StateVector = typename TestFixture::StateVector;
