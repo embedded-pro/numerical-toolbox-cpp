@@ -41,21 +41,21 @@ namespace filters
 
         using StateTransitionWithControlFn = infra::Function<StateVector(const StateVector&, const ControlVector&)>;
 
-        template<std::size_t C = ControlSize, typename = std::enable_if_t<(C == 0)>>
         UnscentedKalmanFilter(const StateVector& initialState, const StateMatrix& initialCovariance,
             StateTransitionFn f, MeasurementFn h,
-            UkfParameters params = UkfParameters{});
+            UkfParameters params = UkfParameters{})
+        requires(ControlSize == 0);
 
-        template<std::size_t C = ControlSize, typename = std::enable_if_t<(C > 0)>>
         UnscentedKalmanFilter(const StateVector& initialState, const StateMatrix& initialCovariance,
             StateTransitionWithControlFn f, MeasurementFn h,
-            UkfParameters params = UkfParameters{});
+            UkfParameters params = UkfParameters{})
+        requires(ControlSize > 0);
 
-        template<std::size_t C = ControlSize, typename = std::enable_if_t<(C == 0)>>
-        void Predict();
+        void Predict()
+        requires(ControlSize == 0);
 
-        template<std::size_t C = ControlSize, typename = std::enable_if_t<(C > 0)>>
-        void Predict(const ControlVector& u);
+        void Predict(const ControlVector& u)
+        requires(ControlSize > 0);
 
         void Update(const MeasurementVector& measurement);
 
@@ -92,11 +92,11 @@ namespace filters
     // Implementation //
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
-    template<std::size_t C, typename>
     UnscentedKalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::UnscentedKalmanFilter(
         const StateVector& initialState, const StateMatrix& initialCovariance,
         StateTransitionFn f, MeasurementFn h,
         UkfParameters params)
+    requires(ControlSize == 0)
         : Base(initialState, initialCovariance)
         , stateTransitionFn(f)
         , measurementFn(h)
@@ -106,11 +106,11 @@ namespace filters
     }
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
-    template<std::size_t C, typename>
     UnscentedKalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::UnscentedKalmanFilter(
         const StateVector& initialState, const StateMatrix& initialCovariance,
         StateTransitionWithControlFn f, MeasurementFn h,
         UkfParameters params)
+    requires(ControlSize > 0)
         : Base(initialState, initialCovariance)
         , stateTransitionWithControlFn(f)
         , measurementFn(h)
@@ -122,7 +122,7 @@ namespace filters
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
     void UnscentedKalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::ComputeWeights()
     {
-        constexpr float n = static_cast<float>(StateSize);
+        constexpr auto n = static_cast<float>(StateSize);
         lambda = parameters.alpha * parameters.alpha * (n + parameters.kappa) - n;
 
         weightsMean[0] = lambda / (n + lambda);
@@ -139,11 +139,11 @@ namespace filters
     void UnscentedKalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::GenerateSigmaPoints(
         std::array<StateVector, SigmaPointCount>& sigmaPoints) const
     {
-        constexpr float n = static_cast<float>(StateSize);
+        constexpr auto n = static_cast<float>(StateSize);
         float scaleFactor = std::sqrt(n + lambda);
-        auto L = solvers::CholeskyDecomposition<QNumberType, StateSize>(this->covariance);
+        auto L = solvers::CholeskyDecomposition<QNumberType, StateSize>(this->covariance());
 
-        sigmaPoints[0] = this->state;
+        sigmaPoints[0] = this->state();
 
         // σᵢ = x̂ ± √(n+λ) · column_i(L)
         for (std::size_t i = 0; i < StateSize; ++i)
@@ -152,8 +152,8 @@ namespace filters
             for (std::size_t j = 0; j < StateSize; ++j)
                 column.at(j, 0) = QNumberType(math::ToFloat(L.at(j, i)) * scaleFactor);
 
-            sigmaPoints[i + 1] = this->state + column;
-            sigmaPoints[i + 1 + StateSize] = this->state - column;
+            sigmaPoints[i + 1] = this->state() + column;
+            sigmaPoints[i + 1 + StateSize] = this->state() - column;
         }
     }
 
@@ -220,13 +220,13 @@ namespace filters
     void UnscentedKalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::PredictFromPropagatedSigmaPoints(
         const std::array<StateVector, SigmaPointCount>& sigmaPoints)
     {
-        this->state = ComputeWeightedMean<StateSize>(sigmaPoints);
-        this->covariance = ComputeWeightedCovariance<StateSize>(sigmaPoints, this->state) + this->processNoise;
+        this->state() = ComputeWeightedMean<StateSize>(sigmaPoints);
+        this->covariance() = ComputeWeightedCovariance<StateSize>(sigmaPoints, this->state()) + this->processNoise();
     }
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
-    template<std::size_t C, typename>
     OPTIMIZE_FOR_SPEED void UnscentedKalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::Predict()
+    requires(ControlSize == 0)
     {
         std::array<StateVector, SigmaPointCount> sigmaPoints;
         GenerateSigmaPoints(sigmaPoints);
@@ -238,8 +238,8 @@ namespace filters
     }
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
-    template<std::size_t C, typename>
     OPTIMIZE_FOR_SPEED void UnscentedKalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::Predict(const ControlVector& u)
+    requires(ControlSize > 0)
     {
         std::array<StateVector, SigmaPointCount> sigmaPoints;
         GenerateSigmaPoints(sigmaPoints);
@@ -261,15 +261,15 @@ namespace filters
             measurementSigmaPoints[i] = measurementFn(sigmaPoints[i]);
 
         auto predictedMeasurement = ComputeWeightedMean<MeasurementSize>(measurementSigmaPoints);
-        auto S = ComputeWeightedCovariance<MeasurementSize>(measurementSigmaPoints, predictedMeasurement) + this->measurementNoise;
-        auto Pxz = ComputeWeightedCrossCovariance(sigmaPoints, this->state, measurementSigmaPoints, predictedMeasurement);
+        auto S = ComputeWeightedCovariance<MeasurementSize>(measurementSigmaPoints, predictedMeasurement) + this->measurementNoise();
+        auto Pxz = ComputeWeightedCrossCovariance(sigmaPoints, this->state(), measurementSigmaPoints, predictedMeasurement);
 
         // Solve K via Sᵀ Kᵀ = Pxzᵀ (avoids explicit S⁻¹)
         auto K = solvers::SolveSystem<QNumberType, MeasurementSize, StateSize>(S, Pxz.Transpose()).Transpose();
 
         auto innovation = measurement - predictedMeasurement;
-        this->state = this->state + K * innovation;
-        this->covariance = this->covariance - K * S * K.Transpose();
+        this->state() = this->state() + K * innovation;
+        this->covariance() = this->covariance() - K * S * K.Transpose();
     }
 
     extern template class UnscentedKalmanFilter<float, 2, 1, 0>;

@@ -29,20 +29,20 @@ namespace filters
         void SetStateTransition(const StateMatrix& F);
         void SetMeasurementMatrix(const MeasurementMatrix& H);
 
-        template<std::size_t C = ControlSize, typename = std::enable_if_t<(C > 0)>>
-        void SetControlInputMatrix(const ControlMatrix& B);
+        void SetControlInputMatrix(const ControlMatrix& B)
+        requires(ControlSize > 0);
 
         void Predict();
 
-        template<std::size_t C = ControlSize, typename = std::enable_if_t<(C > 0)>>
-        void Predict(const ControlVector& u);
+        void Predict(const ControlVector& u)
+        requires(ControlSize > 0);
 
         void Update(const MeasurementVector& measurement);
 
     private:
-        StateMatrix stateTransition;
-        MeasurementMatrix measurementMatrix;
-        [[no_unique_address]] ControlMatrix controlInputMatrix;
+        StateMatrix stateTransition = StateMatrix::Identity();
+        MeasurementMatrix measurementMatrix{};
+        [[no_unique_address]] ControlMatrix controlInputMatrix{};
     };
 
     // Implementation //
@@ -51,9 +51,6 @@ namespace filters
     KalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::KalmanFilter(
         const StateVector& initialState, const StateMatrix& initialCovariance)
         : Base(initialState, initialCovariance)
-        , stateTransition(StateMatrix::Identity())
-        , measurementMatrix(MeasurementMatrix())
-        , controlInputMatrix(ControlMatrix())
     {}
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
@@ -69,8 +66,8 @@ namespace filters
     }
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
-    template<std::size_t C, typename>
     void KalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::SetControlInputMatrix(const ControlMatrix& B)
+    requires(ControlSize > 0)
     {
         controlInputMatrix = B;
     }
@@ -78,22 +75,22 @@ namespace filters
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
     OPTIMIZE_FOR_SPEED void KalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::Predict()
     {
-        this->state = stateTransition * this->state;
-        this->covariance = stateTransition * this->covariance * stateTransition.Transpose() + this->processNoise;
+        this->state() = stateTransition * this->state();
+        this->covariance() = stateTransition * this->covariance() * stateTransition.Transpose() + this->processNoise();
     }
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
-    template<std::size_t C, typename>
     OPTIMIZE_FOR_SPEED void KalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::Predict(const ControlVector& u)
+    requires(ControlSize > 0)
     {
-        this->state = stateTransition * this->state + controlInputMatrix * u;
-        this->covariance = stateTransition * this->covariance * stateTransition.Transpose() + this->processNoise;
+        this->state() = stateTransition * this->state() + controlInputMatrix * u;
+        this->covariance() = stateTransition * this->covariance() * stateTransition.Transpose() + this->processNoise();
     }
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
     OPTIMIZE_FOR_SPEED void KalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::Update(const MeasurementVector& measurement)
     {
-        auto innovation = measurement - (measurementMatrix * this->state);
+        auto innovation = measurement - (measurementMatrix * this->state());
         auto K = this->ComputeKalmanGain(measurementMatrix);
         this->UpdateState(innovation, K, measurementMatrix);
     }
