@@ -13,6 +13,8 @@ target_link_libraries(numerical.controllers.implementations PUBLIC
 target_sources(numerical.controllers.implementations PRIVATE
     Lqr.cpp
     Lqr.hpp
+    Mpc.cpp
+    Mpc.hpp
     PidIncremental.cpp
     PidIncremental.hpp
 )
