@@ -62,7 +62,9 @@ namespace kinematics
         return positions;
     }
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class ForwardKinematics<float, 1>;
     extern template class ForwardKinematics<float, 2>;
     extern template class ForwardKinematics<float, 3>;
+#endif
 }

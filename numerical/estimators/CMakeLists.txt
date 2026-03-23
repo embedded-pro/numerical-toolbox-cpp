@@ -12,10 +12,15 @@ target_link_libraries(numerical.estimators PUBLIC
 
 target_sources(numerical.estimators PRIVATE
     Estimator.hpp
-    LinearRegression.cpp
     LinearRegression.hpp
-    RecursiveLeastSquares.cpp
     RecursiveLeastSquares.hpp
 )
+
+if (EMIL_ENABLE_COVERAGE)
+    target_sources(numerical.estimators PRIVATE
+        LinearRegression.cpp
+        RecursiveLeastSquares.cpp
+    )
+endif()
 
 add_subdirectory(test)

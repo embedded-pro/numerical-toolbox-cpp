@@ -12,15 +12,19 @@ target_link_libraries(numerical.solver PUBLIC
 
 target_sources(numerical.solver PRIVATE
     CholeskyDecomposition.hpp
-    DiscreteAlgebraicRiccatiEquation.cpp
     DiscreteAlgebraicRiccatiEquation.hpp
-    DurandKerner.cpp
     DurandKerner.hpp
-    GaussianElimination.cpp
     GaussianElimination.hpp
     LevinsonDurbin.hpp
-    Solver.cpp
     Solver.hpp
 )
+
+if (EMIL_ENABLE_COVERAGE)
+    target_sources(numerical.solver PRIVATE
+        DiscreteAlgebraicRiccatiEquation.cpp
+        DurandKerner.cpp
+        GaussianElimination.cpp
+    )
+endif()
 
 add_subdirectory(test)

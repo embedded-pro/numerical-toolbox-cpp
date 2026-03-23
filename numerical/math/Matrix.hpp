@@ -313,6 +313,13 @@ namespace math
 
         return sum;
     }
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class Matrix<float, 2, 2>;
+    extern template class Matrix<Q15, 2, 2>;
+    extern template class Matrix<Q31, 2, 2>;
+    extern template class Matrix<float, 3, 3>;
+#endif
 }
 
 #endif

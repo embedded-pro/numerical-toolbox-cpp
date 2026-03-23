@@ -11,7 +11,6 @@ target_link_libraries(numerical.neural_network.activation PUBLIC
 )
 
 target_sources(numerical.neural_network.activation PRIVATE
-    ActivationFunction.cpp
     ActivationFunction.hpp
     LeakyReLU.hpp
     ReLU.hpp

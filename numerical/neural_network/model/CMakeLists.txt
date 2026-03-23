@@ -15,7 +15,6 @@ target_link_libraries(numerical.neural_network.model PUBLIC
 )
 
 target_sources(numerical.neural_network.model PRIVATE
-    Model.cpp
     Model.hpp
 )
 

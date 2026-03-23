@@ -115,7 +115,9 @@ namespace filters
         this->UpdateState(innovation, K, H);
     }
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class ExtendedKalmanFilter<float, 2, 1, 0>;
     extern template class ExtendedKalmanFilter<float, 2, 1, 1>;
     extern template class ExtendedKalmanFilter<float, 3, 1, 0>;
+#endif
 }

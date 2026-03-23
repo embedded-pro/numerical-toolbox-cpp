@@ -11,11 +11,16 @@ target_link_libraries(numerical.controllers.implementations PUBLIC
 )
 
 target_sources(numerical.controllers.implementations PRIVATE
-    Lqr.cpp
     Lqr.hpp
-    PidIncremental.cpp
     PidIncremental.hpp
 )
+
+if (EMIL_ENABLE_COVERAGE)
+    target_sources(numerical.controllers.implementations PRIVATE
+        Lqr.cpp
+        PidIncremental.cpp
+    )
+endif()
 
 add_subdirectory(test)
 add_subdirectory(test_doubles)

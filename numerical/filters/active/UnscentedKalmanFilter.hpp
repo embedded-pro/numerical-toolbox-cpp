@@ -272,7 +272,9 @@ namespace filters
         this->covariance() = this->covariance() - K * S * K.Transpose();
     }
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class UnscentedKalmanFilter<float, 2, 1, 0>;
     extern template class UnscentedKalmanFilter<float, 2, 1, 1>;
     extern template class UnscentedKalmanFilter<float, 3, 1, 0>;
+#endif
 }

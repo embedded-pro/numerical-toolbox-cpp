@@ -15,11 +15,16 @@ target_sources(numerical.analysis PRIVATE
     DiscreteCosineTransform.hpp
     FastFourierTransform.hpp
     FastFourierTransformRadix2Impl.hpp
-    FrequencyResponse.cpp
     FrequencyResponse.hpp
     PowerDensitySpectrum.hpp
-    RootLocus.cpp
     RootLocus.hpp
 )
+
+if (EMIL_ENABLE_COVERAGE)
+    target_sources(numerical.analysis PRIVATE
+        FastFourierTransformRadix2Impl.cpp
+        RootLocus.cpp
+    )
+endif()
 
 add_subdirectory(test)

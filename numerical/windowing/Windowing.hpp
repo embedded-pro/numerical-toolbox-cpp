@@ -82,4 +82,22 @@ namespace windowing
             return QNumberType(0.9999f);
         }
     };
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class HammingWindow<float>;
+    extern template class HammingWindow<math::Q15>;
+    extern template class HammingWindow<math::Q31>;
+
+    extern template class HanningWindow<float>;
+    extern template class HanningWindow<math::Q15>;
+    extern template class HanningWindow<math::Q31>;
+
+    extern template class BlackmanWindow<float>;
+    extern template class BlackmanWindow<math::Q15>;
+    extern template class BlackmanWindow<math::Q31>;
+
+    extern template class RectangularWindow<float>;
+    extern template class RectangularWindow<math::Q15>;
+    extern template class RectangularWindow<math::Q31>;
+#endif
 }

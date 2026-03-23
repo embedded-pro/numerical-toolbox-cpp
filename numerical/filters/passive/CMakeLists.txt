@@ -11,9 +11,7 @@ target_link_libraries(numerical.filters.passive PUBLIC
 )
 
 target_sources(numerical.filters.passive PRIVATE
-    Fir.cpp
     Fir.hpp
-    Iir.cpp
     Iir.hpp
 )
 

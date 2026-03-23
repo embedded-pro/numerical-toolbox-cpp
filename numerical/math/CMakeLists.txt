@@ -14,11 +14,8 @@ target_sources(numerical.math PRIVATE
     ComplexNumber.hpp
     Geometry3D.hpp
     HyperbolicFunctions.hpp
-    Matrix.cpp
     Matrix.hpp
-    QNumber.cpp
     QNumber.hpp
-    RecursiveBuffer.cpp
     RecursiveBuffer.hpp
     SingleInstructionMultipleData.hpp
     Statistics.hpp
@@ -26,6 +23,14 @@ target_sources(numerical.math PRIVATE
     Tolerance.hpp
     TrigonometricFunctions.hpp
 )
+
+if (EMIL_ENABLE_COVERAGE)
+    target_sources(numerical.math PRIVATE
+        ComplexNumber.cpp
+        Matrix.cpp
+        QNumber.cpp
+    )
+endif()
 
 add_subdirectory(test)
 add_subdirectory(test_doubles)

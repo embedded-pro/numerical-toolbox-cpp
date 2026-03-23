@@ -12,17 +12,22 @@ target_link_libraries(numerical.dynamics PUBLIC
 )
 
 target_sources(numerical.dynamics PRIVATE
-    ArticulatedBodyAlgorithm.cpp
     ArticulatedBodyAlgorithm.hpp
     EulerLagrangeDynamics.hpp
-    EulerLagrangeSolver.cpp
     EulerLagrangeSolver.hpp
     NewtonEulerBody.hpp
-    NewtonEulerSolver.cpp
     NewtonEulerSolver.hpp
-    RecursiveNewtonEuler.cpp
     RecursiveNewtonEuler.hpp
     RevoluteJointLink.hpp
 )
+
+if (EMIL_ENABLE_COVERAGE)
+    target_sources(numerical.dynamics PRIVATE
+        ArticulatedBodyAlgorithm.cpp
+        EulerLagrangeSolver.cpp
+        NewtonEulerSolver.cpp
+        RecursiveNewtonEuler.cpp
+    )
+endif()
 
 add_subdirectory(test)

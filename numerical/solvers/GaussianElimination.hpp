@@ -153,6 +153,7 @@ namespace solvers
         return GaussianElimination<T, N>();
     }
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class GaussianElimination<float, 1>;
     extern template class GaussianElimination<float, 2>;
     extern template class GaussianElimination<float, 3>;
@@ -160,4 +161,5 @@ namespace solvers
     extern template class GaussianElimination<math::Q15, 3>;
 
     extern template class GaussianElimination<math::Q31, 3>;
+#endif
 }

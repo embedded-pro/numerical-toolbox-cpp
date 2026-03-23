@@ -110,4 +110,8 @@ namespace estimators
 
         return x;
     }
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class LinearRegression<float, 4, 2>;
+#endif
 }

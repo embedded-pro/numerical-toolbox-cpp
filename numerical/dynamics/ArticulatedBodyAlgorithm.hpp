@@ -394,7 +394,9 @@ namespace dynamics
         return ComputeJointAccelerations(links, gravity, kin, proj);
     }
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class ArticulatedBodyAlgorithm<float, 1>;
     extern template class ArticulatedBodyAlgorithm<float, 2>;
     extern template class ArticulatedBodyAlgorithm<float, 3>;
+#endif
 }

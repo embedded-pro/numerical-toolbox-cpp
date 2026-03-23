@@ -11,8 +11,13 @@ target_link_libraries(numerical.kinematics PUBLIC
 )
 
 target_sources(numerical.kinematics PRIVATE
-    ForwardKinematics.cpp
     ForwardKinematics.hpp
 )
+
+if (EMIL_ENABLE_COVERAGE)
+    target_sources(numerical.kinematics PRIVATE
+        ForwardKinematics.cpp
+    )
+endif()
 
 add_subdirectory(test)

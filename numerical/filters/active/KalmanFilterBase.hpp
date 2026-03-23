@@ -165,8 +165,10 @@ namespace filters
         return covariance_;
     }
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class KalmanFilterBase<float, 2, 1, 0>;
     extern template class KalmanFilterBase<float, 2, 1, 1>;
     extern template class KalmanFilterBase<float, 3, 1, 0>;
     extern template class KalmanFilterBase<float, 4, 2, 0>;
+#endif
 }

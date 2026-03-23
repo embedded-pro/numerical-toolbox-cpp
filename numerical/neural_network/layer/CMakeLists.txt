@@ -11,7 +11,6 @@ target_link_libraries(numerical.neural_network.layer PUBLIC
 )
 
 target_sources(numerical.neural_network.layer PRIVATE
-    Dense.cpp
     Dense.hpp
     Layer.hpp
 )

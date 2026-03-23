@@ -110,4 +110,10 @@ namespace estimators
         else
             return State::unstable;
     }
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class RecursiveLeastSquares<float, 1>;
+    extern template class RecursiveLeastSquares<float, 2>;
+    extern template class RecursiveLeastSquares<float, 3>;
+#endif
 }

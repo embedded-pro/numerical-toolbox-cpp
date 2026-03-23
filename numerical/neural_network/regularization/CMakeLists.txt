@@ -13,7 +13,6 @@ target_link_libraries(numerical.neural_network.regularization PUBLIC
 target_sources(numerical.neural_network.regularization PRIVATE
     L1.hpp
     L2.hpp
-    Regularization.cpp
     Regularization.hpp
 )
 

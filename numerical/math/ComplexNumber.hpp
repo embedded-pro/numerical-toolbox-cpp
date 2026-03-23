@@ -126,6 +126,12 @@ namespace math
     {
         return real == other.real && imag == other.imag;
     }
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class Complex<float>;
+    extern template class Complex<Q15>;
+    extern template class Complex<Q31>;
+#endif
 }
 
 #endif

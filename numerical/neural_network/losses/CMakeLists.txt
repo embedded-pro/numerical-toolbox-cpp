@@ -17,7 +17,6 @@ target_sources(numerical.neural_network.losses PRIVATE
     CategoricalCrossEntropy.hpp
     Loss.hpp
     MeanAbsoluteError.hpp
-    MeanSquaredError.cpp
     MeanSquaredError.hpp
 )
 

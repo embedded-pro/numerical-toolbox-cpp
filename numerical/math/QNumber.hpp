@@ -314,6 +314,11 @@ namespace math
     {
         return value;
     }
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class QNumber<int32_t, 31>;
+    extern template class QNumber<int16_t, 15>;
+#endif
 }
 
 #endif

@@ -197,7 +197,9 @@ namespace dynamics
         return ComputeBackwardPass(links, states);
     }
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class RecursiveNewtonEuler<float, 1>;
     extern template class RecursiveNewtonEuler<float, 2>;
     extern template class RecursiveNewtonEuler<float, 3>;
+#endif
 }

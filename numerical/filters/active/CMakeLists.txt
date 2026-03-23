@@ -12,14 +12,19 @@ target_link_libraries(numerical.filters.active PUBLIC
 )
 
 target_sources(numerical.filters.active PRIVATE
-    ExtendedKalmanFilter.cpp
     ExtendedKalmanFilter.hpp
-    KalmanFilter.cpp
     KalmanFilter.hpp
-    KalmanFilterBase.cpp
     KalmanFilterBase.hpp
-    UnscentedKalmanFilter.cpp
     UnscentedKalmanFilter.hpp
 )
+
+if (EMIL_ENABLE_COVERAGE)
+    target_sources(numerical.filters.active PRIVATE
+        ExtendedKalmanFilter.cpp
+        KalmanFilter.cpp
+        KalmanFilterBase.cpp
+        UnscentedKalmanFilter.cpp
+    )
+endif()
 
 add_subdirectory(test)
