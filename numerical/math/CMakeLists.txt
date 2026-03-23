@@ -1,11 +1,17 @@
-add_library(numerical.math ${EMIL_EXCLUDE_FROM_ALL} STATIC)
+if (EMIL_ENABLE_COVERAGE)
+    add_library(numerical.math ${EMIL_EXCLUDE_FROM_ALL} STATIC)
+    set(_math_visibility PUBLIC)
+else()
+    add_library(numerical.math ${EMIL_EXCLUDE_FROM_ALL} INTERFACE)
+    set(_math_visibility INTERFACE)
+endif()
 
-target_include_directories(numerical.math PUBLIC
+target_include_directories(numerical.math ${_math_visibility}
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-target_link_libraries(numerical.math PUBLIC
+target_link_libraries(numerical.math ${_math_visibility}
     infra.util
 )
 

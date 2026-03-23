@@ -1,11 +1,17 @@
-add_library(numerical.analysis ${EMIL_EXCLUDE_FROM_ALL})
+if (EMIL_ENABLE_COVERAGE)
+    add_library(numerical.analysis ${EMIL_EXCLUDE_FROM_ALL})
+    set(_analysis_visibility PUBLIC)
+else()
+    add_library(numerical.analysis ${EMIL_EXCLUDE_FROM_ALL} INTERFACE)
+    set(_analysis_visibility INTERFACE)
+endif()
 
-target_include_directories(numerical.analysis PUBLIC
+target_include_directories(numerical.analysis ${_analysis_visibility}
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-target_link_libraries(numerical.analysis PUBLIC
+target_link_libraries(numerical.analysis ${_analysis_visibility}
     infra.util
     numerical.math
     numerical.solver
