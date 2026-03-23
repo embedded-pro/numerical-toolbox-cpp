@@ -18,15 +18,14 @@ target_link_libraries(numerical.controllers.implementations ${_controllers_impl_
 
 target_sources(numerical.controllers.implementations PRIVATE
     Lqr.hpp
-    Mpc.cpp
     Mpc.hpp
-    PidIncremental.cpp
     PidIncremental.hpp
 )
 
 if (EMIL_ENABLE_COVERAGE)
     target_sources(numerical.controllers.implementations PRIVATE
         Lqr.cpp
+        Mpc.cpp
         PidIncremental.cpp
     )
 endif()
