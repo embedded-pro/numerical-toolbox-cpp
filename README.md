@@ -14,18 +14,18 @@ Refer to the documentation to quickly integrate and utilize the library's signal
 
 ## Documentation
 
-| Category                                                               | Description                                                          |
-|------------------------------------------------------------------------|----------------------------------------------------------------------|
-| [Analysis](doc/analysis/README.md)                                     | FFT, Power Spectral Density, DCT, Root Locus                        |
-| [Controllers](doc/controllers/README.md)                               | PID, LQR                                                            |
-| [Dynamics](doc/dynamics/README.md)                                     | Euler-Lagrange, Newton-Euler, Recursive Newton-Euler, ABA            |
-| [Estimators](doc/estimators/README.md)                                 | Linear Regression, Yule-Walker                                      |
-| [Filters](doc/filters/README.md)                                      | Kalman, Extended Kalman, Unscented Kalman, FIR, IIR                 |
-| [Kinematics](doc/kinematics/README.md)                                | Forward Kinematics                                                   |
-| [Neural Network](doc/neural_network/README.md)                        | Layers, activations, losses, optimizers, regularization              |
-| [Solvers](doc/solvers/README.md)                                      | Gaussian Elimination, Levinson-Durbin, Durand-Kerner, Cholesky, DARE|
-| [Windowing](doc/windowing/README.md)                                  | Rectangular, Hamming, Hann, Blackman                                 |
-| [Performance Optimization](doc/performance-optimization/README.md)    | Compiler optimizations, SIMD                                         |
+| Category                                                           | Description                                                          |
+|--------------------------------------------------------------------|----------------------------------------------------------------------|
+| [Analysis](doc/analysis/README.md)                                 | FFT, Power Spectral Density, DCT, Root Locus                         |
+| [Controllers](doc/controllers/README.md)                           | PID, LQR                                                             |
+| [Dynamics](doc/dynamics/README.md)                                 | Euler-Lagrange, Newton-Euler, Recursive Newton-Euler, ABA            |
+| [Estimators](doc/estimators/README.md)                             | Linear Regression, Yule-Walker                                       |
+| [Filters](doc/filters/README.md)                                   | Kalman, Extended Kalman, Unscented Kalman, FIR, IIR                  |
+| [Kinematics](doc/kinematics/README.md)                             | Forward Kinematics                                                   |
+| [Neural Network](doc/neural_network/README.md)                     | Layers, activations, losses, optimizers, regularization              |
+| [Solvers](doc/solvers/README.md)                                   | Gaussian Elimination, Levinson-Durbin, Durand-Kerner, Cholesky, DARE |
+| [Windowing](doc/windowing/README.md)                               | Rectangular, Hamming, Hann, Blackman                                 |
+| [Performance Optimization](doc/performance-optimization/README.md) | Compiler optimizations, SIMD                                         |
 
 Each category page lists its algorithms with a brief description and links to the detailed documentation.
 
