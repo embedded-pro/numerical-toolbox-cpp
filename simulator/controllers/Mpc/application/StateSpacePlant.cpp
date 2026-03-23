@@ -1,21 +1,16 @@
 #include "simulator/controllers/Mpc/application/StateSpacePlant.hpp"
+#include <cmath>
 
 namespace simulator::controllers
 {
     StateSpacePlant MakeDoubleIntegrator(float dt)
     {
-        auto plant = StateSpacePlant{};
-        plant.stateSize = 2;
-        plant.inputSize = 1;
-        plant.A = {
-            { 1.0f, dt },
-            { 0.0f, 1.0f }
+        return StateSpacePlant{
+            .A = { { 1.0f, dt }, { 0.0f, 1.0f } },
+            .B = { { 0.5f * dt * dt }, { dt } },
+            .stateSize = 2,
+            .inputSize = 1
         };
-        plant.B = {
-            { 0.5f * dt * dt },
-            { dt }
-        };
-        return plant;
     }
 
     StateSpacePlant MakeFirstOrderWithIntegrator(float gain, float timeConstant, float dt)
@@ -23,17 +18,11 @@ namespace simulator::controllers
         auto a = std::exp(-dt / timeConstant);
         auto b = gain * (1.0f - a);
 
-        auto plant = StateSpacePlant{};
-        plant.stateSize = 2;
-        plant.inputSize = 1;
-        plant.A = {
-            { 1.0f, dt },
-            { 0.0f, a }
+        return StateSpacePlant{
+            .A = { { 1.0f, dt }, { 0.0f, a } },
+            .B = { { 0.0f }, { b } },
+            .stateSize = 2,
+            .inputSize = 1
         };
-        plant.B = {
-            { 0.0f },
-            { b }
-        };
-        return plant;
     }
 }
