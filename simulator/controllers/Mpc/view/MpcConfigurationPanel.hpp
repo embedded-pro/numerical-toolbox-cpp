@@ -7,7 +7,6 @@
 #include <QDoubleSpinBox>
 #include <QGroupBox>
 #include <QPushButton>
-#include <QSpinBox>
 #include <QWidget>
 
 namespace simulator::controllers::view

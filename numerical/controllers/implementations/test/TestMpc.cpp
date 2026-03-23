@@ -31,7 +31,7 @@ TEST_F(TestMpc, compute_control_returns_zero_for_zero_state)
 
     controllers::Mpc<float, 2, 1, 5, 5> mpc(A, B, weights);
 
-    math::Vector<float, 2> zeroState{ { 0.0f }, { 0.0f } };
+    math::Vector<float, 2> zeroState{ 0.0f, 0.0f };
     auto u = mpc.ComputeControl(zeroState);
 
     EXPECT_NEAR(u.at(0, 0), 0.0f, 1e-4f);
@@ -59,7 +59,7 @@ TEST_F(TestMpc, compute_control_produces_nonzero_for_nonzero_state)
 
     controllers::Mpc<float, 2, 1, 5, 5> mpc(A, B, weights);
 
-    math::Vector<float, 2> state{ { 1.0f }, { 0.0f } };
+    math::Vector<float, 2> state{ 1.0f, 0.0f };
     auto u = mpc.ComputeControl(state);
 
     EXPECT_NE(u.at(0, 0), 0.0f);
@@ -87,7 +87,7 @@ TEST_F(TestMpc, compute_control_drives_state_toward_origin)
 
     controllers::Mpc<float, 2, 1, 10, 10> mpc(A, B, weights);
 
-    math::Vector<float, 2> state{ { 5.0f }, { 0.0f } };
+    math::Vector<float, 2> state{ 5.0f, 0.0f };
 
     for (int step = 0; step < 50; ++step)
     {
@@ -121,7 +121,7 @@ TEST_F(TestMpc, control_sequence_length_equals_control_horizon)
 
     controllers::Mpc<float, 2, 1, 10, 5> mpc(A, B, weights);
 
-    math::Vector<float, 2> state{ { 1.0f }, { 0.0f } };
+    math::Vector<float, 2> state{ 1.0f, 0.0f };
     mpc.ComputeControl(state);
 
     auto seq = mpc.GetControlSequence();
@@ -149,12 +149,12 @@ TEST_F(TestMpc, box_constraints_clamp_control_input)
     };
 
     controllers::MpcConstraints<float, 1> constraints;
-    constraints.uMin = math::Vector<float, 1>{ { -0.5f } };
-    constraints.uMax = math::Vector<float, 1>{ { 0.5f } };
+    constraints.uMin = math::Vector<float, 1>{ -0.5f };
+    constraints.uMax = math::Vector<float, 1>{ 0.5f };
 
     controllers::Mpc<float, 2, 1, 5, 5> mpc(A, B, weights, constraints);
 
-    math::Vector<float, 2> state{ { 10.0f }, { 0.0f } };
+    math::Vector<float, 2> state{ 10.0f, 0.0f };
     auto u = mpc.ComputeControl(state);
 
     EXPECT_GE(u.at(0, 0), -0.5f);
@@ -195,7 +195,7 @@ TEST_F(TestMpc, precomputed_constructor_matches_online_computation)
 
     controllers::Mpc<float, 2, 1, 5, 5> mpcPrecomputed(H, F);
 
-    math::Vector<float, 2> state{ { 2.0f }, { -1.0f } };
+    math::Vector<float, 2> state{ 2.0f, -1.0f };
     auto uOnline = mpcOnline.ComputeControl(state);
     auto uPrecomputed = mpcPrecomputed.ComputeControl(state);
 
@@ -229,9 +229,7 @@ TEST_F(TestMpc, double_integrator_regulation)
 
     controllers::Mpc<float, 2, 1, 10, 10> mpc(A, B, weights);
 
-    math::Vector<float, 2> state{ { 1.0f }, { 0.0f } };
-
-    float prevPosition = math::ToFloat(state.at(0, 0));
+    math::Vector<float, 2> state{ 1.0f, 0.0f };
 
     for (int step = 0; step < 100; ++step)
     {
@@ -275,7 +273,7 @@ TEST_F(TestMpc, unconstrained_mpc_approaches_lqr_with_long_horizon)
     controllers::Mpc<float, 2, 1, 10, 10> mpc(A, B, weights);
     controllers::Lqr<float, 2, 1> lqr(A, B, Q, R);
 
-    math::Vector<float, 2> state{ { 1.0f }, { 0.5f } };
+    math::Vector<float, 2> state{ 1.0f, 0.5f };
 
     auto uMpc = mpc.ComputeControl(state);
     auto uLqr = lqr.ComputeControl(state);
@@ -308,10 +306,10 @@ TEST_F(TestMpc, reference_tracking_drives_state_to_reference)
 
     controllers::Mpc<float, 2, 1, 10, 10> mpc(A, B, weights);
 
-    math::Vector<float, 2> ref{ { 3.0f }, { 0.0f } };
+    math::Vector<float, 2> ref{ 3.0f, 0.0f };
     mpc.SetReference(ref);
 
-    math::Vector<float, 2> state{ { 0.0f }, { 0.0f } };
+    math::Vector<float, 2> state{ 0.0f, 0.0f };
 
     for (int step = 0; step < 200; ++step)
     {
@@ -347,10 +345,10 @@ TEST_F(TestMpc, clear_reference_reverts_to_origin_regulation)
 
     controllers::Mpc<float, 2, 1, 10, 10> mpc(A, B, weights);
 
-    auto ref = math::Vector<float, 2>{ { 5.0f }, { 0.0f } };
+    auto ref = math::Vector<float, 2>{ 5.0f, 0.0f };
     mpc.SetReference(ref);
 
-    auto state = math::Vector<float, 2>{ { 0.0f }, { 0.0f } };
+    auto state = math::Vector<float, 2>{ 0.0f, 0.0f };
     auto u1 = mpc.ComputeControl(state);
     EXPECT_GT(u1.at(0, 0), 0.0f);
 
@@ -385,7 +383,7 @@ TEST_F(TestMpc, three_state_system_regulation)
 
     controllers::Mpc<float, 3, 1, 10, 10> mpc(A, B, weights);
 
-    auto state = math::Vector<float, 3>{ { 1.0f }, { 0.0f }, { 0.0f } };
+    auto state = math::Vector<float, 3>{ 1.0f, 0.0f, 0.0f };
 
     for (int step = 0; step < 200; ++step)
     {
@@ -422,12 +420,12 @@ TEST_F(TestMpc, three_state_system_with_constraints)
     };
 
     controllers::MpcConstraints<float, 1> constraints;
-    constraints.uMin = math::Vector<float, 1>{ { -0.3f } };
-    constraints.uMax = math::Vector<float, 1>{ { 0.3f } };
+    constraints.uMin = math::Vector<float, 1>{ -0.3f };
+    constraints.uMax = math::Vector<float, 1>{ 0.3f };
 
     controllers::Mpc<float, 3, 1, 10, 10> mpc(A, B, weights, constraints);
 
-    auto state = math::Vector<float, 3>{ { 2.0f }, { 0.0f }, { 0.0f } };
+    auto state = math::Vector<float, 3>{ 2.0f, 0.0f, 0.0f };
     auto u = mpc.ComputeControl(state);
 
     EXPECT_GE(u.at(0, 0), -0.3f);
@@ -459,10 +457,10 @@ TEST_F(TestMpc, three_state_system_reference_tracking)
 
     controllers::Mpc<float, 3, 1, 10, 10> mpc(A, B, weights);
 
-    auto ref = math::Vector<float, 3>{ { 2.0f }, { 0.0f }, { 0.0f } };
+    auto ref = math::Vector<float, 3>{ 2.0f, 0.0f, 0.0f };
     mpc.SetReference(ref);
 
-    auto state = math::Vector<float, 3>{ { 0.0f }, { 0.0f }, { 0.0f } };
+    auto state = math::Vector<float, 3>{ 0.0f, 0.0f, 0.0f };
 
     for (int step = 0; step < 300; ++step)
     {
@@ -503,7 +501,7 @@ TEST_F(TestMpc, three_state_precomputed_constructor)
 
     controllers::Mpc<float, 3, 1, 10, 10> mpcPrecomputed(H, F);
 
-    auto state = math::Vector<float, 3>{ { 1.0f }, { -0.5f }, { 0.2f } };
+    auto state = math::Vector<float, 3>{ 1.0f, -0.5f, 0.2f };
     auto uOnline = mpcOnline.ComputeControl(state);
     auto uPrecomputed = mpcPrecomputed.ComputeControl(state);
 
@@ -531,12 +529,12 @@ TEST_F(TestMpc, different_prediction_and_control_horizons_with_constraints)
     };
 
     controllers::MpcConstraints<float, 1> constraints;
-    constraints.uMin = math::Vector<float, 1>{ { -1.0f } };
-    constraints.uMax = math::Vector<float, 1>{ { 1.0f } };
+    constraints.uMin = math::Vector<float, 1>{ -1.0f };
+    constraints.uMax = math::Vector<float, 1>{ 1.0f };
 
     controllers::Mpc<float, 2, 1, 10, 5> mpc(A, B, weights, constraints);
 
-    auto state = math::Vector<float, 2>{ { 5.0f }, { 0.0f } };
+    auto state = math::Vector<float, 2>{ 5.0f, 0.0f };
     auto u = mpc.ComputeControl(state);
 
     EXPECT_GE(u.at(0, 0), -1.0f);
@@ -568,10 +566,10 @@ TEST_F(TestMpc, different_prediction_and_control_horizons_reference_tracking)
 
     controllers::Mpc<float, 2, 1, 10, 5> mpc(A, B, weights);
 
-    auto ref = math::Vector<float, 2>{ { 2.0f }, { 0.0f } };
+    auto ref = math::Vector<float, 2>{ 2.0f, 0.0f };
     mpc.SetReference(ref);
 
-    auto state = math::Vector<float, 2>{ { 0.0f }, { 0.0f } };
+    auto state = math::Vector<float, 2>{ 0.0f, 0.0f };
 
     for (int step = 0; step < 200; ++step)
     {
@@ -609,7 +607,7 @@ TEST_F(TestMpc, different_prediction_and_control_horizons_precomputed)
 
     controllers::Mpc<float, 2, 1, 10, 5> mpcPrecomputed(H, F);
 
-    auto state = math::Vector<float, 2>{ { 3.0f }, { -1.0f } };
+    auto state = math::Vector<float, 2>{ 3.0f, -1.0f };
     auto uOnline = mpcOnline.ComputeControl(state);
     auto uPrecomputed = mpcPrecomputed.ComputeControl(state);
 
@@ -642,12 +640,12 @@ TEST_F(TestMpc, ten_horizon_precomputed_with_constraints)
     auto F = mpcOnline.GetGradientMatrix();
 
     controllers::MpcConstraints<float, 1> constraints;
-    constraints.uMin = math::Vector<float, 1>{ { -0.5f } };
-    constraints.uMax = math::Vector<float, 1>{ { 0.5f } };
+    constraints.uMin = math::Vector<float, 1>{ -0.5f };
+    constraints.uMax = math::Vector<float, 1>{ 0.5f };
 
     controllers::Mpc<float, 2, 1, 10, 10> mpcPrecomputed(H, F, constraints);
 
-    auto state = math::Vector<float, 2>{ { 5.0f }, { -1.0f } };
+    auto state = math::Vector<float, 2>{ 5.0f, -1.0f };
     auto u = mpcPrecomputed.ComputeControl(state);
 
     EXPECT_GE(u.at(0, 0), -0.5f);
@@ -682,10 +680,10 @@ TEST_F(TestMpc, three_state_clear_reference_and_get_sequence)
 
     controllers::Mpc<float, 3, 1, 10, 10> mpc(A, B, weights);
 
-    auto ref = math::Vector<float, 3>{ { 1.0f }, { 0.0f }, { 0.0f } };
+    auto ref = math::Vector<float, 3>{ 1.0f, 0.0f, 0.0f };
     mpc.SetReference(ref);
 
-    auto state = math::Vector<float, 3>{ { 0.0f }, { 0.0f }, { 0.0f } };
+    auto state = math::Vector<float, 3>{ 0.0f, 0.0f, 0.0f };
     auto u1 = mpc.ComputeControl(state);
     EXPECT_NE(u1.at(0, 0), 0.0f);
 
@@ -720,10 +718,10 @@ TEST_F(TestMpc, different_horizons_clear_reference)
 
     controllers::Mpc<float, 2, 1, 10, 5> mpc(A, B, weights);
 
-    auto ref = math::Vector<float, 2>{ { 5.0f }, { 0.0f } };
+    auto ref = math::Vector<float, 2>{ 5.0f, 0.0f };
     mpc.SetReference(ref);
 
-    auto state = math::Vector<float, 2>{ { 0.0f }, { 0.0f } };
+    auto state = math::Vector<float, 2>{ 0.0f, 0.0f };
     auto u1 = mpc.ComputeControl(state);
     EXPECT_GT(u1.at(0, 0), 0.0f);
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "simulator/controllers/Mpc/application/StateSpacePlant.hpp"
-#include <cstddef>
 #include <vector>
 
 namespace simulator::controllers
@@ -10,8 +9,6 @@ namespace simulator::controllers
     {
         float duration = 10.0f;
         float sampleTime = 0.1f;
-        std::size_t predictionHorizon = 10;
-        std::size_t controlHorizon = 10;
     };
 
     struct MpcWeightsConfig

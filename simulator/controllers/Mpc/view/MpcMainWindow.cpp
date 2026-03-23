@@ -1,8 +1,7 @@
 #include "simulator/controllers/Mpc/view/MpcMainWindow.hpp"
-#include <QHBoxLayout>
 #include <QMessageBox>
 #include <QSplitter>
-#include <stdexcept>
+#include <exception>
 
 namespace simulator::controllers::view
 {

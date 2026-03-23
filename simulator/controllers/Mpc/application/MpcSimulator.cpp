@@ -47,16 +47,16 @@ namespace simulator::controllers
         auto constraints = ::controllers::MpcConstraints<float, 1>{};
         if (enableConstraints && configuration.constraints.enabled)
         {
-            constraints.uMin = math::Vector<float, 1>{ { configuration.constraints.uMin } };
-            constraints.uMax = math::Vector<float, 1>{ { configuration.constraints.uMax } };
+            constraints.uMin = math::Vector<float, 1>{ configuration.constraints.uMin };
+            constraints.uMax = math::Vector<float, 1>{ configuration.constraints.uMax };
         }
 
         auto mpc = ::controllers::Mpc<float, 2, 1, 10, 10>(A, B, weights, constraints);
 
-        auto ref = math::Vector<float, 2>{ { configuration.referencePosition }, { 0.0f } };
+        auto ref = math::Vector<float, 2>{ configuration.referencePosition, 0.0f };
         mpc.SetReference(ref);
 
-        auto state = math::Vector<float, 2>{ { 0.0f }, { 0.0f } };
+        auto state = math::Vector<float, 2>{ 0.0f, 0.0f };
 
         auto response = MpcTimeResponse{};
         response.states.resize(2);

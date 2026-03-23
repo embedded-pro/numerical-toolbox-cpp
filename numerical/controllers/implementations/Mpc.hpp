@@ -3,10 +3,8 @@
 #include "infra/util/Optional.hpp"
 #include "numerical/controllers/interfaces/MpcController.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
-#include "numerical/solvers/DiscreteAlgebraicRiccatiEquation.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 #include <algorithm>
-#include <cmath>
 
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC optimize("O3", "fast-math")
@@ -28,6 +26,19 @@ namespace controllers
         infra::Optional<math::Vector<T, InputSize>> uMin;
         infra::Optional<math::Vector<T, InputSize>> uMax;
     };
+
+    namespace detail
+    {
+        template<typename T, std::size_t DestRows, std::size_t DestCols, std::size_t SrcRows, std::size_t SrcCols>
+        ALWAYS_INLINE_HOT void SetBlock(math::Matrix<T, DestRows, DestCols>& dest,
+            const math::Matrix<T, SrcRows, SrcCols>& src,
+            std::size_t rowOffset, std::size_t colOffset)
+        {
+            for (std::size_t r = 0; r < SrcRows; ++r)
+                for (std::size_t c = 0; c < SrcCols; ++c)
+                    dest.at(rowOffset + r, colOffset + c) = src.at(r, c);
+        }
+    }
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t PredictionHorizon, std::size_t ControlHorizon = PredictionHorizon>
     class Mpc
@@ -105,7 +116,7 @@ namespace controllers
     {}
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t PredictionHorizon, std::size_t ControlHorizon>
-    auto Mpc<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>::BuildPsi(
+    OPTIMIZE_FOR_SPEED auto Mpc<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>::BuildPsi(
         const StateMatrix& A) const -> PredictionStateMatrix
     {
         PredictionStateMatrix psi;
@@ -114,17 +125,14 @@ namespace controllers
         for (std::size_t k = 0; k < PredictionHorizon; ++k)
         {
             Apow = Apow * A;
-
-            for (std::size_t r = 0; r < StateSize; ++r)
-                for (std::size_t c = 0; c < StateSize; ++c)
-                    psi.at(k * StateSize + r, c) = Apow.at(r, c);
+            detail::SetBlock(psi, Apow, k * StateSize, 0);
         }
 
         return psi;
     }
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t PredictionHorizon, std::size_t ControlHorizon>
-    auto Mpc<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>::BuildTheta(
+    OPTIMIZE_FOR_SPEED auto Mpc<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>::BuildTheta(
         const StateMatrix& A, const InputMatrix& B) const -> PredictionInputMatrix
     {
         PredictionInputMatrix theta;
@@ -138,10 +146,7 @@ namespace controllers
                     ApowLocal = ApowLocal * A;
 
                 auto block = ApowLocal * B;
-
-                for (std::size_t r = 0; r < StateSize; ++r)
-                    for (std::size_t c = 0; c < InputSize; ++c)
-                        theta.at(k * StateSize + r, j * InputSize + c) = block.at(r, c);
+                detail::SetBlock(theta, block, k * StateSize, j * InputSize);
             }
         }
 
@@ -149,7 +154,7 @@ namespace controllers
     }
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t PredictionHorizon, std::size_t ControlHorizon>
-    void Mpc<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>::BuildCostMatrices(
+    OPTIMIZE_FOR_SPEED void Mpc<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>::BuildCostMatrices(
         const MpcWeights<T, StateSize, InputSize>& weights,
         const StateMatrix& A, const InputMatrix& B)
     {
@@ -163,16 +168,12 @@ namespace controllers
                                  ? *weights.terminalP
                                  : weights.Q;
 
-            for (std::size_t r = 0; r < StateSize; ++r)
-                for (std::size_t c = 0; c < StateSize; ++c)
-                    qBar.at(k * StateSize + r, k * StateSize + c) = Qk.at(r, c);
+            detail::SetBlock(qBar, Qk, k * StateSize, k * StateSize);
         }
 
         AugmentedInputWeight rBar;
         for (std::size_t k = 0; k < ControlHorizon; ++k)
-            for (std::size_t r = 0; r < InputSize; ++r)
-                for (std::size_t c = 0; c < InputSize; ++c)
-                    rBar.at(k * InputSize + r, k * InputSize + c) = weights.R.at(r, c);
+            detail::SetBlock(rBar, weights.R, k * InputSize, k * InputSize);
 
         auto thetaT = theta.Transpose();
         hessian = thetaT * qBar * theta + rBar;
@@ -180,7 +181,7 @@ namespace controllers
     }
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t PredictionHorizon, std::size_t ControlHorizon>
-    void Mpc<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>::ApplyConstraints(ControlVector& u) const
+    OPTIMIZE_FOR_SPEED void Mpc<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>::ApplyConstraints(ControlVector& u) const
     {
         if (!constraints.uMin && !constraints.uMax)
             return;
@@ -189,14 +190,10 @@ namespace controllers
         {
             for (std::size_t i = 0; i < InputSize; ++i)
             {
-                auto val = math::ToFloat(u.at(k * InputSize + i, 0));
-
                 if (constraints.uMin)
-                    val = std::max(val, math::ToFloat(constraints.uMin->at(i, 0)));
+                    u.at(k * InputSize + i, 0) = std::max(u.at(k * InputSize + i, 0), constraints.uMin->at(i, 0));
                 if (constraints.uMax)
-                    val = std::min(val, math::ToFloat(constraints.uMax->at(i, 0)));
-
-                u.at(k * InputSize + i, 0) = T(val);
+                    u.at(k * InputSize + i, 0) = std::min(u.at(k * InputSize + i, 0), constraints.uMax->at(i, 0));
             }
         }
     }

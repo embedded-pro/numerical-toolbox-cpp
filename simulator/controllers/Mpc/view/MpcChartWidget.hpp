@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <vector>
 
+class QPainter;
+
 namespace simulator::controllers::view
 {
     class MpcTimeResponseWidget
