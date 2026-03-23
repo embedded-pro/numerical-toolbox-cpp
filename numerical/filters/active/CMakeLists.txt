@@ -16,6 +16,7 @@ target_sources(numerical.filters.active PRIVATE
     ExtendedKalmanFilter.hpp
     KalmanFilter.cpp
     KalmanFilter.hpp
+    KalmanFilterBase.cpp
     KalmanFilterBase.hpp
     UnscentedKalmanFilter.cpp
     UnscentedKalmanFilter.hpp

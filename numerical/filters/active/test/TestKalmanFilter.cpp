@@ -244,3 +244,163 @@ TYPED_TEST(KalmanFilterTest, PredictOnlyGrowsCovariance)
     EXPECT_GT(math::ToFloat(P.at(0, 0)), 0.1f);
     EXPECT_GT(math::ToFloat(P.at(1, 1)), 0.1f);
 }
+
+TYPED_TEST(KalmanFilterTest, ThreeStateConstantAcceleration)
+{
+    using T = TypeParam;
+    using Filter3 = filters::KalmanFilter<T, 3, 1, 0>;
+    using StateVec3 = math::Vector<T, 3>;
+    using StateMat3 = math::SquareMatrix<T, 3>;
+    using MeasMat = math::Matrix<T, 1, 3>;
+    using MeasCov = math::SquareMatrix<T, 1>;
+    using MeasVec = math::Vector<T, 1>;
+
+    float dt = 0.1f;
+
+    auto initialState = StateVec3{ { T(0.0f) }, { T(0.0f) }, { T(0.0f) } };
+    auto initialP = StateMat3{
+        { T(1.0f), T(0.0f), T(0.0f) },
+        { T(0.0f), T(1.0f), T(0.0f) },
+        { T(0.0f), T(0.0f), T(1.0f) }
+    };
+
+    Filter3 filter(initialState, initialP);
+
+    filter.SetStateTransition(StateMat3{
+        { T(1.0f), T(dt), T(0.5f * dt * dt) },
+        { T(0.0f), T(1.0f), T(dt) },
+        { T(0.0f), T(0.0f), T(1.0f) } });
+    filter.SetMeasurementMatrix(MeasMat{ { T(1.0f), T(0.0f), T(0.0f) } });
+    filter.SetMeasurementNoise(MeasCov{ { T(0.1f) } });
+    filter.SetProcessNoise(StateMat3{
+        { T(0.01f), T(0.0f), T(0.0f) },
+        { T(0.0f), T(0.01f), T(0.0f) },
+        { T(0.0f), T(0.0f), T(0.01f) } });
+
+    float trueAcc = 1.0f;
+    float trueVel = 0.0f;
+    float truePos = 0.0f;
+
+    for (int i = 0; i < 20; ++i)
+    {
+        trueVel += trueAcc * dt;
+        truePos += trueVel * dt;
+
+        filter.Predict();
+        filter.Update(MeasVec{ { T(truePos) } });
+    }
+
+    auto finalState = filter.GetState();
+    EXPECT_NEAR(math::ToFloat(finalState.at(0, 0)), truePos, 0.3f);
+}
+
+TYPED_TEST(KalmanFilterTest, FourStateTwoMeasurement)
+{
+    using T = TypeParam;
+    using Filter4 = filters::KalmanFilter<T, 4, 2, 0>;
+    using StateVec4 = math::Vector<T, 4>;
+    using StateMat4 = math::SquareMatrix<T, 4>;
+    using MeasMat = math::Matrix<T, 2, 4>;
+    using MeasCov = math::SquareMatrix<T, 2>;
+    using MeasVec = math::Vector<T, 2>;
+
+    float dt = 0.1f;
+
+    auto initialState = StateVec4{ { T(0.0f) }, { T(0.0f) }, { T(0.0f) }, { T(0.0f) } };
+    auto initialP = StateMat4{
+        { T(1.0f), T(0.0f), T(0.0f), T(0.0f) },
+        { T(0.0f), T(1.0f), T(0.0f), T(0.0f) },
+        { T(0.0f), T(0.0f), T(1.0f), T(0.0f) },
+        { T(0.0f), T(0.0f), T(0.0f), T(1.0f) }
+    };
+
+    Filter4 filter(initialState, initialP);
+
+    // State: [x, vx, y, vy], constant velocity model
+    filter.SetStateTransition(StateMat4{
+        { T(1.0f), T(dt), T(0.0f), T(0.0f) },
+        { T(0.0f), T(1.0f), T(0.0f), T(0.0f) },
+        { T(0.0f), T(0.0f), T(1.0f), T(dt) },
+        { T(0.0f), T(0.0f), T(0.0f), T(1.0f) } });
+
+    // Measure x and y positions
+    filter.SetMeasurementMatrix(MeasMat{
+        { T(1.0f), T(0.0f), T(0.0f), T(0.0f) },
+        { T(0.0f), T(0.0f), T(1.0f), T(0.0f) } });
+
+    filter.SetMeasurementNoise(MeasCov{
+        { T(0.1f), T(0.0f) },
+        { T(0.0f), T(0.1f) } });
+    filter.SetProcessNoise(StateMat4{
+        { T(0.01f), T(0.0f), T(0.0f), T(0.0f) },
+        { T(0.0f), T(0.01f), T(0.0f), T(0.0f) },
+        { T(0.0f), T(0.0f), T(0.01f), T(0.0f) },
+        { T(0.0f), T(0.0f), T(0.0f), T(0.01f) } });
+
+    float trueX = 0.0f, trueVx = 0.5f;
+    float trueY = 0.0f, trueVy = 0.3f;
+
+    for (int i = 0; i < 20; ++i)
+    {
+        trueX += trueVx * dt;
+        trueY += trueVy * dt;
+
+        filter.Predict();
+        filter.Update(MeasVec{ { T(trueX) }, { T(trueY) } });
+    }
+
+    auto finalState = filter.GetState();
+    EXPECT_NEAR(math::ToFloat(finalState.at(0, 0)), trueX, 0.2f);
+    EXPECT_NEAR(math::ToFloat(finalState.at(2, 0)), trueY, 0.2f);
+}
+
+TYPED_TEST(KalmanFilterTest, WithControlInput)
+{
+    using T = TypeParam;
+    using FilterCtrl = filters::KalmanFilter<T, 2, 1, 1>;
+    using StateVec = math::Vector<T, 2>;
+    using StateMat = math::SquareMatrix<T, 2>;
+    using MeasMat = math::Matrix<T, 1, 2>;
+    using MeasCov = math::SquareMatrix<T, 1>;
+    using MeasVec = math::Vector<T, 1>;
+    using CtrlMat = math::Matrix<T, 2, 1>;
+    using CtrlVec = math::Vector<T, 1>;
+
+    float dt = 0.1f;
+
+    auto initialState = StateVec{ { T(0.0f) }, { T(0.0f) } };
+    auto initialP = StateMat{
+        { T(0.5f), T(0.0f) },
+        { T(0.0f), T(0.5f) }
+    };
+
+    FilterCtrl filter(initialState, initialP);
+
+    filter.SetStateTransition(StateMat{
+        { T(1.0f), T(dt) },
+        { T(0.0f), T(1.0f) } });
+    filter.SetControlInputMatrix(CtrlMat{
+        { T(0.5f * dt * dt) },
+        { T(dt) } });
+    filter.SetMeasurementMatrix(MeasMat{ { T(1.0f), T(0.0f) } });
+    filter.SetMeasurementNoise(MeasCov{ { T(0.1f) } });
+    filter.SetProcessNoise(StateMat{
+        { T(0.01f), T(0.0f) },
+        { T(0.0f), T(0.01f) } });
+
+    CtrlVec controlInput{ { T(1.0f) } };
+    float truePos = 0.0f, trueVel = 0.0f;
+
+    for (int i = 0; i < 10; ++i)
+    {
+        trueVel += 1.0f * dt;
+        truePos += trueVel * dt;
+
+        filter.Predict(controlInput);
+        filter.Update(MeasVec{ { T(truePos) } });
+    }
+
+    auto finalState = filter.GetState();
+    EXPECT_NEAR(math::ToFloat(finalState.at(0, 0)), truePos, 0.2f);
+    EXPECT_NEAR(math::ToFloat(finalState.at(1, 0)), trueVel, 0.4f);
+}

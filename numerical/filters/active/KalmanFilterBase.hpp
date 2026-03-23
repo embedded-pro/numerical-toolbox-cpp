@@ -135,4 +135,9 @@ namespace filters
     {
         return covariance;
     }
+
+    extern template class KalmanFilterBase<float, 2, 1, 0>;
+    extern template class KalmanFilterBase<float, 2, 1, 1>;
+    extern template class KalmanFilterBase<float, 3, 1, 0>;
+    extern template class KalmanFilterBase<float, 4, 2, 0>;
 }

@@ -248,3 +248,63 @@ TYPED_TEST(UnscentedKalmanFilterTest, WithControlInput)
     EXPECT_NEAR(math::ToFloat(finalState.at(0, 0)), truePos, 0.2f);
     EXPECT_NEAR(math::ToFloat(finalState.at(1, 0)), trueVel, 0.5f);
 }
+
+TYPED_TEST(UnscentedKalmanFilterTest, ThreeStateConstantAcceleration)
+{
+    using StateVec3 = math::Vector<TypeParam, 3>;
+    using StateMat3 = math::SquareMatrix<TypeParam, 3>;
+    using MeasVec = math::Vector<TypeParam, 1>;
+    using MeasCov = math::SquareMatrix<TypeParam, 1>;
+    using Ukf3 = filters::UnscentedKalmanFilter<TypeParam, 3, 1, 0>;
+
+    auto transition = [](const StateVec3& x) -> StateVec3
+    {
+        return StateVec3{
+            { TypeParam(math::ToFloat(x.at(0, 0)) + math::ToFloat(x.at(1, 0)) * dt) },
+            { TypeParam(math::ToFloat(x.at(1, 0)) + math::ToFloat(x.at(2, 0)) * dt) },
+            { x.at(2, 0) }
+        };
+    };
+
+    auto measurementFn = [](const StateVec3& x) -> MeasVec
+    {
+        return MeasVec{ { x.at(0, 0) } };
+    };
+
+    auto initialState = StateVec3{ { TypeParam(0.0f) }, { TypeParam(0.0f) }, { TypeParam(0.0f) } };
+    auto initialP = StateMat3{
+        { TypeParam(1.0f), TypeParam(0.0f), TypeParam(0.0f) },
+        { TypeParam(0.0f), TypeParam(1.0f), TypeParam(0.0f) },
+        { TypeParam(0.0f), TypeParam(0.0f), TypeParam(1.0f) }
+    };
+
+    filters::UkfParameters params;
+    params.alpha = 1e-1f;
+    params.beta = 2.0f;
+    params.kappa = 0.0f;
+
+    Ukf3 ukf(initialState, initialP, transition, measurementFn, params);
+
+    ukf.SetProcessNoise(StateMat3{
+        { TypeParam(0.01f), TypeParam(0.0f), TypeParam(0.0f) },
+        { TypeParam(0.0f), TypeParam(0.01f), TypeParam(0.0f) },
+        { TypeParam(0.0f), TypeParam(0.0f), TypeParam(0.01f) } });
+    ukf.SetMeasurementNoise(MeasCov{ { TypeParam(0.1f) } });
+
+    float trueAcc = 0.5f;
+    float trueVel3 = 0.0f;
+    float truePos3 = 0.0f;
+
+    for (int i = 0; i < 30; ++i)
+    {
+        trueVel3 += trueAcc * dt;
+        truePos3 += trueVel3 * dt;
+
+        ukf.Predict();
+        ukf.Update(MeasVec{ { TypeParam(truePos3) } });
+    }
+
+    auto finalState3 = ukf.GetState();
+    EXPECT_NEAR(math::ToFloat(finalState3.at(0, 0)), truePos3, 0.15f);
+    EXPECT_NEAR(math::ToFloat(finalState3.at(1, 0)), trueVel3, 0.3f);
+}
