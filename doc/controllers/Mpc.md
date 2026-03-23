@@ -75,11 +75,11 @@ For control input constraints $u_{\min} \leq u_k \leq u_{\max}$, a simple projec
 
 ## Complexity Analysis
 
-| Phase     | Time                       | Space                            | Notes                                              |
-|-----------|----------------------------|----------------------------------|----------------------------------------------------|
-| Offline   | $O(N_p^2 \cdot n^3)$      | $O((N_c m)^2 + N_p n \cdot N_c m)$ | Prediction matrices, Hessian, gradient precomputed |
-| Online    | $O((N_c m)^3)$            | $O((N_c m)^2)$                   | Gaussian elimination to solve $H\mathbf{U}=-Fx$   |
-| Per step  | $O(N_c m \cdot n)$        | $O(N_c m)$                       | Matrix-vector product $Fx$ + constraint clamping   |
+| Phase    | Time                 | Space                              | Notes                                              |
+|----------|----------------------|------------------------------------|----------------------------------------------------|
+| Offline  | $O(N_p^2 \cdot n^3)$ | $O((N_c m)^2 + N_p n \cdot N_c m)$ | Prediction matrices, Hessian, gradient precomputed |
+| Online   | $O((N_c m)^3)$       | $O((N_c m)^2)$                     | Gaussian elimination to solve $H\mathbf{U}=-Fx$    |
+| Per step | $O(N_c m \cdot n)$   | $O(N_c m)$                         | Matrix-vector product $Fx$ + constraint clamping   |
 
 For typical embedded use ($n=2, m=1, N_c=10$): the online solve is a $10 \times 10$ linear system, well within real-time budgets.
 
@@ -122,14 +122,14 @@ Apply first element $u_0^*$ to the plant.
 
 ## Variants & Generalizations
 
-| Variant                | Key Difference                                              | Use Case                             |
-|------------------------|-------------------------------------------------------------|--------------------------------------|
-| Nonlinear MPC (NMPC)  | Nonlinear prediction model, requires iterative optimization | Nonlinear plants, high-accuracy      |
-| Explicit MPC           | Precomputes control law as piecewise affine function        | Very fast online evaluation           |
-| Move-Blocking MPC      | Constrains control moves to change only at specific steps   | Reduces QP size                       |
-| Adaptive MPC           | Updates plant model online                                  | Time-varying or uncertain systems     |
-| Distributed MPC        | Decomposes problem across subsystems                        | Large-scale multi-agent systems       |
-| Robust MPC             | Accounts for bounded disturbances in constraints            | Safety-critical applications          |
+| Variant              | Key Difference                                              | Use Case                          |
+|----------------------|-------------------------------------------------------------|-----------------------------------|
+| Nonlinear MPC (NMPC) | Nonlinear prediction model, requires iterative optimization | Nonlinear plants, high-accuracy   |
+| Explicit MPC         | Precomputes control law as piecewise affine function        | Very fast online evaluation       |
+| Move-Blocking MPC    | Constrains control moves to change only at specific steps   | Reduces QP size                   |
+| Adaptive MPC         | Updates plant model online                                  | Time-varying or uncertain systems |
+| Distributed MPC      | Decomposes problem across subsystems                        | Large-scale multi-agent systems   |
+| Robust MPC           | Accounts for bounded disturbances in constraints            | Safety-critical applications      |
 
 ## Applications
 
