@@ -135,5 +135,7 @@ namespace analysis
         return result;
     }
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class RootLocus<float, 5, 100>;
+#endif
 }

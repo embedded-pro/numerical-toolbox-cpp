@@ -95,8 +95,10 @@ namespace filters
         this->UpdateState(innovation, K, measurementMatrix);
     }
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class KalmanFilter<float, 2, 1, 0>;
     extern template class KalmanFilter<float, 3, 1, 0>;
     extern template class KalmanFilter<float, 4, 2, 0>;
     extern template class KalmanFilter<float, 2, 1, 1>;
+#endif
 }

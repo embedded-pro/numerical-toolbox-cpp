@@ -250,6 +250,7 @@ namespace controllers
         return PidIncrementalBase<QNumberType>::Process(processVariable);
     }
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class PidIncrementalBase<float>;
     extern template class PidIncrementalBase<math::Q15>;
     extern template class PidIncrementalBase<math::Q31>;
@@ -261,4 +262,5 @@ namespace controllers
     extern template class PidIncrementalSynchronous<float>;
     extern template class PidIncrementalSynchronous<math::Q15>;
     extern template class PidIncrementalSynchronous<math::Q31>;
+#endif
 }

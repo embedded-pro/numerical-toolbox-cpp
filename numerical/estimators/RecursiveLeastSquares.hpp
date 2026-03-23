@@ -37,7 +37,7 @@ namespace estimators
         static State EvaluateConvergence(const EstimationMetrics& metrics, T innovationThreshold, T uncertaintyThreshold) noexcept;
 
     private:
-        CoefficientsMatrix theta;
+        CoefficientsMatrix theta{};
         DesignMatrix covariance;
         T lambda;
         T lambdaInverse;
@@ -48,8 +48,7 @@ namespace estimators
 
     template<typename T, std::size_t Features>
     RecursiveLeastSquares<T, Features>::RecursiveLeastSquares(T forgettingFactor)
-        : theta{}
-        , covariance(DesignMatrix::Identity())
+        : covariance(DesignMatrix::Identity())
         , lambda(forgettingFactor)
         , lambdaInverse(T(1) / lambda)
     {
@@ -57,8 +56,7 @@ namespace estimators
 
     template<typename T, std::size_t Features>
     RecursiveLeastSquares<T, Features>::RecursiveLeastSquares(T initialCovariance, T forgettingFactor)
-        : theta{}
-        , covariance(DesignMatrix::Identity() * initialCovariance)
+        : covariance(DesignMatrix::Identity() * initialCovariance)
         , lambda(forgettingFactor)
         , lambdaInverse(T(1) / lambda)
     {
@@ -110,4 +108,10 @@ namespace estimators
         else
             return State::unstable;
     }
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class RecursiveLeastSquares<float, 1>;
+    extern template class RecursiveLeastSquares<float, 2>;
+    extern template class RecursiveLeastSquares<float, 3>;
+#endif
 }

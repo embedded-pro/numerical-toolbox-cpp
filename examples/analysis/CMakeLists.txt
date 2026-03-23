@@ -1,4 +1,0 @@
-add_subdirectory(FastFourierTransformRadix2)
-add_subdirectory(FilterFrequencyResponse)
-add_subdirectory(PowerDensitySpectrumBartlett)
-add_subdirectory(PowerDensitySpectrumWelch)

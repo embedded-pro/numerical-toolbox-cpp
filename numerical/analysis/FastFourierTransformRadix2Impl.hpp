@@ -129,6 +129,12 @@ namespace analysis
         timeDomain.clear();
         timeDomain.resize(timeDomain.max_size());
     }
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class FastFourierTransformRadix2Impl<float, 8>;
+    extern template class FastFourierTransformRadix2Impl<math::Q15, 8>;
+    extern template class FastFourierTransformRadix2Impl<math::Q31, 8>;
+#endif
 }
 
 #endif

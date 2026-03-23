@@ -83,6 +83,7 @@ namespace controllers
         gain = solvers::SolveSystem<T, InputSize, StateSize>(S, BtPA);
     }
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class Lqr<float, 1, 1>;
     extern template class Lqr<float, 2, 1>;
     extern template class Lqr<float, 3, 1>;
@@ -93,4 +94,5 @@ namespace controllers
 
     extern template class Lqr<math::Q31, 1, 1>;
     extern template class Lqr<math::Q31, 2, 1>;
+#endif
 }

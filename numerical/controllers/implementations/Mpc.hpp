@@ -253,8 +253,10 @@ namespace controllers
         return gradientMatrix;
     }
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class Mpc<float, 2, 1, 5, 5>;
     extern template class Mpc<float, 2, 1, 10, 10>;
     extern template class Mpc<float, 3, 1, 10, 10>;
     extern template class Mpc<float, 2, 1, 10, 5>;
+#endif
 }
