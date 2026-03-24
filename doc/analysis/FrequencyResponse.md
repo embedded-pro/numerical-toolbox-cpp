@@ -32,9 +32,9 @@ $$\omega_k = \frac{2\pi f_k}{f_s}$$
 
 ## Complexity Analysis
 
-| Case    | Time             | Space            | Notes                              |
-|---------|------------------|------------------|------------------------------------|
-| Average | $O(N \cdot (P+Q))$ | $O(N)$        | $N$ frequency points, $P+Q$ coefficients |
+| Case    | Time               | Space  | Notes                                    |
+|---------|--------------------|--------|------------------------------------------|
+| Average | $O(N \cdot (P+Q))$ | $O(N)$ | $N$ frequency points, $P+Q$ coefficients |
 
 ## Step-by-Step Walkthrough
 

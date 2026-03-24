@@ -33,11 +33,11 @@ $$H(e^{j\omega}) = \sum_{i=0}^{N-1} b_i e^{-j\omega i}$$
 
 ## Complexity Analysis
 
-| Case    | Time     | Space   | Notes                                  |
-|---------|----------|---------|----------------------------------------|
-| Best    | $O(N)$   | $O(N)$  | Disabled (passthrough)                 |
-| Average | $O(N)$   | $O(N)$  | Convolution sum                        |
-| Worst   | $O(N)$   | $O(N)$  | Same — no data-dependent branching     |
+| Case    | Time   | Space  | Notes                              |
+|---------|--------|--------|------------------------------------|
+| Best    | $O(N)$ | $O(N)$ | Disabled (passthrough)             |
+| Average | $O(N)$ | $O(N)$ | Convolution sum                    |
+| Worst   | $O(N)$ | $O(N)$ | Same — no data-dependent branching |
 
 Time is per sample. Space is for the coefficient and delay line buffers.
 
@@ -46,11 +46,11 @@ Time is per sample. Space is for the coefficient and delay line buffers.
 Given a 3-tap FIR filter with coefficients $b = [0.25, 0.5, 0.25]$ and input sequence $x = [1.0, 2.0, 3.0, 4.0]$:
 
 | $n$ | $x[n]$ | $x[n-1]$ | $x[n-2]$ | $y[n] = 0.25 x[n] + 0.5 x[n-1] + 0.25 x[n-2]$ |
-|-----|---------|-----------|-----------|--------------------------------------------------|
-| 0   | 1.0     | 0.0       | 0.0       | 0.25                                             |
-| 1   | 2.0     | 1.0       | 0.0       | 1.0                                              |
-| 2   | 3.0     | 2.0       | 1.0       | 2.0                                              |
-| 3   | 4.0     | 3.0       | 2.0       | 3.0                                              |
+|-----|--------|----------|----------|-----------------------------------------------|
+| 0   | 1.0    | 0.0      | 0.0      | 0.25                                          |
+| 1   | 2.0    | 1.0      | 0.0      | 1.0                                           |
+| 2   | 3.0    | 2.0      | 1.0      | 2.0                                           |
+| 3   | 4.0    | 3.0      | 2.0      | 3.0                                           |
 
 ## Pitfalls & Edge Cases
 

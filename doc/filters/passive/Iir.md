@@ -30,11 +30,11 @@ The filter is stable if and only if all poles of $H(z)$ lie strictly inside the 
 
 ## Complexity Analysis
 
-| Case    | Time       | Space       | Notes                                  |
-|---------|------------|-------------|----------------------------------------|
-| Best    | $O(P+Q)$  | $O(P+Q)$   | Disabled (passthrough)                 |
-| Average | $O(P+Q)$  | $O(P+Q)$   | Feedforward + feedback sums            |
-| Worst   | $O(P+Q)$  | $O(P+Q)$   | Same — sequential, no branching        |
+| Case    | Time     | Space    | Notes                           |
+|---------|----------|----------|---------------------------------|
+| Best    | $O(P+Q)$ | $O(P+Q)$ | Disabled (passthrough)          |
+| Average | $O(P+Q)$ | $O(P+Q)$ | Feedforward + feedback sums     |
+| Worst   | $O(P+Q)$ | $O(P+Q)$ | Same — sequential, no branching |
 
 Time is per sample. Space stores coefficient and delay line buffers.
 
@@ -43,10 +43,10 @@ Time is per sample. Space stores coefficient and delay line buffers.
 Given a first-order IIR (1 feedforward, 1 feedback) with $b_0 = 0.5$, $a_0 = 0.3$ and input $x = [1.0, 0.0, 0.0]$:
 
 | $n$ | $x[n]$ | $y[n-1]$ | $y[n] = 0.5 \cdot x[n] + 0.3 \cdot y[n-1]$ |
-|-----|---------|-----------|----------------------------------------------|
-| 0   | 1.0     | 0.0       | 0.5                                          |
-| 1   | 0.0     | 0.5       | 0.15                                         |
-| 2   | 0.0     | 0.15      | 0.045                                        |
+|-----|--------|----------|--------------------------------------------|
+| 0   | 1.0    | 0.0      | 0.5                                        |
+| 1   | 0.0    | 0.5      | 0.15                                       |
+| 2   | 0.0    | 0.15     | 0.045                                      |
 
 The output decays exponentially — characteristic of IIR filters with $|a_0| < 1$.
 
