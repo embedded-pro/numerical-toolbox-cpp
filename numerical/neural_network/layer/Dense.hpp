@@ -66,7 +66,7 @@ namespace neural_network
                 preActivation[i] += weights.at(i, j) * input[j];
         }
 
-        activation.ForwardVector(&output[0], &preActivation[0], OutputSize);
+        activation.ForwardVector(output, preActivation);
     }
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize>
@@ -76,7 +76,7 @@ namespace neural_network
     {
         OutputVector preActivationGradient;
 
-        activation.BackwardVector(&preActivationGradient[0], &preActivation[0], &output[0], &output_gradient[0], OutputSize);
+        activation.BackwardVector(preActivationGradient, preActivation, output, output_gradient);
 
         for (std::size_t j = 0; j < InputSize; ++j)
         {

@@ -6,6 +6,7 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/QNumber.hpp"
+#include <span>
 
 namespace neural_network
 {
@@ -19,21 +20,21 @@ namespace neural_network
         virtual QNumberType Forward(QNumberType x) const = 0;
         virtual QNumberType Backward(QNumberType x) const = 0;
 
-        virtual void ForwardVector(QNumberType* output, const QNumberType* input, std::size_t size) const;
-        virtual void BackwardVector(QNumberType* result, const QNumberType* preActivation, const QNumberType* output, const QNumberType* outputGradient, std::size_t size) const;
+        virtual void ForwardVector(std::span<QNumberType> output, std::span<const QNumberType> input) const;
+        virtual void BackwardVector(std::span<QNumberType> result, std::span<const QNumberType> preActivation, std::span<const QNumberType> output, std::span<const QNumberType> outputGradient) const;
     };
 
     template<typename QNumberType>
-    OPTIMIZE_FOR_SPEED void ActivationFunction<QNumberType>::ForwardVector(QNumberType* output, const QNumberType* input, std::size_t size) const
+    OPTIMIZE_FOR_SPEED void ActivationFunction<QNumberType>::ForwardVector(std::span<QNumberType> output, std::span<const QNumberType> input) const
     {
-        for (std::size_t i = 0; i < size; ++i)
+        for (std::size_t i = 0; i < output.size(); ++i)
             output[i] = Forward(input[i]);
     }
 
     template<typename QNumberType>
-    OPTIMIZE_FOR_SPEED void ActivationFunction<QNumberType>::BackwardVector(QNumberType* result, const QNumberType* preActivation, const QNumberType* /*output*/, const QNumberType* outputGradient, std::size_t size) const
+    OPTIMIZE_FOR_SPEED void ActivationFunction<QNumberType>::BackwardVector(std::span<QNumberType> result, std::span<const QNumberType> preActivation, std::span<const QNumberType> /*output*/, std::span<const QNumberType> outputGradient) const
     {
-        for (std::size_t i = 0; i < size; ++i)
+        for (std::size_t i = 0; i < result.size(); ++i)
             result[i] = outputGradient[i] * Backward(preActivation[i]);
     }
 

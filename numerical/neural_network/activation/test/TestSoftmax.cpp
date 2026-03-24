@@ -67,7 +67,7 @@ TYPED_TEST(TestSoftmax, ForwardVectorNormalizesToOne)
     TypeParam input[Size] = { TypeParam(-0.3f), TypeParam(-0.5f), TypeParam(-0.2f) };
     TypeParam output[Size] = {};
 
-    this->activation.ForwardVector(output, input, Size);
+    this->activation.ForwardVector(output, input);
 
     float sum = 0.0f;
     for (std::size_t i = 0; i < Size; ++i)
@@ -85,7 +85,7 @@ TYPED_TEST(TestSoftmax, ForwardVectorPreservesOrdering)
     TypeParam input[Size] = { TypeParam(-0.5f), TypeParam(-0.2f), TypeParam(-0.8f) };
     TypeParam output[Size] = {};
 
-    this->activation.ForwardVector(output, input, Size);
+    this->activation.ForwardVector(output, input);
 
     EXPECT_GT(math::ToFloat(output[1]), math::ToFloat(output[0]));
     EXPECT_GT(math::ToFloat(output[0]), math::ToFloat(output[2]));
@@ -99,12 +99,12 @@ TYPED_TEST(TestSoftmax, BackwardVectorProducesCorrectGradient)
     constexpr std::size_t Size = 3;
     TypeParam input[Size] = { TypeParam(-0.3f), TypeParam(-0.5f), TypeParam(-0.2f) };
     TypeParam output[Size] = {};
-    this->activation.ForwardVector(output, input, Size);
+    this->activation.ForwardVector(output, input);
 
     TypeParam outputGradient[Size] = { TypeParam(0.9999f), TypeParam(0.0f), TypeParam(0.0f) };
     TypeParam result[Size] = {};
 
-    this->activation.BackwardVector(result, input, output, outputGradient, Size);
+    this->activation.BackwardVector(result, input, output, outputGradient);
 
     float dot = 0.0f;
     for (std::size_t i = 0; i < Size; ++i)
