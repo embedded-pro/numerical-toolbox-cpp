@@ -25,7 +25,7 @@ namespace windowing
     public:
         QNumberType operator()(std::size_t n, std::size_t order) override
         {
-            return (0.54f - 0.46f * static_cast<float>(std::cos(2.0 * M_PI * static_cast<double>(n) / static_cast<double>(order)))) * 0.9999f;
+            return QNumberType((0.54f - 0.46f * static_cast<float>(std::cos(2.0 * math::pi * static_cast<double>(n) / static_cast<double>(order)))) * 0.9999f);
         }
 
         QNumberType Power([[maybe_unused]] std::size_t order) override
@@ -41,7 +41,7 @@ namespace windowing
     public:
         QNumberType operator()(std::size_t n, std::size_t order) override
         {
-            return (0.5f * (1.0f - static_cast<float>(std::cos(2.0 * M_PI * static_cast<double>(n) / static_cast<double>(order)))) * 0.9999f);
+            return QNumberType((0.5f * (1.0f - static_cast<float>(std::cos(2.0 * math::pi * static_cast<double>(n) / static_cast<double>(order)))) * 0.9999f));
         }
 
         QNumberType Power([[maybe_unused]] std::size_t order) override
@@ -58,7 +58,7 @@ namespace windowing
         QNumberType operator()(std::size_t n, std::size_t order) override
         {
             return QNumberType(
-                (0.42f - 0.5f * static_cast<float>(std::cos(2.0 * M_PI * static_cast<double>(n) / static_cast<double>(order))) + 0.08f * static_cast<float>(std::cos(4.0 * M_PI * static_cast<double>(n) / static_cast<double>(order)))) * 0.9999f);
+                (0.42f - 0.5f * static_cast<float>(std::cos(2.0 * math::pi * static_cast<double>(n) / static_cast<double>(order))) + 0.08f * static_cast<float>(std::cos(4.0 * math::pi * static_cast<double>(n) / static_cast<double>(order)))) * 0.9999f);
         }
 
         QNumberType Power([[maybe_unused]] std::size_t order) override

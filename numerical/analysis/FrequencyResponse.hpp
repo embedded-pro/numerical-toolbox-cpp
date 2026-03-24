@@ -50,7 +50,7 @@ namespace analysis
 
         for (auto f = fstart; f <= fend; f *= multiplier)
         {
-            auto omega = 2.0f * M_PI * f / sampleFrequency;
+            auto omega = 2.0f * math::pi * f / sampleFrequency;
 
             std::complex<float> numerator(0.0, 0.0);
             std::complex<float> denominator(0.0, 0.0);
@@ -68,7 +68,7 @@ namespace analysis
 
             frequencies.emplace_back(f);
             response.emplace_back(20.0f * std::log10(std::abs(h)));
-            phase.emplace_back(std::arg(h) * 180.0f / M_PI);
+            phase.emplace_back(std::arg(h) * 180.0f / math::pi);
         }
 
         return std::make_tuple(frequencies, response, phase);

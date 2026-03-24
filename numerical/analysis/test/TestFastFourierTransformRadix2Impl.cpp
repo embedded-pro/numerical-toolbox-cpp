@@ -12,7 +12,7 @@ namespace
     {
         auto real = math::ToFloat(value.Real());
         auto imag = math::ToFloat(value.Imaginary());
-        return std::sqrt(real * real + imag * imag);
+        return T(std::sqrt(real * real + imag * imag));
     }
 
     template<typename T>
