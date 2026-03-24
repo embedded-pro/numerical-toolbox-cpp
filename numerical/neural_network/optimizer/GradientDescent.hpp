@@ -5,7 +5,6 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
-
 #include "numerical/neural_network/optimizer/Optimizer.hpp"
 #include <optional>
 
@@ -47,8 +46,7 @@ namespace neural_network
     }
 
     template<typename QNumberType, size_t NumberOfFeatures>
-    OPTIMIZE_FOR_SPEED
-    const typename GradientDescent<QNumberType, NumberOfFeatures>::Result& GradientDescent<QNumberType, NumberOfFeatures>::Minimize(const Vector& initialGuess, Loss<QNumberType, NumberOfFeatures>& loss)
+    OPTIMIZE_FOR_SPEED const typename GradientDescent<QNumberType, NumberOfFeatures>::Result& GradientDescent<QNumberType, NumberOfFeatures>::Minimize(const Vector& initialGuess, Loss<QNumberType, NumberOfFeatures>& loss)
     {
         auto currentParams = initialGuess;
         auto currentCost = loss.Cost(currentParams);

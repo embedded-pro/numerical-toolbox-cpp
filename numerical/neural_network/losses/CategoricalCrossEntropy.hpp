@@ -5,7 +5,6 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
-
 #include "numerical/neural_network/activation/Softmax.hpp"
 #include "numerical/neural_network/losses/Loss.hpp"
 #include "numerical/neural_network/regularization/Regularization.hpp"
@@ -44,8 +43,8 @@ namespace neural_network
 
     template<typename QNumberType, std::size_t NumberOfFeatures>
     typename CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::Vector
-    OPTIMIZE_FOR_SPEED
-    CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::ComputeSoftmaxProbabilities(const Vector& x) const
+        OPTIMIZE_FOR_SPEED
+        CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::ComputeSoftmaxProbabilities(const Vector& x) const
     {
         Vector output;
         QNumberType sum = QNumberType(0.0f);
@@ -67,7 +66,8 @@ namespace neural_network
 
     template<typename QNumberType, std::size_t NumberOfFeatures>
     OPTIMIZE_FOR_SPEED
-    QNumberType CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::Cost(const Vector& parameters)
+        QNumberType
+        CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::Cost(const Vector& parameters)
     {
         Vector probabilities = ComputeSoftmaxProbabilities(parameters);
         QNumberType cost = QNumberType(0.0f);
@@ -80,8 +80,8 @@ namespace neural_network
 
     template<typename QNumberType, std::size_t NumberOfFeatures>
     typename CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::Vector
-    OPTIMIZE_FOR_SPEED
-    CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::Gradient(const Vector& parameters)
+        OPTIMIZE_FOR_SPEED
+        CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::Gradient(const Vector& parameters)
     {
         auto regGradient = regularization.Gradient(parameters);
         Vector probabilities = ComputeSoftmaxProbabilities(parameters);

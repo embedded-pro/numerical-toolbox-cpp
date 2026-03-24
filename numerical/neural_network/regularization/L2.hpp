@@ -5,7 +5,6 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
-
 #include "numerical/neural_network/regularization/Regularization.hpp"
 
 namespace neural_network
@@ -34,7 +33,8 @@ namespace neural_network
 
     template<typename QNumberType, std::size_t Size>
     OPTIMIZE_FOR_SPEED
-    QNumberType L2<QNumberType, Size>::Calculate(const Vector& parameters) const
+        QNumberType
+        L2<QNumberType, Size>::Calculate(const Vector& parameters) const
     {
         QNumberType sum = QNumberType(0.0f);
 
@@ -46,7 +46,8 @@ namespace neural_network
 
     template<typename QNumberType, std::size_t Size>
     OPTIMIZE_FOR_SPEED
-    typename L2<QNumberType, Size>::Vector L2<QNumberType, Size>::Gradient(const Vector& parameters) const
+        typename L2<QNumberType, Size>::Vector
+        L2<QNumberType, Size>::Gradient(const Vector& parameters) const
     {
         Vector gradient;
 

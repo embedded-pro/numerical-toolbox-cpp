@@ -5,7 +5,6 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
-
 #include "numerical/math/Toeplitz.hpp"
 #include "numerical/solvers/Solver.hpp"
 
@@ -31,8 +30,8 @@ namespace solvers
 
     template<typename T, std::size_t N>
     typename LevinsonDurbin<T, N>::SolutionVector
-    OPTIMIZE_FOR_SPEED
-    LevinsonDurbin<T, N>::Solve(const InputMatrix& A, const InputVector& b)
+        OPTIMIZE_FOR_SPEED
+        LevinsonDurbin<T, N>::Solve(const InputMatrix& A, const InputVector& b)
     {
         really_assert(IsToeplitz(A));
 

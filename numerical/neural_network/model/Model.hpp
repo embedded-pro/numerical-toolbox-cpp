@@ -157,8 +157,8 @@ namespace neural_network
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
     typename Model<QNumberType, InputSize, OutputSize, Layers...>::OutputVector
-    OPTIMIZE_FOR_SPEED
-    Model<QNumberType, InputSize, OutputSize, Layers...>::Forward(const InputVector& input)
+        OPTIMIZE_FOR_SPEED
+        Model<QNumberType, InputSize, OutputSize, Layers...>::Forward(const InputVector& input)
     {
         currentInput = input;
         return ForwardImpl(input, std::make_index_sequence<sizeof...(Layers)>{});
@@ -166,8 +166,8 @@ namespace neural_network
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
     typename Model<QNumberType, InputSize, OutputSize, Layers...>::InputVector
-    OPTIMIZE_FOR_SPEED
-    Model<QNumberType, InputSize, OutputSize, Layers...>::Backward(const OutputVector& output_gradient)
+        OPTIMIZE_FOR_SPEED
+        Model<QNumberType, InputSize, OutputSize, Layers...>::Backward(const OutputVector& output_gradient)
     {
         return BackwardImpl(output_gradient, std::make_index_sequence<sizeof...(Layers)>{});
     }

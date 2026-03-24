@@ -5,7 +5,6 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
-
 #include "numerical/neural_network/losses/Loss.hpp"
 #include "numerical/neural_network/regularization/Regularization.hpp"
 
@@ -38,7 +37,8 @@ namespace neural_network
 
     template<typename QNumberType, std::size_t NumberOfFeatures>
     OPTIMIZE_FOR_SPEED
-    QNumberType MeanSquaredError<QNumberType, NumberOfFeatures>::Cost(const Vector& parameters)
+        QNumberType
+        MeanSquaredError<QNumberType, NumberOfFeatures>::Cost(const Vector& parameters)
     {
         QNumberType cost = QNumberType(0.0f);
 
@@ -53,7 +53,8 @@ namespace neural_network
 
     template<typename QNumberType, std::size_t NumberOfFeatures>
     OPTIMIZE_FOR_SPEED
-    typename MeanSquaredError<QNumberType, NumberOfFeatures>::Vector MeanSquaredError<QNumberType, NumberOfFeatures>::Gradient(const Vector& parameters)
+        typename MeanSquaredError<QNumberType, NumberOfFeatures>::Vector
+        MeanSquaredError<QNumberType, NumberOfFeatures>::Gradient(const Vector& parameters)
     {
         Vector gradient;
         auto regGradient = regularization.Gradient(parameters);

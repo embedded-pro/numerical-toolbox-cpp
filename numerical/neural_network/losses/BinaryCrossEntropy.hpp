@@ -5,7 +5,6 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
-
 #include "numerical/neural_network/losses/Loss.hpp"
 #include "numerical/neural_network/regularization/Regularization.hpp"
 #include <cmath>
@@ -40,7 +39,8 @@ namespace neural_network
 
     template<typename QNumberType, std::size_t NumberOfFeatures>
     OPTIMIZE_FOR_SPEED
-    QNumberType BinaryCrossEntropy<QNumberType, NumberOfFeatures>::Cost(const Vector& parameters)
+        QNumberType
+        BinaryCrossEntropy<QNumberType, NumberOfFeatures>::Cost(const Vector& parameters)
     {
         QNumberType cost = QNumberType(0.0f);
 
@@ -57,8 +57,8 @@ namespace neural_network
 
     template<typename QNumberType, std::size_t NumberOfFeatures>
     typename BinaryCrossEntropy<QNumberType, NumberOfFeatures>::Vector
-    OPTIMIZE_FOR_SPEED
-    BinaryCrossEntropy<QNumberType, NumberOfFeatures>::Gradient(const Vector& parameters)
+        OPTIMIZE_FOR_SPEED
+        BinaryCrossEntropy<QNumberType, NumberOfFeatures>::Gradient(const Vector& parameters)
     {
         Vector gradient;
         auto regGradient = regularization.Gradient(parameters);

@@ -158,4 +158,3 @@ namespace math
         return result;
     }
 }
-

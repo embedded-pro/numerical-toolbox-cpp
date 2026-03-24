@@ -13,4 +13,3 @@ namespace math
         virtual QNumberType Arctangent(const QNumberType& value) const = 0;
     };
 }
-
