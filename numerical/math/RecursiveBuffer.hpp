@@ -1,6 +1,7 @@
 #pragma once
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
+#include <algorithm>
 #include <array>
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -20,12 +21,12 @@ namespace math
 
     struct Index
     {
-        [[nodiscard]] constexpr IndexRelative operator-(int32_t offset) const noexcept
+        [[nodiscard]] friend constexpr IndexRelative operator-(Index, int32_t offset) noexcept
         {
             return IndexRelative(offset);
         }
 
-        [[nodiscard]] constexpr IndexRelative operator+() const noexcept
+        [[nodiscard]] friend constexpr IndexRelative operator+(Index) noexcept
         {
             return IndexRelative(0);
         }
@@ -47,21 +48,19 @@ namespace math
         [[nodiscard]] QNumberType operator[](const IndexRelative& n) const noexcept;
 
     private:
-        std::array<QNumberType, Length> buffer;
+        std::array<QNumberType, Length> buffer{};
     };
 
     // Implementation
 
     template<typename QNumberType, std::size_t Length>
-    constexpr RecursiveBuffer<QNumberType, Length>::RecursiveBuffer() noexcept
-        : buffer{}
-    {}
+    constexpr RecursiveBuffer<QNumberType, Length>::RecursiveBuffer() noexcept = default;
 
     template<typename QNumberType, std::size_t Length>
     RecursiveBuffer<QNumberType, Length>& RecursiveBuffer<QNumberType, Length>::operator=(std::initializer_list<QNumberType> init)
     {
         really_assert(init.size() <= Length);
-        std::copy(init.begin(), init.end(), buffer.begin());
+        std::ranges::copy(init, buffer.begin());
 
         if (init.size() < Length)
             std::fill(buffer.begin() + init.size(), buffer.end(), QNumberType(0.0f));

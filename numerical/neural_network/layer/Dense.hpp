@@ -109,10 +109,16 @@ namespace neural_network
 
         for (std::size_t i = 0; i < OutputSize; ++i)
             for (std::size_t j = 0; j < InputSize; ++j)
-                parameters[idx++] = weights.at(i, j);
+            {
+                parameters[idx] = weights.at(i, j);
+                ++idx;
+            }
 
         for (std::size_t i = 0; i < OutputSize; ++i)
-            parameters[idx++] = biases[i];
+        {
+            parameters[idx] = biases[i];
+            ++idx;
+        }
 
         return parameters;
     }
@@ -124,10 +130,16 @@ namespace neural_network
 
         for (std::size_t i = 0; i < OutputSize; ++i)
             for (std::size_t j = 0; j < InputSize; ++j)
-                weights.at(i, j) = parameters[idx++];
+            {
+                weights.at(i, j) = parameters[idx];
+                ++idx;
+            }
 
         for (std::size_t i = 0; i < OutputSize; ++i)
-            biases[i] = parameters[idx++];
+        {
+            biases[i] = parameters[idx];
+            ++idx;
+        }
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD

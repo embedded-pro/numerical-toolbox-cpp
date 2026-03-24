@@ -12,8 +12,8 @@ namespace filters::passive
     template<typename QNumberType, std::size_t N>
     class Fir
     {
-        static_assert(math::is_qnumber<QNumberType>::value ||
-                          std::is_floating_point<QNumberType>::value,
+        static_assert(math::is_qnumber_v<QNumberType> ||
+                          std::is_floating_point_v<QNumberType>,
             "Fir can only be instantiated with math::QNumber types.");
 
     public:
@@ -27,7 +27,7 @@ namespace filters::passive
     private:
         bool enabled = true;
 
-        math::Index n;
+        [[no_unique_address]] math::Index n;
         math::RecursiveBuffer<QNumberType, N> b;
         math::RecursiveBuffer<QNumberType, N> x;
     };
@@ -51,7 +51,7 @@ namespace filters::passive
 
         QNumberType output{};
         for (std::size_t i = 0; i < N; ++i)
-            output += b[n - i] * x[n - i];
+            output += b[n - static_cast<int32_t>(i)] * x[n - static_cast<int32_t>(i)];
 
         return output;
     }

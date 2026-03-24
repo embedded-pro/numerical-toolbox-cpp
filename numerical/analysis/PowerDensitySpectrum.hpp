@@ -10,16 +10,20 @@
 #include "numerical/math/QNumber.hpp"
 #include "numerical/windowing/Windowing.hpp"
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+#include "numerical/analysis/test/PowerDensitySpectrumTestSupport.hpp"
+#endif
+
 namespace analysis
 {
     template<typename QNumberType, std::size_t SegmentSize, typename Fft, typename TwindleFactor, std::size_t Overlap>
     class PowerSpectralDensity
     {
-        static_assert(math::is_qnumber<QNumberType>::value ||
-                          std::is_floating_point<QNumberType>::value,
+        static_assert(math::is_qnumber_v<QNumberType> ||
+                          std::is_floating_point_v<QNumberType>,
             "PowerSpectralDensity can only be instantiated with math::QNumber types.");
 
-        static_assert(std::is_base_of<FastFourierTransform<QNumberType>, Fft>::value,
+        static_assert(std::is_base_of_v<FastFourierTransform<QNumberType>, Fft>,
             "Fft has to be derived from FastFourierTransform.");
 
         static_assert((SegmentSize % 2) == 0,
@@ -96,12 +100,6 @@ namespace analysis
     };
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
-}
-
-#include "numerical/analysis/test/PowerDensitySpectrumTestSupport.hpp"
-
-namespace analysis
-{
     extern template class PowerSpectralDensity<float, 512, test::FftStub<float, 512>, test::TwiddleFactorsStub<float, 256>, 50>;
 #endif
 }

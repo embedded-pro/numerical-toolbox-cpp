@@ -14,7 +14,7 @@ namespace neural_network
     class GradientDescent
         : public Optimizer<QNumberType, NumberOfFeatures>
     {
-        static_assert(math::is_qnumber<QNumberType>::value || std::is_floating_point<QNumberType>::value,
+        static_assert(math::is_qnumber_v<QNumberType> || std::is_floating_point_v<QNumberType>,
             "GradientDescent can only be instantiated with math::QNumber types.");
 
     public:

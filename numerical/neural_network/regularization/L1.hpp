@@ -52,7 +52,14 @@ namespace neural_network
         Vector gradient;
 
         for (std::size_t i = 0; i < Size; ++i)
-            gradient[i] = parameters[i] > QNumberType(0.0f) ? lambda : (parameters[i] < QNumberType(0.0f) ? -lambda : QNumberType(0.0f));
+        {
+            if (parameters[i] > QNumberType(0.0f))
+                gradient[i] = lambda;
+            else if (parameters[i] < QNumberType(0.0f))
+                gradient[i] = -lambda;
+            else
+                gradient[i] = QNumberType(0.0f);
+        }
 
         return gradient;
     }
