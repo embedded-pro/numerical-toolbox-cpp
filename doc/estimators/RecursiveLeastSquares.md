@@ -39,8 +39,8 @@ The implementation provides convergence diagnostics via `EstimationMetrics`:
 
 ## Complexity Analysis
 
-| Case    | Time     | Space     | Notes                                 |
-|---------|----------|-----------|---------------------------------------|
+| Case    | Time     | Space    | Notes                                  |
+|---------|----------|----------|----------------------------------------|
 | Average | $O(p^2)$ | $O(p^2)$ | Matrix-vector products + outer product |
 
 Per-update cost is $O(p^2)$ for $p$ parameters, dominated by the covariance update. This is significantly cheaper than the $O(p^3)$ batch solution via matrix inversion.
@@ -50,11 +50,11 @@ Per-update cost is $O(p^2)$ for $p$ parameters, dominated by the covariance upda
 Estimating the slope of $y = 2x$ with RLS ($p = 2$: bias + slope, $\lambda = 1$):
 
 | Step | $\mathbf{x}$ | $y$ | $\hat{\theta}_0$ (bias) | $\hat{\theta}_1$ (slope) | Innovation |
-|------|---------------|-----|-------------------------|--------------------------|------------|
-| Init | —             | —   | 0.0                     | 0.0                      | —          |
-| 1    | [1, 1]        | 2   | 1.0                     | 1.0                      | 2.0        |
-| 2    | [1, 2]        | 4   | 0.0                     | 2.0                      | 1.0        |
-| 3    | [1, 3]        | 6   | 0.0                     | 2.0                      | 0.0        |
+|------|--------------|-----|-------------------------|--------------------------|------------|
+| Init | —            | —   | 0.0                     | 0.0                      | —          |
+| 1    | [1, 1]       | 2   | 1.0                     | 1.0                      | 2.0        |
+| 2    | [1, 2]       | 4   | 0.0                     | 2.0                      | 1.0        |
+| 3    | [1, 3]       | 6   | 0.0                     | 2.0                      | 0.0        |
 
 Convergence is achieved in 2 steps for this noiseless system.
 
