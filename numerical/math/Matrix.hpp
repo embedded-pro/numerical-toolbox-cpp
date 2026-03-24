@@ -46,10 +46,14 @@ namespace math
         static constexpr size_type size = Rows * Cols;
 
         constexpr Matrix() noexcept;
+
         template<typename... Args>
         requires(sizeof...(Args) == Rows * Cols &&
                  !(sizeof...(Args) == 1 && (std::is_same_v<std::decay_t<Args>, Matrix> && ...)))
-        constexpr explicit Matrix(Args&&... args) noexcept;
+        OPTIMIZE_FOR_SPEED constexpr explicit Matrix(Args&&... args) noexcept
+            : data{ std::forward<Args>(args)... }
+        {}
+
         constexpr Matrix(std::initializer_list<std::initializer_list<T>> init);
 
         [[nodiscard]] constexpr reference at(size_type row, size_type col);
@@ -136,14 +140,6 @@ namespace math
     template<typename T, size_t Rows, size_t Cols>
     constexpr Matrix<T, Rows, Cols>::Matrix() noexcept
         : data{}
-    {}
-
-    template<typename T, size_t Rows, size_t Cols>
-    template<typename... Args>
-    requires(sizeof...(Args) == Rows * Cols &&
-             !(sizeof...(Args) == 1 && (std::is_same_v<std::decay_t<Args>, Matrix<T, Rows, Cols>> && ...)))
-    OPTIMIZE_FOR_SPEED constexpr Matrix<T, Rows, Cols>::Matrix(Args&&... args) noexcept
-        : data{ std::forward<Args>(args)... }
     {}
 
     template<typename T, size_t Rows, size_t Cols>
