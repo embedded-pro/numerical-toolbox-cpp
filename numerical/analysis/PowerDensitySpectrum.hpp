@@ -1,22 +1,29 @@
-#ifndef ANALYSIS_POWER_SPECTRAL_DENSITY_HPP
-#define ANALYSIS_POWER_SPECTRAL_DENSITY_HPP
+#pragma once
 
-#include "infra/util/ReallyAssert.hpp"
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
+
 #include "numerical/analysis/FastFourierTransform.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/ComplexNumber.hpp"
 #include "numerical/math/QNumber.hpp"
 #include "numerical/windowing/Windowing.hpp"
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+#include "numerical/analysis/test/PowerDensitySpectrumTestSupport.hpp"
+#endif
 
 namespace analysis
 {
     template<typename QNumberType, std::size_t SegmentSize, typename Fft, typename TwindleFactor, std::size_t Overlap>
     class PowerSpectralDensity
     {
-        static_assert(math::is_qnumber<QNumberType>::value ||
-                          std::is_floating_point<QNumberType>::value,
+        static_assert(math::is_qnumber_v<QNumberType> ||
+                          std::is_floating_point_v<QNumberType>,
             "PowerSpectralDensity can only be instantiated with math::QNumber types.");
 
-        static_assert(std::is_base_of<FastFourierTransform<QNumberType>, Fft>::value,
+        static_assert(std::is_base_of_v<FastFourierTransform<QNumberType>, Fft>,
             "Fft has to be derived from FastFourierTransform.");
 
         static_assert((SegmentSize % 2) == 0,
@@ -35,7 +42,7 @@ namespace analysis
         using VectorReal = typename FastFourierTransform<QNumberType>::VectorReal;
         using VectorComplex = typename FastFourierTransform<QNumberType>::VectorComplex;
 
-        VectorReal& Calculate(const VectorReal& input)
+        OPTIMIZE_FOR_SPEED VectorReal& Calculate(const VectorReal& input)
         {
             really_assert(input.size() >= SegmentSize);
 
@@ -61,7 +68,7 @@ namespace analysis
         }
 
     private:
-        QNumberType MagnitudeSquared(math::Complex<QNumberType>& data)
+        QNumberType MagnitudeSquared(const math::Complex<QNumberType>& data) const
         {
             return data.Real() * data.Real() + data.Imaginary() * data.Imaginary();
         }
@@ -91,6 +98,8 @@ namespace analysis
         typename infra::BoundedVector<QNumberType>::template WithMaxSize<SegmentSize> segment;
         typename FastFourierTransform<QNumberType>::VectorReal::template WithMaxSize<SegmentSize / 2 + 1> y;
     };
-}
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class PowerSpectralDensity<float, 512, test::FftStub<float, 512>, test::TwiddleFactorsStub<float, 256>, 50>;
 #endif
+}

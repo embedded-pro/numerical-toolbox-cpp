@@ -1,6 +1,4 @@
-#ifndef ANALYSIS_FAST_FOURIER_TRANSFORM_HPP
-#define ANALYSIS_FAST_FOURIER_TRANSFORM_HPP
-
+#pragma once
 #include "infra/util/BoundedVector.hpp"
 #include "numerical/math/ComplexNumber.hpp"
 #include "numerical/math/QNumber.hpp"
@@ -49,5 +47,3 @@ namespace analysis
         }
     };
 }
-
-#endif

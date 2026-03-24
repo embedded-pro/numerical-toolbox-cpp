@@ -1,6 +1,4 @@
-#ifndef MATH_MATRIX_HPP
-#define MATH_MATRIX_HPP
-
+#pragma once
 #include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/QNumber.hpp"
 #include <array>
@@ -303,5 +301,3 @@ namespace math
     extern template class Matrix<float, 3, 3>;
 #endif
 }
-
-#endif

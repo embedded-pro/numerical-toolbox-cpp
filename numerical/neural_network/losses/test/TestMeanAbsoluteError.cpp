@@ -10,6 +10,7 @@ namespace
     public:
         using Vector = typename neural_network::Regularization<QNumberType, Size>::Vector;
         MOCK_METHOD(QNumberType, Calculate, (const Vector& parameters), (const, override));
+        MOCK_METHOD(Vector, Gradient, (const Vector& parameters), (const, override));
     };
 
     template<typename T>

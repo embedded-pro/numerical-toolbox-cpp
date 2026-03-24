@@ -1,6 +1,10 @@
-#ifndef NEURAL_NETWORK_LOSSES_CATEGORICAL_CROSS_ENTROPY_HPP
-#define NEURAL_NETWORK_LOSSES_CATEGORICAL_CROSS_ENTROPY_HPP
+#pragma once
 
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
+
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/neural_network/activation/Softmax.hpp"
 #include "numerical/neural_network/losses/Loss.hpp"
 #include "numerical/neural_network/regularization/Regularization.hpp"
@@ -39,7 +43,8 @@ namespace neural_network
 
     template<typename QNumberType, std::size_t NumberOfFeatures>
     typename CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::Vector
-    CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::ComputeSoftmaxProbabilities(const Vector& x) const
+        OPTIMIZE_FOR_SPEED
+        CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::ComputeSoftmaxProbabilities(const Vector& x) const
     {
         Vector output;
         QNumberType sum = QNumberType(0.0f);
@@ -60,7 +65,9 @@ namespace neural_network
     }
 
     template<typename QNumberType, std::size_t NumberOfFeatures>
-    QNumberType CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::Cost(const Vector& parameters)
+    OPTIMIZE_FOR_SPEED
+        QNumberType
+        CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::Cost(const Vector& parameters)
     {
         Vector probabilities = ComputeSoftmaxProbabilities(parameters);
         QNumberType cost = QNumberType(0.0f);
@@ -73,17 +80,20 @@ namespace neural_network
 
     template<typename QNumberType, std::size_t NumberOfFeatures>
     typename CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::Vector
-    CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::Gradient(const Vector& parameters)
+        OPTIMIZE_FOR_SPEED
+        CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::Gradient(const Vector& parameters)
     {
-        auto reg = regularization.Calculate(parameters);
+        auto regGradient = regularization.Gradient(parameters);
         Vector probabilities = ComputeSoftmaxProbabilities(parameters);
         Vector gradient;
 
         for (std::size_t i = 0; i < NumberOfFeatures; ++i)
-            gradient[i] = probabilities[i] - target[i] + reg;
+            gradient[i] = probabilities[i] - target[i] + regGradient[i];
 
         return gradient;
     }
-}
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class CategoricalCrossEntropy<float, 2>;
 #endif
+}

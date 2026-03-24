@@ -1,5 +1,4 @@
-#ifndef FILTERS_PASSIVE_IIR_HPP
-#define FILTERS_PASSIVE_IIR_HPP
+#pragma once
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/RecursiveBuffer.hpp"
@@ -13,8 +12,8 @@ namespace filters::passive
     template<typename QNumberType, std::size_t P, std::size_t Q>
     class Iir
     {
-        static_assert(math::is_qnumber<QNumberType>::value ||
-                          std::is_floating_point<QNumberType>::value,
+        static_assert(math::is_qnumber_v<QNumberType> ||
+                          std::is_floating_point_v<QNumberType>,
             "Iir can only be instantiated with math::QNumber types.");
 
     public:
@@ -28,7 +27,7 @@ namespace filters::passive
     private:
         bool enabled = true;
 
-        math::Index n;
+        [[no_unique_address]] math::Index n;
         math::RecursiveBuffer<QNumberType, Q> a;
         math::RecursiveBuffer<QNumberType, P> b;
         math::RecursiveBuffer<QNumberType, Q> y;
@@ -55,11 +54,11 @@ namespace filters::passive
 
         QNumberType feedforward{};
         for (std::size_t i = 0; i < P; ++i)
-            feedforward += b[n - i] * x[n - i];
+            feedforward += b[n - static_cast<int32_t>(i)] * x[n - static_cast<int32_t>(i)];
 
         QNumberType feedback{};
         for (std::size_t i = 0; i < Q; ++i)
-            feedback += a[n - i] * y[n - i];
+            feedback += a[n - static_cast<int32_t>(i)] * y[n - static_cast<int32_t>(i)];
 
         const auto output = feedforward + feedback;
         y.Update(output);
@@ -85,6 +84,10 @@ namespace filters::passive
         x.Reset();
         y.Reset();
     }
-}
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class Iir<float, 3, 3>;
+    extern template class Iir<math::Q15, 3, 3>;
+    extern template class Iir<math::Q31, 3, 3>;
 #endif
+}

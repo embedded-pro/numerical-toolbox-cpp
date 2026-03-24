@@ -1,6 +1,4 @@
-#ifndef MATH_Q_NUMBER_H
-#define MATH_Q_NUMBER_H
-
+#pragma once
 #include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include <chrono>
@@ -267,5 +265,3 @@ namespace math
     extern template class QNumber<int16_t, 15>;
 #endif
 }
-
-#endif

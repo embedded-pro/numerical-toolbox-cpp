@@ -1,5 +1,4 @@
-#ifndef NEURAL_NETWORK_OPTIMIZER_HPP
-#define NEURAL_NETWORK_OPTIMIZER_HPP
+#pragma once
 
 #include "numerical/math/QNumber.hpp"
 #include "numerical/neural_network/losses/Loss.hpp"
@@ -9,7 +8,7 @@ namespace neural_network
     template<typename QNumberType, std::size_t NumberOfFeatures>
     class Optimizer
     {
-        static_assert(math::is_qnumber<QNumberType>::value || std::is_floating_point<QNumberType>::value,
+        static_assert(math::is_qnumber_v<QNumberType> || std::is_floating_point_v<QNumberType>,
             "Optimizer can only be instantiated with math::QNumber types.");
 
     public:
@@ -31,5 +30,3 @@ namespace neural_network
         virtual const Result& Minimize(const Vector& initialGuess, Loss<QNumberType, NumberOfFeatures>& loss) = 0;
     };
 }
-
-#endif

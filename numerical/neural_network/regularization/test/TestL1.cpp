@@ -61,3 +61,35 @@ TYPED_TEST(TestL1, DifferentLambdaValue)
 
     EXPECT_NEAR(math::ToFloat(result), math::ToFloat(expected), 1e-3f);
 }
+
+TYPED_TEST(TestL1, GradientPositiveValues)
+{
+    using Vector = typename neural_network::L1<TypeParam, TestFixture::Size>::Vector;
+    Vector parameters;
+    parameters[0] = TypeParam(0.1f);
+    parameters[1] = TypeParam(0.2f);
+    parameters[2] = TypeParam(0.3f);
+    parameters[3] = TypeParam(0.4f);
+
+    Vector gradient = TestFixture::regularization.Gradient(parameters);
+
+    for (std::size_t i = 0; i < TestFixture::Size; ++i)
+        EXPECT_NEAR(math::ToFloat(gradient[i]), 0.001f, 1e-3f);
+}
+
+TYPED_TEST(TestL1, GradientMixedValues)
+{
+    using Vector = typename neural_network::L1<TypeParam, TestFixture::Size>::Vector;
+    Vector parameters;
+    parameters[0] = TypeParam(0.1f);
+    parameters[1] = TypeParam(-0.2f);
+    parameters[2] = TypeParam(0.0f);
+    parameters[3] = TypeParam(-0.3f);
+
+    Vector gradient = TestFixture::regularization.Gradient(parameters);
+
+    EXPECT_NEAR(math::ToFloat(gradient[0]), 0.001f, 1e-3f);
+    EXPECT_NEAR(math::ToFloat(gradient[1]), -0.001f, 1e-3f);
+    EXPECT_NEAR(math::ToFloat(gradient[2]), 0.0f, 1e-3f);
+    EXPECT_NEAR(math::ToFloat(gradient[3]), -0.001f, 1e-3f);
+}

@@ -77,7 +77,15 @@ TYPED_TEST(TestGaussianElimination, solve_back_substitutes_upper_triangular)
     EXPECT_NEAR(math::ToFloat(result.at(0, 0)), 0.1f, 0.02f);
 }
 
-TEST(TestGaussianEliminationFloat, solve_system_delegates_per_column)
+namespace
+{
+    class TestGaussianEliminationFloat
+        : public ::testing::Test
+    {
+    };
+}
+
+TEST_F(TestGaussianEliminationFloat, solve_system_delegates_per_column)
 {
     math::SquareMatrix<float, 2> a{
         { 0.5f, 0.2f },

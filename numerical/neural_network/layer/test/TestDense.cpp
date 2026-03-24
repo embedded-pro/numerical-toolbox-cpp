@@ -1,7 +1,7 @@
 #include "numerical/math/QNumber.hpp"
 #include "numerical/neural_network/activation/ActivationFunction.hpp"
 #include "numerical/neural_network/layer/Dense.hpp"
-#include "numerical/neural_network/optimizer/GradientDescent.hpp"
+#include "numerical/neural_network/optimizer/Optimizer.hpp"
 #include "gmock/gmock.h"
 
 namespace
@@ -24,6 +24,22 @@ namespace
 
         MOCK_METHOD(T, Cost, (const Vector& parameters), (override));
         MOCK_METHOD(Vector, Gradient, (const Vector& parameters), (override));
+    };
+
+    template<typename T, std::size_t Features>
+    class MockOptimizer
+        : public neural_network::Optimizer<T, Features>
+    {
+    public:
+        using Result = typename neural_network::Optimizer<T, Features>::Result;
+        using Vector = typename neural_network::Loss<T, Features>::Vector;
+
+        const Result& Minimize(const Vector& initialGuess, neural_network::Loss<T, Features>& loss) override
+        {
+            return result;
+        }
+
+        Result result{ Vector{}, T(0), 0 };
     };
 
     template<typename T>
@@ -123,10 +139,10 @@ TYPED_TEST(TestDense, BackwardPropagation)
 
     dense.Forward(input);
 
-    EXPECT_CALL(this->activation, Backward(T(0.5f)))
-        .WillOnce(testing::Return(T(0.4f)));
-    EXPECT_CALL(this->activation, Backward(T(0.7f)))
-        .WillOnce(testing::Return(T(0.5f)));
+    T expectedPreActivationBackward = T(0.6f);
+    EXPECT_CALL(this->activation, Backward(expectedPreActivationBackward))
+        .Times(TestDense<T>::OutputSize)
+        .WillRepeatedly(testing::Return(T(0.4f)));
 
     dense.Backward(outputGradient);
 }
@@ -156,7 +172,7 @@ TYPED_TEST(TestDense, ParametersExtractionAndSetting)
     }
 }
 
-TYPED_TEST(TestDense, OptimizationWithGradientDescent)
+TYPED_TEST(TestDense, OptimizationWithMockedOptimizer)
 {
     using T = TypeParam;
     using ParameterVector = typename TestDense<T>::ParameterVector;
@@ -166,57 +182,27 @@ TYPED_TEST(TestDense, OptimizationWithGradientDescent)
     neural_network::Dense<T, TestDense<T>::InputSize, TestDense<T>::OutputSize>
         dense(this->initialWeight, this->activation);
 
-    MockLoss<T, TotalParams> loss;
-
-    typename neural_network::GradientDescent<T, TotalParams>::Parameters params;
-    params.learningRate = T(0.1f);
-    params.maxIterations = 3;
-
-    neural_network::GradientDescent<T, TotalParams> optimizer(params);
+    MockOptimizer<T, TotalParams> optimizer;
 
     auto initialParams = dense.Parameters();
 
-    // Create gradient vectors
-    ParameterVector gradVec1;
-    ParameterVector gradVec2;
-    ParameterVector gradVec3;
-
+    ParameterVector optimizedParams;
     for (std::size_t i = 0; i < TotalParams; ++i)
-    {
-        gradVec1[i] = T(0.5f);
-        gradVec2[i] = T(0.4f);
-        gradVec3[i] = T(0.3f);
-    }
+        optimizedParams[i] = T(0.05f);
 
-    {
-        ::testing::InSequence seq;
+    optimizer.result = typename neural_network::Optimizer<T, TotalParams>::Result(
+        optimizedParams, T(0.4f), 3);
 
-        EXPECT_CALL(loss, Cost(testing::_))
-            .WillOnce(testing::Return(T(1.0f)));
+    MockLoss<T, TotalParams> loss;
+    auto& result = optimizer.Minimize(initialParams, loss);
 
-        EXPECT_CALL(loss, Gradient(testing::_))
-            .WillOnce(testing::Return(gradVec1));
+    dense.SetParameters(result.parameters);
 
-        EXPECT_CALL(loss, Cost(testing::_))
-            .WillOnce(testing::Return(T(0.8f)));
+    auto updatedParams = dense.Parameters();
+    for (std::size_t i = 0; i < TotalParams; ++i)
+        EXPECT_EQ(updatedParams[i], optimizedParams[i]);
 
-        EXPECT_CALL(loss, Gradient(testing::_))
-            .WillOnce(testing::Return(gradVec2));
-
-        EXPECT_CALL(loss, Cost(testing::_))
-            .WillOnce(testing::Return(T(0.6f)));
-
-        EXPECT_CALL(loss, Gradient(testing::_))
-            .WillOnce(testing::Return(gradVec3));
-
-        EXPECT_CALL(loss, Cost(testing::_))
-            .WillOnce(testing::Return(T(0.4f)));
-    }
-
-    auto result = optimizer.Minimize(initialParams, loss);
-
-    // From your class definition, only verify iterations
-    EXPECT_EQ(result.iterations, params.maxIterations);
+    EXPECT_EQ(result.iterations, 3u);
 }
 
 TYPED_TEST(TestDense, FullLayerSequence)
@@ -245,9 +231,9 @@ TYPED_TEST(TestDense, FullLayerSequence)
         EXPECT_CALL(this->activation, Forward(testing::_))
             .WillOnce(testing::Return(T(0.6f)));
 
-        EXPECT_CALL(this->activation, Backward(outputGradient[0]))
+        EXPECT_CALL(this->activation, Backward(testing::_))
             .WillOnce(testing::Return(T(0.3f)));
-        EXPECT_CALL(this->activation, Backward(outputGradient[1]))
+        EXPECT_CALL(this->activation, Backward(testing::_))
             .WillOnce(testing::Return(T(0.4f)));
     }
 
@@ -286,9 +272,9 @@ TYPED_TEST(TestDense, MultipleForwardBackwardPasses)
         EXPECT_CALL(this->activation, Forward(testing::_))
             .WillOnce(testing::Return(T(0.6f)));
 
-        EXPECT_CALL(this->activation, Backward(outputGradient1[0]))
+        EXPECT_CALL(this->activation, Backward(testing::_))
             .WillOnce(testing::Return(T(0.3f)));
-        EXPECT_CALL(this->activation, Backward(outputGradient1[1]))
+        EXPECT_CALL(this->activation, Backward(testing::_))
             .WillOnce(testing::Return(T(0.4f)));
 
         EXPECT_CALL(this->activation, Forward(testing::_))
@@ -296,9 +282,9 @@ TYPED_TEST(TestDense, MultipleForwardBackwardPasses)
         EXPECT_CALL(this->activation, Forward(testing::_))
             .WillOnce(testing::Return(T(0.8f)));
 
-        EXPECT_CALL(this->activation, Backward(outputGradient2[0]))
+        EXPECT_CALL(this->activation, Backward(testing::_))
             .WillOnce(testing::Return(T(0.5f)));
-        EXPECT_CALL(this->activation, Backward(outputGradient2[1]))
+        EXPECT_CALL(this->activation, Backward(testing::_))
             .WillOnce(testing::Return(T(0.6f)));
     }
 

@@ -1,6 +1,10 @@
-#ifndef NEURAL_NETWORK_GRADIENT_DESCENT_HPP
-#define NEURAL_NETWORK_GRADIENT_DESCENT_HPP
+#pragma once
 
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
+
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/neural_network/optimizer/Optimizer.hpp"
 #include <optional>
 
@@ -10,7 +14,7 @@ namespace neural_network
     class GradientDescent
         : public Optimizer<QNumberType, NumberOfFeatures>
     {
-        static_assert(math::is_qnumber<QNumberType>::value || std::is_floating_point<QNumberType>::value,
+        static_assert(math::is_qnumber_v<QNumberType> || std::is_floating_point_v<QNumberType>,
             "GradientDescent can only be instantiated with math::QNumber types.");
 
     public:
@@ -42,7 +46,7 @@ namespace neural_network
     }
 
     template<typename QNumberType, size_t NumberOfFeatures>
-    const typename GradientDescent<QNumberType, NumberOfFeatures>::Result& GradientDescent<QNumberType, NumberOfFeatures>::Minimize(const Vector& initialGuess, Loss<QNumberType, NumberOfFeatures>& loss)
+    OPTIMIZE_FOR_SPEED const typename GradientDescent<QNumberType, NumberOfFeatures>::Result& GradientDescent<QNumberType, NumberOfFeatures>::Minimize(const Vector& initialGuess, Loss<QNumberType, NumberOfFeatures>& loss)
     {
         auto currentParams = initialGuess;
         auto currentCost = loss.Cost(currentParams);
@@ -64,6 +68,10 @@ namespace neural_network
 
         return *result;
     }
-}
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class GradientDescent<float, 2>;
+    extern template class GradientDescent<math::Q15, 2>;
+    extern template class GradientDescent<math::Q31, 2>;
 #endif
+}

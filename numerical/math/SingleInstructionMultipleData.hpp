@@ -1,6 +1,4 @@
-#ifndef MATH_SIMD_HPP
-#define MATH_SIMD_HPP
-
+#pragma once
 #include <cstdint>
 
 namespace math
@@ -35,5 +33,3 @@ namespace math
         virtual uint32_t Sxtb16(uint32_t value) = 0;
     };
 }
-
-#endif
