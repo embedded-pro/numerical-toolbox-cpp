@@ -153,6 +153,9 @@ namespace math
     struct is_qnumber<QNumber<IntType, FractionalBits>> : std::true_type
     {};
 
+    template<typename T>
+    inline constexpr bool is_qnumber_v = is_qnumber<T>::value;
+
     // Implementation
 
     template<typename IntType, int FractionalBits>

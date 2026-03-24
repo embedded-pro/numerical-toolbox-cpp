@@ -37,19 +37,16 @@ if (NUMERICAL_TOOLBOX_STANDALONE)
         emil
         GIT_REPOSITORY https://github.com/embedded-pro/embedded-infra-lib.git
         GIT_TAG        74165ff75d8734b9968bd5f2772e542968bfe2a0 # Unreleased
+        PATCH_COMMAND ${CMAKE_COMMAND} -Demil_SOURCE_DIR=<SOURCE_DIR> -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/patch-emil.cmake
     )
 
+    set(EMIL_INCLUDE_MBEDTLS Off CACHE BOOL "" FORCE)
+    set(EMIL_INCLUDE_ECHO Off CACHE BOOL "" FORCE)
+    set(EMIL_FETCH_ECHO_COMPILERS Off CACHE BOOL "" FORCE)
+    set(EMIL_BUILD_ECHO_COMPILERS Off CACHE BOOL "" FORCE)
+    set(EMIL_ENABLE_DOCKER_TOOLS Off CACHE BOOL "" FORCE)
+
     FetchContent_MakeAvailable(emil)
-
-    if (EMIL_HOST_BUILD)
-        FetchContent_Declare(
-            cucumber-cpp-runner
-            GIT_REPOSITORY https://github.com/philips-software/amp-cucumber-cpp-runner.git
-            GIT_TAG        d8b8c030c0bea97f1c41cc5229a927b2d06f5290 # v3.0.0
-        )
-
-        FetchContent_MakeAvailable(cucumber-cpp-runner)
-    endif()
 endif()
 
 project(numerical-toolbox LANGUAGES C CXX ASM VERSION 1.0.0) # x-release-please-version
@@ -90,18 +87,6 @@ add_subdirectory(numerical)
 
 if (NUMERICAL_TOOLBOX_BUILD_SIMULATOR)
     add_subdirectory(simulator)
-endif()
-
-if(TARGET yaml-cpp)
-    emil_exclude_from_clang_format(yaml-cpp)
-
-    get_target_property(yaml_cpp_compile_options yaml-cpp COMPILE_OPTIONS)
-    if(yaml_cpp_compile_options)
-        list(REMOVE_ITEM yaml_cpp_compile_options /WX -Werror)
-        set_target_properties(yaml-cpp PROPERTIES COMPILE_OPTIONS "${yaml_cpp_compile_options}")
-    endif()
-    
-    set_target_properties(yaml-cpp PROPERTIES COMPILE_WARNING_AS_ERROR OFF)
 endif()
 
 emil_clangformat_directories(numerical DIRECTORIES .)
