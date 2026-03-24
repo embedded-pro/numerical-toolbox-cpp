@@ -20,6 +20,7 @@ target_sources(numerical.neural_network.activation PRIVATE
 )
 
 numerical_add_coverage_sources(numerical.neural_network.activation
+    ActivationFunction.cpp
     ReLU.cpp
     LeakyReLU.cpp
     Sigmoid.cpp

@@ -23,6 +23,7 @@ target_sources(numerical.analysis PRIVATE
 numerical_add_coverage_sources(numerical.analysis
     FastFourierTransformRadix2Impl.cpp
     FrequencyResponse.cpp
+    PowerDensitySpectrum.cpp
     RootLocus.cpp
 )
 

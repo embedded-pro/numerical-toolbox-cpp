@@ -94,4 +94,14 @@ namespace analysis
         typename infra::BoundedVector<QNumberType>::template WithMaxSize<SegmentSize> segment;
         typename FastFourierTransform<QNumberType>::VectorReal::template WithMaxSize<SegmentSize / 2 + 1> y;
     };
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+}
+
+#include "numerical/analysis/test/PowerDensitySpectrumTestSupport.hpp"
+
+namespace analysis
+{
+    extern template class PowerSpectralDensity<float, 512, test::FftStub<float, 512>, test::TwiddleFactorsStub<float, 256>, 50>;
+#endif
 }

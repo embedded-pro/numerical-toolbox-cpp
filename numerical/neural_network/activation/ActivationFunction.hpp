@@ -36,4 +36,10 @@ namespace neural_network
         for (std::size_t i = 0; i < size; ++i)
             result[i] = outputGradient[i] * Backward(preActivation[i]);
     }
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class ActivationFunction<float>;
+    extern template class ActivationFunction<math::Q15>;
+    extern template class ActivationFunction<math::Q31>;
+#endif
 }

@@ -132,5 +132,7 @@ namespace neural_network
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class Dense<float, 3, 2>;
+    extern template class Dense<math::Q15, 3, 2>;
+    extern template class Dense<math::Q31, 3, 2>;
 #endif
 }
