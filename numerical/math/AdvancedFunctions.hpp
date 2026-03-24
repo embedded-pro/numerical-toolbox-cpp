@@ -1,6 +1,4 @@
-#ifndef MATH_ADVANCED_FUNCTIONS_HPP
-#define MATH_ADVANCED_FUNCTIONS_HPP
-
+#pragma once
 #include "numerical/math/QNumber.hpp"
 
 namespace math
@@ -14,5 +12,3 @@ namespace math
         virtual QNumberType SquareRoot(const QNumberType& value) const = 0;
     };
 }
-
-#endif

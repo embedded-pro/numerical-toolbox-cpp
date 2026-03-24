@@ -1,4 +1,4 @@
-#ifndef MATH_HYPERBOLIC_FUNCTIONS_HPP
+#pragma once
 
 #include "numerical/math/QNumber.hpp"
 
@@ -13,5 +13,3 @@ namespace math
         virtual QNumberType Arctangent(const QNumberType& value) const = 0;
     };
 }
-
-#endif

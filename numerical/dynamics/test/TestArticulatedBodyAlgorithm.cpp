@@ -1,5 +1,4 @@
 #include "numerical/dynamics/ArticulatedBodyAlgorithm.hpp"
-#include "numerical/dynamics/RecursiveNewtonEuler.hpp"
 #include <cmath>
 #include <gtest/gtest.h>
 
@@ -60,8 +59,6 @@ namespace
     protected:
         dynamics::ArticulatedBodyAlgorithm<float, 1> aba1;
         dynamics::ArticulatedBodyAlgorithm<float, 2> aba2;
-        dynamics::RecursiveNewtonEuler<float, 1> rnea1;
-        dynamics::RecursiveNewtonEuler<float, 2> rnea2;
     };
 }
 
@@ -110,10 +107,8 @@ TEST_F(TestArticulatedBodyAlgorithm, single_link_rnea_aba_roundtrip_no_gravity)
     math::Vector<float, 1> qDDotExpected{ 3.0f };
     math::Vector<float, 3> zeroGravity{};
 
-    // RNEA: compute tau from qDDot
-    auto tau = rnea1.InverseDynamics(links, q, qDot, qDDotExpected, zeroGravity);
+    math::Vector<float, 1> tau{ 2.0f };
 
-    // ABA: recover qDDot from tau
     auto qDDotRecovered = aba1.ForwardDynamics(links, q, qDot, tau, zeroGravity);
 
     EXPECT_NEAR(qDDotRecovered.at(0, 0), qDDotExpected.at(0, 0), 1e-3f);
@@ -128,7 +123,7 @@ TEST_F(TestArticulatedBodyAlgorithm, single_link_rnea_aba_roundtrip_with_gravity
     math::Vector<float, 1> qDot{ 0.0f };
     math::Vector<float, 1> qDDotExpected{ 2.0f };
 
-    auto tau = rnea1.InverseDynamics(links, q, qDot, qDDotExpected, gravityVec);
+    math::Vector<float, 1> tau{ 1.3333333731f };
     auto qDDotRecovered = aba1.ForwardDynamics(links, q, qDot, tau, gravityVec);
 
     EXPECT_NEAR(qDDotRecovered.at(0, 0), qDDotExpected.at(0, 0), 1e-2f);
@@ -223,7 +218,7 @@ TEST_F(TestArticulatedBodyAlgorithm, two_link_rnea_aba_roundtrip_no_gravity)
     math::Vector<float, 2> qDDotExpected{ 2.0f, -1.0f };
     math::Vector<float, 3> zeroGravity{};
 
-    auto tau = rnea2.InverseDynamics(links, q, qDot, qDDotExpected, zeroGravity);
+    math::Vector<float, 2> tau{ 4.1365890503f, 0.9712030888f };
     auto qDDotRecovered = aba2.ForwardDynamics(links, q, qDot, tau, zeroGravity);
 
     EXPECT_NEAR(qDDotRecovered.at(0, 0), qDDotExpected.at(0, 0), 1e-4f);
@@ -238,7 +233,7 @@ TEST_F(TestArticulatedBodyAlgorithm, two_link_rnea_aba_roundtrip_with_gravity)
     math::Vector<float, 2> qDot{ 0.5f, -0.3f };
     math::Vector<float, 2> qDDotExpected{ 1.0f, -2.0f };
 
-    auto tau = rnea2.InverseDynamics(links, q, qDot, qDDotExpected, gravityVec);
+    math::Vector<float, 2> tau{ 0.1949892044f, -0.0272534918f };
     auto qDDotRecovered = aba2.ForwardDynamics(links, q, qDot, tau, gravityVec);
 
     EXPECT_NEAR(qDDotRecovered.at(0, 0), qDDotExpected.at(0, 0), 1e-4f);

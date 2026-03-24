@@ -1,5 +1,9 @@
 #pragma once
 
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
+
 #include "infra/util/ReallyAssert.hpp"
 #include "numerical/controllers/interfaces/LqrController.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
@@ -38,10 +42,9 @@ namespace controllers
     template<typename T, std::size_t StateSize, std::size_t InputSize>
     Lqr<T, StateSize, InputSize>::Lqr(
         const StateMatrix& A, const InputMatrix& B, const StateMatrix& Q, const InputWeightMatrix& R)
+        : riccatiSolution(solvers::DiscreteAlgebraicRiccatiEquation<T, StateSize, InputSize>{}.Solve(A, B, Q, R))
+        , riccatiSolutionAvailable(true)
     {
-        solvers::DiscreteAlgebraicRiccatiEquation<T, StateSize, InputSize> dare;
-        riccatiSolution = dare.Solve(A, B, Q, R);
-        riccatiSolutionAvailable = true;
         ComputeGain(A, B, riccatiSolution, R);
     }
 
@@ -83,6 +86,7 @@ namespace controllers
         gain = solvers::SolveSystem<T, InputSize, StateSize>(S, BtPA);
     }
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class Lqr<float, 1, 1>;
     extern template class Lqr<float, 2, 1>;
     extern template class Lqr<float, 3, 1>;
@@ -94,4 +98,5 @@ namespace controllers
 
     extern template class Lqr<math::Q31, 1, 1>;
     extern template class Lqr<math::Q31, 2, 1>;
+#endif
 }

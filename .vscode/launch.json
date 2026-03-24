@@ -86,6 +86,46 @@
       ]
     },
     {
+      "name": "Kalman Filter Simulator",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/host/simulator/filters/KalmanFilter/Debug/numerical.simulator.filters.kalman",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
+      "name": "MPC Controller Simulator",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/host/simulator/controllers/Mpc/Debug/numerical.simulator.controllers.mpc",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
       "name": "Linux Debug",
       "type": "cppdbg",
       "request": "launch",

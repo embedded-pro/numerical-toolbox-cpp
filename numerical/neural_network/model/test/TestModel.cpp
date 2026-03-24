@@ -43,6 +43,7 @@ namespace
 
         MOCK_METHOD(void, Forward, (const InputVector&), (override));
         MOCK_METHOD(InputVector&, Backward, (const OutputVector&), (override));
+        MOCK_METHOD(const OutputVector&, Output, (), (const, override));
         MOCK_METHOD(ParameterVector&, Parameters, (), (const, override));
         MOCK_METHOD(void, SetParameters, (const ParameterVector&), (override));
 
@@ -62,6 +63,12 @@ namespace
                         return inputGradient;
                     });
 
+            ON_CALL(*this, Output())
+                .WillByDefault([this]() -> const OutputVector&
+                    {
+                        return outputValue;
+                    });
+
             ON_CALL(*this, Parameters())
                 .WillByDefault([this]() -> ParameterVector&
                     {
@@ -76,6 +83,7 @@ namespace
         }
 
         InputVector inputGradient;
+        OutputVector outputValue;
         ParameterVector parameters;
     };
 

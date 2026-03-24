@@ -1,6 +1,4 @@
-#ifndef MATH_TRIGONOMETRIC_FUNCTIONS_STUB_HPP
-#define MATH_TRIGONOMETRIC_FUNCTIONS_STUB_HPP
-
+#pragma once
 #include "numerical/math/TrigonometricFunctions.hpp"
 #include <algorithm>
 #include <cmath>
@@ -44,5 +42,3 @@ namespace math
         }
     };
 }
-
-#endif

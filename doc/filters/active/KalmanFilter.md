@@ -40,7 +40,7 @@ $$y_k = z_k - H_k \hat{x}_k^- \qquad \text{(innovation)}$$
 $$S_k = H_k P_k^- H_k^T + R_k \qquad \text{(innovation covariance)}$$
 $$K_k = P_k^- H_k^T S_k^{-1} \qquad \text{(Kalman gain)}$$
 $$\hat{x}_k = \hat{x}_k^- + K_k y_k \qquad \text{(state update)}$$
-$$P_k = (I - K_k H_k) P_k^- \qquad \text{(covariance update)}$$
+$$P_k = (I - K_k H_k) P_k^- (I - K_k H_k)^T + K_k R_k K_k^T \qquad \text{(Joseph form covariance update)}$$
 
 ### Optimality
 

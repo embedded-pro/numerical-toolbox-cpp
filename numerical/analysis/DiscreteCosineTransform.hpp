@@ -1,5 +1,8 @@
-#ifndef ANALYSIS_DISCRETE_COSINE_TRANSFORM_HPP
-#define ANALYSIS_DISCRETE_COSINE_TRANSFORM_HPP
+#pragma once
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
 
 #include "infra/util/BoundedVector.hpp"
 #include "numerical/analysis/FastFourierTransform.hpp"
@@ -41,7 +44,9 @@ namespace analysis
     }
 
     template<typename QNumberType, std::size_t Length>
-    typename DiscreteConsineTransform<QNumberType, Length>::VectorReal& DiscreteConsineTransform<QNumberType, Length>::Forward(VectorReal& input)
+    OPTIMIZE_FOR_SPEED
+        typename DiscreteConsineTransform<QNumberType, Length>::VectorReal&
+        DiscreteConsineTransform<QNumberType, Length>::Forward(VectorReal& input)
     {
         auto& fftResult = fft.Forward(input);
 
@@ -78,5 +83,3 @@ namespace analysis
         return fft.Inverse(complexBuffer);
     }
 }
-
-#endif

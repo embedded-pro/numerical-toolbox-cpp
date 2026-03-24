@@ -63,7 +63,9 @@ namespace dynamics
         return M * qDDot + C + g;
     }
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class EulerLagrangeSolver<float, 1>;
     extern template class EulerLagrangeSolver<float, 2>;
     extern template class EulerLagrangeSolver<float, 3>;
+#endif
 }

@@ -1,6 +1,4 @@
-#ifndef ANALYSIS_FAST_FOURIER_TRANSFORM_HPP
-#define ANALYSIS_FAST_FOURIER_TRANSFORM_HPP
-
+#pragma once
 #include "infra/util/BoundedVector.hpp"
 #include "numerical/math/ComplexNumber.hpp"
 #include "numerical/math/QNumber.hpp"
@@ -18,7 +16,7 @@ namespace analysis
     class FastFourierTransform
     {
         static_assert(math::is_qnumber<QNumberType>::value ||
-                          std::is_floating_point<QNumberType>::value,
+                          std::is_floating_point_v<QNumberType>,
             "FastFourierTransform can only be instantiated with math::QNumber types.");
 
     public:
@@ -49,5 +47,3 @@ namespace analysis
         }
     };
 }
-
-#endif

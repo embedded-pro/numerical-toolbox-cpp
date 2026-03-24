@@ -1,5 +1,9 @@
 #pragma once
 
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
+
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/QNumber.hpp"
@@ -80,7 +84,9 @@ namespace solvers
         return true;
     }
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class DiscreteAlgebraicRiccatiEquation<float, 1, 1>;
     extern template class DiscreteAlgebraicRiccatiEquation<float, 2, 1>;
     extern template class DiscreteAlgebraicRiccatiEquation<float, 4, 1>;
+#endif
 }

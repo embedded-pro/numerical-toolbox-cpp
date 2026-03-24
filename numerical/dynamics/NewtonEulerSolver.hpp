@@ -110,5 +110,7 @@ namespace dynamics
         return SpatialForce<T>{ resultForce, resultTorque };
     }
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class NewtonEulerSolver<float>;
+#endif
 }

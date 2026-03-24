@@ -1,5 +1,9 @@
 #pragma once
 
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
+
 #include "numerical/math/QNumber.hpp"
 #include <cmath>
 
@@ -9,7 +13,7 @@ namespace windowing
     class Window
     {
         static_assert(math::is_qnumber<QNumberType>::value ||
-                          std::is_floating_point<QNumberType>::value,
+                          std::is_floating_point_v<QNumberType>,
             "Window can only be instantiated with math::QNumber types.");
 
     public:
@@ -25,7 +29,7 @@ namespace windowing
     public:
         QNumberType operator()(std::size_t n, std::size_t order) override
         {
-            return (0.54f - 0.46f * static_cast<float>(std::cos(2.0f * M_PI * n / order))) * 0.9999f;
+            return QNumberType((0.54f - 0.46f * static_cast<float>(std::cos(2.0 * math::pi * static_cast<double>(n) / static_cast<double>(order)))) * 0.9999f);
         }
 
         QNumberType Power([[maybe_unused]] std::size_t order) override
@@ -41,7 +45,7 @@ namespace windowing
     public:
         QNumberType operator()(std::size_t n, std::size_t order) override
         {
-            return (0.5f * (1.0f - static_cast<float>(std::cos(2.0f * M_PI * n / order))) * 0.9999f);
+            return QNumberType(0.5f * (1.0f - static_cast<float>(std::cos(2.0 * math::pi * static_cast<double>(n) / static_cast<double>(order)))) * 0.9999f);
         }
 
         QNumberType Power([[maybe_unused]] std::size_t order) override
@@ -58,7 +62,7 @@ namespace windowing
         QNumberType operator()(std::size_t n, std::size_t order) override
         {
             return QNumberType(
-                (0.42f - 0.5f * static_cast<float>(std::cos(2.0f * M_PI * n / order)) + 0.08f * static_cast<float>(std::cos(4.0f * M_PI * n / order))) * 0.9999f);
+                (0.42f - 0.5f * static_cast<float>(std::cos(2.0 * math::pi * static_cast<double>(n) / static_cast<double>(order))) + 0.08f * static_cast<float>(std::cos(4.0 * math::pi * static_cast<double>(n) / static_cast<double>(order)))) * 0.9999f);
         }
 
         QNumberType Power([[maybe_unused]] std::size_t order) override
@@ -82,4 +86,22 @@ namespace windowing
             return QNumberType(0.9999f);
         }
     };
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class HammingWindow<float>;
+    extern template class HammingWindow<math::Q15>;
+    extern template class HammingWindow<math::Q31>;
+
+    extern template class HanningWindow<float>;
+    extern template class HanningWindow<math::Q15>;
+    extern template class HanningWindow<math::Q31>;
+
+    extern template class BlackmanWindow<float>;
+    extern template class BlackmanWindow<math::Q15>;
+    extern template class BlackmanWindow<math::Q31>;
+
+    extern template class RectangularWindow<float>;
+    extern template class RectangularWindow<math::Q15>;
+    extern template class RectangularWindow<math::Q31>;
+#endif
 }

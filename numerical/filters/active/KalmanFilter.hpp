@@ -1,139 +1,104 @@
-#ifndef FILTERS_ACTIVE_KALMAN_FILTER_HPP
-#define FILTERS_ACTIVE_KALMAN_FILTER_HPP
+#pragma once
 
-#include "numerical/math/Matrix.hpp"
+#include "numerical/filters/active/KalmanFilterBase.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
 
 namespace filters
 {
-    namespace detail
-    {
-        template<typename QNumberType>
-        inline constexpr bool is_kalman_supported_v =
-            std::disjunction_v<
-                std::is_same<QNumberType, float>,
-                std::is_same<QNumberType, math::Q15>,
-                std::is_same<QNumberType, math::Q31>>;
-    }
-
-    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize>
+    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize = 0>
     class KalmanFilter
+        : public KalmanFilterBase<QNumberType, StateSize, MeasurementSize, ControlSize>
     {
-        static_assert(detail::is_kalman_supported_v<QNumberType>,
-            "KalmanFilter only supports float, Q15, or Q31 types");
-        static_assert(math::detail::is_valid_dimensions_v<StateSize, StateSize>,
-            "State dimensions must be positive");
-        static_assert(math::detail::is_valid_dimensions_v<MeasurementSize, MeasurementSize>,
-            "Measurement dimensions must be positive");
+        using Base = KalmanFilterBase<QNumberType, StateSize, MeasurementSize, ControlSize>;
 
     public:
-        using StateMatrix = math::SquareMatrix<QNumberType, StateSize>;
-        using StateVector = math::Vector<QNumberType, StateSize>;
-        using MeasurementMatrix = math::Matrix<QNumberType, MeasurementSize, StateSize>;
-        using MeasurementVector = math::Vector<QNumberType, MeasurementSize>;
-        using MeasurementCovariance = math::SquareMatrix<QNumberType, MeasurementSize>;
+        using typename Base::ControlMatrix;
+        using typename Base::ControlVector;
+        using typename Base::MeasurementCovariance;
+        using typename Base::MeasurementMatrix;
+        using typename Base::MeasurementVector;
+        using typename Base::StateMatrix;
+        using typename Base::StateVector;
 
         KalmanFilter(const StateVector& initialState, const StateMatrix& initialCovariance);
 
         void SetStateTransition(const StateMatrix& F);
-        void SetProcessNoise(const StateMatrix& Q);
         void SetMeasurementMatrix(const MeasurementMatrix& H);
-        void SetMeasurementNoise(const MeasurementCovariance& R);
+
+        void SetControlInputMatrix(const ControlMatrix& B)
+        requires(ControlSize > 0);
+
         void Predict();
+
+        void Predict(const ControlVector& u)
+        requires(ControlSize > 0);
+
         void Update(const MeasurementVector& measurement);
-        [[nodiscard]] const StateVector& GetState() const;
-        [[nodiscard]] const StateMatrix& GetCovariance() const;
 
     private:
-        StateVector state;
-        StateMatrix covariance;
-        StateMatrix stateTransition;
-        StateMatrix processNoise;
-        MeasurementMatrix measurementMatrix;
-        MeasurementCovariance measurementNoise;
+        StateMatrix stateTransition = StateMatrix::Identity();
+        MeasurementMatrix measurementMatrix{};
+        [[no_unique_address]] ControlMatrix controlInputMatrix{};
     };
 
     // Implementation //
 
-    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize>
-    KalmanFilter<QNumberType, StateSize, MeasurementSize>::KalmanFilter(
+    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
+    KalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::KalmanFilter(
         const StateVector& initialState, const StateMatrix& initialCovariance)
-        : state(initialState)
-        , covariance(initialCovariance)
-        , stateTransition(StateMatrix::Identity())
-        , processNoise(StateMatrix::Identity())
-        , measurementMatrix(MeasurementMatrix())
-        , measurementNoise(MeasurementCovariance::Identity())
+        : Base(initialState, initialCovariance)
     {}
 
-    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize>
-    void KalmanFilter<QNumberType, StateSize, MeasurementSize>::SetStateTransition(const StateMatrix& F)
+    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
+    void KalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::SetStateTransition(const StateMatrix& F)
     {
         stateTransition = F;
     }
 
-    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize>
-    void KalmanFilter<QNumberType, StateSize, MeasurementSize>::SetProcessNoise(const StateMatrix& Q)
-    {
-        processNoise = Q;
-    }
-
-    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize>
-    void KalmanFilter<QNumberType, StateSize, MeasurementSize>::SetMeasurementMatrix(const MeasurementMatrix& H)
+    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
+    void KalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::SetMeasurementMatrix(const MeasurementMatrix& H)
     {
         measurementMatrix = H;
     }
 
-    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize>
-    void KalmanFilter<QNumberType, StateSize, MeasurementSize>::SetMeasurementNoise(const MeasurementCovariance& R)
+    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
+    void KalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::SetControlInputMatrix(const ControlMatrix& B)
+    requires(ControlSize > 0)
     {
-        measurementNoise = R;
+        controlInputMatrix = B;
     }
 
-    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize>
-    void KalmanFilter<QNumberType, StateSize, MeasurementSize>::Predict()
+    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
+    OPTIMIZE_FOR_SPEED void KalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::Predict()
     {
-        // State prediction: x̂ₖ₋ = Fₖ₋₁x̂ₖ₋₁
-        state = stateTransition * state;
-
-        // Covariance prediction: Pₖ₋ = Fₖ₋₁Pₖ₋₁Fₖ₋₁ᵀ + Qₖ₋₁
-        covariance = stateTransition * covariance * stateTransition.Transpose() + processNoise;
+        this->state() = stateTransition * this->state();
+        this->covariance() = stateTransition * this->covariance() * stateTransition.Transpose() + this->processNoise();
     }
 
-    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize>
-    void KalmanFilter<QNumberType, StateSize, MeasurementSize>::Update(const MeasurementVector& measurement)
+    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
+    OPTIMIZE_FOR_SPEED void KalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::Predict(const ControlVector& u)
+    requires(ControlSize > 0)
     {
-        // Innovation/measurement residual: yₖ = zₖ - Hₖx̂ₖ₋
-        auto innovation = measurement - (measurementMatrix * state);
-
-        // Innovation covariance: Sₖ = HₖPₖ₋Hₖᵀ + Rₖ
-        auto innovationCovariance = measurementMatrix * covariance * measurementMatrix.Transpose() + measurementNoise;
-
-        // Optimal Kalman gain: Kₖ = Pₖ₋Hₖᵀ(Sₖ)⁻¹
-        // Note: For this implementation, we're assuming the inverse exists
-        // In practice, you might want to add checks or use pseudo-inverse
-        auto kalmanGain = covariance * measurementMatrix.Transpose() * innovationCovariance;
-
-        // State update: x̂ₖ = x̂ₖ₋ + Kₖyₖ
-        state = state + kalmanGain * innovation;
-
-        // Covariance update: Pₖ = (I - KₖHₖ)Pₖ₋
-        auto identity = StateMatrix::Identity();
-        covariance = (identity - kalmanGain * measurementMatrix) * covariance;
+        this->state() = stateTransition * this->state() + controlInputMatrix * u;
+        this->covariance() = stateTransition * this->covariance() * stateTransition.Transpose() + this->processNoise();
     }
 
-    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize>
-    const typename KalmanFilter<QNumberType, StateSize, MeasurementSize>::StateVector&
-    KalmanFilter<QNumberType, StateSize, MeasurementSize>::GetState() const
+    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
+    OPTIMIZE_FOR_SPEED void KalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::Update(const MeasurementVector& measurement)
     {
-        return state;
+        auto innovation = measurement - (measurementMatrix * this->state());
+        auto K = this->ComputeKalmanGain(measurementMatrix);
+        this->UpdateState(innovation, K, measurementMatrix);
     }
 
-    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize>
-    const typename KalmanFilter<QNumberType, StateSize, MeasurementSize>::StateMatrix&
-    KalmanFilter<QNumberType, StateSize, MeasurementSize>::GetCovariance() const
-    {
-        return covariance;
-    }
-}
-
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class KalmanFilter<float, 2, 1, 0>;
+    extern template class KalmanFilter<float, 3, 1, 0>;
+    extern template class KalmanFilter<float, 4, 2, 0>;
+    extern template class KalmanFilter<float, 2, 1, 1>;
 #endif
+}

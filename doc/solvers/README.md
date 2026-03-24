@@ -6,6 +6,7 @@ Numerical solvers for linear systems, polynomial roots, and matrix equations.
 
 | Algorithm                                                                  | Description                                                            |
 |----------------------------------------------------------------------------|------------------------------------------------------------------------|
+| [Cholesky Decomposition](CholeskyDecomposition.md)                         | Fast factorization for symmetric positive-definite matrices            |
 | [Gaussian Elimination](GaussianElimination.md)                             | Direct solver for dense linear systems using partial pivoting          |
 | [Levinson-Durbin](LevinsonDurbin.md)                                       | Fast solver for Toeplitz linear systems exploiting structural symmetry |
 | [Durand-Kerner](DurandKerner.md)                                           | Simultaneous iterative root-finder for polynomials                     |

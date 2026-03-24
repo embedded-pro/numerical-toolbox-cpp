@@ -140,7 +140,9 @@ namespace solvers
         return roots;
     }
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class DurandKerner<float, 10>;
 
     extern template class DurandKerner<double, 10>;
+#endif
 }

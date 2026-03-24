@@ -16,7 +16,6 @@ This is a numerical algorithms library providing digital signal processing (DSP)
   - `neural_network/`: Neural network components (layers, activations, optimizers)
   - `solvers/`: Numerical solvers (Levinson-Durbin)
   - `windowing/`: Window functions for signal processing
-- **examples/**: Demonstrates library usage with practical implementations
 - **doc/**: Comprehensive documentation for each algorithm with mathematical background
 - **embedded-infra-lib/**: Submodule containing infrastructure foundations and utilities for embedded systems
 
@@ -64,15 +63,6 @@ Place code here when it is:
 - Hardware-agnostic and reusable across projects
 - Organized by domain (analysis, controllers, dynamics, filters, estimators, math, neural_network, solvers, windowing)
 
-### Examples (`examples/`)
-
-Place code here when it is:
-- Demonstrating proper usage of library components
-- Showing practical implementations and patterns
-- Providing working reference implementations
-- Testing algorithms in realistic scenarios
-- Each example should be self-contained and demonstrate specific features
-
 ### Documentation (`doc/`)
 
 When implementing or modifying algorithms:
@@ -104,6 +94,14 @@ When implementing or modifying algorithms:
       };
   }
   ```
+
+### Comments
+
+- **AVOID COMMENTS**: Code should be self-documenting through clear naming, small functions, and expressive types
+- Do not add comments that restate what the code does
+- Do not add `TODO`, `FIXME`, or `HACK` comments in production code
+- Do not add function/method docstrings unless the API is non-obvious to a domain expert
+- Acceptable exceptions: legal headers, `NOLINT` annotations, and brief clarifications of non-trivial math or domain-specific constants
 
 ### Error Handling
 
@@ -180,17 +178,19 @@ When implementing or modifying algorithms:
 Header-only templates are compiled into test executables, which do **not** have `--coverage` flags.
 To get coverage, template code must be explicitly instantiated in a `.cpp` file that is part of the library (which **does** have coverage flags).
 
-1. **Add `extern template` declarations** at the bottom of the header (prevents implicit instantiation in other TUs):
+Both the `extern template` declarations in headers and the matching `.cpp` files are **conditionally compiled only when `EMIL_ENABLE_COVERAGE` is set** (i.e. the `coverage` CMake preset). This avoids polluting non-coverage builds.
+
+1. **Add `extern template` declarations** at the bottom of the header, guarded by `NUMERICAL_TOOLBOX_COVERAGE_BUILD`:
    ```cpp
-   // In Algorithm.hpp, at the bottom of the namespace, after all template definitions
+       #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
        extern template class Algorithm<float, 3>;
        extern template class Algorithm<math::Q15, 3>;
+       #endif
    }
    ```
 
-2. **Create a matching `.cpp` file** with explicit instantiation (compiled with `--coverage` as part of the library):
+2. **Create a matching `.cpp` file** with explicit instantiation:
    ```cpp
-   // Algorithm.cpp
    #include "numerical/domain/Algorithm.hpp"
 
    namespace domain
@@ -200,7 +200,12 @@ To get coverage, template code must be explicitly instantiated in a `.cpp` file 
    }
    ```
 
-3. **Add the `.cpp` file to `CMakeLists.txt`** in `target_sources`
+3. **Add the `.cpp` file to `CMakeLists.txt`** using the coverage helper:
+   ```cmake
+   numerical_add_coverage_sources(numerical.domain
+       Algorithm.cpp
+   )
+   ```
 
 4. **Instantiate all specializations used by tests** — each `extern template` in the header must have a matching `template class` in the `.cpp` file
 
@@ -277,8 +282,49 @@ class Algorithm
 - Support for host (simulation and testing) and embedded targets
 - Separate build configurations for Debug, Release, RelWithDebInfo
 - GoogleTest for unit testing
-- Optional build of examples via `NUMERICAL_TOOLBOX_BUILD_EXAMPLES`
 - Optional compiler optimizations via `NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS`
+- Coverage builds via the `coverage` CMake preset (`EMIL_ENABLE_COVERAGE=On`)
+
+### Header-Only Library CMake Pattern
+
+All header-only library targets under `numerical/` use the reusable CMake functions
+defined in `cmake/NumericalHeaderLibrary.cmake`:
+
+- **`numerical_add_header_library(<target> [STATIC])`** — Creates the library target.
+  In coverage builds (`EMIL_ENABLE_COVERAGE=On`), creates a regular (or `STATIC`) library
+  so that explicit template instantiation `.cpp` files are compiled with `--coverage` flags.
+  In non-coverage builds, creates an `INTERFACE` library. Sets `NUMERICAL_VISIBILITY` in
+  the calling scope to either `PUBLIC` or `INTERFACE` for use with `target_include_directories`
+  and `target_link_libraries`.
+
+- **`numerical_add_coverage_sources(<target> <sources...>)`** — Conditionally adds
+  explicit template instantiation `.cpp` files only when `EMIL_ENABLE_COVERAGE` is set.
+
+#### Example CMakeLists.txt
+
+  ```cmake
+  numerical_add_header_library(numerical.domain)
+
+  target_include_directories(numerical.domain ${NUMERICAL_VISIBILITY}
+      "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../>"
+      "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+  )
+
+  target_link_libraries(numerical.domain ${NUMERICAL_VISIBILITY}
+      infra.util
+      numerical.math
+  )
+
+  target_sources(numerical.domain PRIVATE
+      Algorithm.hpp
+  )
+
+  numerical_add_coverage_sources(numerical.domain
+      Algorithm.cpp
+  )
+
+  add_subdirectory(test)
+  ```
 
 ## Version Control
 
@@ -314,8 +360,7 @@ When implementing a new algorithm:
    - Implementation details
    - Usage examples
    - Numerical considerations (stability, range, precision)
-6. **Create example in `examples/`** demonstrating practical usage
-7. **Consider SIMD optimizations** where applicable using `math::SingleInstructionMultipleData`
+6. **Consider SIMD optimizations** where applicable using `math::SingleInstructionMultipleData`
 
 ### Performance Optimization Guidelines
 
