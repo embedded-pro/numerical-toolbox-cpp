@@ -19,7 +19,7 @@ namespace simulator::controllers::lqr::view
         void SetConfig(const LqrCartPoleConfig& config);
         void Clear();
 
-    public slots:
+    public Q_SLOTS:
         void OnStateUpdated(float x, float xDot, float theta, float thetaDot, float force);
 
     private:

@@ -26,7 +26,7 @@ namespace simulator::controllers::lqr::view
         void ResetRequested();
         void DisturbRequested();
 
-    public slots:
+    public Q_SLOTS:
         void OnStateUpdated(float x, float xDot, float theta, float thetaDot, float force);
 
     private:
