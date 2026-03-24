@@ -77,3 +77,9 @@ Given a 3-tap FIR filter with coefficients $b = [0.25, 0.5, 0.25]$ and input seq
 - **IIR Filter**: IIR filters achieve sharper cutoffs with fewer coefficients but sacrifice guaranteed stability and linear phase.
 - **FFT**: For large $N$, the convolution can be computed more efficiently via FFT-based overlap-add/save methods.
 - **Window Functions**: Window functions from the `windowing` module are used in FIR coefficient design.
+
+## References & Further Reading
+
+- Oppenheim, A.V. and Schafer, R.W., *Discrete-Time Signal Processing*, 3rd ed., Pearson, 2009 — Chapter 7.
+- Parks, T.W. and Burrus, C.S., *Digital Filter Design*, Wiley, 1987.
+- Smith, S.W., *The Scientist and Engineer's Guide to Digital Signal Processing*, California Technical Publishing, 1997 — Chapters 14–16.

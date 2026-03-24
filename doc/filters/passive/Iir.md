@@ -77,3 +77,9 @@ The output decays exponentially — characteristic of IIR filters with $|a_0| < 
 - **FIR Filter**: FIR is a special case of IIR with $Q = 0$ (no feedback). FIR is always stable but requires more coefficients for comparable selectivity.
 - **Frequency Response**: The `FrequencyResponse` class evaluates $H(e^{j\omega})$ for both FIR and IIR filters by accepting both $b$ and $a$ coefficient arrays.
 - **Kalman Filter**: Kalman filters can be viewed as optimal adaptive IIR filters with time-varying coefficients.
+
+## References & Further Reading
+
+- Oppenheim, A.V. and Schafer, R.W., *Discrete-Time Signal Processing*, 3rd ed., Pearson, 2009 — Chapter 7.
+- Mitra, S.K., *Digital Signal Processing: A Computer-Based Approach*, 4th ed., McGraw-Hill, 2010 — Chapters 6–8.
+- Smith, S.W., *The Scientist and Engineer's Guide to Digital Signal Processing*, California Technical Publishing, 1997 — Chapter 19.

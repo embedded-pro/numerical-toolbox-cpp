@@ -74,3 +74,9 @@ Given a simple first-order low-pass FIR filter with $b = [0.5, 0.5]$, $a = [1.0]
 - **FFT**: The DFT of a zero-padded impulse response produces the frequency response at uniformly spaced frequencies. This class generalizes to arbitrary frequency points.
 - **Root Locus**: Both frequency response and root locus analyze the same transfer function from complementary perspectives (frequency domain vs. pole-zero domain).
 - **Power Density Spectrum**: PDS estimates the spectral content of a signal; frequency response characterizes the system that shapes it.
+
+## References & Further Reading
+
+- Oppenheim, A.V. and Schafer, R.W., *Discrete-Time Signal Processing*, 3rd ed., Pearson, 2009 — Chapters 5–6.
+- Proakis, J.G. and Manolakis, D.G., *Digital Signal Processing: Principles, Algorithms, and Applications*, 4th ed., Pearson, 2006 — Chapter 6.
+- Smith, S.W., *The Scientist and Engineer's Guide to Digital Signal Processing*, California Technical Publishing, 1997 — Chapter 21.

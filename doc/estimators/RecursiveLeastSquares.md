@@ -86,3 +86,9 @@ Convergence is achieved in 2 steps for this noiseless system.
 - **Yule-Walker**: Both estimate AR model parameters, but Yule-Walker uses autocorrelation statistics (offline) while RLS processes samples sequentially.
 - **Kalman Filter**: RLS is a special case of the Kalman filter where the state transition is identity and the process noise is zero.
 - **Gradient Descent**: LMS/gradient descent is a simpler adaptive algorithm with $O(p)$ cost but slower convergence compared to RLS's $O(p^2)$.
+
+## References & Further Reading
+
+- Haykin, S., *Adaptive Filter Theory*, 5th ed., Pearson, 2014 — Chapter 9.
+- Ljung, L., *System Identification: Theory for the User*, 2nd ed., Prentice Hall, 1999 — Chapter 11.
+- Åström, K.J. and Wittenmark, B., *Adaptive Control*, 2nd ed., Dover, 2008 — Chapter 2.
