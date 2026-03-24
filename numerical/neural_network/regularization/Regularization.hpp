@@ -1,5 +1,4 @@
-#ifndef NEURAL_NETWORK_REGULARIZATION_HPP
-#define NEURAL_NETWORK_REGULARIZATION_HPP
+#pragma once
 
 #include "numerical/math/Matrix.hpp"
 
@@ -11,7 +10,6 @@ namespace neural_network
     public:
         using Vector = math::Vector<QNumberType, Size>;
         virtual QNumberType Calculate(const Vector& parameters) const = 0;
+        virtual Vector Gradient(const Vector& parameters) const = 0;
     };
 }
-
-#endif

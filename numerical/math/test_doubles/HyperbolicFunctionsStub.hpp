@@ -1,6 +1,4 @@
-#ifndef MATH_HYPERBOLIC_FUNCTIONS_STUB_HPP
-#define MATH_HYPERBOLIC_FUNCTIONS_STUB_HPP
-
+#pragma once
 #include "numerical/math/HyperbolicFunctions.hpp"
 
 namespace math
@@ -16,4 +14,3 @@ namespace math
     };
 }
 
-#endif

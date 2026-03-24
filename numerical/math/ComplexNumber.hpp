@@ -1,6 +1,4 @@
-#ifndef MATH_COMPLEX_NUMBER_H
-#define MATH_COMPLEX_NUMBER_H
-
+#pragma once
 #include "numerical/math/QNumber.hpp"
 
 namespace math
@@ -121,4 +119,3 @@ namespace math
 #endif
 }
 
-#endif

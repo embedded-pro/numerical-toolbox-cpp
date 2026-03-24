@@ -11,6 +11,7 @@ namespace
     public:
         using Vector = typename neural_network::Regularization<QNumberType, Size>::Vector;
         MOCK_METHOD(QNumberType, Calculate, (const Vector& parameters), (const, override));
+        MOCK_METHOD(Vector, Gradient, (const Vector& parameters), (const, override));
     };
 
     template<typename T>
@@ -85,8 +86,12 @@ TYPED_TEST(TestCategoricalCrossEntropy, GradientTest)
     typename TestCategoricalCrossEntropy<TypeParam>::Vector parameters{ TypeParam(0.2f), TypeParam(0.5f) };
     TypeParam regValue = TypeParam(0.1f);
 
-    EXPECT_CALL(this->mockRegularization, Calculate(::testing::_))
-        .WillOnce(::testing::Return(regValue));
+    typename TestCategoricalCrossEntropy<TypeParam>::Vector regGradient;
+    for (std::size_t i = 0; i < this->NumberOfFeature; ++i)
+        regGradient[i] = regValue;
+
+    EXPECT_CALL(this->mockRegularization, Gradient(::testing::_))
+        .WillOnce(::testing::Return(regGradient));
 
     this->loss.emplace(this->target, this->mockRegularization);
     auto gradient = this->loss->Gradient(parameters);

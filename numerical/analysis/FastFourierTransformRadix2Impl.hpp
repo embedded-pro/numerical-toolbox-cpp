@@ -1,5 +1,10 @@
-#ifndef ANALYSIS_FAST_FOURIER_TRANSFORM_RADIX_2_IMPL_HPP
-#define ANALYSIS_FAST_FOURIER_TRANSFORM_RADIX_2_IMPL_HPP
+#pragma once
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
+
+#include "numerical/math/CompilerOptimizations.hpp"
 
 #include "infra/util/BoundedVector.hpp"
 #include "numerical/analysis/FastFourierTransform.hpp"
@@ -54,6 +59,7 @@ namespace analysis
     }
 
     template<typename QNumberType, std::size_t Length>
+    OPTIMIZE_FOR_SPEED
     void FastFourierTransformRadix2Impl<QNumberType, Length>::Calculate()
     {
         for (auto step = 2; step <= Length; step *= 2)
@@ -81,6 +87,7 @@ namespace analysis
     }
 
     template<typename QNumberType, std::size_t Length>
+    OPTIMIZE_FOR_SPEED
     typename FastFourierTransformRadix2Impl<QNumberType, Length>::VectorComplex& FastFourierTransformRadix2Impl<QNumberType, Length>::Forward(FastFourierTransformRadix2Impl<QNumberType, Length>::VectorReal& input)
     {
         ResetFrequencyDomain();
@@ -136,5 +143,3 @@ namespace analysis
     extern template class FastFourierTransformRadix2Impl<math::Q31, 8>;
 #endif
 }
-
-#endif

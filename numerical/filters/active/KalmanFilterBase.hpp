@@ -148,7 +148,9 @@ namespace filters
         const MeasurementVector& innovation, const KalmanGain& K, const MeasurementMatrix& H)
     {
         state_ = state_ + K * innovation;
-        covariance_ = (StateMatrix::Identity() - K * H) * covariance_;
+
+        auto IminusKH = StateMatrix::Identity() - K * H;
+        covariance_ = IminusKH * covariance_ * IminusKH.Transpose() + K * measurementNoise_ * K.Transpose();
     }
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>

@@ -404,3 +404,37 @@ TYPED_TEST(KalmanFilterTest, WithControlInput)
     EXPECT_NEAR(math::ToFloat(finalState.at(0, 0)), truePos, 0.2f);
     EXPECT_NEAR(math::ToFloat(finalState.at(1, 0)), trueVel, 0.4f);
 }
+
+TYPED_TEST(KalmanFilterTest, JosephFormPreservesPositiveDefiniteness)
+{
+    auto initialState = this->MakeStateVector(0.0f, 0.0f);
+    auto initialCovariance = this->MakeStateMatrix(
+        1000.0f, 0.0f,
+        0.0f, 1000.0f);
+
+    typename TestFixture::FilterType filter(initialState, initialCovariance);
+
+    float dt = 0.1f;
+    filter.SetStateTransition(this->MakeStateMatrix(
+        1.0f, dt,
+        0.0f, 1.0f));
+    filter.SetMeasurementMatrix(this->MakeMeasurementMatrix(1.0f, 0.0f));
+    filter.SetMeasurementNoise(this->MakeMeasurementCovariance(0.001f));
+    filter.SetProcessNoise(this->MakeStateMatrix(
+        0.001f, 0.0f,
+        0.0f, 0.001f));
+
+    for (int i = 0; i < 50; ++i)
+    {
+        filter.Predict();
+        filter.Update(this->MakeMeasurement(1.0f));
+
+        auto P = filter.GetCovariance();
+        EXPECT_GE(math::ToFloat(P.at(0, 0)), 0.0f);
+        EXPECT_GE(math::ToFloat(P.at(1, 1)), 0.0f);
+
+        float det = math::ToFloat(P.at(0, 0)) * math::ToFloat(P.at(1, 1)) -
+                    math::ToFloat(P.at(0, 1)) * math::ToFloat(P.at(1, 0));
+        EXPECT_GE(det, 0.0f);
+    }
+}

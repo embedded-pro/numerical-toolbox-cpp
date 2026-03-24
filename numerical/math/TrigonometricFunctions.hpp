@@ -1,6 +1,4 @@
-#ifndef MATH_TRIGONOMETRIC_FUNCTIONS_HPP
-#define MATH_TRIGONOMETRIC_FUNCTIONS_HPP
-
+#pragma once
 #include "numerical/math/QNumber.hpp"
 
 namespace math
@@ -16,4 +14,3 @@ namespace math
     };
 }
 
-#endif

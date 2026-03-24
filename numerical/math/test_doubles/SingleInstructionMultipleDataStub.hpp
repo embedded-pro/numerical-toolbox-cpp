@@ -1,6 +1,4 @@
-#ifndef MATH_SIMD_STUB_HPP
-#define MATH_SIMD_STUB_HPP
-
+#pragma once
 #include "numerical/math/SingleInstructionMultipleData.hpp"
 
 namespace math
@@ -136,4 +134,3 @@ namespace math
     };
 }
 
-#endif

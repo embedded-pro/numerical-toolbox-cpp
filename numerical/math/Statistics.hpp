@@ -1,6 +1,4 @@
-#ifndef MATH_STATISTICS_HPP
-#define MATH_STATISTICS_HPP
-
+#pragma once
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/QNumber.hpp"
 #include <cmath>
@@ -161,4 +159,3 @@ namespace math
     }
 }
 
-#endif

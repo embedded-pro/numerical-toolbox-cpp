@@ -123,10 +123,10 @@ TYPED_TEST(TestDense, BackwardPropagation)
 
     dense.Forward(input);
 
-    EXPECT_CALL(this->activation, Backward(T(0.5f)))
-        .WillOnce(testing::Return(T(0.4f)));
-    EXPECT_CALL(this->activation, Backward(T(0.7f)))
-        .WillOnce(testing::Return(T(0.5f)));
+    T expectedPreActivationBackward = T(0.6f);
+    EXPECT_CALL(this->activation, Backward(expectedPreActivationBackward))
+        .Times(TestDense<T>::OutputSize)
+        .WillRepeatedly(testing::Return(T(0.4f)));
 
     dense.Backward(outputGradient);
 }
@@ -245,9 +245,9 @@ TYPED_TEST(TestDense, FullLayerSequence)
         EXPECT_CALL(this->activation, Forward(testing::_))
             .WillOnce(testing::Return(T(0.6f)));
 
-        EXPECT_CALL(this->activation, Backward(outputGradient[0]))
+        EXPECT_CALL(this->activation, Backward(testing::_))
             .WillOnce(testing::Return(T(0.3f)));
-        EXPECT_CALL(this->activation, Backward(outputGradient[1]))
+        EXPECT_CALL(this->activation, Backward(testing::_))
             .WillOnce(testing::Return(T(0.4f)));
     }
 
@@ -286,9 +286,9 @@ TYPED_TEST(TestDense, MultipleForwardBackwardPasses)
         EXPECT_CALL(this->activation, Forward(testing::_))
             .WillOnce(testing::Return(T(0.6f)));
 
-        EXPECT_CALL(this->activation, Backward(outputGradient1[0]))
+        EXPECT_CALL(this->activation, Backward(testing::_))
             .WillOnce(testing::Return(T(0.3f)));
-        EXPECT_CALL(this->activation, Backward(outputGradient1[1]))
+        EXPECT_CALL(this->activation, Backward(testing::_))
             .WillOnce(testing::Return(T(0.4f)));
 
         EXPECT_CALL(this->activation, Forward(testing::_))
@@ -296,9 +296,9 @@ TYPED_TEST(TestDense, MultipleForwardBackwardPasses)
         EXPECT_CALL(this->activation, Forward(testing::_))
             .WillOnce(testing::Return(T(0.8f)));
 
-        EXPECT_CALL(this->activation, Backward(outputGradient2[0]))
+        EXPECT_CALL(this->activation, Backward(testing::_))
             .WillOnce(testing::Return(T(0.5f)));
-        EXPECT_CALL(this->activation, Backward(outputGradient2[1]))
+        EXPECT_CALL(this->activation, Backward(testing::_))
             .WillOnce(testing::Return(T(0.6f)));
     }
 

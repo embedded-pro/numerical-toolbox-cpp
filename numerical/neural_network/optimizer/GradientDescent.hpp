@@ -1,5 +1,10 @@
-#ifndef NEURAL_NETWORK_GRADIENT_DESCENT_HPP
-#define NEURAL_NETWORK_GRADIENT_DESCENT_HPP
+#pragma once
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
+
+#include "numerical/math/CompilerOptimizations.hpp"
 
 #include "numerical/neural_network/optimizer/Optimizer.hpp"
 #include <optional>
@@ -42,6 +47,7 @@ namespace neural_network
     }
 
     template<typename QNumberType, size_t NumberOfFeatures>
+    OPTIMIZE_FOR_SPEED
     const typename GradientDescent<QNumberType, NumberOfFeatures>::Result& GradientDescent<QNumberType, NumberOfFeatures>::Minimize(const Vector& initialGuess, Loss<QNumberType, NumberOfFeatures>& loss)
     {
         auto currentParams = initialGuess;
@@ -64,6 +70,10 @@ namespace neural_network
 
         return *result;
     }
-}
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class GradientDescent<float, 2>;
+    extern template class GradientDescent<math::Q15, 2>;
+    extern template class GradientDescent<math::Q31, 2>;
 #endif
+}

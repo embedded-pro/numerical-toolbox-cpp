@@ -1,6 +1,4 @@
-#ifndef MATH_ADVANCED_FUNCTIONS_STUB_HPP
-#define MATH_ADVANCED_FUNCTIONS_STUB_HPP
-
+#pragma once
 #include "numerical/math/AdvancedFunctions.hpp"
 #include <cmath>
 
@@ -32,4 +30,3 @@ namespace math
     };
 }
 
-#endif

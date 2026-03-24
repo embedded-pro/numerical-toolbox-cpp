@@ -1,5 +1,4 @@
-#ifndef FILTERS_PASSIVE_FIR_HPP
-#define FILTERS_PASSIVE_FIR_HPP
+#pragma once
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/RecursiveBuffer.hpp"
@@ -74,6 +73,10 @@ namespace filters::passive
     {
         x.Reset();
     }
-}
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class Fir<float, 3>;
+    extern template class Fir<math::Q15, 3>;
+    extern template class Fir<math::Q31, 3>;
 #endif
+}

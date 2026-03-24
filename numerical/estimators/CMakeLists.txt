@@ -8,17 +8,20 @@ target_include_directories(numerical.estimators ${NUMERICAL_VISIBILITY}
 target_link_libraries(numerical.estimators ${NUMERICAL_VISIBILITY}
     infra.util
     numerical.math
+    numerical.solver
 )
 
 target_sources(numerical.estimators PRIVATE
     Estimator.hpp
     LinearRegression.hpp
     RecursiveLeastSquares.hpp
+    YuleWalker.hpp
 )
 
 numerical_add_coverage_sources(numerical.estimators
     LinearRegression.cpp
     RecursiveLeastSquares.cpp
+    YuleWalker.cpp
 )
 
 add_subdirectory(test)

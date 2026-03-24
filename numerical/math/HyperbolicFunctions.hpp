@@ -1,4 +1,4 @@
-#ifndef MATH_HYPERBOLIC_FUNCTIONS_HPP
+#pragma once
 
 #include "numerical/math/QNumber.hpp"
 
@@ -14,4 +14,3 @@ namespace math
     };
 }
 
-#endif

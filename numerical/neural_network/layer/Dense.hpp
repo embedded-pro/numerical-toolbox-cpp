@@ -1,5 +1,10 @@
-#ifndef NEURAL_NETWORK_DENSE_HPP
-#define NEURAL_NETWORK_DENSE_HPP
+#pragma once
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
+
+#include "numerical/math/CompilerOptimizations.hpp"
 
 #include "numerical/neural_network/activation/ActivationFunction.hpp"
 #include "numerical/neural_network/layer/Layer.hpp"
@@ -21,6 +26,7 @@ namespace neural_network
 
         void Forward(const InputVector& input) override;
         InputVector& Backward(const OutputVector& output_gradient) override;
+        const OutputVector& Output() const override;
         ParameterVector& Parameters() const override;
         void SetParameters(const ParameterVector& parameters) override;
 
@@ -50,6 +56,7 @@ namespace neural_network
     {}
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize>
+    OPTIMIZE_FOR_SPEED
     void Dense<QNumberType, InputSize, OutputSize>::Forward(const InputVector& input)
     {
         this->input = input;
@@ -59,18 +66,18 @@ namespace neural_network
             preActivation[i] = biases[i];
             for (std::size_t j = 0; j < InputSize; ++j)
                 preActivation[i] += weights.at(i, j) * input[j];
-
-            output[i] = activation.Forward(preActivation[i]);
         }
+
+        activation.ForwardVector(&output[0], &preActivation[0], OutputSize);
     }
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize>
+    OPTIMIZE_FOR_SPEED
     typename Dense<QNumberType, InputSize, OutputSize>::InputVector& Dense<QNumberType, InputSize, OutputSize>::Backward(const OutputVector& output_gradient)
     {
         OutputVector preActivationGradient;
 
-        for (std::size_t i = 0; i < OutputSize; ++i)
-            preActivationGradient[i] = activation.Backward(output_gradient[i]);
+        activation.BackwardVector(&preActivationGradient[0], &preActivation[0], &output[0], &output_gradient[0], OutputSize);
 
         for (std::size_t j = 0; j < InputSize; ++j)
         {
@@ -88,6 +95,12 @@ namespace neural_network
         }
 
         return inputGradient;
+    }
+
+    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize>
+    const typename Dense<QNumberType, InputSize, OutputSize>::OutputVector& Dense<QNumberType, InputSize, OutputSize>::Output() const
+    {
+        return output;
     }
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize>
@@ -117,6 +130,8 @@ namespace neural_network
         for (std::size_t i = 0; i < OutputSize; ++i)
             biases[i] = parameters[idx++];
     }
-}
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class Dense<float, 3, 2>;
 #endif
+}

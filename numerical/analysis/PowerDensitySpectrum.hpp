@@ -1,8 +1,11 @@
-#ifndef ANALYSIS_POWER_SPECTRAL_DENSITY_HPP
-#define ANALYSIS_POWER_SPECTRAL_DENSITY_HPP
+#pragma once
 
-#include "infra/util/ReallyAssert.hpp"
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
+
 #include "numerical/analysis/FastFourierTransform.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/ComplexNumber.hpp"
 #include "numerical/math/QNumber.hpp"
 #include "numerical/windowing/Windowing.hpp"
@@ -35,7 +38,7 @@ namespace analysis
         using VectorReal = typename FastFourierTransform<QNumberType>::VectorReal;
         using VectorComplex = typename FastFourierTransform<QNumberType>::VectorComplex;
 
-        VectorReal& Calculate(const VectorReal& input)
+        OPTIMIZE_FOR_SPEED VectorReal& Calculate(const VectorReal& input)
         {
             really_assert(input.size() >= SegmentSize);
 
@@ -61,7 +64,7 @@ namespace analysis
         }
 
     private:
-        QNumberType MagnitudeSquared(math::Complex<QNumberType>& data)
+        QNumberType MagnitudeSquared(const math::Complex<QNumberType>& data) const
         {
             return data.Real() * data.Real() + data.Imaginary() * data.Imaginary();
         }
@@ -92,5 +95,3 @@ namespace analysis
         typename FastFourierTransform<QNumberType>::VectorReal::template WithMaxSize<SegmentSize / 2 + 1> y;
     };
 }
-
-#endif

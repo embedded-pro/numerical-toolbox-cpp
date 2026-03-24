@@ -1,6 +1,4 @@
-#ifndef MATH_RECURSIVE_BUFFER_H
-#define MATH_RECURSIVE_BUFFER_H
-
+#pragma once
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
 #include <array>
@@ -99,4 +97,3 @@ namespace math
     }
 }
 
-#endif

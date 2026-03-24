@@ -1,5 +1,4 @@
-#ifndef FILTERS_PASSIVE_IIR_HPP
-#define FILTERS_PASSIVE_IIR_HPP
+#pragma once
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/RecursiveBuffer.hpp"
@@ -85,6 +84,10 @@ namespace filters::passive
         x.Reset();
         y.Reset();
     }
-}
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class Iir<float, 3, 3>;
+    extern template class Iir<math::Q15, 3, 3>;
+    extern template class Iir<math::Q31, 3, 3>;
 #endif
+}

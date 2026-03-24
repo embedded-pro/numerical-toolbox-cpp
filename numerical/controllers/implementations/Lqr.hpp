@@ -1,5 +1,9 @@
 #pragma once
 
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
+
 #include "infra/util/ReallyAssert.hpp"
 #include "numerical/controllers/interfaces/LqrController.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"

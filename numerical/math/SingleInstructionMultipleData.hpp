@@ -1,6 +1,4 @@
-#ifndef MATH_SIMD_HPP
-#define MATH_SIMD_HPP
-
+#pragma once
 #include <cstdint>
 
 namespace math
@@ -36,4 +34,3 @@ namespace math
     };
 }
 
-#endif

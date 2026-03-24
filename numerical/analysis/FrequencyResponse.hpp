@@ -1,5 +1,10 @@
-#ifndef ANALYSIS_FREQUENCY_RESPONSE_HPP
-#define ANALYSIS_FREQUENCY_RESPONSE_HPP
+#pragma once
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
+
+#include "numerical/math/CompilerOptimizations.hpp"
 
 #include "infra/util/BoundedVector.hpp"
 #include "infra/util/MemoryRange.hpp"
@@ -43,6 +48,7 @@ namespace analysis
     }
 
     template<typename QNumberType, std::size_t NumberOfPoints>
+    OPTIMIZE_FOR_SPEED
     std::tuple<typename FrequencyResponse<QNumberType, NumberOfPoints>::Vector, typename FrequencyResponse<QNumberType, NumberOfPoints>::Vector, typename FrequencyResponse<QNumberType, NumberOfPoints>::Vector> FrequencyResponse<QNumberType, NumberOfPoints>::Calculate()
     {
         const auto maxSize = static_cast<double>(response.max_size());
@@ -82,5 +88,3 @@ namespace analysis
     extern template class FrequencyResponse<float, 128>;
 #endif
 }
-
-#endif

@@ -1,6 +1,4 @@
-#ifndef MATH_TOEPLITZ_MATRIX_HPP
-#define MATH_TOEPLITZ_MATRIX_HPP
-
+#pragma once
 #include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
@@ -173,4 +171,3 @@ namespace math
     }
 }
 
-#endif

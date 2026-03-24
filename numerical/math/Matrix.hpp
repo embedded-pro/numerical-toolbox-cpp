@@ -1,6 +1,4 @@
-#ifndef MATH_MATRIX_HPP
-#define MATH_MATRIX_HPP
-
+#pragma once
 #include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/QNumber.hpp"
 #include <array>
@@ -304,4 +302,3 @@ namespace math
 #endif
 }
 
-#endif
