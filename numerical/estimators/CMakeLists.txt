@@ -1,17 +1,11 @@
-if (EMIL_ENABLE_COVERAGE)
-    add_library(numerical.estimators ${EMIL_EXCLUDE_FROM_ALL})
-    set(_estimators_visibility PUBLIC)
-else()
-    add_library(numerical.estimators ${EMIL_EXCLUDE_FROM_ALL} INTERFACE)
-    set(_estimators_visibility INTERFACE)
-endif()
+numerical_add_header_library(numerical.estimators)
 
-target_include_directories(numerical.estimators ${_estimators_visibility}
+target_include_directories(numerical.estimators ${NUMERICAL_VISIBILITY}
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-target_link_libraries(numerical.estimators ${_estimators_visibility}
+target_link_libraries(numerical.estimators ${NUMERICAL_VISIBILITY}
     infra.util
     numerical.math
 )
@@ -22,11 +16,9 @@ target_sources(numerical.estimators PRIVATE
     RecursiveLeastSquares.hpp
 )
 
-if (EMIL_ENABLE_COVERAGE)
-    target_sources(numerical.estimators PRIVATE
-        LinearRegression.cpp
-        RecursiveLeastSquares.cpp
-    )
-endif()
+numerical_add_coverage_sources(numerical.estimators
+    LinearRegression.cpp
+    RecursiveLeastSquares.cpp
+)
 
 add_subdirectory(test)

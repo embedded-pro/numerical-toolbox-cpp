@@ -1,17 +1,11 @@
-if (EMIL_ENABLE_COVERAGE)
-    add_library(numerical.math ${EMIL_EXCLUDE_FROM_ALL} STATIC)
-    set(_math_visibility PUBLIC)
-else()
-    add_library(numerical.math ${EMIL_EXCLUDE_FROM_ALL} INTERFACE)
-    set(_math_visibility INTERFACE)
-endif()
+numerical_add_header_library(numerical.math STATIC)
 
-target_include_directories(numerical.math ${_math_visibility}
+target_include_directories(numerical.math ${NUMERICAL_VISIBILITY}
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-target_link_libraries(numerical.math ${_math_visibility}
+target_link_libraries(numerical.math ${NUMERICAL_VISIBILITY}
     infra.util
 )
 
@@ -30,13 +24,11 @@ target_sources(numerical.math PRIVATE
     TrigonometricFunctions.hpp
 )
 
-if (EMIL_ENABLE_COVERAGE)
-    target_sources(numerical.math PRIVATE
-        ComplexNumber.cpp
-        Matrix.cpp
-        QNumber.cpp
-    )
-endif()
+numerical_add_coverage_sources(numerical.math
+    ComplexNumber.cpp
+    Matrix.cpp
+    QNumber.cpp
+)
 
 add_subdirectory(test)
 add_subdirectory(test_doubles)

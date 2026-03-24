@@ -25,6 +25,9 @@ if (EMIL_ENABLE_COVERAGE)
     add_definitions(-DNUMERICAL_TOOLBOX_COVERAGE_BUILD=1)
 endif()
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+include(NumericalHeaderLibrary)
+
 add_definitions(-DEMIL_ENABLE_TRACING=1)
 
 if (NUMERICAL_TOOLBOX_STANDALONE)

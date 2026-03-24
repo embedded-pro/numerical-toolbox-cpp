@@ -73,6 +73,11 @@ namespace analysis
 
         return std::make_tuple(frequencies, response, phase);
     }
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class FrequencyResponse<float, 64>;
+    extern template class FrequencyResponse<float, 128>;
+#endif
 }
 
 #endif

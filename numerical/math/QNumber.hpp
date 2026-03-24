@@ -117,7 +117,6 @@ namespace math
         QNumber operator+() const;
         QNumber operator-() const;
 
-        friend bool operator==(const QNumber&, const QNumber&) = default;
         friend auto operator<=>(const QNumber&, const QNumber&) = default;
 
         static QNumber FromDuration(std::chrono::microseconds duration)
