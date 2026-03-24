@@ -1,17 +1,11 @@
-if (EMIL_ENABLE_COVERAGE)
-    add_library(numerical.analysis ${EMIL_EXCLUDE_FROM_ALL})
-    set(_analysis_visibility PUBLIC)
-else()
-    add_library(numerical.analysis ${EMIL_EXCLUDE_FROM_ALL} INTERFACE)
-    set(_analysis_visibility INTERFACE)
-endif()
+numerical_add_header_library(numerical.analysis)
 
-target_include_directories(numerical.analysis ${_analysis_visibility}
+target_include_directories(numerical.analysis ${NUMERICAL_VISIBILITY}
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-target_link_libraries(numerical.analysis ${_analysis_visibility}
+target_link_libraries(numerical.analysis ${NUMERICAL_VISIBILITY}
     infra.util
     numerical.math
     numerical.solver
@@ -26,11 +20,10 @@ target_sources(numerical.analysis PRIVATE
     RootLocus.hpp
 )
 
-if (EMIL_ENABLE_COVERAGE)
-    target_sources(numerical.analysis PRIVATE
-        FastFourierTransformRadix2Impl.cpp
-        RootLocus.cpp
-    )
-endif()
+numerical_add_coverage_sources(numerical.analysis
+    FastFourierTransformRadix2Impl.cpp
+    FrequencyResponse.cpp
+    RootLocus.cpp
+)
 
 add_subdirectory(test)

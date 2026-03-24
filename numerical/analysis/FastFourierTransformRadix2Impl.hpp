@@ -86,7 +86,7 @@ namespace analysis
         ResetFrequencyDomain();
 
         for (std::size_t i = 0; i < input.size(); i++)
-            frequencyDomain[i] = (math::Complex<QNumberType>{ input[i], 0.0f });
+            frequencyDomain[i] = (math::Complex<QNumberType>{ input[i], QNumberType(0.0f) });
 
         BitReversePermutation();
         Calculate();

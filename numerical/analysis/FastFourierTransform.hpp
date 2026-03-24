@@ -18,7 +18,7 @@ namespace analysis
     class FastFourierTransform
     {
         static_assert(math::is_qnumber<QNumberType>::value ||
-                          std::is_floating_point<QNumberType>::value,
+                          std::is_floating_point_v<QNumberType>,
             "FastFourierTransform can only be instantiated with math::QNumber types.");
 
     public:

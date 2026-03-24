@@ -200,13 +200,11 @@ Both the `extern template` declarations in headers and the matching `.cpp` files
    }
    ```
 
-3. **Add the `.cpp` file to `CMakeLists.txt`** conditionally:
+3. **Add the `.cpp` file to `CMakeLists.txt`** using the coverage helper:
    ```cmake
-   if (EMIL_ENABLE_COVERAGE)
-       target_sources(numerical.domain PRIVATE
-           Algorithm.cpp
-       )
-   endif()
+   numerical_add_coverage_sources(numerical.domain
+       Algorithm.cpp
+   )
    ```
 
 4. **Instantiate all specializations used by tests** — each `extern template` in the header must have a matching `template class` in the `.cpp` file
@@ -286,6 +284,47 @@ class Algorithm
 - GoogleTest for unit testing
 - Optional compiler optimizations via `NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS`
 - Coverage builds via the `coverage` CMake preset (`EMIL_ENABLE_COVERAGE=On`)
+
+### Header-Only Library CMake Pattern
+
+All header-only library targets under `numerical/` use the reusable CMake functions
+defined in `cmake/NumericalHeaderLibrary.cmake`:
+
+- **`numerical_add_header_library(<target> [STATIC])`** — Creates the library target.
+  In coverage builds (`EMIL_ENABLE_COVERAGE=On`), creates a regular (or `STATIC`) library
+  so that explicit template instantiation `.cpp` files are compiled with `--coverage` flags.
+  In non-coverage builds, creates an `INTERFACE` library. Sets `NUMERICAL_VISIBILITY` in
+  the calling scope to either `PUBLIC` or `INTERFACE` for use with `target_include_directories`
+  and `target_link_libraries`.
+
+- **`numerical_add_coverage_sources(<target> <sources...>)`** — Conditionally adds
+  explicit template instantiation `.cpp` files only when `EMIL_ENABLE_COVERAGE` is set.
+
+#### Example CMakeLists.txt
+
+  ```cmake
+  numerical_add_header_library(numerical.domain)
+
+  target_include_directories(numerical.domain ${NUMERICAL_VISIBILITY}
+      "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../>"
+      "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+  )
+
+  target_link_libraries(numerical.domain ${NUMERICAL_VISIBILITY}
+      infra.util
+      numerical.math
+  )
+
+  target_sources(numerical.domain PRIVATE
+      Algorithm.hpp
+  )
+
+  numerical_add_coverage_sources(numerical.domain
+      Algorithm.cpp
+  )
+
+  add_subdirectory(test)
+  ```
 
 ## Version Control
 

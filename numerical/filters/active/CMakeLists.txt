@@ -1,17 +1,11 @@
-if (EMIL_ENABLE_COVERAGE)
-    add_library(numerical.filters.active ${EMIL_EXCLUDE_FROM_ALL})
-    set(_filters_active_visibility PUBLIC)
-else()
-    add_library(numerical.filters.active ${EMIL_EXCLUDE_FROM_ALL} INTERFACE)
-    set(_filters_active_visibility INTERFACE)
-endif()
+numerical_add_header_library(numerical.filters.active)
 
-target_include_directories(numerical.filters.active ${_filters_active_visibility}
+target_include_directories(numerical.filters.active ${NUMERICAL_VISIBILITY}
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../../>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-target_link_libraries(numerical.filters.active ${_filters_active_visibility}
+target_link_libraries(numerical.filters.active ${NUMERICAL_VISIBILITY}
     infra.util
     numerical.math
     numerical.solver
@@ -24,13 +18,11 @@ target_sources(numerical.filters.active PRIVATE
     UnscentedKalmanFilter.hpp
 )
 
-if (EMIL_ENABLE_COVERAGE)
-    target_sources(numerical.filters.active PRIVATE
-        ExtendedKalmanFilter.cpp
-        KalmanFilter.cpp
-        KalmanFilterBase.cpp
-        UnscentedKalmanFilter.cpp
-    )
-endif()
+numerical_add_coverage_sources(numerical.filters.active
+    ExtendedKalmanFilter.cpp
+    KalmanFilter.cpp
+    KalmanFilterBase.cpp
+    UnscentedKalmanFilter.cpp
+)
 
 add_subdirectory(test)

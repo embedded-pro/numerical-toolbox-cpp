@@ -11,6 +11,11 @@ namespace
         using ComplexType = math::Complex<QNumberType>;
         static constexpr float kEpsilon = 1e-4f;
 
+        static ComplexType MakeComplex(float real, float imag)
+        {
+            return ComplexType(QNumberType(real), QNumberType(imag));
+        }
+
         static float ToFloat(const float& value)
         {
             return value;
@@ -50,7 +55,7 @@ TYPED_TEST(ComplexTest, ComponentConstructor)
 
 TYPED_TEST(ComplexTest, FloatConstructor)
 {
-    typename TestFixture::ComplexType num(0.5f, 0.3f);
+    auto num = TestFixture::MakeComplex(0.5f, 0.3f);
 
     EXPECT_NEAR(this->ToFloat(num.Real()), 0.5f, TestFixture::kEpsilon);
     EXPECT_NEAR(this->ToFloat(num.Imaginary()), 0.3f, TestFixture::kEpsilon);
@@ -58,8 +63,8 @@ TYPED_TEST(ComplexTest, FloatConstructor)
 
 TYPED_TEST(ComplexTest, Addition)
 {
-    typename TestFixture::ComplexType a(0.3f, 0.4f);
-    typename TestFixture::ComplexType b(0.1f, 0.2f);
+    auto a = TestFixture::MakeComplex(0.3f, 0.4f);
+    auto b = TestFixture::MakeComplex(0.1f, 0.2f);
     typename TestFixture::ComplexType result = a + b;
 
     EXPECT_NEAR(this->ToFloat(result.Real()), 0.4f, TestFixture::kEpsilon);
@@ -68,8 +73,8 @@ TYPED_TEST(ComplexTest, Addition)
 
 TYPED_TEST(ComplexTest, Subtraction)
 {
-    typename TestFixture::ComplexType a(0.3f, 0.4f);
-    typename TestFixture::ComplexType b(0.1f, 0.2f);
+    auto a = TestFixture::MakeComplex(0.3f, 0.4f);
+    auto b = TestFixture::MakeComplex(0.1f, 0.2f);
     typename TestFixture::ComplexType result = a - b;
 
     EXPECT_NEAR(this->ToFloat(result.Real()), 0.2f, TestFixture::kEpsilon);
@@ -78,8 +83,8 @@ TYPED_TEST(ComplexTest, Subtraction)
 
 TYPED_TEST(ComplexTest, Multiplication)
 {
-    typename TestFixture::ComplexType a(0.3f, 0.4f);
-    typename TestFixture::ComplexType b(0.1f, 0.2f);
+    auto a = TestFixture::MakeComplex(0.3f, 0.4f);
+    auto b = TestFixture::MakeComplex(0.1f, 0.2f);
     typename TestFixture::ComplexType result = a * b;
 
     // (0.3 + 0.4i)(0.1 + 0.2i) = (0.3*0.1 - 0.4*0.2) + (0.3*0.2 + 0.4*0.1)i
@@ -89,8 +94,8 @@ TYPED_TEST(ComplexTest, Multiplication)
 
 TYPED_TEST(ComplexTest, CompoundAddition)
 {
-    typename TestFixture::ComplexType a(0.3f, 0.4f);
-    typename TestFixture::ComplexType b(0.1f, 0.2f);
+    auto a = TestFixture::MakeComplex(0.3f, 0.4f);
+    auto b = TestFixture::MakeComplex(0.1f, 0.2f);
     a += b;
 
     EXPECT_NEAR(this->ToFloat(a.Real()), 0.4f, TestFixture::kEpsilon);
@@ -99,8 +104,8 @@ TYPED_TEST(ComplexTest, CompoundAddition)
 
 TYPED_TEST(ComplexTest, CompoundSubtraction)
 {
-    typename TestFixture::ComplexType a(0.3f, 0.4f);
-    typename TestFixture::ComplexType b(0.1f, 0.2f);
+    auto a = TestFixture::MakeComplex(0.3f, 0.4f);
+    auto b = TestFixture::MakeComplex(0.1f, 0.2f);
     a -= b;
 
     EXPECT_NEAR(this->ToFloat(a.Real()), 0.2f, TestFixture::kEpsilon);
@@ -109,8 +114,8 @@ TYPED_TEST(ComplexTest, CompoundSubtraction)
 
 TYPED_TEST(ComplexTest, CompoundMultiplication)
 {
-    typename TestFixture::ComplexType a(0.3f, 0.4f);
-    typename TestFixture::ComplexType b(0.1f, 0.2f);
+    auto a = TestFixture::MakeComplex(0.3f, 0.4f);
+    auto b = TestFixture::MakeComplex(0.1f, 0.2f);
     a *= b;
 
     EXPECT_NEAR(this->ToFloat(a.Real()), -0.05f, TestFixture::kEpsilon);
@@ -119,7 +124,7 @@ TYPED_TEST(ComplexTest, CompoundMultiplication)
 
 TYPED_TEST(ComplexTest, UnaryPlus)
 {
-    typename TestFixture::ComplexType a(0.3f, 0.4f);
+    auto a = TestFixture::MakeComplex(0.3f, 0.4f);
     typename TestFixture::ComplexType result = +a;
 
     EXPECT_NEAR(this->ToFloat(result.Real()), 0.3f, TestFixture::kEpsilon);
@@ -128,7 +133,7 @@ TYPED_TEST(ComplexTest, UnaryPlus)
 
 TYPED_TEST(ComplexTest, UnaryNegation)
 {
-    typename TestFixture::ComplexType a(0.3f, 0.4f);
+    auto a = TestFixture::MakeComplex(0.3f, 0.4f);
     typename TestFixture::ComplexType result = -a;
 
     EXPECT_NEAR(this->ToFloat(result.Real()), -0.3f, TestFixture::kEpsilon);
@@ -137,9 +142,9 @@ TYPED_TEST(ComplexTest, UnaryNegation)
 
 TYPED_TEST(ComplexTest, EqualityComparison)
 {
-    typename TestFixture::ComplexType a(0.3f, 0.4f);
-    typename TestFixture::ComplexType b(0.3f, 0.4f);
-    typename TestFixture::ComplexType c(0.3f, 0.5f);
+    auto a = TestFixture::MakeComplex(0.3f, 0.4f);
+    auto b = TestFixture::MakeComplex(0.3f, 0.4f);
+    auto c = TestFixture::MakeComplex(0.3f, 0.5f);
 
     EXPECT_TRUE(a == b);
     EXPECT_FALSE(a == c);
