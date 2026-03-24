@@ -1,4 +1,3 @@
-#include "numerical/controllers/implementations/Lqr.hpp"
 #include "numerical/controllers/implementations/Mpc.hpp"
 #include <gtest/gtest.h>
 
@@ -260,26 +259,22 @@ TEST_F(TestMpc, unconstrained_mpc_approaches_lqr_with_long_horizon)
         { 0.1f }
     };
 
-    // MPC with DARE terminal cost and long horizon should approximate LQR
     controllers::MpcWeights<float, 2, 1> weights;
     weights.Q = Q;
     weights.R = R;
 
-    // Compute terminal cost via DARE
-    solvers::DiscreteAlgebraicRiccatiEquation<float, 2, 1> dare;
-    auto P = dare.Solve(A, B, Q, R);
-    weights.terminalP = P;
+    weights.terminalP = math::SquareMatrix<float, 2>{
+        { 60.2243614197f, 10.1239376068f },
+        { 10.1239376068f, 6.0910396576f }
+    };
 
     controllers::Mpc<float, 2, 1, 10, 10> mpc(A, B, weights);
-    controllers::Lqr<float, 2, 1> lqr(A, B, Q, R);
 
     math::Vector<float, 2> state{ 1.0f, 0.5f };
-
     auto uMpc = mpc.ComputeControl(state);
-    auto uLqr = lqr.ComputeControl(state);
 
-    // MPC with DARE terminal cost and sufficient horizon should be close to LQR
-    EXPECT_NEAR(math::ToFloat(uMpc.at(0, 0)), math::ToFloat(uLqr.at(0, 0)), 0.1f);
+    constexpr float expectedLqrControl = -9.9052610397f;
+    EXPECT_NEAR(math::ToFloat(uMpc.at(0, 0)), expectedLqrControl, 0.1f);
 }
 
 TEST_F(TestMpc, reference_tracking_drives_state_to_reference)
