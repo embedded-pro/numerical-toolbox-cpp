@@ -5,7 +5,6 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
-
 #include "numerical/neural_network/activation/ActivationFunction.hpp"
 #include <cmath>
 
@@ -24,14 +23,16 @@ namespace neural_network
 
     template<typename QNumberType>
     OPTIMIZE_FOR_SPEED
-    QNumberType Tanh<QNumberType>::Forward(QNumberType x) const
+        QNumberType
+        Tanh<QNumberType>::Forward(QNumberType x) const
     {
         return QNumberType(std::tanh(math::ToFloat(x)));
     }
 
     template<typename QNumberType>
     OPTIMIZE_FOR_SPEED
-    QNumberType Tanh<QNumberType>::Backward(QNumberType x) const
+        QNumberType
+        Tanh<QNumberType>::Backward(QNumberType x) const
     {
         QNumberType y = Forward(x);
         return QNumberType(0.9999f) - y * y;

@@ -5,7 +5,6 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
-
 #include "numerical/neural_network/activation/ActivationFunction.hpp"
 #include "numerical/neural_network/layer/Layer.hpp"
 #include <random>
@@ -56,8 +55,7 @@ namespace neural_network
     {}
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize>
-    OPTIMIZE_FOR_SPEED
-    void Dense<QNumberType, InputSize, OutputSize>::Forward(const InputVector& input)
+    OPTIMIZE_FOR_SPEED void Dense<QNumberType, InputSize, OutputSize>::Forward(const InputVector& input)
     {
         this->input = input;
 
@@ -73,7 +71,8 @@ namespace neural_network
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize>
     OPTIMIZE_FOR_SPEED
-    typename Dense<QNumberType, InputSize, OutputSize>::InputVector& Dense<QNumberType, InputSize, OutputSize>::Backward(const OutputVector& output_gradient)
+        typename Dense<QNumberType, InputSize, OutputSize>::InputVector&
+        Dense<QNumberType, InputSize, OutputSize>::Backward(const OutputVector& output_gradient)
     {
         OutputVector preActivationGradient;
 

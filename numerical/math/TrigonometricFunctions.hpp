@@ -13,4 +13,3 @@ namespace math
         virtual QNumberType Phase(const QNumberType& real, const QNumberType& imag) const = 0;
     };
 }
-

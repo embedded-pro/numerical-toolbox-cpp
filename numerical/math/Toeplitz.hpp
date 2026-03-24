@@ -170,4 +170,3 @@ namespace math
         return ToeplitzMatrix<T, N>(autocorrelation);
     }
 }
-

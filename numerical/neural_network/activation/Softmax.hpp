@@ -5,7 +5,6 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
-
 #include "numerical/neural_network/activation/ActivationFunction.hpp"
 #include <cmath>
 
@@ -24,22 +23,23 @@ namespace neural_network
 
     template<typename QNumberType>
     OPTIMIZE_FOR_SPEED
-    QNumberType Softmax<QNumberType>::Forward(QNumberType x) const
+        QNumberType
+        Softmax<QNumberType>::Forward(QNumberType x) const
     {
         return QNumberType(std::exp(math::ToFloat(x)));
     }
 
     template<typename QNumberType>
     OPTIMIZE_FOR_SPEED
-    QNumberType Softmax<QNumberType>::Backward(QNumberType x) const
+        QNumberType
+        Softmax<QNumberType>::Backward(QNumberType x) const
     {
         QNumberType y = Forward(x);
         return y * (QNumberType(0.9999f) - y);
     }
 
     template<typename QNumberType>
-    OPTIMIZE_FOR_SPEED
-    void Softmax<QNumberType>::ForwardVector(QNumberType* output, const QNumberType* input, std::size_t size) const
+    OPTIMIZE_FOR_SPEED void Softmax<QNumberType>::ForwardVector(QNumberType* output, const QNumberType* input, std::size_t size) const
     {
         QNumberType maxVal = input[0];
         for (std::size_t i = 1; i < size; ++i)
@@ -58,8 +58,7 @@ namespace neural_network
     }
 
     template<typename QNumberType>
-    OPTIMIZE_FOR_SPEED
-    void Softmax<QNumberType>::BackwardVector(QNumberType* result, const QNumberType* /*preActivation*/, const QNumberType* output, const QNumberType* outputGradient, std::size_t size) const
+    OPTIMIZE_FOR_SPEED void Softmax<QNumberType>::BackwardVector(QNumberType* result, const QNumberType* /*preActivation*/, const QNumberType* output, const QNumberType* outputGradient, std::size_t size) const
     {
         QNumberType dot = QNumberType(0.0f);
         for (std::size_t i = 0; i < size; ++i)

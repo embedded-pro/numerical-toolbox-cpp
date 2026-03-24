@@ -5,7 +5,6 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
-
 #include "numerical/neural_network/activation/ActivationFunction.hpp"
 
 namespace neural_network
@@ -33,14 +32,16 @@ namespace neural_network
 
     template<typename QNumberType>
     OPTIMIZE_FOR_SPEED
-    QNumberType LeakyReLU<QNumberType>::Forward(QNumberType x) const
+        QNumberType
+        LeakyReLU<QNumberType>::Forward(QNumberType x) const
     {
         return x > QNumberType(0.0f) ? x : alpha * x;
     }
 
     template<typename QNumberType>
     OPTIMIZE_FOR_SPEED
-    QNumberType LeakyReLU<QNumberType>::Backward(QNumberType x) const
+        QNumberType
+        LeakyReLU<QNumberType>::Backward(QNumberType x) const
     {
         return x > QNumberType(0.0f) ? QNumberType(0.9999f) : alpha;
     }

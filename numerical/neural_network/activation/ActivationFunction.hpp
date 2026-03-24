@@ -5,7 +5,6 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
-
 #include "numerical/math/QNumber.hpp"
 
 namespace neural_network
@@ -25,16 +24,14 @@ namespace neural_network
     };
 
     template<typename QNumberType>
-    OPTIMIZE_FOR_SPEED
-    void ActivationFunction<QNumberType>::ForwardVector(QNumberType* output, const QNumberType* input, std::size_t size) const
+    OPTIMIZE_FOR_SPEED void ActivationFunction<QNumberType>::ForwardVector(QNumberType* output, const QNumberType* input, std::size_t size) const
     {
         for (std::size_t i = 0; i < size; ++i)
             output[i] = Forward(input[i]);
     }
 
     template<typename QNumberType>
-    OPTIMIZE_FOR_SPEED
-    void ActivationFunction<QNumberType>::BackwardVector(QNumberType* result, const QNumberType* preActivation, const QNumberType* /*output*/, const QNumberType* outputGradient, std::size_t size) const
+    OPTIMIZE_FOR_SPEED void ActivationFunction<QNumberType>::BackwardVector(QNumberType* result, const QNumberType* preActivation, const QNumberType* /*output*/, const QNumberType* outputGradient, std::size_t size) const
     {
         for (std::size_t i = 0; i < size; ++i)
             result[i] = outputGradient[i] * Backward(preActivation[i]);
