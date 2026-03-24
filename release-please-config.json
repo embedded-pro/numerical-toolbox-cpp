@@ -6,7 +6,7 @@
   "packages": {
     ".": {
       "release-type": "simple",
-      "package-name": "control-toolbox",
+      "package-name": "numerical-toolbox",
       "extra-files": [
         "CMakeLists.txt"
       ]
