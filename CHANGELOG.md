@@ -1,5 +1,28 @@
 # Changelog
 
+## [2.0.0](https://github.com/embedded-pro/numerical-toolbox-cpp/compare/v1.0.0...v2.0.0) (2026-03-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* controllers refactored ([#57](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/57))
+
+### Features
+
+* Add dynamics ([#97](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/97)) ([d308931](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/d308931df5e2a8b7b52a98afaae9af4557ef9b32))
+* Add LQR controller ([#89](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/89)) ([dff0d71](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/dff0d71f0262e948c902b9ad545773398484d705))
+* Add mpc controller ([#104](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/104)) ([9ce0c04](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/9ce0c04e098bb9a64f9e6314be955ca503ed4fcf))
+* Add psd simulator ([#92](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/92)) ([3399820](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/3399820e98909a402a56024b6cb905c99cef3292))
+* Add rls ([#80](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/80)) ([0ed488b](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/0ed488b957ffe6d3ae58a80888b12fa33e31ce17))
+* Controllers refactored ([#57](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/57)) ([2a420e9](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/2a420e9464540b6271622f9ceb9142eb38d07f03))
+* Improve and extend kalman filter ([#100](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/100)) ([31f6cf8](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/31f6cf89b75f21287e16be45716156530a22c363))
+* Integration test folder ([#30](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/30)) ([1f7810d](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/1f7810de8f85e9a6493d9956e28b4d5fab0ecfa3))
+
+
+### Bug Fixes
+
+* Sonarqube issues ([#67](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/67)) ([6079480](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/60794803f9ff099cc2e52ffcb752fb2a62282d8d))
+
 ## 1.0.0 (2025-08-24)
 
 
