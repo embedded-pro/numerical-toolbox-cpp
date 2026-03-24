@@ -3,6 +3,7 @@
 #include <QPen>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 namespace simulator::utils
 {
@@ -51,7 +52,7 @@ namespace simulator::utils
 
         auto totalWeight = 0;
         for (const auto& panel : chartPanels)
-            totalWeight += panel.heightWeight;
+            totalWeight += std::max(panel.heightWeight, 1);
 
         auto availableHeight = height() - topMargin - bottomMargin - static_cast<int>(chartPanels.size() - 1) * panelSpacing;
         if (availableHeight <= 0)
@@ -61,7 +62,7 @@ namespace simulator::utils
 
         for (const auto& panel : chartPanels)
         {
-            auto panelHeight = availableHeight * panel.heightWeight / totalWeight;
+            auto panelHeight = availableHeight * std::max(panel.heightWeight, 1) / totalWeight;
             QRect plotArea(leftMargin, currentY, plotWidth, panelHeight);
 
             auto bounds = ComputeBounds(panel);
@@ -214,15 +215,24 @@ namespace simulator::utils
 
     TimeSeriesChartWidget::PanelBounds TimeSeriesChartWidget::ComputeBounds(const ChartPanel& panel) const
     {
-        PanelBounds bounds;
+        PanelBounds bounds{ std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest() };
 
+        bool hasData = false;
         for (const auto& series : panel.series)
         {
             for (auto v : series.data)
             {
                 bounds.maxY = std::max(bounds.maxY, v);
                 bounds.minY = std::min(bounds.minY, v);
+                hasData = true;
             }
+        }
+
+        if (!hasData)
+        {
+            bounds.minY = -1.0f;
+            bounds.maxY = 1.0f;
+            return bounds;
         }
 
         auto pad = (bounds.maxY - bounds.minY) * 0.1f;

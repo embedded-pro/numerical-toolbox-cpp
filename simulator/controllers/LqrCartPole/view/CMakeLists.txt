@@ -7,7 +7,7 @@ target_include_directories(numerical.simulator.controllers.lqr.view PUBLIC
 
 target_link_libraries(numerical.simulator.controllers.lqr.view PUBLIC
     numerical.simulator.controllers.lqr.application
-    numerical.simulator.utils
+    numerical.simulator.widgets
     Qt6::Widgets
 )
 

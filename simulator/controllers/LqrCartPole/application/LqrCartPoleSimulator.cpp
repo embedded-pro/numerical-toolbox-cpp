@@ -48,12 +48,7 @@ namespace simulator::controllers::lqr
     {
         auto& s = plant.GetState();
 
-        StateVector stateVec{
-            { s.x },
-            { s.xDot },
-            { s.theta },
-            { s.thetaDot },
-        };
+        StateVector stateVec(s.x, s.xDot, s.theta, s.thetaDot);
 
         auto u = lqr->ComputeControl(stateVec);
         auto force = u.at(0, 0);

@@ -88,7 +88,7 @@ namespace simulator::controllers::lqr
             { 1.0f, dt, 0.0f, 0.0f },
             { 0.0f, 1.0f + a12 * dt, a13 * dt, 0.0f },
             { 0.0f, 0.0f, 1.0f, dt },
-            { 0.0f, a32 * dt, 1.0f + a33 * dt, 0.0f },
+            { 0.0f, a32 * dt, a33 * dt, 1.0f },
         };
     }
 
