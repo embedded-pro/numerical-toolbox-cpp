@@ -1,6 +1,7 @@
 #include "simulator/controllers/LqrCartPole/view/CartPoleWidget.hpp"
 #include <QPainter>
 #include <QPen>
+#include <algorithm>
 #include <cmath>
 #include <numbers>
 
@@ -48,10 +49,9 @@ namespace simulator::controllers::lqr::view
         if (!simulator)
             return;
 
-        simulator->Step(mouseForce);
+        auto force = simulator->Step(mouseForce);
 
         auto& s = simulator->GetState();
-        auto force = simulator->ComputeControlForce();
         emit StateUpdated(s.x, s.xDot, s.theta, s.thetaDot, force);
 
         update();

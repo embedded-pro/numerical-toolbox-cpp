@@ -3,6 +3,7 @@
 #include <QColor>
 #include <QString>
 #include <QWidget>
+#include <span>
 #include <vector>
 
 namespace simulator::utils
@@ -11,7 +12,7 @@ namespace simulator::utils
     {
         QString name;
         QColor color;
-        std::vector<float> data;
+        std::span<const float> data;
     };
 
     struct ChartPanel
@@ -30,8 +31,8 @@ namespace simulator::utils
     public:
         explicit TimeSeriesChartWidget(QWidget* parent = nullptr);
 
-        void SetTimeAxis(const std::vector<float>& time);
-        void SetPanels(const std::vector<ChartPanel>& panels);
+        void SetTimeAxis(std::span<const float> time);
+        void SetPanels(std::vector<ChartPanel> panels);
         void Clear();
 
     protected:
@@ -52,7 +53,7 @@ namespace simulator::utils
         void DrawLegend(QPainter& painter, const QRect& plotArea, const ChartPanel& panel);
         [[nodiscard]] PanelBounds ComputeBounds(const ChartPanel& panel) const;
 
-        std::vector<float> timeData;
+        std::span<const float> timeData;
         std::vector<ChartPanel> chartPanels;
         float maxTime = 0.0f;
 

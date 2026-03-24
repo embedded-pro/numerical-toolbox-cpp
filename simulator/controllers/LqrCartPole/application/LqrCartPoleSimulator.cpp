@@ -61,13 +61,15 @@ namespace simulator::controllers::lqr
         return std::clamp(force, -configuration.simulation.forceLimit, configuration.simulation.forceLimit);
     }
 
-    void LqrCartPoleSimulator::Step(float externalForce)
+    float LqrCartPoleSimulator::Step(float externalForce)
     {
         auto controlForce = ComputeControlForce();
         auto totalForce = controlForce + externalForce;
         auto clampedForce = std::clamp(totalForce, -configuration.simulation.forceLimit, configuration.simulation.forceLimit);
 
         plant.Step(clampedForce, configuration.simulation.dt);
+
+        return controlForce;
     }
 
     const CartPoleState& LqrCartPoleSimulator::GetState() const

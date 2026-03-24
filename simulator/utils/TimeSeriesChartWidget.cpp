@@ -14,22 +14,22 @@ namespace simulator::utils
         setAutoFillBackground(true);
     }
 
-    void TimeSeriesChartWidget::SetTimeAxis(const std::vector<float>& time)
+    void TimeSeriesChartWidget::SetTimeAxis(std::span<const float> time)
     {
         timeData = time;
         maxTime = timeData.empty() ? 0.0f : timeData.back();
         update();
     }
 
-    void TimeSeriesChartWidget::SetPanels(const std::vector<ChartPanel>& panels)
+    void TimeSeriesChartWidget::SetPanels(std::vector<ChartPanel> panels)
     {
-        chartPanels = panels;
+        chartPanels = std::move(panels);
         update();
     }
 
     void TimeSeriesChartWidget::Clear()
     {
-        timeData.clear();
+        timeData = {};
         chartPanels.clear();
         maxTime = 0.0f;
         update();

@@ -73,6 +73,8 @@ namespace simulator::controllers::lqr::view
         xDotHistory.clear();
         thetaHistory.clear();
         thetaDotHistory.clear();
+        thetaDegHistory.clear();
+        thetaDotDegHistory.clear();
         forceHistory.clear();
         costHistory.clear();
 
@@ -95,6 +97,8 @@ namespace simulator::controllers::lqr::view
 
     void LqrEvaluationWidget::OnStateUpdated(float x, float xDot, float theta, float thetaDot, float force)
     {
+        static constexpr auto radToDeg = 180.0f / std::numbers::pi_v<float>;
+
         auto t = static_cast<float>(sampleCount) * config.simulation.dt;
         ++sampleCount;
 
@@ -103,6 +107,8 @@ namespace simulator::controllers::lqr::view
         xDotHistory.push_back(xDot);
         thetaHistory.push_back(theta);
         thetaDotHistory.push_back(thetaDot);
+        thetaDegHistory.push_back(theta * radToDeg);
+        thetaDotDegHistory.push_back(thetaDot * radToDeg);
         forceHistory.push_back(force);
 
         // LQR cost: J = sum( x'Qx + u'Ru ) * dt
@@ -140,13 +146,6 @@ namespace simulator::controllers::lqr::view
 
     void LqrEvaluationWidget::UpdateCharts()
     {
-        static constexpr auto radToDeg = 180.0f / std::numbers::pi_v<float>;
-
-        std::vector<float> thetaDeg;
-        thetaDeg.reserve(thetaHistory.size());
-        for (auto v : thetaHistory)
-            thetaDeg.push_back(v * radToDeg);
-
         stateChart->SetTimeAxis(time);
         stateChart->SetPanels({
             {
@@ -154,7 +153,7 @@ namespace simulator::controllers::lqr::view
                 "",
                 {
                     { "x (m)", QColor(41, 128, 185), xHistory },
-                    { "\u03B8 (\u00B0)", QColor(231, 76, 60), thetaDeg },
+                    { "\u03B8 (\u00B0)", QColor(231, 76, 60), thetaDegHistory },
                 },
                 2,
             },
@@ -163,7 +162,7 @@ namespace simulator::controllers::lqr::view
                 "",
                 {
                     { "x\u0307 (m/s)", QColor(39, 174, 96), xDotHistory },
-                    { "\u03B8\u0307 (\u00B0/s)", QColor(142, 68, 173), thetaDotHistory },
+                    { "\u03B8\u0307 (\u00B0/s)", QColor(142, 68, 173), thetaDotDegHistory },
                 },
                 1,
             },

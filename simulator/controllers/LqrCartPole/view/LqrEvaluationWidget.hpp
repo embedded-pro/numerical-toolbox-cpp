@@ -33,6 +33,8 @@ namespace simulator::controllers::lqr::view
         std::vector<float> xDotHistory;
         std::vector<float> thetaHistory;
         std::vector<float> thetaDotHistory;
+        std::vector<float> thetaDegHistory;
+        std::vector<float> thetaDotDegHistory;
         std::vector<float> forceHistory;
         std::vector<float> costHistory;
 

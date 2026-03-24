@@ -37,7 +37,7 @@ namespace simulator::controllers::lqr
 
         void Configure(const LqrCartPoleConfig& config);
         void Reset();
-        void Step(float externalForce = 0.0f);
+        [[nodiscard]] float Step(float externalForce = 0.0f);
         void SetState(const CartPoleState& state);
 
         [[nodiscard]] float ComputeControlForce() const;
