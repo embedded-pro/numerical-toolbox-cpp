@@ -4,8 +4,6 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
-#include "numerical/math/CompilerOptimizations.hpp"
-
 #include "infra/util/BoundedVector.hpp"
 #include "numerical/analysis/FastFourierTransform.hpp"
 #include "numerical/math/ComplexNumber.hpp"
@@ -47,7 +45,8 @@ namespace analysis
 
     template<typename QNumberType, std::size_t Length>
     OPTIMIZE_FOR_SPEED
-    typename DiscreteConsineTransform<QNumberType, Length>::VectorReal& DiscreteConsineTransform<QNumberType, Length>::Forward(VectorReal& input)
+        typename DiscreteConsineTransform<QNumberType, Length>::VectorReal&
+        DiscreteConsineTransform<QNumberType, Length>::Forward(VectorReal& input)
     {
         auto& fftResult = fft.Forward(input);
 

@@ -96,4 +96,3 @@ namespace math
         return buffer[n.offset];
     }
 }
-

@@ -118,4 +118,3 @@ namespace math
     extern template class Complex<Q31>;
 #endif
 }
-

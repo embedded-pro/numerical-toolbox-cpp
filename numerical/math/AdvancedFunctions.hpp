@@ -12,4 +12,3 @@ namespace math
         virtual QNumberType SquareRoot(const QNumberType& value) const = 0;
     };
 }
-

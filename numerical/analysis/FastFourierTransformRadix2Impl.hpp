@@ -59,8 +59,7 @@ namespace analysis
     }
 
     template<typename QNumberType, std::size_t Length>
-    OPTIMIZE_FOR_SPEED
-    void FastFourierTransformRadix2Impl<QNumberType, Length>::Calculate()
+    OPTIMIZE_FOR_SPEED void FastFourierTransformRadix2Impl<QNumberType, Length>::Calculate()
     {
         for (auto step = 2; step <= Length; step *= 2)
         {
@@ -88,7 +87,8 @@ namespace analysis
 
     template<typename QNumberType, std::size_t Length>
     OPTIMIZE_FOR_SPEED
-    typename FastFourierTransformRadix2Impl<QNumberType, Length>::VectorComplex& FastFourierTransformRadix2Impl<QNumberType, Length>::Forward(FastFourierTransformRadix2Impl<QNumberType, Length>::VectorReal& input)
+        typename FastFourierTransformRadix2Impl<QNumberType, Length>::VectorComplex&
+        FastFourierTransformRadix2Impl<QNumberType, Length>::Forward(FastFourierTransformRadix2Impl<QNumberType, Length>::VectorReal& input)
     {
         ResetFrequencyDomain();
 

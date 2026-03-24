@@ -301,4 +301,3 @@ namespace math
     extern template class Matrix<float, 3, 3>;
 #endif
 }
-

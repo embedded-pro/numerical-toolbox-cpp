@@ -7,6 +7,7 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 
 #include "numerical/estimators/Estimator.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 
 namespace estimators
@@ -33,8 +34,7 @@ namespace estimators
     // Implementation //
 
     template<typename T, std::size_t Samples, std::size_t Features>
-    OPTIMIZE_FOR_SPEED
-    void LinearRegression<T, Samples, Features>::Fit(const math::Matrix<T, Samples, Features>& X, const math::Matrix<T, Samples, 1>& y)
+    OPTIMIZE_FOR_SPEED void LinearRegression<T, Samples, Features>::Fit(const math::Matrix<T, Samples, Features>& X, const math::Matrix<T, Samples, 1>& y)
     {
         math::Matrix<T, Samples, Features + 1> X_design;
 
@@ -55,7 +55,8 @@ namespace estimators
 
     template<typename T, std::size_t Samples, std::size_t Features>
     OPTIMIZE_FOR_SPEED
-    T LinearRegression<T, Samples, Features>::Predict(const InputMatrix& X) const
+        T
+        LinearRegression<T, Samples, Features>::Predict(const InputMatrix& X) const
     {
         T result = coefficients.at(0, 0);
 

@@ -49,7 +49,8 @@ namespace analysis
 
     template<typename QNumberType, std::size_t NumberOfPoints>
     OPTIMIZE_FOR_SPEED
-    std::tuple<typename FrequencyResponse<QNumberType, NumberOfPoints>::Vector, typename FrequencyResponse<QNumberType, NumberOfPoints>::Vector, typename FrequencyResponse<QNumberType, NumberOfPoints>::Vector> FrequencyResponse<QNumberType, NumberOfPoints>::Calculate()
+        std::tuple<typename FrequencyResponse<QNumberType, NumberOfPoints>::Vector, typename FrequencyResponse<QNumberType, NumberOfPoints>::Vector, typename FrequencyResponse<QNumberType, NumberOfPoints>::Vector>
+        FrequencyResponse<QNumberType, NumberOfPoints>::Calculate()
     {
         const auto maxSize = static_cast<double>(response.max_size());
         const auto fstart = static_cast<float>(sampleFrequency / maxSize);

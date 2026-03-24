@@ -5,7 +5,6 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
-
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/Toeplitz.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
@@ -43,8 +42,7 @@ namespace estimators
     // Implementation //
 
     template<typename T, std::size_t Samples, std::size_t Order>
-    OPTIMIZE_FOR_SPEED
-    void YuleWalker<T, Samples, Order>::Fit(const InputVector& x)
+    OPTIMIZE_FOR_SPEED void YuleWalker<T, Samples, Order>::Fit(const InputVector& x)
     {
         mean = T(0.0f);
         for (std::size_t i = 0; i < Samples; ++i)
@@ -82,7 +80,8 @@ namespace estimators
 
     template<typename T, std::size_t Samples, std::size_t Order>
     OPTIMIZE_FOR_SPEED
-    T YuleWalker<T, Samples, Order>::Predict(const math::Vector<T, Order>& past) const
+        T
+        YuleWalker<T, Samples, Order>::Predict(const math::Vector<T, Order>& past) const
     {
         T prediction = mean;
         for (std::size_t i = 0; i < Order; ++i)
@@ -105,7 +104,8 @@ namespace estimators
 
     template<typename T, std::size_t Samples, std::size_t Order>
     OPTIMIZE_FOR_SPEED
-    typename YuleWalker<T, Samples, Order>::AutocovarianceVector YuleWalker<T, Samples, Order>::ComputeAutocovariance(const InputVector& x, T xMean) const
+        typename YuleWalker<T, Samples, Order>::AutocovarianceVector
+        YuleWalker<T, Samples, Order>::ComputeAutocovariance(const InputVector& x, T xMean) const
     {
         AutocovarianceVector r;
 

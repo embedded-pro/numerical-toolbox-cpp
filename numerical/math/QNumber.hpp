@@ -265,4 +265,3 @@ namespace math
     extern template class QNumber<int16_t, 15>;
 #endif
 }
-

@@ -33,4 +33,3 @@ namespace math
         virtual uint32_t Sxtb16(uint32_t value) = 0;
     };
 }
-
