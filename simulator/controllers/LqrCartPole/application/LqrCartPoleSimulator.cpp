@@ -27,17 +27,19 @@ namespace simulator::controllers::lqr
 
     void LqrCartPoleSimulator::RecomputeGain()
     {
-        auto A = plant.LinearizedA(configuration.dt);
-        auto B = plant.LinearizedB(configuration.dt);
+        auto A = plant.LinearizedA(configuration.simulation.dt);
+        auto B = plant.LinearizedB(configuration.simulation.dt);
+
+        auto& w = configuration.weights;
 
         StateMatrix Q{
-            { configuration.qX, 0.0f, 0.0f, 0.0f },
-            { 0.0f, configuration.qXDot, 0.0f, 0.0f },
-            { 0.0f, 0.0f, configuration.qTheta, 0.0f },
-            { 0.0f, 0.0f, 0.0f, configuration.qThetaDot },
+            { w.qX, 0.0f, 0.0f, 0.0f },
+            { 0.0f, w.qXDot, 0.0f, 0.0f },
+            { 0.0f, 0.0f, w.qTheta, 0.0f },
+            { 0.0f, 0.0f, 0.0f, w.qThetaDot },
         };
 
-        math::SquareMatrix<float, inputSize> R{ { configuration.rForce } };
+        math::SquareMatrix<float, inputSize> R{ { w.rForce } };
 
         lqr = std::make_unique<::controllers::Lqr<float, stateSize, inputSize>>(A, B, Q, R);
     }
@@ -56,16 +58,16 @@ namespace simulator::controllers::lqr
         auto u = lqr->ComputeControl(stateVec);
         auto force = u.at(0, 0);
 
-        return std::clamp(force, -configuration.forceLimit, configuration.forceLimit);
+        return std::clamp(force, -configuration.simulation.forceLimit, configuration.simulation.forceLimit);
     }
 
     void LqrCartPoleSimulator::Step(float externalForce)
     {
         auto controlForce = ComputeControlForce();
         auto totalForce = controlForce + externalForce;
-        auto clampedForce = std::clamp(totalForce, -configuration.forceLimit, configuration.forceLimit);
+        auto clampedForce = std::clamp(totalForce, -configuration.simulation.forceLimit, configuration.simulation.forceLimit);
 
-        plant.Step(clampedForce, configuration.dt);
+        plant.Step(clampedForce, configuration.simulation.dt);
     }
 
     const CartPoleState& LqrCartPoleSimulator::GetState() const
@@ -80,11 +82,11 @@ namespace simulator::controllers::lqr
 
     float LqrCartPoleSimulator::GetDt() const
     {
-        return configuration.dt;
+        return configuration.simulation.dt;
     }
 
     float LqrCartPoleSimulator::GetForceLimit() const
     {
-        return configuration.forceLimit;
+        return configuration.simulation.forceLimit;
     }
 }

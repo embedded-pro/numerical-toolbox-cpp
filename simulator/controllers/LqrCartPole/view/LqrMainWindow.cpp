@@ -1,4 +1,5 @@
 #include "simulator/controllers/LqrCartPole/view/LqrMainWindow.hpp"
+#include <QMessageBox>
 #include <QSplitter>
 
 namespace simulator::controllers::lqr::view
@@ -46,12 +47,20 @@ namespace simulator::controllers::lqr::view
 
     void LqrMainWindow::OnConfigureRequested()
     {
-        auto config = configPanel->GetConfiguration();
-        simulator.Configure(config);
-        cartPoleWidget->Reset();
-        evaluationWidget->SetConfig(config);
-        evaluationWidget->Clear();
-        statusBar()->showMessage("Configuration applied. Press Start to begin.");
+        try
+        {
+            auto config = configPanel->GetConfiguration();
+            simulator.Configure(config);
+            cartPoleWidget->Reset();
+            evaluationWidget->SetConfig(config);
+            evaluationWidget->Clear();
+            statusBar()->showMessage("Configuration applied. Press Start to begin.");
+        }
+        catch (const std::exception& e)
+        {
+            QMessageBox::warning(this, "Configuration Error", e.what());
+            statusBar()->showMessage("Configuration failed");
+        }
     }
 
     void LqrMainWindow::OnStartRequested()

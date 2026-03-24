@@ -8,16 +8,26 @@ namespace simulator::controllers::lqr
 {
     using LqrController = ::controllers::Lqr<float, stateSize, inputSize>;
 
-    struct LqrCartPoleConfig
+    struct LqrWeightsConfig
     {
-        CartPoleParameters plantParams;
-        float dt = 0.01f;
         float qX = 1.0f;
         float qXDot = 1.0f;
         float qTheta = 100.0f;
         float qThetaDot = 10.0f;
         float rForce = 0.01f;
+    };
+
+    struct LqrSimulationConfig
+    {
+        float dt = 0.01f;
         float forceLimit = 50.0f;
+    };
+
+    struct LqrCartPoleConfig
+    {
+        CartPoleParameters plantParams;
+        LqrWeightsConfig weights;
+        LqrSimulationConfig simulation;
     };
 
     class LqrCartPoleSimulator

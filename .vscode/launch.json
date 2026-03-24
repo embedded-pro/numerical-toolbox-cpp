@@ -66,6 +66,22 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/build/host/simulator/controllers/LqrCartPole/Debug/numerical.simulator.controllers.lqr_cart_pole",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
       "name": "Robot Arm Simulator",
       "type": "cppdbg",
       "request": "launch",

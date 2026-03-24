@@ -4,6 +4,7 @@
 #include <QVBoxLayout>
 #include <algorithm>
 #include <cmath>
+#include <numbers>
 
 namespace simulator::controllers::lqr::view
 {
@@ -94,7 +95,7 @@ namespace simulator::controllers::lqr::view
 
     void LqrEvaluationWidget::OnStateUpdated(float x, float xDot, float theta, float thetaDot, float force)
     {
-        auto t = static_cast<float>(sampleCount) * config.dt;
+        auto t = static_cast<float>(sampleCount) * config.simulation.dt;
         ++sampleCount;
 
         time.push_back(t);
@@ -105,13 +106,14 @@ namespace simulator::controllers::lqr::view
         forceHistory.push_back(force);
 
         // LQR cost: J = sum( x'Qx + u'Ru ) * dt
-        auto stepCost = config.qX * x * x + config.qXDot * xDot * xDot + config.qTheta * theta * theta + config.qThetaDot * thetaDot * thetaDot + config.rForce * force * force;
-        cumulativeCost += stepCost * config.dt;
+        auto& w = config.weights;
+        auto stepCost = w.qX * x * x + w.qXDot * xDot * xDot + w.qTheta * theta * theta + w.qThetaDot * thetaDot * thetaDot + w.rForce * force * force;
+        cumulativeCost += stepCost * config.simulation.dt;
         costHistory.push_back(cumulativeCost);
 
         peakTheta = std::max(peakTheta, std::abs(theta));
         peakX = std::max(peakX, std::abs(x));
-        totalEffort += std::abs(force) * config.dt;
+        totalEffort += std::abs(force) * config.simulation.dt;
 
         // Settling time: last time any state exceeds threshold
         auto stateNorm = std::sqrt(x * x + theta * theta);
@@ -127,7 +129,7 @@ namespace simulator::controllers::lqr::view
 
     void LqrEvaluationWidget::UpdateMetrics()
     {
-        constexpr auto radToDeg = 180.0f / 3.14159265f;
+        static constexpr auto radToDeg = 180.0f / std::numbers::pi_v<float>;
 
         costLabel->setText(QString::number(static_cast<double>(cumulativeCost), 'f', 3));
         settlingTimeLabel->setText(QString::number(static_cast<double>(settlingTime), 'f', 2));
@@ -138,7 +140,7 @@ namespace simulator::controllers::lqr::view
 
     void LqrEvaluationWidget::UpdateCharts()
     {
-        constexpr auto radToDeg = 180.0f / 3.14159265f;
+        static constexpr auto radToDeg = 180.0f / std::numbers::pi_v<float>;
 
         std::vector<float> thetaDeg;
         thetaDeg.reserve(thetaHistory.size());

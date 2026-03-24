@@ -119,14 +119,14 @@ namespace simulator::controllers::lqr::view
         config.plantParams.cartFriction = static_cast<float>(frictionSpinBox->value());
         config.plantParams.trackLimit = static_cast<float>(trackLimitSpinBox->value());
 
-        config.qX = static_cast<float>(qXSpinBox->value());
-        config.qXDot = static_cast<float>(qXDotSpinBox->value());
-        config.qTheta = static_cast<float>(qThetaSpinBox->value());
-        config.qThetaDot = static_cast<float>(qThetaDotSpinBox->value());
-        config.rForce = static_cast<float>(rForceSpinBox->value());
+        config.weights.qX = static_cast<float>(qXSpinBox->value());
+        config.weights.qXDot = static_cast<float>(qXDotSpinBox->value());
+        config.weights.qTheta = static_cast<float>(qThetaSpinBox->value());
+        config.weights.qThetaDot = static_cast<float>(qThetaDotSpinBox->value());
+        config.weights.rForce = static_cast<float>(rForceSpinBox->value());
 
-        config.dt = static_cast<float>(dtSpinBox->value());
-        config.forceLimit = static_cast<float>(forceLimitSpinBox->value());
+        config.simulation.dt = static_cast<float>(dtSpinBox->value());
+        config.simulation.forceLimit = static_cast<float>(forceLimitSpinBox->value());
 
         return config;
     }

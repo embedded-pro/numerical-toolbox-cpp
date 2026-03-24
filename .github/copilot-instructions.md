@@ -73,6 +73,42 @@ When implementing or modifying algorithms:
 - Document numerical properties and limitations
 - Keep documentation in sync with code changes
 
+## Design Principles
+
+These are the most important architectural directives in this codebase. Every new class, function, and CMake target must follow them.
+
+### SOLID Principles
+
+- **Single Responsibility (SRP)**: Each class and struct owns exactly one concern. Separate configuration into sub-structs by concern (e.g., `WeightsConfig`, `SimulationConfig`, `PlantParameters`) rather than flat mega-structs. Each source file should address a single topic.
+- **Open/Closed (OCP)**: Prefer templates and compile-time polymorphism for extending algorithms to new numeric types (`float`, `Q15`, `Q31`) without modifying existing code.
+- **Liskov Substitution (LSP)**: When using abstract base classes (e.g., `Plant`), all derived classes must be fully substitutable. Override every pure virtual method; do not weaken preconditions or strengthen postconditions.
+- **Interface Segregation (ISP)**: Keep interfaces small and focused. Do not force implementers to depend on methods they do not use.
+- **Dependency Inversion (DIP)**: High-level modules (simulators, controllers) depend on abstractions, not concrete implementations. Use constructor injection for dependencies. Pass interfaces, not concrete types, when multiple implementations exist.
+
+### DRY (Don't Repeat Yourself)
+
+- **NEVER duplicate logic**. If two functions share more than a few lines of identical code, extract a common helper, template, or base class.
+- Use templates to eliminate per-type or per-size code duplication (e.g., DOF-parameterized dynamics instead of copy-pasted `StepDof2()` / `StepDof3()`).
+- Use `std::numbers::pi_v<float>` consistently — never hardcode `3.14159265f` or similar constants.
+- Share configuration structs across layers instead of re-declaring equivalent types.
+- Reuse existing utility components (e.g., `TimeSeriesChartWidget`, `SignalGenerator`) rather than reimplementing equivalent widgets.
+
+### Small Functions
+
+- **Every function should do one thing and fit on one screen** (~30 lines max, hard limit ~50 lines).
+- Extract named helpers from long methods — the name acts as self-documentation.
+- Rendering code should delegate to focused `Draw*()` helpers (e.g., `DrawTrack()`, `DrawCart()`, `DrawPole()`).
+- Prefer returning values over mutating shared state — this makes functions easier to test and reason about.
+
+### CMake Reuse
+
+- **Simulator structure**: Every simulator follows the three-layer pattern: `application/` (logic) → `view/` (Qt GUI) → `Main.cpp` (entry point), each with its own `CMakeLists.txt` and library target.
+- **Shared utilities**: Link against `numerical.simulator.utils` for common widgets (`TimeSeriesChartWidget`, `SignalGenerator`) — do not duplicate them.
+- **Shared abstractions**: Link against `numerical.simulator.controllers.common` for shared controller interfaces (e.g., `Plant`).
+- **Naming convention**: Targets follow `numerical.simulator.<domain>.<algorithm>.<layer>` (e.g., `numerical.simulator.controllers.lqr.application`).
+- **Library code reuse**: Use `numerical_add_header_library()` and `numerical_add_coverage_sources()` from `cmake/NumericalHeaderLibrary.cmake` for all `numerical/` targets.
+- **Compiler options blocks**: Every simulator target repeats the same MSVC/GCC warning suppression — keep this consistent across all targets.
+
 ## Coding Style and Patterns
 
 ### Dependency Injection
