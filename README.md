@@ -16,15 +16,17 @@ Refer to the documentation to quickly integrate and utilize the library's signal
 
 | Category                                                           | Description                                                          |
 |--------------------------------------------------------------------|----------------------------------------------------------------------|
-| [Analysis](doc/analysis/README.md)                                 | FFT, Power Spectral Density, DCT, Root Locus                         |
-| [Controllers](doc/controllers/README.md)                           | PID, LQR                                                             |
+| [Analysis](doc/analysis/README.md)                                 | FFT, Power Spectral Density, DCT, Window Functions                    |
+| [Control Analysis](doc/control_analysis/README.md)                 | Frequency Response, Root Locus                                        |
+| [Controllers](doc/controllers/README.md)                           | PID, LQR, MPC                                                        |
 | [Dynamics](doc/dynamics/README.md)                                 | Euler-Lagrange, Newton-Euler, Recursive Newton-Euler, ABA            |
-| [Estimators](doc/estimators/README.md)                             | Linear Regression, Yule-Walker                                       |
+| [Estimators](doc/estimators/README.md)                             | Linear Regression, Yule-Walker (offline), Recursive Least Squares (online) |
 | [Filters](doc/filters/README.md)                                   | Kalman, Extended Kalman, Unscented Kalman, FIR, IIR                  |
 | [Kinematics](doc/kinematics/README.md)                             | Forward Kinematics                                                   |
-| [Neural Network](doc/neural_network/README.md)                     | Layers, activations, losses, optimizers, regularization              |
+| [Neural Network](doc/neural_network/README.md)                     | Layers, activations, losses, model                                   |
+| [Optimization](doc/optimization/README.md)                         | Gradient Descent                                                     |
+| [Regularization](doc/regularization/README.md)                     | L1 (Lasso), L2 (Ridge)                                              |
 | [Solvers](doc/solvers/README.md)                                   | Gaussian Elimination, Levinson-Durbin, Durand-Kerner, Cholesky, DARE |
-| [Windowing](doc/windowing/README.md)                               | Rectangular, Hamming, Hann, Blackman                                 |
 | [Performance Optimization](doc/performance-optimization/README.md) | Compiler optimizations, SIMD                                         |
 
 Each category page lists its algorithms with a brief description and links to the detailed documentation.

@@ -6,7 +6,7 @@ A **Model** composes a sequence of [dense layers](../layer/Layer.md) into a sing
 
 1. Chains layers so the output of each feeds into the next (**forward pass**).
 2. Propagates gradients backward through the chain (**backward pass**).
-3. Flattens all layer parameters into a single vector for the [optimizer](../optimizer/Optimizer.md).
+3. Flattens all layer parameters into a single vector for the [optimizer](../../optimization/Optimizer.md).
 4. Verifies dimensional compatibility **at compile time** using variadic templates.
 
 In this library, the Model is fully statically typed — layer dimensions, parameter counts, and memory footprints are all known at compile time, enabling zero-overhead abstraction on embedded targets.
@@ -144,8 +144,8 @@ graph TD
 |-------------------------------------------------------|--------------------------------------------------------------------------------------------|
 | [Dense Layer](../layer/Layer.md)                      | The Model is a sequence of layers stored in a `std::tuple`                                 |
 | [Loss Functions](../losses/Loss.md)                   | Measures prediction error; the Model delegates loss computation to a Loss object           |
-| [Optimizer](../optimizer/Optimizer.md)                | Receives the flat parameter/gradient vectors from the Model and returns updated parameters |
-| [Regularization](../regularization/Regularization.md) | Added to the loss before optimization                                                      |
+| [Optimizer](../../optimization/Optimizer.md)                | Receives the flat parameter/gradient vectors from the Model and returns updated parameters |
+| [Regularization](../../regularization/Regularization.md) | Added to the loss before optimization                                                      |
 
 ## References & Further Reading
 

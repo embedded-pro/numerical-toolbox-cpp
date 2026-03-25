@@ -1,6 +1,6 @@
 #include "simulator/controllers/PidController/application/PidSimulator.hpp"
-#include "numerical/analysis/FrequencyResponse.hpp"
-#include "numerical/analysis/RootLocus.hpp"
+#include "numerical/control_analysis/FrequencyResponse.hpp"
+#include "numerical/control_analysis/RootLocus.hpp"
 #include "numerical/controllers/implementations/PidIncremental.hpp"
 #include <algorithm>
 #include <cmath>
@@ -168,7 +168,7 @@ namespace simulator::controllers
         std::vector<float> numCoeffs = discrete.numerator;
         std::vector<float> denCoeffs = discrete.denominator;
 
-        analysis::FrequencyResponse<float, bodeResolution> freqResponse(
+        control_analysis::FrequencyResponse<float, bodeResolution> freqResponse(
             infra::MemoryRange<float>(numCoeffs),
             infra::MemoryRange<float>(denCoeffs),
             fs);
@@ -218,7 +218,7 @@ namespace simulator::controllers
         auto openNum = PolyMultiply(pidTf.numerator, plantTf.numerator);
         auto openDen = PolyMultiply(pidTf.denominator, plantTf.denominator);
 
-        analysis::RootLocus<float, rootLocusMaxOrder, rootLocusGainSteps> rootLocus;
+        control_analysis::RootLocus<float, rootLocusMaxOrder, rootLocusGainSteps> rootLocus;
         auto rlResult = rootLocus.Calculate(
             infra::MemoryRange<const float>(openNum),
             infra::MemoryRange<const float>(openDen),

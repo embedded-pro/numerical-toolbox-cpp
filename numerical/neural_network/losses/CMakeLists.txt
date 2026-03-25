@@ -9,7 +9,7 @@ target_link_libraries(numerical.neural_network.losses ${NUMERICAL_VISIBILITY}
     infra.util
     numerical.math
     numerical.neural_network.activation
-    numerical.neural_network.regularization
+    numerical.regularization
 )
 
 target_sources(numerical.neural_network.losses PRIVATE

@@ -8,14 +8,20 @@ This is a numerical algorithms library providing digital signal processing (DSP)
 
 - **numerical/**: Core implementation of algorithms organized by domain:
   - `analysis/`: Signal analysis (FFT, PSD, DCT)
-  - `controllers/`: Control algorithms (PID controllers)
-  - `dynamics/`: Dynamics and modeling (Euler-Lagrange)
-  - `estimators/`: Estimation algorithms (Linear Regression, Yule-Walker)
+    - `windowing/`: Window functions for spectral analysis
+  - `control_analysis/`: Control system analysis (Frequency Response, Root Locus)
+  - `controllers/`: Control algorithms (PID, LQR, MPC)
+  - `dynamics/`: Dynamics and modeling (Euler-Lagrange, Newton-Euler)
+  - `estimators/`: Estimation algorithms
+    - `offline/`: Batch estimators (Linear Regression, Yule-Walker)
+    - `online/`: Streaming estimators (Recursive Least Squares)
   - `filters/`: Digital filters (FIR, IIR, Kalman)
+  - `kinematics/`: Forward/inverse kinematics
   - `math/`: Mathematical foundations (QNumber, Matrix, Complex, Trigonometric functions)
-  - `neural_network/`: Neural network components (layers, activations, optimizers)
-  - `solvers/`: Numerical solvers (Levinson-Durbin)
-  - `windowing/`: Window functions for signal processing
+  - `neural_network/`: Neural network components (layers, activations, losses, model)
+  - `optimization/`: General-purpose optimizers (Gradient Descent)
+  - `regularization/`: Regularization techniques (L1, L2)
+  - `solvers/`: Numerical solvers (Levinson-Durbin, Gaussian Elimination, DARE)
 - **doc/**: Comprehensive documentation for each algorithm with mathematical background
 - **embedded-infra-lib/**: Submodule containing infrastructure foundations and utilities for embedded systems
 
@@ -61,7 +67,7 @@ Place code here when it is:
 - Estimators and solvers
 - Neural network components
 - Hardware-agnostic and reusable across projects
-- Organized by domain (analysis, controllers, dynamics, filters, estimators, math, neural_network, solvers, windowing)
+- Organized by domain (analysis, control_analysis, controllers, dynamics, estimators, filters, kinematics, math, neural_network, optimization, regularization, solvers)
 
 ### Documentation (`doc/`)
 
@@ -285,6 +291,7 @@ class Algorithm
 - **INTERFACES**: Define interfaces (pure virtual classes) for testability and flexibility
 - **NAMESPACE**: Use appropriate namespaces by domain:
   - `analysis::` - Signal analysis algorithms
+  - `control_analysis::` - Control system analysis (Frequency Response, Root Locus)
   - `controllers::` - Control system algorithms
   - `dynamics::` - Dynamics and modeling algorithms
   - `estimators::` - Estimation algorithms
@@ -292,8 +299,10 @@ class Algorithm
   - `filters::active::` - Active filters (Kalman)
   - `math::` - Mathematical utilities and functions
   - `neural_network::` - Neural network components
+  - `optimization::` - General-purpose optimizers
+  - `regularization::` - Regularization techniques
   - `solvers::` - Numerical solvers
-  - `windowing::` - Window functions
+  - `windowing::` - Window functions (under `analysis/windowing/`)
 - **SELF-DOCUMENTING CODE**: Write clear, self-explanatory code with descriptive names
 - **UNITS**: Be explicit about units (radians, Hz, samples, normalized) in variable names or comments
 - **NUMERICAL TYPES**: Support multiple numeric representations:

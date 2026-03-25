@@ -1,7 +1,7 @@
 #include "numerical/math/QNumber.hpp"
 #include "numerical/neural_network/activation/ActivationFunction.hpp"
 #include "numerical/neural_network/layer/Dense.hpp"
-#include "numerical/neural_network/optimizer/Optimizer.hpp"
+#include "numerical/optimization/Optimizer.hpp"
 #include "gmock/gmock.h"
 
 namespace
@@ -28,10 +28,10 @@ namespace
 
     template<typename T, std::size_t Features>
     class MockOptimizer
-        : public neural_network::Optimizer<T, Features>
+        : public optimization::Optimizer<T, Features>
     {
     public:
-        using Result = typename neural_network::Optimizer<T, Features>::Result;
+        using Result = typename optimization::Optimizer<T, Features>::Result;
         using Vector = typename neural_network::Loss<T, Features>::Vector;
 
         const Result& Minimize(const Vector& initialGuess, neural_network::Loss<T, Features>& loss) override
@@ -190,7 +190,7 @@ TYPED_TEST(TestDense, OptimizationWithMockedOptimizer)
     for (std::size_t i = 0; i < TotalParams; ++i)
         optimizedParams[i] = T(0.05f);
 
-    optimizer.result = typename neural_network::Optimizer<T, TotalParams>::Result(
+    optimizer.result = typename optimization::Optimizer<T, TotalParams>::Result(
         optimizedParams, T(0.4f), 3);
 
     MockLoss<T, TotalParams> loss;

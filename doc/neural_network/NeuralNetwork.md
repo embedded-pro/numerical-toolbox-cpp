@@ -104,7 +104,7 @@ graph LR
 - **Dead neurons.** ReLU neurons that receive only negative inputs output zero forever. LeakyReLU mitigates this.
 - **Fixed-point saturation.** In Q15/Q31, activations and gradients must stay within $[-1, 1)$. Scale inputs and learning rates accordingly.
 - **Learning rate sensitivity.** Too high → divergence; too low → no progress. Start with $\eta = 0.01$ and adjust.
-- **Overfitting.** Small embedded datasets are easily memorized. Apply [regularization](regularization/Regularization.md) (L2 weight decay).
+- **Overfitting.** Small embedded datasets are easily memorized. Apply [regularization](../regularization/Regularization.md) (L2 weight decay).
 
 ## Variants & Generalizations
 
@@ -151,8 +151,8 @@ graph TD
 | [Dense Layer](layer/Layer.md)                          | The fundamental building block; computes affine transformations |
 | [Activation Functions](activation/Activation.md)       | Introduce non-linearity after each layer                        |
 | [Loss Functions](losses/Loss.md)                       | Define the training objective                                   |
-| [Optimizer](optimizer/Optimizer.md)                    | Drives parameter updates via gradient descent                   |
-| [Regularization](regularization/Regularization.md)     | Penalizes complexity to prevent overfitting                     |
+| [Optimizer](../optimization/Optimizer.md)                    | Drives parameter updates via gradient descent                   |
+| [Regularization](../regularization/Regularization.md)     | Penalizes complexity to prevent overfitting                     |
 | [Model](model/Model.md)                                | Composes layers into a trainable pipeline                       |
 | [Linear Regression](../estimators/LinearRegression.md) | Special case: single layer, identity activation, MSE loss       |
 

@@ -7,7 +7,7 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/neural_network/activation/Softmax.hpp"
 #include "numerical/neural_network/losses/Loss.hpp"
-#include "numerical/neural_network/regularization/Regularization.hpp"
+#include "numerical/regularization/Regularization.hpp"
 #include <cmath>
 
 namespace neural_network
@@ -19,13 +19,13 @@ namespace neural_network
     public:
         using Vector = typename Loss<QNumberType, NumberOfFeatures>::Vector;
 
-        CategoricalCrossEntropy(const Vector& target, Regularization<QNumberType, NumberOfFeatures>& regularization);
+        CategoricalCrossEntropy(const Vector& target, regularization::Regularization<QNumberType, NumberOfFeatures>& regularization);
         QNumberType Cost(const Vector& parameters) override;
         Vector Gradient(const Vector& parameters) override;
 
     private:
         Vector target;
-        Regularization<QNumberType, NumberOfFeatures>& regularization;
+        regularization::Regularization<QNumberType, NumberOfFeatures>& regularization;
         Softmax<QNumberType> softmax;
 
         Vector ComputeSoftmaxProbabilities(const Vector& x) const;
@@ -36,7 +36,7 @@ namespace neural_network
     template<typename QNumberType, std::size_t NumberOfFeatures>
     CategoricalCrossEntropy<QNumberType, NumberOfFeatures>::CategoricalCrossEntropy(
         const Vector& target,
-        Regularization<QNumberType, NumberOfFeatures>& regularization)
+        regularization::Regularization<QNumberType, NumberOfFeatures>& regularization)
         : target(target)
         , regularization(regularization)
     {}

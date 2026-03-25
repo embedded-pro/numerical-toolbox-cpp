@@ -5,10 +5,10 @@
 #endif
 
 #include "numerical/analysis/FastFourierTransform.hpp"
+#include "numerical/analysis/windowing/Windowing.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/ComplexNumber.hpp"
 #include "numerical/math/QNumber.hpp"
-#include "numerical/windowing/Windowing.hpp"
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
 #include "numerical/analysis/test/PowerDensitySpectrumTestSupport.hpp"

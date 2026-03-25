@@ -7,6 +7,7 @@ target_include_directories(numerical.simulator.controllers.pid.application PUBLI
 
 target_link_libraries(numerical.simulator.controllers.pid.application PUBLIC
     numerical.analysis
+    numerical.control_analysis
     numerical.controllers.implementations
     numerical.simulator.controllers.common
     numerical.solver
