@@ -117,7 +117,7 @@ graph TD
 |-----------------------------------------------------------|----------------------------------------------------------------------------------------|
 | [Activation Functions](../activation/Activation.md)       | Applied element-wise after the affine transformation                                   |
 | [Model](../model/Model.md)                                | Chains multiple dense layers into a network                                            |
-| [Optimizer](../optimizer/Optimizer.md)                    | Updates $W$ and $b$ using the computed gradients                                       |
+| [Optimizer](../../optimization/Optimizer.md)              | Updates $W$ and $b$ using the computed gradients                                       |
 | [Linear Regression](../../estimators/LinearRegression.md) | A dense layer with identity activation and MSE loss is equivalent to linear regression |
 
 ## References & Further Reading

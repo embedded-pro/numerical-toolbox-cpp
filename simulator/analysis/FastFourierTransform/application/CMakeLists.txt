@@ -7,7 +7,7 @@ target_include_directories(numerical.simulator.analysis.fft.application PUBLIC
 
 target_link_libraries(numerical.simulator.analysis.fft.application PUBLIC
     numerical.analysis
-    numerical.windowing
+    numerical.analysis.windowing
     numerical.simulator.utils
 )
 

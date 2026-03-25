@@ -4,12 +4,11 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
-#include "numerical/math/CompilerOptimizations.hpp"
-
 #include "infra/util/BoundedVector.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/neural_network/layer/Layer.hpp"
 #include "numerical/neural_network/losses/Loss.hpp"
-#include "numerical/neural_network/optimizer/Optimizer.hpp"
+#include "numerical/optimization/Optimizer.hpp"
 #include <functional>
 #include <tuple>
 #include <utility>
@@ -117,7 +116,7 @@ namespace neural_network
 
         OutputVector Forward(const InputVector& input);
         InputVector Backward(const OutputVector& output_gradient);
-        void Train(Optimizer<QNumberType, TotalParameters>& optimizer, Loss<QNumberType, TotalParameters>& loss, const ParameterVector& initialParameters);
+        void Train(optimization::Optimizer<QNumberType, TotalParameters>& optimizer, Loss<QNumberType, TotalParameters>& loss, const ParameterVector& initialParameters);
         void SetParameters(const ParameterVector& parameters);
         ParameterVector GetParameters() const;
 
@@ -174,7 +173,7 @@ namespace neural_network
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
     void Model<QNumberType, InputSize, OutputSize, Layers...>::Train(
-        Optimizer<QNumberType, TotalParameters>& optimizer,
+        optimization::Optimizer<QNumberType, TotalParameters>& optimizer,
         Loss<QNumberType, TotalParameters>& loss,
         const ParameterVector& initialParameters)
     {

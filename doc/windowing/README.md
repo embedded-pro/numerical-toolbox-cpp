@@ -1,6 +1,6 @@
 # Windowing
 
-Window functions for reducing spectral leakage in frequency-domain analysis.
+Window functions for reducing spectral leakage in frequency-domain analysis. Part of the [Analysis](../analysis/README.md) domain.
 
 ## Algorithms
 

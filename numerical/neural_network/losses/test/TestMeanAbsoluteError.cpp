@@ -5,10 +5,10 @@ namespace
 {
     template<typename QNumberType, std::size_t Size>
     class MockRegularization
-        : public neural_network::Regularization<QNumberType, Size>
+        : public regularization::Regularization<QNumberType, Size>
     {
     public:
-        using Vector = typename neural_network::Regularization<QNumberType, Size>::Vector;
+        using Vector = typename regularization::Regularization<QNumberType, Size>::Vector;
         MOCK_METHOD(QNumberType, Calculate, (const Vector& parameters), (const, override));
         MOCK_METHOD(Vector, Gradient, (const Vector& parameters), (const, override));
     };

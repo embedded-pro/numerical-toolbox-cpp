@@ -7,24 +7,21 @@ target_include_directories(numerical.analysis ${NUMERICAL_VISIBILITY}
 
 target_link_libraries(numerical.analysis ${NUMERICAL_VISIBILITY}
     infra.util
+    numerical.analysis.windowing
     numerical.math
-    numerical.solver
 )
 
 target_sources(numerical.analysis PRIVATE
     DiscreteCosineTransform.hpp
     FastFourierTransform.hpp
     FastFourierTransformRadix2Impl.hpp
-    FrequencyResponse.hpp
     PowerDensitySpectrum.hpp
-    RootLocus.hpp
 )
 
 numerical_add_coverage_sources(numerical.analysis
     FastFourierTransformRadix2Impl.cpp
-    FrequencyResponse.cpp
     PowerDensitySpectrum.cpp
-    RootLocus.cpp
 )
 
 add_subdirectory(test)
+add_subdirectory(windowing)

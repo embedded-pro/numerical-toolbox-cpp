@@ -11,7 +11,7 @@ target_link_libraries(numerical.neural_network.model ${NUMERICAL_VISIBILITY}
     numerical.neural_network.activation
     numerical.neural_network.layer
     numerical.neural_network.losses
-    numerical.neural_network.optimizer
+    numerical.optimization
 )
 
 target_sources(numerical.neural_network.model PRIVATE

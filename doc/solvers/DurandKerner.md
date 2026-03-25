@@ -76,7 +76,7 @@ After ~15–20 iterations the roots converge to $z \approx \{1, 2, 3\}$ (imagina
 - **Leading coefficient must be non-zero.** The polynomial degree is determined by the first coefficient.
 - **Complex arithmetic required.** This algorithm operates entirely in $\mathbb{C}$, so it is limited to floating-point types (`float`, `double`). Fixed-point types are not supported.
 - **No convergence guarantee for all polynomials.** Wilkinson's polynomial and other pathological cases may require higher precision or alternative methods.
-- **Root ordering.** Results are sorted by real part (ascending), which may not correspond to meaningful branch ordering in applications like [Root Locus](../analysis/RootLocus.md).
+- **Root ordering.** Results are sorted by real part (ascending), which may not correspond to meaningful branch ordering in applications like [Root Locus](../control_analysis/RootLocus.md).
 
 ## Variants & Generalizations
 
@@ -90,7 +90,7 @@ After ~15–20 iterations the roots converge to $z \approx \{1, 2, 3\}$ (imagina
 
 ## Applications
 
-- **Root locus analysis** — The [Root Locus](../analysis/RootLocus.md) algorithm calls Durand-Kerner at each gain step to find the closed-loop poles.
+- **Root locus analysis** — The [Root Locus](../control_analysis/RootLocus.md) algorithm calls Durand-Kerner at each gain step to find the closed-loop poles.
 - **Stability analysis** — Determining whether all roots of a characteristic polynomial lie inside the unit circle (discrete) or left half-plane (continuous).
 - **Filter design** — Finding pole and zero locations of transfer functions.
 - **Control system design** — Evaluating characteristic equations to check stability margins.
@@ -108,7 +108,7 @@ graph LR
 
 | Algorithm                                      | Relationship                                                                                          |
 |------------------------------------------------|-------------------------------------------------------------------------------------------------------|
-| [Root Locus](../analysis/RootLocus.md)         | Primary consumer — calls Durand-Kerner to find characteristic polynomial roots at each gain step      |
+| [Root Locus](../control_analysis/RootLocus.md) | Primary consumer — calls Durand-Kerner to find characteristic polynomial roots at each gain step      |
 | [Gaussian Elimination](GaussianElimination.md) | Alternative approach: form the companion matrix and compute eigenvalues (requires a different solver) |
 
 ## References & Further Reading

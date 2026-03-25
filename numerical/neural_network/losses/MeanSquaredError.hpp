@@ -6,7 +6,7 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/neural_network/losses/Loss.hpp"
-#include "numerical/neural_network/regularization/Regularization.hpp"
+#include "numerical/regularization/Regularization.hpp"
 
 namespace neural_network
 {
@@ -17,20 +17,20 @@ namespace neural_network
     public:
         using Vector = typename Loss<QNumberType, NumberOfFeatures>::Vector;
 
-        MeanSquaredError(const Vector& target, Regularization<QNumberType, NumberOfFeatures>& regularization);
+        MeanSquaredError(const Vector& target, regularization::Regularization<QNumberType, NumberOfFeatures>& regularization);
 
         QNumberType Cost(const Vector& parameters) override;
         Vector Gradient(const Vector& parameters) override;
 
     private:
         Vector target;
-        Regularization<QNumberType, NumberOfFeatures>& regularization;
+        regularization::Regularization<QNumberType, NumberOfFeatures>& regularization;
     };
 
     // Implementation //
 
     template<typename QNumberType, std::size_t NumberOfFeatures>
-    MeanSquaredError<QNumberType, NumberOfFeatures>::MeanSquaredError(const Vector& target, Regularization<QNumberType, NumberOfFeatures>& regularization)
+    MeanSquaredError<QNumberType, NumberOfFeatures>::MeanSquaredError(const Vector& target, regularization::Regularization<QNumberType, NumberOfFeatures>& regularization)
         : target(target)
         , regularization(regularization)
     {}

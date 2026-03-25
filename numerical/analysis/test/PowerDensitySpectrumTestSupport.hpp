@@ -1,7 +1,7 @@
 #pragma once
 
 #include "numerical/analysis/FastFourierTransform.hpp"
-#include "numerical/windowing/Windowing.hpp"
+#include "numerical/analysis/windowing/Windowing.hpp"
 
 namespace analysis::test
 {

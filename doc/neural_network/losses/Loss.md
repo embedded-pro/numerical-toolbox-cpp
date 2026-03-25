@@ -128,8 +128,8 @@ graph TD
 | Component                                                 | Relationship                                                                                         |
 |-----------------------------------------------------------|------------------------------------------------------------------------------------------------------|
 | [Activation Functions](../activation/Activation.md)       | Output activation must match: Sigmoid ↔ BCE, Softmax ↔ CCE, identity ↔ MSE                           |
-| [Optimizer](../optimizer/Optimizer.md)                    | Uses $\nabla \mathcal{L}$ to update parameters                                                       |
-| [Regularization](../regularization/Regularization.md)     | Adds a penalty term to the loss: $\mathcal{L}_{\text{total}} = \mathcal{L} + \lambda \Omega(\theta)$ |
+| [Optimizer](../../optimization/Optimizer.md)              | Uses $\nabla \mathcal{L}$ to update parameters                                                       |
+| [Regularization](../../regularization/Regularization.md)  | Adds a penalty term to the loss: $\mathcal{L}_{\text{total}} = \mathcal{L} + \lambda \Omega(\theta)$ |
 | [Linear Regression](../../estimators/LinearRegression.md) | Solved analytically when the loss is MSE and the model is linear                                     |
 
 ## References & Further Reading
