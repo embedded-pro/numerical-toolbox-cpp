@@ -108,7 +108,7 @@ graph LR
 
 | Algorithm                                      | Relationship                                                                                          |
 |------------------------------------------------|-------------------------------------------------------------------------------------------------------|
-| [Root Locus](../control_analysis/RootLocus.md)         | Primary consumer — calls Durand-Kerner to find characteristic polynomial roots at each gain step      |
+| [Root Locus](../control_analysis/RootLocus.md) | Primary consumer — calls Durand-Kerner to find characteristic polynomial roots at each gain step      |
 | [Gaussian Elimination](GaussianElimination.md) | Alternative approach: form the companion matrix and compute eigenvalues (requires a different solver) |
 
 ## References & Further Reading
