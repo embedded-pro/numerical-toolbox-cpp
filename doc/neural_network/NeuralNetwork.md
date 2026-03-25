@@ -151,8 +151,8 @@ graph TD
 | [Dense Layer](layer/Layer.md)                          | The fundamental building block; computes affine transformations |
 | [Activation Functions](activation/Activation.md)       | Introduce non-linearity after each layer                        |
 | [Loss Functions](losses/Loss.md)                       | Define the training objective                                   |
-| [Optimizer](../optimization/Optimizer.md)                    | Drives parameter updates via gradient descent                   |
-| [Regularization](../regularization/Regularization.md)     | Penalizes complexity to prevent overfitting                     |
+| [Optimizer](../optimization/Optimizer.md)              | Drives parameter updates via gradient descent                   |
+| [Regularization](../regularization/Regularization.md)  | Penalizes complexity to prevent overfitting                     |
 | [Model](model/Model.md)                                | Composes layers into a trainable pipeline                       |
 | [Linear Regression](../estimators/LinearRegression.md) | Special case: single layer, identity activation, MSE loss       |
 

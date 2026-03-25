@@ -12,8 +12,8 @@ Signal analysis algorithms for frequency-domain decomposition and spectral estim
 
 ## Sub-domains
 
-| Sub-domain                          | Description                                                               |
-|-------------------------------------|---------------------------------------------------------------------------|
+| Sub-domain                          | Description                                                                      |
+|-------------------------------------|----------------------------------------------------------------------------------|
 | [Windowing](../windowing/README.md) | Window functions (Rectangular, Hamming, Hanning, Blackman) for FFT preprocessing |
 
 > **Note:** For control system analysis tools (Frequency Response, Root Locus), see [Control Analysis](../control_analysis/README.md).

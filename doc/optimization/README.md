@@ -4,6 +4,6 @@ General-purpose optimization algorithms for parameter fitting, training, and con
 
 ## Algorithms
 
-| Algorithm                              | Description                                                                    |
-|----------------------------------------|--------------------------------------------------------------------------------|
-| [Gradient Descent](Optimizer.md)       | Iterative batch optimization via gradient-based weight updates                 |
+| Algorithm                        | Description                                                    |
+|----------------------------------|----------------------------------------------------------------|
+| [Gradient Descent](Optimizer.md) | Iterative batch optimization via gradient-based weight updates |

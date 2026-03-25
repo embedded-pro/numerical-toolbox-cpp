@@ -4,6 +4,6 @@ General-purpose regularization techniques for preventing overfitting in paramete
 
 ## Algorithms
 
-| Algorithm                                    | Description                                                        |
-|----------------------------------------------|--------------------------------------------------------------------|
-| [Regularization](Regularization.md)          | L1 (Lasso) and L2 (Ridge) weight penalty methods                  |
+| Algorithm                           | Description                                      |
+|-------------------------------------|--------------------------------------------------|
+| [Regularization](Regularization.md) | L1 (Lasso) and L2 (Ridge) weight penalty methods |
