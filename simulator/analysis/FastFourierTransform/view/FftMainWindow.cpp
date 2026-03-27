@@ -1,7 +1,9 @@
 #include "simulator/analysis/FastFourierTransform/view/FftMainWindow.hpp"
-#include <QHBoxLayout>
+#include "simulator/widgets/FrequencyChartWidget.hpp"
+#include "simulator/widgets/TimeSeriesChartWidget.hpp"
 #include <QMessageBox>
 #include <QSplitter>
+#include <QTabWidget>
 #include <stdexcept>
 
 namespace simulator::analysis::view
@@ -17,10 +19,16 @@ namespace simulator::analysis::view
         configPanel = new FftConfigurationPanel(splitter);
         configPanel->setMaximumWidth(320);
 
-        chartWidget = new FftChartWidget(splitter);
+        tabWidget = new QTabWidget(splitter);
+
+        timeDomainChart = new widgets::TimeSeriesChartWidget(tabWidget);
+        frequencyChart = new widgets::FrequencyChartWidget(tabWidget);
+
+        tabWidget->addTab(timeDomainChart, "Time Domain");
+        tabWidget->addTab(frequencyChart, "Frequency Spectrum");
 
         splitter->addWidget(configPanel);
-        splitter->addWidget(chartWidget);
+        splitter->addWidget(tabWidget);
         splitter->setStretchFactor(0, 0);
         splitter->setStretchFactor(1, 1);
 
@@ -39,7 +47,32 @@ namespace simulator::analysis::view
         try
         {
             auto result = fftSimulator.Compute();
-            chartWidget->SetData(result);
+
+            timeDomainChart->SetTimeAxis(result.time);
+            timeDomainChart->SetPanels({
+                {
+                    "Input Signal",
+                    "Amplitude",
+                    {
+                        { "Signal", QColor(41, 128, 185), result.signal },
+                        { "Windowed", QColor(231, 76, 60), result.windowedSignal },
+                    },
+                    1,
+                },
+            });
+
+            frequencyChart->SetFrequencyAxis(result.frequencies);
+            frequencyChart->SetPanels({
+                {
+                    "FFT Magnitude",
+                    "Magnitude",
+                    {
+                        { "Magnitude", QColor(41, 128, 185), result.magnitudes },
+                    },
+                    1,
+                },
+            });
+
             statusBar()->showMessage(
                 QString("FFT computed: %1 points, sample rate %2 Hz")
                     .arg(config.fftSize)

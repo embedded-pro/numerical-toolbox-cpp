@@ -7,6 +7,7 @@ target_include_directories(numerical.simulator.controllers.mpc.view PUBLIC
 
 target_link_libraries(numerical.simulator.controllers.mpc.view PUBLIC
     numerical.simulator.controllers.mpc.application
+    numerical.simulator.widgets
     Qt6::Widgets
 )
 
@@ -15,8 +16,6 @@ set_target_properties(numerical.simulator.controllers.mpc.view PROPERTIES
 )
 
 target_sources(numerical.simulator.controllers.mpc.view PRIVATE
-    MpcChartWidget.cpp
-    MpcChartWidget.hpp
     MpcConfigurationPanel.cpp
     MpcConfigurationPanel.hpp
     MpcMainWindow.cpp

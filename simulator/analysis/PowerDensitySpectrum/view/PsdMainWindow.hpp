@@ -1,10 +1,16 @@
 #pragma once
 
 #include "simulator/analysis/PowerDensitySpectrum/application/PsdSimulator.hpp"
-#include "simulator/analysis/PowerDensitySpectrum/view/PsdChartWidget.hpp"
 #include "simulator/analysis/PowerDensitySpectrum/view/PsdConfigurationPanel.hpp"
 #include <QMainWindow>
 #include <QStatusBar>
+#include <QTabWidget>
+
+namespace simulator::widgets
+{
+    class TimeSeriesChartWidget;
+    class FrequencyChartWidget;
+}
 
 namespace simulator::analysis::psd::view
 {
@@ -21,6 +27,8 @@ namespace simulator::analysis::psd::view
 
         PsdSimulator psdSimulator;
         PsdConfigurationPanel* configPanel;
-        PsdChartWidget* chartWidget;
+        QTabWidget* tabWidget;
+        widgets::TimeSeriesChartWidget* timeDomainChart;
+        widgets::FrequencyChartWidget* psdChart;
     };
 }

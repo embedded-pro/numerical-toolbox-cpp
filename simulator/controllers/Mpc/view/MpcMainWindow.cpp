@@ -1,4 +1,5 @@
 #include "simulator/controllers/Mpc/view/MpcMainWindow.hpp"
+#include "simulator/widgets/TimeSeriesChartWidget.hpp"
 #include <QMessageBox>
 #include <QSplitter>
 #include <exception>
@@ -18,8 +19,8 @@ namespace simulator::controllers::view
 
         tabWidget = new QTabWidget(splitter);
 
-        stepChart = new MpcStepResponseWidget(tabWidget);
-        constrainedChart = new MpcConstrainedResponseWidget(tabWidget);
+        stepChart = new widgets::TimeSeriesChartWidget(tabWidget);
+        constrainedChart = new widgets::TimeSeriesChartWidget(tabWidget);
 
         tabWidget->addTab(stepChart, "Step Response");
         tabWidget->addTab(constrainedChart, "Constrained Response");
@@ -45,10 +46,10 @@ namespace simulator::controllers::view
             mpcSimulator.Configure(plant, config);
 
             auto stepResult = mpcSimulator.ComputeStepResponse();
-            stepChart->SetData(stepResult, config.referencePosition);
+            DisplayResponse(stepChart, stepResult, config.referencePosition);
 
             auto constrainedResult = mpcSimulator.ComputeConstrainedResponse();
-            constrainedChart->SetData(constrainedResult, config.referencePosition);
+            DisplayResponse(constrainedChart, constrainedResult, config.referencePosition);
 
             statusBar()->showMessage(
                 QString("MPC: Q=%1 R=%2 | Plant: %3")
@@ -61,5 +62,54 @@ namespace simulator::controllers::view
             QMessageBox::warning(this, "Computation Error", e.what());
             statusBar()->showMessage("Computation failed");
         }
+    }
+
+    void MpcMainWindow::DisplayResponse(widgets::TimeSeriesChartWidget* chart, const MpcTimeResponse& result, float referencePosition)
+    {
+        const QColor stateColors[] = {
+            QColor(41, 128, 185),
+            QColor(231, 76, 60),
+            QColor(39, 174, 96),
+            QColor(142, 68, 173),
+        };
+
+        std::vector<widgets::Series> stateSeries;
+        for (std::size_t i = 0; i < result.states.size(); ++i)
+        {
+            stateSeries.push_back({
+                QString("x%1").arg(i),
+                stateColors[i % 4],
+                result.states[i],
+            });
+        }
+
+        std::vector<float> refLine(result.time.size(), referencePosition);
+        stateSeries.push_back({ "Reference", QColor(100, 100, 100), refLine });
+
+        chart->SetTimeAxis(result.time);
+        chart->SetPanels({
+            {
+                "States",
+                "Value",
+                stateSeries,
+                2,
+            },
+            {
+                "Control Input",
+                "u",
+                {
+                    { "Control", QColor(231, 76, 60), result.control },
+                },
+                1,
+            },
+            {
+                "Cost",
+                "J",
+                {
+                    { "Cost", QColor(142, 68, 173), result.cost },
+                },
+                1,
+            },
+        });
     }
 }

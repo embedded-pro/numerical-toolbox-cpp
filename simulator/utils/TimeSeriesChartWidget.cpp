@@ -17,7 +17,14 @@ namespace simulator::utils
 
     void TimeSeriesChartWidget::SetTimeAxis(std::span<const float> time)
     {
-        timeData = time;
+        timeData.assign(time.begin(), time.end());
+        maxTime = timeData.empty() ? 0.0f : timeData.back();
+        update();
+    }
+
+    void TimeSeriesChartWidget::SetTimeAxis(std::vector<float> time)
+    {
+        timeData = std::move(time);
         maxTime = timeData.empty() ? 0.0f : timeData.back();
         update();
     }
@@ -30,7 +37,7 @@ namespace simulator::utils
 
     void TimeSeriesChartWidget::Clear()
     {
-        timeData = {};
+        timeData.clear();
         chartPanels.clear();
         maxTime = 0.0f;
         update();
@@ -129,11 +136,13 @@ namespace simulator::utils
         QPen pen(series.color, 2);
         painter.setPen(pen);
 
+        auto count = std::min(timeData.size(), series.data.size());
+        auto stride = std::max<std::size_t>(1, count / static_cast<std::size_t>(plotArea.width()));
+
         QPointF prev;
         auto hasPrev = false;
-        auto count = std::min(timeData.size(), series.data.size());
 
-        for (std::size_t i = 0; i < count; ++i)
+        for (std::size_t i = 0; i < count; i += stride)
         {
             auto xRatio = timeData[i] / maxTime;
             auto yRatio = (series.data[i] - bounds.minY) / range;
@@ -146,6 +155,16 @@ namespace simulator::utils
                 painter.drawLine(prev, curr);
             prev = curr;
             hasPrev = true;
+        }
+
+        auto lastIdx = count - 1;
+        if (hasPrev && lastIdx % stride != 0)
+        {
+            auto xRatio = timeData[lastIdx] / maxTime;
+            auto yRatio = (series.data[lastIdx] - bounds.minY) / range;
+            auto x = plotArea.left() + static_cast<int>(xRatio * plotArea.width());
+            auto y = plotArea.bottom() - static_cast<int>(yRatio * plotArea.height());
+            painter.drawLine(prev, QPointF(x, y));
         }
     }
 
