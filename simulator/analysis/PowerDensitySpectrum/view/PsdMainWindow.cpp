@@ -1,7 +1,9 @@
 #include "simulator/analysis/PowerDensitySpectrum/view/PsdMainWindow.hpp"
-#include <QHBoxLayout>
+#include "simulator/widgets/FrequencyChartWidget.hpp"
+#include "simulator/widgets/TimeSeriesChartWidget.hpp"
 #include <QMessageBox>
 #include <QSplitter>
+#include <QTabWidget>
 #include <stdexcept>
 
 namespace simulator::analysis::psd::view
@@ -17,10 +19,16 @@ namespace simulator::analysis::psd::view
         configPanel = new PsdConfigurationPanel(splitter);
         configPanel->setMaximumWidth(320);
 
-        chartWidget = new PsdChartWidget(splitter);
+        tabWidget = new QTabWidget(splitter);
+
+        timeDomainChart = new widgets::TimeSeriesChartWidget(tabWidget);
+        psdChart = new widgets::FrequencyChartWidget(tabWidget);
+
+        tabWidget->addTab(timeDomainChart, "Time Domain");
+        tabWidget->addTab(psdChart, "Power Spectral Density");
 
         splitter->addWidget(configPanel);
-        splitter->addWidget(chartWidget);
+        splitter->addWidget(tabWidget);
         splitter->setStretchFactor(0, 0);
         splitter->setStretchFactor(1, 1);
 
@@ -39,7 +47,31 @@ namespace simulator::analysis::psd::view
         try
         {
             auto result = psdSimulator.Compute();
-            chartWidget->SetData(result);
+
+            timeDomainChart->SetTimeAxis(result.time);
+            timeDomainChart->SetPanels({
+                {
+                    "Input Signal",
+                    "Amplitude",
+                    {
+                        { "Signal", QColor(41, 128, 185), result.signal },
+                    },
+                    1,
+                },
+            });
+
+            psdChart->SetFrequencyAxis(result.frequencies);
+            psdChart->SetPanels({
+                {
+                    "Power Spectral Density",
+                    "Power (dB/Hz)",
+                    {
+                        { "PSD (dB)", QColor(231, 76, 60), result.powerDensityDb },
+                    },
+                    1,
+                },
+            });
+
             statusBar()->showMessage(
                 QString("PSD computed: %1 input samples, %2-point segments, %3% overlap, %4 Hz")
                     .arg(config.inputSize)

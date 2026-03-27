@@ -1,7 +1,7 @@
 #pragma once
 
 #include "simulator/controllers/LqrCartPole/application/LqrCartPoleSimulator.hpp"
-#include "simulator/utils/TimeSeriesChartWidget.hpp"
+#include "simulator/widgets/TimeSeriesChartWidget.hpp"
 #include <QLabel>
 #include <QWidget>
 #include <vector>
@@ -51,8 +51,8 @@ namespace simulator::controllers::lqr::view
         QLabel* peakXLabel;
         QLabel* totalEffortLabel;
 
-        utils::TimeSeriesChartWidget* stateChart;
-        utils::TimeSeriesChartWidget* controlChart;
+        widgets::TimeSeriesChartWidget* stateChart;
+        widgets::TimeSeriesChartWidget* controlChart;
 
         static constexpr int updateInterval = 10;
         static constexpr float settlingThreshold = 0.02f;

@@ -1,10 +1,16 @@
 #pragma once
 
 #include "simulator/analysis/FastFourierTransform/application/FftSimulator.hpp"
-#include "simulator/analysis/FastFourierTransform/view/FftChartWidget.hpp"
 #include "simulator/analysis/FastFourierTransform/view/FftConfigurationPanel.hpp"
 #include <QMainWindow>
 #include <QStatusBar>
+#include <QTabWidget>
+
+namespace simulator::widgets
+{
+    class TimeSeriesChartWidget;
+    class FrequencyChartWidget;
+}
 
 namespace simulator::analysis::view
 {
@@ -21,6 +27,8 @@ namespace simulator::analysis::view
 
         FftSimulator fftSimulator;
         FftConfigurationPanel* configPanel;
-        FftChartWidget* chartWidget;
+        QTabWidget* tabWidget;
+        widgets::TimeSeriesChartWidget* timeDomainChart;
+        widgets::FrequencyChartWidget* frequencyChart;
     };
 }

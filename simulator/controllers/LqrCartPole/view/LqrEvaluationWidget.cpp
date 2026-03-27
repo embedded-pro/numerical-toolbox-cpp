@@ -50,8 +50,8 @@ namespace simulator::controllers::lqr::view
 
         auto* chartSplitter = new QSplitter(Qt::Vertical, this);
 
-        stateChart = new utils::TimeSeriesChartWidget(chartSplitter);
-        controlChart = new utils::TimeSeriesChartWidget(chartSplitter);
+        stateChart = new widgets::TimeSeriesChartWidget(chartSplitter);
+        controlChart = new widgets::TimeSeriesChartWidget(chartSplitter);
 
         chartSplitter->addWidget(stateChart);
         chartSplitter->addWidget(controlChart);

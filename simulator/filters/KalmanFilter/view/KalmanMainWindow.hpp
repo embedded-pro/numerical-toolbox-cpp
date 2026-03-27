@@ -1,10 +1,14 @@
 #pragma once
 
 #include "simulator/filters/KalmanFilter/application/KalmanFilterSimulator.hpp"
-#include "simulator/filters/KalmanFilter/view/KalmanChartWidget.hpp"
 #include "simulator/filters/KalmanFilter/view/KalmanConfigPanel.hpp"
 #include <QMainWindow>
 #include <QTabWidget>
+
+namespace simulator::widgets
+{
+    class TimeSeriesChartWidget;
+}
 
 namespace simulator::filters::view
 {
@@ -22,9 +26,9 @@ namespace simulator::filters::view
         KalmanFilterSimulator simulator;
         KalmanConfigPanel* configPanel;
         QTabWidget* tabWidget;
-        ThetaChartWidget* thetaChart;
-        ThetaDotChartWidget* thetaDotChart;
-        CovarianceChartWidget* covarianceChart;
-        ErrorChartWidget* errorChart;
+        widgets::TimeSeriesChartWidget* thetaChart;
+        widgets::TimeSeriesChartWidget* thetaDotChart;
+        widgets::TimeSeriesChartWidget* covarianceChart;
+        widgets::TimeSeriesChartWidget* errorChart;
     };
 }

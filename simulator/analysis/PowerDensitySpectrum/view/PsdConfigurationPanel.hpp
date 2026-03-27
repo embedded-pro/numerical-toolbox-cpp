@@ -1,11 +1,11 @@
 #pragma once
 
 #include "simulator/analysis/PowerDensitySpectrum/application/PsdSimulator.hpp"
+#include "simulator/widgets/SignalConfigWidget.hpp"
 #include <QComboBox>
 #include <QDoubleSpinBox>
 #include <QGroupBox>
 #include <QPushButton>
-#include <QTableWidget>
 #include <QWidget>
 
 namespace simulator::analysis::psd::view
@@ -25,8 +25,6 @@ namespace simulator::analysis::psd::view
 
     private:
         void SetupUi();
-        void AddSignalComponent();
-        void RemoveSignalComponent();
 
         QComboBox* segmentSizeCombo;
         QComboBox* windowTypeCombo;
@@ -35,9 +33,7 @@ namespace simulator::analysis::psd::view
         QDoubleSpinBox* inputSizeSpinBox;
         QComboBox* noiseTypeCombo;
         QDoubleSpinBox* noiseAmplitudeSpinBox;
-        QTableWidget* componentsTable;
-        QPushButton* addComponentButton;
-        QPushButton* removeComponentButton;
+        widgets::SignalConfigWidget* signalConfig;
         QPushButton* computeButton;
     };
 }

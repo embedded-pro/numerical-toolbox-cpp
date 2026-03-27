@@ -1,12 +1,12 @@
 #pragma once
 
 #include "simulator/analysis/FastFourierTransform/application/FftSimulator.hpp"
+#include "simulator/widgets/SignalConfigWidget.hpp"
 #include <QComboBox>
 #include <QDoubleSpinBox>
 #include <QGroupBox>
 #include <QPushButton>
 #include <QSpinBox>
-#include <QTableWidget>
 #include <QWidget>
 
 namespace simulator::analysis::view
@@ -26,15 +26,11 @@ namespace simulator::analysis::view
 
     private:
         void SetupUi();
-        void AddSignalComponent();
-        void RemoveSignalComponent();
 
         QComboBox* fftSizeCombo;
         QComboBox* windowTypeCombo;
         QDoubleSpinBox* sampleRateSpinBox;
-        QTableWidget* componentsTable;
-        QPushButton* addComponentButton;
-        QPushButton* removeComponentButton;
+        widgets::SignalConfigWidget* signalConfig;
         QPushButton* computeButton;
     };
 }

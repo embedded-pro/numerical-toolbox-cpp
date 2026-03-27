@@ -7,6 +7,7 @@ target_include_directories(numerical.simulator.analysis.psd.view PUBLIC
 
 target_link_libraries(numerical.simulator.analysis.psd.view PUBLIC
     numerical.simulator.analysis.psd.application
+    numerical.simulator.widgets
     Qt6::Widgets
 )
 
@@ -15,8 +16,6 @@ set_target_properties(numerical.simulator.analysis.psd.view PROPERTIES
 )
 
 target_sources(numerical.simulator.analysis.psd.view PRIVATE
-    PsdChartWidget.cpp
-    PsdChartWidget.hpp
     PsdConfigurationPanel.cpp
     PsdConfigurationPanel.hpp
     PsdMainWindow.cpp
