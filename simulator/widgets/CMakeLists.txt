@@ -17,6 +17,8 @@ set_target_properties(numerical.simulator.widgets PROPERTIES
 )
 
 target_sources(numerical.simulator.widgets PRIVATE
+    ChartInteraction.cpp
+    ChartInteraction.hpp
     FrequencyChartWidget.cpp
     FrequencyChartWidget.hpp
     SignalConfigWidget.cpp
