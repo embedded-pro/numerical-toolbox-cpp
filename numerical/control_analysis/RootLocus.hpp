@@ -5,7 +5,6 @@
 #endif
 
 #include "infra/util/BoundedVector.hpp"
-#include "infra/util/MemoryRange.hpp"
 #include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/solvers/DurandKerner.hpp"
@@ -14,6 +13,7 @@
 #include <complex>
 #include <cstddef>
 #include <numbers>
+#include <span>
 #include <type_traits>
 
 namespace control_analysis
@@ -43,27 +43,27 @@ namespace control_analysis
         };
 
         Result Calculate(
-            infra::MemoryRange<const T> numerator,
-            infra::MemoryRange<const T> denominator,
+            std::span<const T> numerator,
+            std::span<const T> denominator,
             T currentGain,
             T gainMin = T(0.001),
             T gainMax = T(50)) const;
 
     private:
-        RootVector FindRoots(infra::MemoryRange<const T> polynomial) const;
+        RootVector FindRoots(std::span<const T> polynomial) const;
 
         static void PolyAdd(
-            infra::MemoryRange<const T> base,
-            infra::MemoryRange<const T> addend,
+            std::span<const T> base,
+            std::span<const T> addend,
             T scale,
-            infra::MemoryRange<T> result);
+            std::span<T> result);
     };
 
     ////    Implementation    ////
 
     template<typename T, std::size_t MaxOrder, std::size_t MaxGainSteps>
     typename RootLocus<T, MaxOrder, MaxGainSteps>::RootVector
-    RootLocus<T, MaxOrder, MaxGainSteps>::FindRoots(infra::MemoryRange<const T> polynomial) const
+    RootLocus<T, MaxOrder, MaxGainSteps>::FindRoots(std::span<const T> polynomial) const
     {
         solvers::DurandKerner<T, MaxOrder> solver;
         return solver.Solve(polynomial);
@@ -71,10 +71,10 @@ namespace control_analysis
 
     template<typename T, std::size_t MaxOrder, std::size_t MaxGainSteps>
     void RootLocus<T, MaxOrder, MaxGainSteps>::PolyAdd(
-        infra::MemoryRange<const T> base,
-        infra::MemoryRange<const T> addend,
+        std::span<const T> base,
+        std::span<const T> addend,
         T scale,
-        infra::MemoryRange<T> result)
+        std::span<T> result)
     {
         really_assert(base.size() >= addend.size());
 
@@ -89,8 +89,8 @@ namespace control_analysis
     template<typename T, std::size_t MaxOrder, std::size_t MaxGainSteps>
     OPTIMIZE_FOR_SPEED typename RootLocus<T, MaxOrder, MaxGainSteps>::Result
     RootLocus<T, MaxOrder, MaxGainSteps>::Calculate(
-        infra::MemoryRange<const T> numerator,
-        infra::MemoryRange<const T> denominator,
+        std::span<const T> numerator,
+        std::span<const T> denominator,
         T currentGain,
         T gainMin,
         T gainMax) const
@@ -119,18 +119,18 @@ namespace control_analysis
             T K = std::pow(T(10), logK);
             result.gains.push_back(K);
 
-            auto charPoly = infra::MakeRange(charPolyStorage.data(), charPolyStorage.data() + denominator.size());
+            auto charPoly = std::span<T>(charPolyStorage.data(), denominator.size());
             PolyAdd(denominator, numerator, K, charPoly);
 
-            auto roots = FindRoots(infra::MemoryRange<const T>(charPoly));
+            auto roots = FindRoots(std::span<const T>(charPoly));
             for (std::size_t r = 0; r < polyOrder && r < roots.size(); ++r)
                 result.loci[r].push_back(roots[r]);
         }
 
         std::ranges::fill(charPolyStorage, T(0));
-        auto closedPoly = infra::MakeRange(charPolyStorage.data(), charPolyStorage.data() + denominator.size());
+        auto closedPoly = std::span<T>(charPolyStorage.data(), denominator.size());
         PolyAdd(denominator, numerator, currentGain, closedPoly);
-        result.closedLoopPoles = FindRoots(infra::MemoryRange<const T>(closedPoly));
+        result.closedLoopPoles = FindRoots(std::span<const T>(closedPoly));
 
         return result;
     }

@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <numbers>
+#include <span>
 
 namespace simulator::controllers
 {
@@ -169,8 +170,8 @@ namespace simulator::controllers
         std::vector<float> denCoeffs = discrete.denominator;
 
         control_analysis::FrequencyResponse<float, bodeResolution> freqResponse(
-            infra::MemoryRange<float>(numCoeffs),
-            infra::MemoryRange<float>(denCoeffs),
+            std::span<float>(numCoeffs),
+            std::span<float>(denCoeffs),
             fs);
 
         auto [frequencies, magnitudeDb, phaseDeg] = freqResponse.Calculate();
@@ -220,8 +221,8 @@ namespace simulator::controllers
 
         control_analysis::RootLocus<float, rootLocusMaxOrder, rootLocusGainSteps> rootLocus;
         auto rlResult = rootLocus.Calculate(
-            infra::MemoryRange<const float>(openNum),
-            infra::MemoryRange<const float>(openDen),
+            std::span<const float>(openNum),
+            std::span<const float>(openDen),
             1.0f);
 
         RootLocusResult result;

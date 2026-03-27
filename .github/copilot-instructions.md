@@ -147,7 +147,7 @@ These are the most important architectural directives in this codebase. Every ne
 
 ### Error Handling
 
-- Use `infra::Optional` for functions that may not return a value
+- Use `std::optional` for functions that may not return a value
 - Return error codes or status enums, not exceptions
 - Assert preconditions in debug builds with `assert()` or `really_assert()`
 

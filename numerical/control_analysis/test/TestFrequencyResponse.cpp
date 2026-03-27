@@ -19,7 +19,7 @@ TEST_F(TestFrequencyResponse, unity_system_has_zero_db_response)
     std::array<float, 1> a = { 1.0f };
 
     control_analysis::FrequencyResponse<float, 64> freqResponse(
-        infra::MakeRange(b), infra::MakeRange(a), sampleFrequency);
+        b, a, sampleFrequency);
 
     auto [frequencies, magnitudes, phases] = freqResponse.Calculate();
 
@@ -37,7 +37,7 @@ TEST_F(TestFrequencyResponse, frequencies_are_within_nyquist_range)
     std::array<float, 1> a = { 1.0f };
 
     control_analysis::FrequencyResponse<float, 128> freqResponse(
-        infra::MakeRange(b), infra::MakeRange(a), sampleFrequency);
+        b, a, sampleFrequency);
 
     auto [frequencies, magnitudes, phases] = freqResponse.Calculate();
 
@@ -56,7 +56,7 @@ TEST_F(TestFrequencyResponse, frequencies_are_monotonically_increasing)
     std::array<float, 1> a = { 1.0f };
 
     control_analysis::FrequencyResponse<float, 64> freqResponse(
-        infra::MakeRange(b), infra::MakeRange(a), sampleFrequency);
+        b, a, sampleFrequency);
 
     auto [frequencies, magnitudes, phases] = freqResponse.Calculate();
 
@@ -72,7 +72,7 @@ TEST_F(TestFrequencyResponse, lowpass_filter_attenuates_high_frequencies)
     std::array<float, 1> a = { 1.0f };
 
     control_analysis::FrequencyResponse<float, 64> freqResponse(
-        infra::MakeRange(b), infra::MakeRange(a), sampleFrequency);
+        b, a, sampleFrequency);
 
     auto [frequencies, magnitudes, phases] = freqResponse.Calculate();
 
@@ -90,7 +90,7 @@ TEST_F(TestFrequencyResponse, phase_response_is_computed)
     std::array<float, 1> a = { 1.0f };
 
     control_analysis::FrequencyResponse<float, 64> freqResponse(
-        infra::MakeRange(b), infra::MakeRange(a), sampleFrequency);
+        b, a, sampleFrequency);
 
     auto [frequencies, magnitudes, phases] = freqResponse.Calculate();
 
@@ -109,7 +109,7 @@ TEST_F(TestFrequencyResponse, output_sizes_match_for_multi_coefficient_system)
     std::array<float, 3> a = { 1.0f, -0.5f, 0.1f };
 
     control_analysis::FrequencyResponse<float, 64> freqResponse(
-        infra::MakeRange(b), infra::MakeRange(a), sampleFrequency);
+        b, a, sampleFrequency);
 
     auto [frequencies, magnitudes, phases] = freqResponse.Calculate();
 

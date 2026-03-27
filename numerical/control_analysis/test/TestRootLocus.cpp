@@ -18,8 +18,8 @@ TEST_F(TestRootLocus, finds_open_loop_poles_of_first_order_system)
     std::array<float, 2> den = { 1.0f, 2.0f };
 
     auto result = rootLocus.Calculate(
-        infra::MemoryRange<const float>(num),
-        infra::MemoryRange<const float>(den),
+        num,
+        den,
         1.0f);
 
     ASSERT_EQ(result.openLoopPoles.size(), 1u);
@@ -35,8 +35,8 @@ TEST_F(TestRootLocus, finds_open_loop_poles_of_second_order_system)
     std::array<float, 3> den = { 1.0f, 2.0f * zeta * wn, wn * wn };
 
     auto result = rootLocus.Calculate(
-        infra::MemoryRange<const float>(num),
-        infra::MemoryRange<const float>(den),
+        num,
+        den,
         1.0f);
 
     ASSERT_EQ(result.openLoopPoles.size(), 2u);
@@ -52,8 +52,8 @@ TEST_F(TestRootLocus, finds_open_loop_zeros)
     std::array<float, 3> den = { 1.0f, 5.0f, 6.0f };
 
     auto result = rootLocus.Calculate(
-        infra::MemoryRange<const float>(num),
-        infra::MemoryRange<const float>(den),
+        num,
+        den,
         1.0f);
 
     ASSERT_EQ(result.openLoopZeros.size(), 1u);
@@ -67,8 +67,8 @@ TEST_F(TestRootLocus, gain_sweep_produces_correct_number_of_steps)
     std::array<float, 2> den = { 1.0f, 1.0f };
 
     auto result = rootLocus.Calculate(
-        infra::MemoryRange<const float>(num),
-        infra::MemoryRange<const float>(den),
+        num,
+        den,
         1.0f);
 
     EXPECT_EQ(result.gains.size(), 100u);
@@ -82,8 +82,8 @@ TEST_F(TestRootLocus, gain_sweep_covers_range)
     std::array<float, 2> den = { 1.0f, 1.0f };
 
     auto result = rootLocus.Calculate(
-        infra::MemoryRange<const float>(num),
-        infra::MemoryRange<const float>(den),
+        num,
+        den,
         1.0f, 0.01f, 10.0f);
 
     EXPECT_NEAR(result.gains.front(), 0.01f, 1e-4f);
@@ -96,8 +96,8 @@ TEST_F(TestRootLocus, closed_loop_poles_at_current_gain)
     std::array<float, 2> den = { 1.0f, 1.0f };
 
     auto result = rootLocus.Calculate(
-        infra::MemoryRange<const float>(num),
-        infra::MemoryRange<const float>(den),
+        num,
+        den,
         2.0f);
 
     ASSERT_EQ(result.closedLoopPoles.size(), 1u);
@@ -112,8 +112,8 @@ TEST_F(TestRootLocus, loci_move_left_with_increasing_gain_for_first_order)
     std::array<float, 2> den = { 1.0f, 1.0f };
 
     auto result = rootLocus.Calculate(
-        infra::MemoryRange<const float>(num),
-        infra::MemoryRange<const float>(den),
+        num,
+        den,
         1.0f, 0.1f, 100.0f);
 
     ASSERT_GE(result.loci[0].size(), 2u);
@@ -128,8 +128,8 @@ TEST_F(TestRootLocus, second_order_poles_become_complex_with_high_gain)
     std::array<float, 3> den = { 1.0f, 3.0f, 2.0f };
 
     auto result = rootLocus.Calculate(
-        infra::MemoryRange<const float>(num),
-        infra::MemoryRange<const float>(den),
+        num,
+        den,
         10.0f, 0.01f, 100.0f);
 
     ASSERT_EQ(result.activeBranches, 2u);
@@ -152,8 +152,8 @@ TEST_F(TestRootLocus, stores_current_gain)
     std::array<float, 2> den = { 1.0f, 1.0f };
 
     auto result = rootLocus.Calculate(
-        infra::MemoryRange<const float>(num),
-        infra::MemoryRange<const float>(den),
+        num,
+        den,
         42.0f);
 
     EXPECT_FLOAT_EQ(result.currentGain, 42.0f);
@@ -178,8 +178,8 @@ TEST_F(TestRootLocus, works_with_pid_and_first_order_plant)
     openDen[2] = pidDen[1] * plantDen[1];
 
     auto result = rootLocus.Calculate(
-        infra::MemoryRange<const float>(openNum),
-        infra::MemoryRange<const float>(openDen),
+        openNum,
+        openDen,
         1.0f);
 
     EXPECT_EQ(result.activeBranches, 2u);
