@@ -55,15 +55,18 @@ namespace simulator::controllers::view
         chart->SetTimeAxis(result.time);
         chart->SetPanels({
             widgets::ChartPanel{ "Output", "Amplitude", {
-                widgets::Series{ "Reference", QColor(41, 128, 185), result.reference },
-                widgets::Series{ "Output", QColor(231, 76, 60), result.output },
-            }, 2 },
+                                                            widgets::Series{ "Reference", QColor(41, 128, 185), result.reference },
+                                                            widgets::Series{ "Output", QColor(231, 76, 60), result.output },
+                                                        },
+                2 },
             widgets::ChartPanel{ "Control Signal", "u(t)", {
-                widgets::Series{ "Control", QColor(39, 174, 96), result.controlSignal },
-            }, 1 },
+                                                               widgets::Series{ "Control", QColor(39, 174, 96), result.controlSignal },
+                                                           },
+                1 },
             widgets::ChartPanel{ "Error", "e(t)", {
-                widgets::Series{ "Error", QColor(243, 156, 18), result.error },
-            }, 1 },
+                                                      widgets::Series{ "Error", QColor(243, 156, 18), result.error },
+                                                  },
+                1 },
         });
     }
 
@@ -72,11 +75,13 @@ namespace simulator::controllers::view
         chart->SetFrequencyAxis(result.frequencies);
         chart->SetPanels({
             widgets::ChartPanel{ "Magnitude", "dB", {
-                widgets::Series{ "Magnitude", QColor(41, 128, 185), result.magnitudeDb },
-            }, 1 },
+                                                        widgets::Series{ "Magnitude", QColor(41, 128, 185), result.magnitudeDb },
+                                                    },
+                1 },
             widgets::ChartPanel{ "Phase", "degrees", {
-                widgets::Series{ "Phase", QColor(231, 76, 60), result.phaseDeg },
-            }, 1 },
+                                                         widgets::Series{ "Phase", QColor(231, 76, 60), result.phaseDeg },
+                                                     },
+                1 },
         });
     }
 

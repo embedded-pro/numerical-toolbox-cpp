@@ -108,7 +108,7 @@ namespace simulator::estimators::rls::view
         });
 
         statusBar()->showMessage(QString("RLS estimation complete: %1 samples, λ=%2")
-                                     .arg(config.rls.numSamples)
-                                     .arg(static_cast<double>(config.rls.forgettingFactor), 0, 'f', 3));
+                .arg(config.rls.numSamples)
+                .arg(static_cast<double>(config.rls.forgettingFactor), 0, 'f', 3));
     }
 }

@@ -31,7 +31,7 @@ namespace simulator::neural_network::nn
             for (std::size_t i = 0; i < samples; ++i)
             {
                 float x = static_cast<float>(i) / static_cast<float>(samples - 1) * 2.0f * std::numbers::pi_v<float>;
-                data.inputs[i] = { x / (2.0f * std::numbers::pi_v<float>) };
+                data.inputs[i] = { x / (2.0f * std::numbers::pi_v<float>)};
                 data.targets[i] = (std::sin(x) + 1.0f) / 2.0f;
             }
             return data;
@@ -197,12 +197,12 @@ namespace simulator::neural_network::nn
 
         switch (configuration.nn.demo)
         {
-        case DemoType::Xor:
-            data = GenerateXorData();
-            break;
-        case DemoType::SineApproximation:
-            data = GenerateSineData(configuration.nn.sineSamples);
-            break;
+            case DemoType::Xor:
+                data = GenerateXorData();
+                break;
+            case DemoType::SineApproximation:
+                data = GenerateSineData(configuration.nn.sineSamples);
+                break;
         }
 
         return TrainNetwork(configuration.nn, data);

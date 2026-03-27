@@ -72,7 +72,7 @@ namespace simulator::neural_network::nn::view
 
         auto finalLoss = result.lossHistory.empty() ? 0.0f : result.lossHistory.back();
         statusBar()->showMessage(QString("Training complete: %1 epochs, final loss = %2")
-                                     .arg(config.nn.epochs)
-                                     .arg(static_cast<double>(finalLoss), 0, 'g', 6));
+                .arg(config.nn.epochs)
+                .arg(static_cast<double>(finalLoss), 0, 'g', 6));
     }
 }

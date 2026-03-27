@@ -74,12 +74,12 @@ namespace simulator::estimators::rls
 
         switch (features)
         {
-        case 2:
-            return RunEstimation<2>(configuration.rls);
-        case 3:
-            return RunEstimation<3>(configuration.rls);
-        default:
-            return RunEstimation<3>(configuration.rls);
+            case 2:
+                return RunEstimation<2>(configuration.rls);
+            case 3:
+                return RunEstimation<3>(configuration.rls);
+            default:
+                return RunEstimation<3>(configuration.rls);
         }
     }
 }
