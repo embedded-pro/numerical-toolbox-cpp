@@ -5,7 +5,6 @@
 #endif
 
 #include "infra/util/BoundedVector.hpp"
-#include "infra/util/MemoryRange.hpp"
 #include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include <algorithm>
@@ -13,6 +12,7 @@
 #include <complex>
 #include <cstddef>
 #include <numbers>
+#include <span>
 #include <type_traits>
 
 namespace solvers
@@ -26,17 +26,17 @@ namespace solvers
     public:
         using Roots = typename infra::BoundedVector<std::complex<T>>::template WithMaxSize<MaxOrder>;
 
-        Roots Solve(infra::MemoryRange<const T> coefficients,
+        Roots Solve(std::span<const T> coefficients,
             std::size_t maxIterations = 200, T tolerance = T(1e-6)) const;
 
     private:
         static std::complex<T> EvaluatePolynomial(
-            infra::MemoryRange<const T> coefficients, std::complex<T> x);
+            std::span<const T> coefficients, std::complex<T> x);
 
         static std::complex<T> ComputeDenominator(
             const Roots& roots, std::size_t r, std::size_t order);
 
-        static bool Iterate(Roots& roots, infra::MemoryRange<const T> coefficients,
+        static bool Iterate(Roots& roots, std::span<const T> coefficients,
             std::size_t order, T tolerance);
     };
 
@@ -44,7 +44,7 @@ namespace solvers
 
     template<typename T, std::size_t MaxOrder>
     std::complex<T> DurandKerner<T, MaxOrder>::EvaluatePolynomial(
-        infra::MemoryRange<const T> coefficients, std::complex<T> x)
+        std::span<const T> coefficients, std::complex<T> x)
     {
         std::complex<T> result(coefficients[0], T(0));
         for (std::size_t c = 1; c < coefficients.size(); ++c)
@@ -70,7 +70,7 @@ namespace solvers
 
     template<typename T, std::size_t MaxOrder>
     bool DurandKerner<T, MaxOrder>::Iterate(Roots& roots,
-        infra::MemoryRange<const T> coefficients, std::size_t order, T tolerance)
+        std::span<const T> coefficients, std::size_t order, T tolerance)
     {
         bool converged = true;
 
@@ -90,7 +90,7 @@ namespace solvers
 
     template<typename T, std::size_t MaxOrder>
     OPTIMIZE_FOR_SPEED typename DurandKerner<T, MaxOrder>::Roots
-    DurandKerner<T, MaxOrder>::Solve(infra::MemoryRange<const T> coefficients,
+    DurandKerner<T, MaxOrder>::Solve(std::span<const T> coefficients,
         std::size_t maxIterations, T tolerance) const
     {
         Roots roots;

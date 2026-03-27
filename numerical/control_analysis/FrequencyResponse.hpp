@@ -4,13 +4,12 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
-#include "numerical/math/CompilerOptimizations.hpp"
-
 #include "infra/util/BoundedVector.hpp"
-#include "infra/util/MemoryRange.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/QNumber.hpp"
 #include <cmath>
 #include <complex>
+#include <span>
 #include <tuple>
 
 namespace control_analysis
@@ -25,22 +24,22 @@ namespace control_analysis
     public:
         using Vector = infra::BoundedVector<float>::WithMaxSize<NumberOfPoints>;
 
-        FrequencyResponse(infra::MemoryRange<QNumberType> b, infra::MemoryRange<QNumberType> a, float sampleFrequency);
+        FrequencyResponse(std::span<QNumberType> b, std::span<QNumberType> a, float sampleFrequency);
         std::tuple<Vector, Vector, Vector> Calculate();
 
     private:
         Vector frequencies;
         Vector response;
         Vector phase;
-        infra::MemoryRange<QNumberType> a;
-        infra::MemoryRange<QNumberType> b;
+        std::span<QNumberType> a;
+        std::span<QNumberType> b;
         float sampleFrequency;
     };
 
     ////    Implementation    ////
 
     template<typename QNumberType, std::size_t NumberOfPoints>
-    FrequencyResponse<QNumberType, NumberOfPoints>::FrequencyResponse(infra::MemoryRange<QNumberType> b, infra::MemoryRange<QNumberType> a, float sampleFrequency)
+    FrequencyResponse<QNumberType, NumberOfPoints>::FrequencyResponse(std::span<QNumberType> b, std::span<QNumberType> a, float sampleFrequency)
         : b(b)
         , a(a)
         , sampleFrequency(sampleFrequency)

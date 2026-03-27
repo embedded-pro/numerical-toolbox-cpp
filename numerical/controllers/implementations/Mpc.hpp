@@ -1,10 +1,10 @@
 #pragma once
 
-#include "infra/util/Optional.hpp"
 #include "numerical/controllers/interfaces/MpcController.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 #include <algorithm>
+#include <optional>
 
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC optimize("O3", "fast-math")
@@ -17,14 +17,14 @@ namespace controllers
     {
         math::SquareMatrix<T, StateSize> Q;
         math::SquareMatrix<T, InputSize> R;
-        infra::Optional<math::SquareMatrix<T, StateSize>> terminalP;
+        std::optional<math::SquareMatrix<T, StateSize>> terminalP;
     };
 
     template<typename T, std::size_t InputSize>
     struct MpcConstraints
     {
-        infra::Optional<math::Vector<T, InputSize>> uMin;
-        infra::Optional<math::Vector<T, InputSize>> uMax;
+        std::optional<math::Vector<T, InputSize>> uMin;
+        std::optional<math::Vector<T, InputSize>> uMax;
     };
 
     namespace detail
@@ -93,7 +93,7 @@ namespace controllers
         GradientMatrix gradientMatrix;
         MpcConstraints<T, InputSize> constraints;
         ControlSequence controlSequence;
-        infra::Optional<StateVector> reference;
+        std::optional<StateVector> reference;
     };
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t PredictionHorizon, std::size_t ControlHorizon>
@@ -236,7 +236,7 @@ namespace controllers
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t PredictionHorizon, std::size_t ControlHorizon>
     void Mpc<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>::ClearReference()
     {
-        reference = infra::none;
+        reference = std::nullopt;
     }
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t PredictionHorizon, std::size_t ControlHorizon>
