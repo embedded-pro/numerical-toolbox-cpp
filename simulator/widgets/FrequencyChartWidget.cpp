@@ -13,31 +13,25 @@ namespace simulator::widgets
         setMinimumSize(400, 300);
         setBackgroundRole(QPalette::Base);
         setAutoFillBackground(true);
+        setMouseTracking(true);
     }
 
     void FrequencyChartWidget::SetFrequencyAxis(std::span<const float> frequenciesHz)
     {
         freqData.assign(frequenciesHz.begin(), frequenciesHz.end());
-
-        if (!freqData.empty())
-        {
-            minFreq = *std::min_element(freqData.begin(), freqData.end());
-            maxFreq = *std::max_element(freqData.begin(), freqData.end());
-
-            if (minFreq <= 0.0f)
-                minFreq = 1.0f;
-
-            logMinFreq = std::log10(minFreq);
-            logMaxFreq = std::log10(maxFreq);
-        }
-
+        UpdateLogRange();
         update();
     }
 
     void FrequencyChartWidget::SetFrequencyAxis(std::vector<float> frequenciesHz)
     {
         freqData = std::move(frequenciesHz);
+        UpdateLogRange();
+        update();
+    }
 
+    void FrequencyChartWidget::UpdateLogRange()
+    {
         if (!freqData.empty())
         {
             minFreq = *std::min_element(freqData.begin(), freqData.end());
@@ -48,9 +42,9 @@ namespace simulator::widgets
 
             logMinFreq = std::log10(minFreq);
             logMaxFreq = std::log10(maxFreq);
-        }
 
-        update();
+            interaction.SetDataRange(logMinFreq, logMaxFreq);
+        }
     }
 
     void FrequencyChartWidget::SetPanels(std::vector<ChartPanel> panels)
@@ -65,7 +59,51 @@ namespace simulator::widgets
         chartPanels.clear();
         minFreq = 0.0f;
         maxFreq = 0.0f;
+        logMinFreq = 0.0f;
+        logMaxFreq = 0.0f;
+        interaction.SetDataRange(0.0f, 0.0f);
         update();
+    }
+
+    float FrequencyChartWidget::FreqToX(float freq, int plotLeft, int plotWidth) const
+    {
+        auto viewSpan = interaction.viewMax - interaction.viewMin;
+        if (viewSpan <= 0.0f)
+            return static_cast<float>(plotLeft);
+
+        auto logFreq = std::log10(std::max(freq, 1e-10f));
+        auto ratio = (logFreq - interaction.viewMin) / viewSpan;
+        return static_cast<float>(plotLeft) + ratio * plotWidth;
+    }
+
+    std::vector<FrequencyChartWidget::PanelLayout> FrequencyChartWidget::ComputeLayouts() const
+    {
+        std::vector<PanelLayout> layouts;
+
+        auto plotWidth = width() - leftMargin - rightMargin;
+        if (plotWidth <= 0 || chartPanels.empty())
+            return layouts;
+
+        auto totalWeight = 0;
+        for (const auto& panel : chartPanels)
+            totalWeight += std::max(panel.heightWeight, 1);
+
+        auto availableHeight = height() - topMargin - bottomMargin - static_cast<int>(chartPanels.size() - 1) * panelSpacing;
+        if (availableHeight <= 0)
+            return layouts;
+
+        auto currentY = topMargin;
+
+        for (std::size_t i = 0; i < chartPanels.size(); ++i)
+        {
+            auto panelHeight = availableHeight * std::max(chartPanels[i].heightWeight, 1) / totalWeight;
+            QRect plotArea(leftMargin, currentY, plotWidth, panelHeight);
+            auto bounds = ComputeBounds(chartPanels[i]);
+            layouts.push_back({ plotArea, bounds, i });
+            currentY += panelHeight + panelSpacing;
+        }
+
+        return layouts;
     }
 
     void FrequencyChartWidget::paintEvent(QPaintEvent* event)
@@ -78,66 +116,66 @@ namespace simulator::widgets
         if (chartPanels.empty())
             return;
 
+        cachedLayouts = ComputeLayouts();
+        if (cachedLayouts.empty())
+            return;
+
         auto plotWidth = width() - leftMargin - rightMargin;
-        if (plotWidth <= 0)
-            return;
 
-        auto totalWeight = 0;
-        for (const auto& panel : chartPanels)
-            totalWeight += std::max(panel.heightWeight, 1);
-
-        auto availableHeight = height() - topMargin - bottomMargin - static_cast<int>(chartPanels.size() - 1) * panelSpacing;
-        if (availableHeight <= 0)
-            return;
-
-        auto currentY = topMargin;
-
-        for (const auto& panel : chartPanels)
-        {
-            auto panelHeight = availableHeight * std::max(panel.heightWeight, 1) / totalWeight;
-            QRect plotArea(leftMargin, currentY, plotWidth, panelHeight);
-
-            auto bounds = ComputeBounds(panel);
-            DrawPanel(painter, plotArea, panel, bounds);
-
-            currentY += panelHeight + panelSpacing;
-        }
+        for (const auto& layout : cachedLayouts)
+            DrawPanel(painter, layout.plotArea, chartPanels[layout.panelIndex], layout.bounds);
 
         QFont labelFont = painter.font();
         labelFont.setPointSize(9);
         painter.setFont(labelFont);
         painter.setPen(Qt::black);
 
-        auto lastPanelBottom = currentY - panelSpacing;
+        auto lastPanelBottom = cachedLayouts.back().plotArea.bottom();
         painter.drawText(leftMargin + plotWidth / 2 - 30, lastPanelBottom + 25, "Frequency (Hz)");
 
         labelFont.setPointSize(8);
         painter.setFont(labelFont);
 
-        if (maxFreq > minFreq && minFreq > 0.0f)
+        auto viewSpan = interaction.viewMax - interaction.viewMin;
+        if (viewSpan > 0.0f)
         {
-            auto lastPanelY = currentY - panelSpacing;
-            auto startDecade = static_cast<int>(std::floor(logMinFreq));
-            auto endDecade = static_cast<int>(std::ceil(logMaxFreq));
+            auto viewMinFreq = std::pow(10.0f, interaction.viewMin);
+            auto viewMaxFreq = std::pow(10.0f, interaction.viewMax);
+
+            auto FormatFreq = [](float freq) -> QString
+            {
+                if (freq >= 1000.0f)
+                    return QString::number(static_cast<double>(freq / 1000.0f), 'g', 3) + "k";
+                return QString::number(static_cast<double>(freq), 'g', 3);
+            };
+
+            QRect startRect(leftMargin - 25, lastPanelBottom + 2, 50, 14);
+            painter.drawText(startRect, Qt::AlignCenter, FormatFreq(viewMinFreq));
+
+            QRect endRect(leftMargin + plotWidth - 25, lastPanelBottom + 2, 50, 14);
+            painter.drawText(endRect, Qt::AlignCenter, FormatFreq(viewMaxFreq));
+
+            auto startDecade = static_cast<int>(std::floor(interaction.viewMin)) + 1;
+            auto endDecade = static_cast<int>(std::ceil(interaction.viewMax)) - 1;
 
             for (int decade = startDecade; decade <= endDecade; ++decade)
             {
-                auto freq = std::pow(10.0f, static_cast<float>(decade));
+                auto logF = static_cast<float>(decade);
+                if (logF <= interaction.viewMin || logF >= interaction.viewMax)
+                    continue;
+
+                auto freq = std::pow(10.0f, logF);
                 auto x = static_cast<int>(FreqToX(freq, leftMargin, plotWidth));
 
-                if (x >= leftMargin && x <= leftMargin + plotWidth)
+                if (x > leftMargin + 25 && x < leftMargin + plotWidth - 25)
                 {
-                    QString label;
-                    if (freq >= 1000.0f)
-                        label = QString::number(static_cast<double>(freq / 1000.0f), 'f', 0) + "k";
-                    else
-                        label = QString::number(static_cast<double>(freq), 'f', 0);
-
-                    QRect labelRect(x - 25, lastPanelY + 2, 50, 14);
-                    painter.drawText(labelRect, Qt::AlignCenter, label);
+                    QRect labelRect(x - 25, lastPanelBottom + 2, 50, 14);
+                    painter.drawText(labelRect, Qt::AlignCenter, FormatFreq(freq));
                 }
             }
         }
+
+        DrawCrosshair(painter);
     }
 
     void FrequencyChartWidget::DrawPanel(QPainter& painter, const QRect& plotArea, const ChartPanel& panel, const PanelBounds& bounds)
@@ -165,7 +203,8 @@ namespace simulator::widgets
 
     void FrequencyChartWidget::DrawSeries(QPainter& painter, const QRect& plotArea, const Series& series, const PanelBounds& bounds)
     {
-        if (maxFreq <= minFreq || series.data.empty())
+        auto viewSpan = interaction.viewMax - interaction.viewMin;
+        if (viewSpan <= 0.0f || series.data.empty())
             return;
 
         auto range = bounds.maxY - bounds.minY;
@@ -174,11 +213,12 @@ namespace simulator::widgets
 
         QPen pen(series.color, 2);
         painter.setPen(pen);
+        painter.setClipRect(plotArea);
 
         QPointF prev;
         auto hasPrev = false;
         auto count = std::min(freqData.size(), series.data.size());
-        auto stride = std::max<std::size_t>(1, count / static_cast<std::size_t>(plotArea.width()));
+        auto stride = std::max<std::size_t>(1, count / static_cast<std::size_t>(plotArea.width() * 2));
 
         for (std::size_t i = 0; i < count; i += stride)
         {
@@ -204,6 +244,8 @@ namespace simulator::widgets
             auto y = static_cast<float>(plotArea.bottom()) - yRatio * plotArea.height();
             painter.drawLine(prev, QPointF(x, y));
         }
+
+        painter.setClipping(false);
     }
 
     void FrequencyChartWidget::DrawAxes(QPainter& painter, const QRect& plotArea)
@@ -216,7 +258,6 @@ namespace simulator::widgets
 
     void FrequencyChartWidget::DrawLogGridLines(QPainter& painter, const QRect& plotArea)
     {
-        // Y grid lines (linear)
         QPen gridPen(QColor(220, 220, 220), 1, Qt::DashLine);
         painter.setPen(gridPen);
 
@@ -226,12 +267,12 @@ namespace simulator::widgets
             painter.drawLine(plotArea.left(), y, plotArea.right(), y);
         }
 
-        // X grid lines (logarithmic decades)
-        if (maxFreq <= minFreq || minFreq <= 0.0f)
+        auto viewSpan = interaction.viewMax - interaction.viewMin;
+        if (viewSpan <= 0.0f)
             return;
 
-        auto startDecade = static_cast<int>(std::floor(logMinFreq));
-        auto endDecade = static_cast<int>(std::ceil(logMaxFreq));
+        auto startDecade = static_cast<int>(std::floor(interaction.viewMin));
+        auto endDecade = static_cast<int>(std::ceil(interaction.viewMax));
 
         for (int decade = startDecade; decade <= endDecade; ++decade)
         {
@@ -289,6 +330,99 @@ namespace simulator::widgets
         }
     }
 
+    void FrequencyChartWidget::DrawCrosshair(QPainter& painter)
+    {
+        if (!interaction.showCrosshair || cachedLayouts.empty() || freqData.empty())
+            return;
+
+        auto cursorX = static_cast<int>(interaction.cursorPos.x());
+        auto cursorY = static_cast<int>(interaction.cursorPos.y());
+
+        const PanelLayout* hoveredLayout = nullptr;
+        for (const auto& layout : cachedLayouts)
+        {
+            if (layout.plotArea.contains(cursorX, cursorY))
+            {
+                hoveredLayout = &layout;
+                break;
+            }
+        }
+
+        if (!hoveredLayout)
+            return;
+
+        auto plotArea = hoveredLayout->plotArea;
+        auto bounds = hoveredLayout->bounds;
+        const auto& panel = chartPanels[hoveredLayout->panelIndex];
+
+        QPen crosshairPen(QColor(100, 100, 100, 150), 1, Qt::DashLine);
+        painter.setPen(crosshairPen);
+        painter.drawLine(cursorX, plotArea.top(), cursorX, plotArea.bottom());
+        painter.drawLine(plotArea.left(), cursorY, plotArea.right(), cursorY);
+
+        auto viewSpan = interaction.viewMax - interaction.viewMin;
+        if (viewSpan <= 0.0f)
+            return;
+
+        auto xRatio = static_cast<float>(cursorX - plotArea.left()) / plotArea.width();
+        auto logFreqAtCursor = interaction.viewMin + xRatio * viewSpan;
+        auto freqAtCursor = std::pow(10.0f, logFreqAtCursor);
+
+        QStringList lines;
+        if (freqAtCursor >= 1000.0f)
+            lines << QString("f = %1 kHz").arg(static_cast<double>(freqAtCursor / 1000.0f), 0, 'f', 2);
+        else
+            lines << QString("f = %1 Hz").arg(static_cast<double>(freqAtCursor), 0, 'f', 1);
+
+        for (const auto& series : panel.series)
+        {
+            auto count = std::min(freqData.size(), series.data.size());
+            if (count == 0)
+                continue;
+
+            std::size_t idx = 0;
+            auto bestDist = std::numeric_limits<float>::max();
+            for (std::size_t i = 0; i < count; ++i)
+            {
+                if (freqData[i] <= 0.0f)
+                    continue;
+                auto dist = std::abs(std::log10(freqData[i]) - logFreqAtCursor);
+                if (dist < bestDist)
+                {
+                    bestDist = dist;
+                    idx = i;
+                }
+            }
+
+            lines << QString("%1 = %2").arg(series.name).arg(static_cast<double>(series.data[idx]), 0, 'f', 2);
+        }
+
+        auto text = lines.join("\n");
+
+        QFont tooltipFont = painter.font();
+        tooltipFont.setPointSize(8);
+        painter.setFont(tooltipFont);
+
+        QFontMetrics fm(tooltipFont);
+        auto textRect = fm.boundingRect(QRect(0, 0, 300, 200), Qt::AlignLeft | Qt::TextWordWrap, text);
+
+        auto tooltipX = cursorX + 12;
+        auto tooltipY = cursorY - textRect.height() - 8;
+        if (tooltipX + textRect.width() + 12 > plotArea.right())
+            tooltipX = cursorX - textRect.width() - 20;
+        if (tooltipY < plotArea.top())
+            tooltipY = cursorY + 12;
+
+        QRect bgRect(tooltipX - 4, tooltipY - 2, textRect.width() + 12, textRect.height() + 8);
+        painter.setPen(QPen(QColor(180, 180, 180), 1));
+        painter.setBrush(QColor(255, 255, 255, 230));
+        painter.drawRoundedRect(bgRect, 3, 3);
+
+        painter.setPen(Qt::black);
+        painter.drawText(bgRect.adjusted(4, 2, -4, -2), Qt::AlignLeft, text);
+        painter.setBrush(Qt::NoBrush);
+    }
+
     FrequencyChartWidget::PanelBounds FrequencyChartWidget::ComputeBounds(const ChartPanel& panel) const
     {
         PanelBounds bounds{ std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest() };
@@ -296,11 +430,18 @@ namespace simulator::widgets
         bool hasData = false;
         for (const auto& series : panel.series)
         {
-            for (auto v : series.data)
+            auto count = std::min(freqData.size(), series.data.size());
+            for (std::size_t i = 0; i < count; ++i)
             {
-                bounds.maxY = std::max(bounds.maxY, v);
-                bounds.minY = std::min(bounds.minY, v);
-                hasData = true;
+                if (freqData[i] <= 0.0f)
+                    continue;
+                auto logF = std::log10(freqData[i]);
+                if (logF >= interaction.viewMin && logF <= interaction.viewMax)
+                {
+                    bounds.maxY = std::max(bounds.maxY, series.data[i]);
+                    bounds.minY = std::min(bounds.minY, series.data[i]);
+                    hasData = true;
+                }
             }
         }
 
@@ -320,13 +461,63 @@ namespace simulator::widgets
         return bounds;
     }
 
-    float FrequencyChartWidget::FreqToX(float freq, int plotLeft, int plotWidth) const
+    void FrequencyChartWidget::wheelEvent(QWheelEvent* event)
     {
-        if (logMaxFreq <= logMinFreq)
-            return static_cast<float>(plotLeft);
+        auto plotWidth = width() - leftMargin - rightMargin;
+        if (plotWidth <= 0)
+            return;
 
-        auto logFreq = std::log10(std::max(freq, minFreq));
-        auto ratio = (logFreq - logMinFreq) / (logMaxFreq - logMinFreq);
-        return static_cast<float>(plotLeft) + ratio * plotWidth;
+        auto cursorXRatio = static_cast<float>(event->position().x() - leftMargin) / plotWidth;
+        cursorXRatio = std::clamp(cursorXRatio, 0.0f, 1.0f);
+
+        interaction.Zoom(static_cast<float>(event->angleDelta().y()), cursorXRatio);
+        update();
+    }
+
+    void FrequencyChartWidget::mousePressEvent(QMouseEvent* event)
+    {
+        if (event->button() == Qt::LeftButton)
+        {
+            auto plotWidth = width() - leftMargin - rightMargin;
+            interaction.StartPan(event->pos(), leftMargin, plotWidth);
+            setCursor(Qt::ClosedHandCursor);
+        }
+    }
+
+    void FrequencyChartWidget::mouseMoveEvent(QMouseEvent* event)
+    {
+        interaction.cursorPos = event->pos();
+        interaction.showCrosshair = true;
+
+        if (interaction.IsPanning())
+        {
+            auto plotWidth = width() - leftMargin - rightMargin;
+            interaction.UpdatePan(event->pos(), leftMargin, plotWidth);
+        }
+
+        update();
+    }
+
+    void FrequencyChartWidget::mouseReleaseEvent(QMouseEvent* event)
+    {
+        if (event->button() == Qt::LeftButton)
+        {
+            interaction.EndPan();
+            setCursor(Qt::ArrowCursor);
+        }
+    }
+
+    void FrequencyChartWidget::mouseDoubleClickEvent(QMouseEvent* event)
+    {
+        Q_UNUSED(event);
+        interaction.ResetView();
+        update();
+    }
+
+    void FrequencyChartWidget::leaveEvent(QEvent* event)
+    {
+        Q_UNUSED(event);
+        interaction.showCrosshair = false;
+        update();
     }
 }

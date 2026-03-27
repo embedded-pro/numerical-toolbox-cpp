@@ -9,6 +9,32 @@
       "package-name": "numerical-toolbox",
       "extra-files": [
         "CMakeLists.txt"
+      ],
+      "changelog-sections": [
+        {
+          "type": "feat",
+          "section": "Features"
+        },
+        {
+          "type": "fix",
+          "section": "Bug Fixes"
+        },
+        {
+          "type": "chore",
+          "section": "Miscellaneous"
+        },
+        {
+          "type": "refactor",
+          "section": "Refactoring"
+        },
+        {
+          "type": "build",
+          "section": "Build System"
+        },
+        {
+          "type": "perf",
+          "section": "Performance Improvements"
+        }
       ]
     }
   },
