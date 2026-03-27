@@ -17,7 +17,26 @@ namespace simulator::widgets
 
     void FrequencyChartWidget::SetFrequencyAxis(std::span<const float> frequenciesHz)
     {
-        freqData = frequenciesHz;
+        freqData.assign(frequenciesHz.begin(), frequenciesHz.end());
+
+        if (!freqData.empty())
+        {
+            minFreq = *std::min_element(freqData.begin(), freqData.end());
+            maxFreq = *std::max_element(freqData.begin(), freqData.end());
+
+            if (minFreq <= 0.0f)
+                minFreq = 1.0f;
+
+            logMinFreq = std::log10(minFreq);
+            logMaxFreq = std::log10(maxFreq);
+        }
+
+        update();
+    }
+
+    void FrequencyChartWidget::SetFrequencyAxis(std::vector<float> frequenciesHz)
+    {
+        freqData = std::move(frequenciesHz);
 
         if (!freqData.empty())
         {
@@ -42,7 +61,7 @@ namespace simulator::widgets
 
     void FrequencyChartWidget::Clear()
     {
-        freqData = {};
+        freqData.clear();
         chartPanels.clear();
         minFreq = 0.0f;
         maxFreq = 0.0f;
@@ -159,8 +178,9 @@ namespace simulator::widgets
         QPointF prev;
         auto hasPrev = false;
         auto count = std::min(freqData.size(), series.data.size());
+        auto stride = std::max<std::size_t>(1, count / static_cast<std::size_t>(plotArea.width()));
 
-        for (std::size_t i = 0; i < count; ++i)
+        for (std::size_t i = 0; i < count; i += stride)
         {
             if (freqData[i] <= 0.0f)
                 continue;
@@ -174,6 +194,15 @@ namespace simulator::widgets
                 painter.drawLine(prev, curr);
             prev = curr;
             hasPrev = true;
+        }
+
+        auto lastIdx = count - 1;
+        if (hasPrev && lastIdx % stride != 0 && freqData[lastIdx] > 0.0f)
+        {
+            auto x = FreqToX(freqData[lastIdx], plotArea.left(), plotArea.width());
+            auto yRatio = (series.data[lastIdx] - bounds.minY) / range;
+            auto y = static_cast<float>(plotArea.bottom()) - yRatio * plotArea.height();
+            painter.drawLine(prev, QPointF(x, y));
         }
     }
 

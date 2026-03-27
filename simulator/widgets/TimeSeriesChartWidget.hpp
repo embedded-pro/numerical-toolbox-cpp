@@ -12,7 +12,7 @@ namespace simulator::widgets
     {
         QString name;
         QColor color;
-        std::span<const float> data;
+        std::vector<float> data;
     };
 
     struct ChartPanel
@@ -32,6 +32,7 @@ namespace simulator::widgets
         explicit TimeSeriesChartWidget(QWidget* parent = nullptr);
 
         void SetTimeAxis(std::span<const float> time);
+        void SetTimeAxis(std::vector<float> time);
         void SetPanels(std::vector<ChartPanel> panels);
         void Clear();
 
@@ -53,7 +54,7 @@ namespace simulator::widgets
         void DrawLegend(QPainter& painter, const QRect& plotArea, const ChartPanel& panel);
         [[nodiscard]] PanelBounds ComputeBounds(const ChartPanel& panel) const;
 
-        std::span<const float> timeData;
+        std::vector<float> timeData;
         std::vector<ChartPanel> chartPanels;
         float maxTime = 0.0f;
 

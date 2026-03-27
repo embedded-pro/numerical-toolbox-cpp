@@ -15,6 +15,7 @@ namespace simulator::widgets
         explicit FrequencyChartWidget(QWidget* parent = nullptr);
 
         void SetFrequencyAxis(std::span<const float> frequenciesHz);
+        void SetFrequencyAxis(std::vector<float> frequenciesHz);
         void SetPanels(std::vector<ChartPanel> panels);
         void Clear();
 
@@ -37,7 +38,7 @@ namespace simulator::widgets
         [[nodiscard]] PanelBounds ComputeBounds(const ChartPanel& panel) const;
         [[nodiscard]] float FreqToX(float freq, int plotLeft, int plotWidth) const;
 
-        std::span<const float> freqData;
+        std::vector<float> freqData;
         std::vector<ChartPanel> chartPanels;
         float minFreq = 0.0f;
         float maxFreq = 0.0f;

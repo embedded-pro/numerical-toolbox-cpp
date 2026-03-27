@@ -30,7 +30,6 @@ namespace simulator::controllers::view
     private:
         void DrawAxes(QPainter& painter, const QRect& plotArea);
         void DrawGridLines(QPainter& painter, const QRect& plotArea);
-        void DrawUnitCircle(QPainter& painter, const QRect& plotArea);
         void DrawLoci(QPainter& painter, const QRect& plotArea);
         void DrawPoles(QPainter& painter, const QRect& plotArea);
         void DrawZeros(QPainter& painter, const QRect& plotArea);

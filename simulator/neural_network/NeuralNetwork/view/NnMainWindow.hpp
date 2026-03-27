@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QTabWidget>
 
 namespace simulator::neural_network::nn::view
 {

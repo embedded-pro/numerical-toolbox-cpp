@@ -3,6 +3,7 @@
 #include <QPolygonF>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 namespace simulator::controllers::view
 {
@@ -26,14 +27,19 @@ namespace simulator::controllers::view
         currentGain = result.currentGain;
 
         // Auto-fit view bounds
-        float rMin = 0.0f, rMax = 0.0f, iMin = 0.0f, iMax = 0.0f;
+        float rMin = std::numeric_limits<float>::max();
+        float rMax = std::numeric_limits<float>::lowest();
+        float iMin = std::numeric_limits<float>::max();
+        float iMax = std::numeric_limits<float>::lowest();
 
+        bool hasData = false;
         auto expandBounds = [&](std::complex<float> c)
         {
             rMin = std::min(rMin, c.real());
             rMax = std::max(rMax, c.real());
             iMin = std::min(iMin, c.imag());
             iMax = std::max(iMax, c.imag());
+            hasData = true;
         };
 
         for (const auto& pole : openLoopPoles)
@@ -43,6 +49,16 @@ namespace simulator::controllers::view
         for (const auto& locus : loci)
             for (const auto& point : locus)
                 expandBounds(point);
+
+        if (!hasData)
+        {
+            viewRealMin = -10.0f;
+            viewRealMax = 5.0f;
+            viewImagMin = -7.0f;
+            viewImagMax = 7.0f;
+            update();
+            return;
+        }
 
         float rPad = (rMax - rMin) * 0.2f;
         float iPad = (iMax - iMin) * 0.2f;
