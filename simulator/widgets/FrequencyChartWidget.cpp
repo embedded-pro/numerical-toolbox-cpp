@@ -40,8 +40,8 @@ namespace simulator::widgets
             if (minFreq <= 0.0f)
                 minFreq = 1.0f;
 
-            logMinFreq = std::floor(std::log10(minFreq));
-            logMaxFreq = std::ceil(std::log10(maxFreq));
+            logMinFreq = std::log10(minFreq);
+            logMaxFreq = std::log10(maxFreq);
 
             interaction.SetDataRange(logMinFreq, logMaxFreq);
         }
@@ -71,7 +71,7 @@ namespace simulator::widgets
         if (viewSpan <= 0.0f)
             return static_cast<float>(plotLeft);
 
-        auto logFreq = std::log10(std::max(freq, std::pow(10.0f, interaction.viewMin)));
+        auto logFreq = std::log10(std::max(freq, 1e-10f));
         auto ratio = (logFreq - interaction.viewMin) / viewSpan;
         return static_cast<float>(plotLeft) + ratio * plotWidth;
     }
@@ -139,24 +139,38 @@ namespace simulator::widgets
         auto viewSpan = interaction.viewMax - interaction.viewMin;
         if (viewSpan > 0.0f)
         {
-            auto startDecade = static_cast<int>(std::floor(interaction.viewMin));
-            auto endDecade = static_cast<int>(std::ceil(interaction.viewMax));
+            auto viewMinFreq = std::pow(10.0f, interaction.viewMin);
+            auto viewMaxFreq = std::pow(10.0f, interaction.viewMax);
+
+            auto FormatFreq = [](float freq) -> QString
+            {
+                if (freq >= 1000.0f)
+                    return QString::number(static_cast<double>(freq / 1000.0f), 'g', 3) + "k";
+                return QString::number(static_cast<double>(freq), 'g', 3);
+            };
+
+            QRect startRect(leftMargin - 25, lastPanelBottom + 2, 50, 14);
+            painter.drawText(startRect, Qt::AlignCenter, FormatFreq(viewMinFreq));
+
+            QRect endRect(leftMargin + plotWidth - 25, lastPanelBottom + 2, 50, 14);
+            painter.drawText(endRect, Qt::AlignCenter, FormatFreq(viewMaxFreq));
+
+            auto startDecade = static_cast<int>(std::floor(interaction.viewMin)) + 1;
+            auto endDecade = static_cast<int>(std::ceil(interaction.viewMax)) - 1;
 
             for (int decade = startDecade; decade <= endDecade; ++decade)
             {
-                auto freq = std::pow(10.0f, static_cast<float>(decade));
+                auto logF = static_cast<float>(decade);
+                if (logF <= interaction.viewMin || logF >= interaction.viewMax)
+                    continue;
+
+                auto freq = std::pow(10.0f, logF);
                 auto x = static_cast<int>(FreqToX(freq, leftMargin, plotWidth));
 
-                if (x >= leftMargin && x <= leftMargin + plotWidth)
+                if (x > leftMargin + 25 && x < leftMargin + plotWidth - 25)
                 {
-                    QString label;
-                    if (freq >= 1000.0f)
-                        label = QString::number(static_cast<double>(freq / 1000.0f), 'f', 0) + "k";
-                    else
-                        label = QString::number(static_cast<double>(freq), 'f', 0);
-
                     QRect labelRect(x - 25, lastPanelBottom + 2, 50, 14);
-                    painter.drawText(labelRect, Qt::AlignCenter, label);
+                    painter.drawText(labelRect, Qt::AlignCenter, FormatFreq(freq));
                 }
             }
         }
