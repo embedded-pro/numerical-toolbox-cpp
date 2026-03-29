@@ -36,8 +36,7 @@ if (NUMERICAL_TOOLBOX_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/embedded-pro/embedded-infra-lib.git
-        GIT_TAG        74165ff75d8734b9968bd5f2772e542968bfe2a0 # Unreleased
-        PATCH_COMMAND ${CMAKE_COMMAND} -Demil_SOURCE_DIR=<SOURCE_DIR> -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/patch-emil.cmake
+        GIT_TAG        06931dbb0464cd357833ac95c35d9f03c13e3ada # Unreleased
     )
 
     set(EMIL_INCLUDE_MBEDTLS Off CACHE BOOL "" FORCE)
