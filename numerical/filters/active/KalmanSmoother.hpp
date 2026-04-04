@@ -206,6 +206,7 @@ namespace filters
         const MeasurementVector& innovation,
         const MeasurementCovariance& innovationCovariance) const
     {
+        static const float log2pi = std::log(2.0f * std::numbers::pi_v<float>);
         const auto L = solvers::CholeskyDecomposition(innovationCovariance);
         const auto sInvNu = solvers::SolveSystem<float, MeasurementSize, 1>(innovationCovariance, innovation);
         float logDetS = 0.0f;
@@ -216,7 +217,7 @@ namespace filters
             quadForm += innovation.at(i, 0) * sInvNu.at(i, 0);
         }
         logDetS *= 2.0f;
-        return -0.5f * (logDetS + quadForm + static_cast<float>(MeasurementSize) * std::log(2.0f * std::numbers::pi_v<float>));
+        return -0.5f * (logDetS + quadForm + static_cast<float>(MeasurementSize) * log2pi);
     }
 
     template<std::size_t StateSize, std::size_t MeasurementSize, std::size_t MaxSteps>
