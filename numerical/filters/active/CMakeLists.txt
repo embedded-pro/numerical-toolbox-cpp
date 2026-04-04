@@ -15,6 +15,7 @@ target_sources(numerical.filters.active PRIVATE
     ExtendedKalmanFilter.hpp
     KalmanFilter.hpp
     KalmanFilterBase.hpp
+    KalmanSmoother.hpp
     UnscentedKalmanFilter.hpp
 )
 
@@ -22,6 +23,7 @@ numerical_add_coverage_sources(numerical.filters.active
     ExtendedKalmanFilter.cpp
     KalmanFilter.cpp
     KalmanFilterBase.cpp
+    KalmanSmoother.cpp
     UnscentedKalmanFilter.cpp
 )
 
