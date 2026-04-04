@@ -28,8 +28,14 @@ if (NUMERICAL_TOOLBOX_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/embedded-pro/embedded-infra-lib.git
-        GIT_TAG        74165ff75d8734b9968bd5f2772e542968bfe2a0 # Unreleased
+        GIT_TAG        0bd0158e69add0726123305906128b51fecef234 # Unreleased
     )
+
+    set(EMIL_INCLUDE_ECHO Off CACHE BOOL "" FORCE)
+    set(EMIL_FETCH_ECHO_COMPILERS Off CACHE BOOL "" FORCE)
+    set(EMIL_BUILD_ECHO_COMPILERS Off CACHE BOOL "" FORCE)
+    set(EMIL_ENABLE_DOCKER_TOOLS Off CACHE BOOL "" FORCE)
+    set(EMIL_INCLUDE_MBEDTLS Off CACHE BOOL "" FORCE)
 
     FetchContent_MakeAvailable(emil)
 
