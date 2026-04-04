@@ -73,11 +73,11 @@ Place code here when it is:
 
 When implementing or modifying algorithms:
 - **ALWAYS UPDATE DOCUMENTATION**: Each algorithm must have corresponding documentation in `doc/`
-- Include mathematical background and theory
-- Provide implementation details and considerations
-- Add usage examples and expected behaviors
-- Document numerical properties and limitations
-- Keep documentation in sync with code changes
+- Follow the structure defined in `doc/TEMPLATE.md` exactly
+- Documentation is **design-first**: describe mathematical theory, algorithm behaviour, complexity, pitfalls, and connections — not how the code is written
+- **Do NOT include implementation details** (e.g., class names, template parameters, header paths)
+- **Do NOT include usage examples or code snippets** — the implementation must follow what the doc describes, not the other way around
+- Keep documentation in sync with algorithmic changes (not code-level changes)
 
 ## Design Principles
 
@@ -402,8 +402,6 @@ When implementing a new algorithm:
 4. **Write comprehensive tests** for all numeric types
 5. **Document in `doc/`** with:
    - Mathematical background
-   - Implementation details
-   - Usage examples
    - Numerical considerations (stability, range, precision)
 6. **Consider SIMD optimizations** where applicable using `math::SingleInstructionMultipleData`
 

@@ -67,10 +67,11 @@ For each file to create or modify, specify:
 
 #### Documentation Update
 - Documentation file to create or update: `doc/{domain}/{AlgorithmName}.md`
-- Mathematical background section
-- Implementation details and considerations
-- Usage examples
+- Follow `doc/TEMPLATE.md` structure exactly
+- Mathematical background: theory, derivations, complexity, pitfalls, connections
 - Numerical properties and limitations (stability, range, precision)
+- **No implementation details** (class names, template parameters, header paths)
+- **No usage code examples** — docs describe algorithm design; implementation follows from them
 
 #### Build Integration
 - `CMakeLists.txt` changes using `numerical_add_header_library()` and `numerical_add_coverage_sources()`
@@ -148,8 +149,9 @@ Before finalizing, verify the plan against these constraints:
 
 ### Documentation — ALWAYS UPDATED
 - [ ] `doc/{domain}/{AlgorithmName}.md` created or updated for every change
+- [ ] Follows `doc/TEMPLATE.md` structure
 - [ ] Mathematical background with equations
-- [ ] Implementation details and considerations
-- [ ] Usage examples with code snippets
 - [ ] Numerical properties: stability, range, precision, real-time suitability
+- [ ] No implementation details (class names, template params, header paths)
+- [ ] No usage code examples or code snippets
 - [ ] README in domain's `doc/{domain}/README.md` updated if needed

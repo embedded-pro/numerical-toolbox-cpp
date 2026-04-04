@@ -160,9 +160,10 @@ End with a summary: total criticals, warnings, suggestions, and overall verdict 
 ### 13. Documentation Alignment (CRITICAL)
 
 - [ ] `doc/{domain}/{AlgorithmName}.md` exists and is up-to-date for every changed algorithm
+- [ ] Follows `doc/TEMPLATE.md` structure
 - [ ] Documentation includes mathematical background (equations, formulas)
-- [ ] Documentation includes implementation details and considerations
-- [ ] Documentation includes usage examples with code snippets
+- [ ] Documentation does **not** include implementation details (class names, template params, header paths)
+- [ ] Documentation does **not** include usage code examples or code snippets
 - [ ] Documentation includes numerical properties: stability, range, precision, real-time suitability
 - [ ] `doc/{domain}/README.md` updated if a new algorithm was added
 - [ ] README references correct numeric type support

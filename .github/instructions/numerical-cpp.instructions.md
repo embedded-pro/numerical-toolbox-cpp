@@ -74,6 +74,6 @@ Apply `OPTIMIZE_FOR_SPEED` (from `numerical/math/CompilerOptimizations.hpp`) on 
 
 ## Documentation — MANDATORY
 
-For every algorithm added or modified, update the corresponding `doc/{domain}/{AlgorithmName}.md` file. Include mathematical background, implementation details, usage examples, and numerical properties.
+For every algorithm added or modified, update the corresponding `doc/{domain}/{AlgorithmName}.md` file. Follow `doc/TEMPLATE.md` exactly. Documentation is **design-first**: cover mathematical background, algorithm behaviour, complexity, pitfalls, and connections. Do **not** include implementation details, class names, template parameters, or usage code examples — docs describe the algorithm design; code follows from it.
 
 Full details: [copilot-instructions.md](../../.github/copilot-instructions.md)

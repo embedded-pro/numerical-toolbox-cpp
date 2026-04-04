@@ -240,10 +240,12 @@ namespace filters::passive
 **ALWAYS update documentation for every change:**
 
 - Create or update `doc/{domain}/{AlgorithmName}.md` for every new or modified algorithm
-- Use `doc/TEMPLATE.md` as the starting template for new documentation files
-- Include: mathematical background, implementation details, usage examples, numerical properties
+- Use `doc/TEMPLATE.md` as the starting template — follow its structure exactly
+- Documentation is **design-first**: cover mathematical theory, algorithm behaviour, complexity, pitfalls, and connections to other algorithms
+- **Do NOT add implementation details** (class names, template parameters, header paths)
+- **Do NOT add usage code examples** — the implementation follows the doc, not the other way around
 - Update `doc/{domain}/README.md` if a new algorithm is added
-- Documentation must stay in sync with code changes
+- Keep documentation in sync with algorithmic changes
 
 ---
 
