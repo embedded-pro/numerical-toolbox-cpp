@@ -59,10 +59,10 @@ The cost is a small positional bias proportional to $\lambda$: the algorithm con
 
 ## Complexity Analysis
 
-| Case | Time | Space | Notes |
-|------|------|--------|-------|
-| Per iteration | $O(n)$ | $O(n)$ | FK sweep + Jacobian + $3\times3$ solve |
-| Total | $O(k \cdot n)$ | $O(n)$ | $k$ = iterations (typically 10–50) |
+| Case          | Time           | Space  | Notes                                  |
+|---------------|----------------|--------|----------------------------------------|
+| Per iteration | $O(n)$         | $O(n)$ | FK sweep + Jacobian + $3\times3$ solve |
+| Total         | $O(k \cdot n)$ | $O(n)$ | $k$ = iterations (typically 10–50)     |
 
 The $3 \times 3$ linear solve is $O(1)$ (constant-size), independent of the number of joints $n$.
 
