@@ -11,6 +11,8 @@ target_link_libraries(numerical.controllers.interfaces INTERFACE
 )
 
 target_sources(numerical.controllers.interfaces PRIVATE
+    LqrController.hpp
+    MpcController.hpp
     PidController.hpp
     PidDriver.hpp
 )

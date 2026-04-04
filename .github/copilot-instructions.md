@@ -8,14 +8,20 @@ This is a numerical algorithms library providing digital signal processing (DSP)
 
 - **numerical/**: Core implementation of algorithms organized by domain:
   - `analysis/`: Signal analysis (FFT, PSD, DCT)
-  - `controllers/`: Control algorithms (PID controllers)
-  - `estimators/`: Estimation algorithms (Linear Regression, Yule-Walker)
+    - `windowing/`: Window functions for spectral analysis
+  - `control_analysis/`: Control system analysis (Frequency Response, Root Locus)
+  - `controllers/`: Control algorithms (PID, LQR, MPC)
+  - `dynamics/`: Dynamics and modeling (Euler-Lagrange, Newton-Euler)
+  - `estimators/`: Estimation algorithms
+    - `offline/`: Batch estimators (Linear Regression, Yule-Walker)
+    - `online/`: Streaming estimators (Recursive Least Squares)
   - `filters/`: Digital filters (FIR, IIR, Kalman)
+  - `kinematics/`: Forward/inverse kinematics
   - `math/`: Mathematical foundations (QNumber, Matrix, Complex, Trigonometric functions)
-  - `neural_network/`: Neural network components (layers, activations, optimizers)
-  - `solvers/`: Numerical solvers (Levinson-Durbin)
-  - `windowing/`: Window functions for signal processing
-- **examples/**: Demonstrates library usage with practical implementations
+  - `neural_network/`: Neural network components (layers, activations, losses, model)
+  - `optimization/`: General-purpose optimizers (Gradient Descent)
+  - `regularization/`: Regularization techniques (L1, L2)
+  - `solvers/`: Numerical solvers (Levinson-Durbin, Gaussian Elimination, DARE)
 - **doc/**: Comprehensive documentation for each algorithm with mathematical background
 - **embedded-infra-lib/**: Submodule containing infrastructure foundations and utilities for embedded systems
 
@@ -61,16 +67,7 @@ Place code here when it is:
 - Estimators and solvers
 - Neural network components
 - Hardware-agnostic and reusable across projects
-- Organized by domain (analysis, controllers, filters, estimators, math, neural_network, solvers, windowing)
-
-### Examples (`examples/`)
-
-Place code here when it is:
-- Demonstrating proper usage of library components
-- Showing practical implementations and patterns
-- Providing working reference implementations
-- Testing algorithms in realistic scenarios
-- Each example should be self-contained and demonstrate specific features
+- Organized by domain (analysis, control_analysis, controllers, dynamics, estimators, filters, kinematics, math, neural_network, optimization, regularization, solvers)
 
 ### Documentation (`doc/`)
 
@@ -81,6 +78,42 @@ When implementing or modifying algorithms:
 - Add usage examples and expected behaviors
 - Document numerical properties and limitations
 - Keep documentation in sync with code changes
+
+## Design Principles
+
+These are the most important architectural directives in this codebase. Every new class, function, and CMake target must follow them.
+
+### SOLID Principles
+
+- **Single Responsibility (SRP)**: Each class and struct owns exactly one concern. Separate configuration into sub-structs by concern (e.g., `WeightsConfig`, `SimulationConfig`, `PlantParameters`) rather than flat mega-structs. Each source file should address a single topic.
+- **Open/Closed (OCP)**: Prefer templates and compile-time polymorphism for extending algorithms to new numeric types (`float`, `Q15`, `Q31`) without modifying existing code.
+- **Liskov Substitution (LSP)**: When using abstract base classes (e.g., `Plant`), all derived classes must be fully substitutable. Override every pure virtual method; do not weaken preconditions or strengthen postconditions.
+- **Interface Segregation (ISP)**: Keep interfaces small and focused. Do not force implementers to depend on methods they do not use.
+- **Dependency Inversion (DIP)**: High-level modules (simulators, controllers) depend on abstractions, not concrete implementations. Use constructor injection for dependencies. Pass interfaces, not concrete types, when multiple implementations exist.
+
+### DRY (Don't Repeat Yourself)
+
+- **NEVER duplicate logic**. If two functions share more than a few lines of identical code, extract a common helper, template, or base class.
+- Use templates to eliminate per-type or per-size code duplication (e.g., DOF-parameterized dynamics instead of copy-pasted `StepDof2()` / `StepDof3()`).
+- Use `std::numbers::pi_v<float>` consistently — never hardcode `3.14159265f` or similar constants.
+- Share configuration structs across layers instead of re-declaring equivalent types.
+- Reuse existing utility components (e.g., `TimeSeriesChartWidget`, `SignalGenerator`) rather than reimplementing equivalent widgets.
+
+### Small Functions
+
+- **Every function should do one thing and fit on one screen** (~30 lines max, hard limit ~50 lines).
+- Extract named helpers from long methods — the name acts as self-documentation.
+- Rendering code should delegate to focused `Draw*()` helpers (e.g., `DrawTrack()`, `DrawCart()`, `DrawPole()`).
+- Prefer returning values over mutating shared state — this makes functions easier to test and reason about.
+
+### CMake Reuse
+
+- **Simulator structure**: Every simulator follows the three-layer pattern: `application/` (logic) → `view/` (Qt GUI) → `Main.cpp` (entry point), each with its own `CMakeLists.txt` and library target.
+- **Shared utilities**: Link against `numerical.simulator.utils` for common widgets (`TimeSeriesChartWidget`, `SignalGenerator`) — do not duplicate them.
+- **Shared abstractions**: Link against `numerical.simulator.controllers.common` for shared controller interfaces (e.g., `Plant`).
+- **Naming convention**: Targets follow `numerical.simulator.<domain>.<algorithm>.<layer>` (e.g., `numerical.simulator.controllers.lqr.application`).
+- **Library code reuse**: Use `numerical_add_header_library()` and `numerical_add_coverage_sources()` from `cmake/NumericalHeaderLibrary.cmake` for all `numerical/` targets.
+- **Compiler options blocks**: Every simulator target repeats the same MSVC/GCC warning suppression — keep this consistent across all targets.
 
 ## Coding Style and Patterns
 
@@ -104,9 +137,17 @@ When implementing or modifying algorithms:
   }
   ```
 
+### Comments
+
+- **AVOID COMMENTS**: Code should be self-documenting through clear naming, small functions, and expressive types
+- Do not add comments that restate what the code does
+- Do not add `TODO`, `FIXME`, or `HACK` comments in production code
+- Do not add function/method docstrings unless the API is non-obvious to a domain expert
+- Acceptable exceptions: legal headers, `NOLINT` annotations, and brief clarifications of non-trivial math or domain-specific constants
+
 ### Error Handling
 
-- Use `infra::Optional` for functions that may not return a value
+- Use `std::optional` for functions that may not return a value
 - Return error codes or status enums, not exceptions
 - Assert preconditions in debug builds with `assert()` or `really_assert()`
 
@@ -118,19 +159,97 @@ When implementing or modifying algorithms:
 - Aim for high code coverage, especially in numerical algorithms
 - Verify numerical accuracy and stability
 - Test edge cases and boundary conditions
-- Example typed test pattern:
+
+#### Test Macro Rules (cppcheck compliance)
+
+- **NEVER use plain `TEST()` macro** — cppcheck cannot parse it and will report `syntaxError`
+- **Use `TYPED_TEST`** when testing with multiple numeric types
+- **Use `TEST_F`** when testing with a single type or a fixture
+- Fixture class and type aliases go inside an anonymous `namespace {}`
+- Test macros (`TEST_F`, `TYPED_TEST`) go **outside** the anonymous namespace
+- Include `<gtest/gtest.h>` (not `<gmock/gmock.h>`) unless gmock matchers are needed
+
+#### Typed Test Pattern (multiple types)
+
   ```cpp
-  template<typename T>
-  class TestAlgorithm : public testing::Test {};
-  
-  using TestedTypes = ::testing::Types<float, math::Q15, math::Q31>;
-  TYPED_TEST_SUITE(TestAlgorithm, TestedTypes);
-  
+  #include "numerical/solvers/GaussianElimination.hpp"
+  #include <gtest/gtest.h>
+
+  namespace
+  {
+      template<typename T>
+      class TestAlgorithm : public ::testing::Test
+      {
+      protected:
+          solvers::GaussianElimination<T, 3> solver;
+      };
+
+      using TestTypes = ::testing::Types<float, math::Q15, math::Q31>;
+      TYPED_TEST_SUITE(TestAlgorithm, TestTypes);
+  }
+
   TYPED_TEST(TestAlgorithm, computes_correct_result)
   {
-      // Test with TypeParam
+      // Use TypeParam for the type, this->solver for fixture members
   }
   ```
+
+#### Fixture Test Pattern (single type)
+
+  ```cpp
+  #include "numerical/solvers/DiscreteAlgebraicRiccatiEquation.hpp"
+  #include <gtest/gtest.h>
+
+  namespace
+  {
+      class TestDare : public ::testing::Test
+      {
+      protected:
+          solvers::DiscreteAlgebraicRiccatiEquation<float, 2, 1> solver;
+      };
+  }
+
+  TEST_F(TestDare, solves_simple_system)
+  {
+      // Use this->solver for fixture members
+  }
+  ```
+
+#### Coverage for Template Code
+
+Header-only templates are compiled into test executables, which do **not** have `--coverage` flags.
+To get coverage, template code must be explicitly instantiated in a `.cpp` file that is part of the library (which **does** have coverage flags).
+
+Both the `extern template` declarations in headers and the matching `.cpp` files are **conditionally compiled only when `EMIL_ENABLE_COVERAGE` is set** (i.e. the `coverage` CMake preset). This avoids polluting non-coverage builds.
+
+1. **Add `extern template` declarations** at the bottom of the header, guarded by `NUMERICAL_TOOLBOX_COVERAGE_BUILD`:
+   ```cpp
+       #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+       extern template class Algorithm<float, 3>;
+       extern template class Algorithm<math::Q15, 3>;
+       #endif
+   }
+   ```
+
+2. **Create a matching `.cpp` file** with explicit instantiation:
+   ```cpp
+   #include "numerical/domain/Algorithm.hpp"
+
+   namespace domain
+   {
+       template class Algorithm<float, 3>;
+       template class Algorithm<math::Q15, 3>;
+   }
+   ```
+
+3. **Add the `.cpp` file to `CMakeLists.txt`** using the coverage helper:
+   ```cmake
+   numerical_add_coverage_sources(numerical.domain
+       Algorithm.cpp
+   )
+   ```
+
+4. **Instantiate all specializations used by tests** — each `extern template` in the header must have a matching `template class` in the `.cpp` file
 
 ## Common Patterns
 
@@ -172,14 +291,18 @@ class Algorithm
 - **INTERFACES**: Define interfaces (pure virtual classes) for testability and flexibility
 - **NAMESPACE**: Use appropriate namespaces by domain:
   - `analysis::` - Signal analysis algorithms
+  - `control_analysis::` - Control system analysis (Frequency Response, Root Locus)
   - `controllers::` - Control system algorithms
+  - `dynamics::` - Dynamics and modeling algorithms
   - `estimators::` - Estimation algorithms
   - `filters::passive::` - Passive filters (FIR, IIR)
   - `filters::active::` - Active filters (Kalman)
   - `math::` - Mathematical utilities and functions
   - `neural_network::` - Neural network components
+  - `optimization::` - General-purpose optimizers
+  - `regularization::` - Regularization techniques
   - `solvers::` - Numerical solvers
-  - `windowing::` - Window functions
+  - `windowing::` - Window functions (under `analysis/windowing/`)
 - **SELF-DOCUMENTING CODE**: Write clear, self-explanatory code with descriptive names
 - **UNITS**: Be explicit about units (radians, Hz, samples, normalized) in variable names or comments
 - **NUMERICAL TYPES**: Support multiple numeric representations:
@@ -204,8 +327,49 @@ class Algorithm
 - Support for host (simulation and testing) and embedded targets
 - Separate build configurations for Debug, Release, RelWithDebInfo
 - GoogleTest for unit testing
-- Optional build of examples via `NUMERICAL_TOOLBOX_BUILD_EXAMPLES`
 - Optional compiler optimizations via `NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS`
+- Coverage builds via the `coverage` CMake preset (`EMIL_ENABLE_COVERAGE=On`)
+
+### Header-Only Library CMake Pattern
+
+All header-only library targets under `numerical/` use the reusable CMake functions
+defined in `cmake/NumericalHeaderLibrary.cmake`:
+
+- **`numerical_add_header_library(<target> [STATIC])`** — Creates the library target.
+  In coverage builds (`EMIL_ENABLE_COVERAGE=On`), creates a regular (or `STATIC`) library
+  so that explicit template instantiation `.cpp` files are compiled with `--coverage` flags.
+  In non-coverage builds, creates an `INTERFACE` library. Sets `NUMERICAL_VISIBILITY` in
+  the calling scope to either `PUBLIC` or `INTERFACE` for use with `target_include_directories`
+  and `target_link_libraries`.
+
+- **`numerical_add_coverage_sources(<target> <sources...>)`** — Conditionally adds
+  explicit template instantiation `.cpp` files only when `EMIL_ENABLE_COVERAGE` is set.
+
+#### Example CMakeLists.txt
+
+  ```cmake
+  numerical_add_header_library(numerical.domain)
+
+  target_include_directories(numerical.domain ${NUMERICAL_VISIBILITY}
+      "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../>"
+      "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+  )
+
+  target_link_libraries(numerical.domain ${NUMERICAL_VISIBILITY}
+      infra.util
+      numerical.math
+  )
+
+  target_sources(numerical.domain PRIVATE
+      Algorithm.hpp
+  )
+
+  numerical_add_coverage_sources(numerical.domain
+      Algorithm.cpp
+  )
+
+  add_subdirectory(test)
+  ```
 
 ## Version Control
 
@@ -241,8 +405,7 @@ When implementing a new algorithm:
    - Implementation details
    - Usage examples
    - Numerical considerations (stability, range, precision)
-6. **Create example in `examples/`** demonstrating practical usage
-7. **Consider SIMD optimizations** where applicable using `math::SingleInstructionMultipleData`
+6. **Consider SIMD optimizations** where applicable using `math::SingleInstructionMultipleData`
 
 ### Performance Optimization Guidelines
 
@@ -273,14 +436,41 @@ When implementing a new algorithm:
 
 ## Compiler Optimizations and SIMD
 
+### Mandatory Optimizations for `numerical/` Headers
+
+All header files under `numerical/` that contain algorithm implementations **must** include both:
+
+1. **File-level `#pragma GCC optimize`** — placed immediately after `#pragma once` and includes:
+   ```cpp
+   #pragma once
+
+   #if defined(__GNUC__) || defined(__clang__)
+   #pragma GCC optimize("O3", "fast-math")
+   #endif
+   ```
+
+2. **`OPTIMIZE_FOR_SPEED` macro** on hot-path method definitions (e.g., `Filter()`, `Compute()`, `Calculate()`, `Solve()`):
+   ```cpp
+   #include "numerical/math/CompilerOptimizations.hpp"
+
+   template<typename T, std::size_t N>
+   OPTIMIZE_FOR_SPEED T Algorithm<T, N>::Compute(T input)
+   {
+       // performance-critical implementation
+   }
+   ```
+
+The `#pragma GCC optimize` applies `-O3` and `-ffast-math` to the entire translation unit even in Debug builds, while `OPTIMIZE_FOR_SPEED` additionally forces inlining and marks functions as hot for the linker.
+
 ### Optimization Macros
 
-The library provides compiler-specific optimization hints:
+Defined in `numerical/math/CompilerOptimizations.hpp`:
 
 - **OPTIMIZE_FOR_SPEED**: For performance-critical algorithms (PID, filters)
-  - GCC: `-O3`, `-ffast-math`, `hot`, `flatten` attributes
-  - Clang: `hot`, `flatten` attributes
-  - Enables aggressive inlining and optimization
+  - GCC: `-O3`, `-ffast-math`, `hot`, `always_inline` attributes
+  - Clang: `hot`, `always_inline` attributes
+  - MSVC/other: no-op
+  - Only active when `NumericalToolbox_ENABLE_OPTIMIZATIONS` is defined
 - **ALWAYS_INLINE_HOT**: Forces inlining for frequently-called hot-path code
 - **ALWAYS_INLINE**: Forces inlining without hot attribute
 
@@ -319,6 +509,16 @@ The library provides compiler-specific optimization hints:
 - **Saturation**: Clamp outputs to prevent actuator saturation issues
 - **Derivative Filtering**: Consider derivative kick prevention techniques
 - **Discretization**: Document the discretization method used (Tustin, forward Euler, etc.)
+
+### Dynamics & Modeling (Euler-Lagrange, Newton-Euler)
+
+- **Generalized Coordinates**: Use radians for revolute joints, meters for prismatic joints
+- **Mass Matrix**: Must be symmetric positive definite; verify in tests
+- **Coriolis Convention**: Interface returns $C(q,\dot{q})\dot{q}$ (the product), not the matrix $C$ alone
+- **Units**: Torques in N·m, forces in N, angles in radians, angular velocities in rad/s
+- **Float Only**: Dynamics values typically exceed Q15/Q31 range; use `float` unless inputs are scaled
+- **Forward Dynamics**: Use `GaussianElimination` for the $M^{-1}$ solve; avoid explicit matrix inversion
+- **DOF Sizes**: Explicitly instantiate for Dof = 1, 2, 3 (pendulum, planar arm, 3-link)
 
 ### Neural Networks
 

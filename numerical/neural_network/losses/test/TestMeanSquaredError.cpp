@@ -5,11 +5,12 @@ namespace
 {
     template<typename QNumberType, std::size_t Size>
     class MockRegularization
-        : public neural_network::Regularization<QNumberType, Size>
+        : public regularization::Regularization<QNumberType, Size>
     {
     public:
-        using Vector = typename neural_network::Regularization<QNumberType, Size>::Vector;
+        using Vector = typename regularization::Regularization<QNumberType, Size>::Vector;
         MOCK_METHOD(QNumberType, Calculate, (const Vector& parameters), (const, override));
+        MOCK_METHOD(Vector, Gradient, (const Vector& parameters), (const, override));
     };
 
     template<typename T>
@@ -94,5 +95,23 @@ TYPED_TEST(TestMeanSquaredError, MultipleParameters)
         mseValue = TypeParam(math::ToFloat(mseValue) / 2.0f);
 
         EXPECT_NEAR(math::ToFloat(cost), math::ToFloat(mseValue + regValue), 0.001f);
+    }
+}
+
+TYPED_TEST(TestMeanSquaredError, GradientIncludesRegularization)
+{
+    typename TestMeanSquaredError<TypeParam>::Vector parameters{ TypeParam(0.7f), TypeParam(-0.1f) };
+    typename TestMeanSquaredError<TypeParam>::Vector regGradient{ TypeParam(0.01f), TypeParam(-0.02f) };
+
+    EXPECT_CALL(this->mockRegularization, Gradient(::testing::_))
+        .WillOnce(::testing::Return(regGradient));
+
+    this->loss.emplace(this->target, this->mockRegularization);
+    auto gradient = this->loss->Gradient(parameters);
+
+    for (std::size_t i = 0; i < TestMeanSquaredError<TypeParam>::NumberOfFeature; ++i)
+    {
+        float expected = math::ToFloat(parameters[i] - this->target[i] + regGradient[i]);
+        EXPECT_NEAR(math::ToFloat(gradient[i]), expected, 0.001f);
     }
 }

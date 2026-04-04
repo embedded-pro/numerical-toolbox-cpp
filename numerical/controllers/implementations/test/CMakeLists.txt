@@ -9,5 +9,7 @@ target_link_libraries(numerical.controllers_test PUBLIC
 )
 
 target_sources(numerical.controllers_test PRIVATE
+    TestLqr.cpp
+    TestMpc.cpp
     TestPidIncremental.cpp
 )

@@ -1,6 +1,4 @@
-#ifndef MATH_COMPLEX_NUMBER_H
-#define MATH_COMPLEX_NUMBER_H
-
+#pragma once
 #include "numerical/math/QNumber.hpp"
 
 namespace math
@@ -9,7 +7,7 @@ namespace math
     class Complex
     {
         static_assert(math::is_qnumber<QNumberType>::value ||
-                          std::is_floating_point<QNumberType>::value,
+                          std::is_floating_point_v<QNumberType>,
             "Complex can only be instantiated with math::QNumber types.");
 
     public:
@@ -19,9 +17,23 @@ namespace math
         QNumberType Real() const;
         QNumberType Imaginary() const;
 
-        Complex operator+(const Complex& other) const;
-        Complex operator-(const Complex& other) const;
-        Complex operator*(const Complex& other) const;
+        friend Complex operator+(const Complex& lhs, const Complex& rhs)
+        {
+            return Complex(lhs.real + rhs.real, lhs.imag + rhs.imag);
+        }
+
+        friend Complex operator-(const Complex& lhs, const Complex& rhs)
+        {
+            return Complex(lhs.real - rhs.real, lhs.imag - rhs.imag);
+        }
+
+        friend Complex operator*(const Complex& lhs, const Complex& rhs)
+        {
+            QNumberType newReal = lhs.real * rhs.real - lhs.imag * rhs.imag;
+            QNumberType newImag = lhs.real * rhs.imag + lhs.imag * rhs.real;
+            return Complex(newReal, newImag);
+        }
+
         Complex& operator+=(const Complex& other);
         Complex& operator-=(const Complex& other);
         Complex& operator*=(const Complex& other);
@@ -29,7 +41,7 @@ namespace math
         Complex operator+() const;
         Complex operator-() const;
 
-        bool operator==(const Complex& other) const;
+        bool operator==(const Complex& other) const = default;
 
     private:
         QNumberType real;
@@ -60,27 +72,6 @@ namespace math
     QNumberType Complex<QNumberType>::Imaginary() const
     {
         return imag;
-    }
-
-    template<typename QNumberType>
-    Complex<QNumberType> Complex<QNumberType>::operator+(const Complex& other) const
-    {
-        return Complex(real + other.real, imag + other.imag);
-    }
-
-    template<typename QNumberType>
-    Complex<QNumberType> Complex<QNumberType>::operator-(const Complex& other) const
-    {
-        return Complex(real - other.real, imag - other.imag);
-    }
-
-    template<typename QNumberType>
-    Complex<QNumberType> Complex<QNumberType>::operator*(const Complex& other) const
-    {
-        // (a + bi)(c + di) = (ac - bd) + (ad + bc)i
-        QNumberType newReal = real * other.real - imag * other.imag;
-        QNumberType newImag = real * other.imag + imag * other.real;
-        return Complex(newReal, newImag);
     }
 
     template<typename QNumberType>
@@ -121,11 +112,9 @@ namespace math
         return Complex(-real, -imag);
     }
 
-    template<typename QNumberType>
-    bool Complex<QNumberType>::operator==(const Complex& other) const
-    {
-        return real == other.real && imag == other.imag;
-    }
-}
-
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class Complex<float>;
+    extern template class Complex<Q15>;
+    extern template class Complex<Q31>;
 #endif
+}

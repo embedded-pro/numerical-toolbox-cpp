@@ -1,16 +1,19 @@
 #include "numerical/math/QNumber.hpp"
 #include <gtest/gtest.h>
 
-template<typename QNumType>
-class QNumberTest
-    : public ::testing::Test
+namespace
 {
-protected:
-    using IntType = typename std::decay<decltype(std::declval<QNumType>().RawValue())>::type;
-};
+    template<typename QNumType>
+    class QNumberTest
+        : public ::testing::Test
+    {
+    protected:
+        using IntType = typename std::decay<decltype(std::declval<QNumType>().RawValue())>::type;
+    };
 
-using QNumberTypes = ::testing::Types<math::Q31, math::Q15>;
-TYPED_TEST_SUITE(QNumberTest, QNumberTypes);
+    using QNumberTypes = ::testing::Types<math::Q31, math::Q15>;
+    TYPED_TEST_SUITE(QNumberTest, QNumberTypes);
+}
 
 TYPED_TEST(QNumberTest, DefaultConstructor)
 {

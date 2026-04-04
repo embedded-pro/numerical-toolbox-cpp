@@ -1,30 +1,33 @@
-#ifndef FILTERS_PASSIVE_FIR_HPP
-#define FILTERS_PASSIVE_FIR_HPP
+#pragma once
 
-#include "numerical/math/QNumber.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/RecursiveBuffer.hpp"
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
 
 namespace filters::passive
 {
     template<typename QNumberType, std::size_t N>
     class Fir
     {
-        static_assert(math::is_qnumber<QNumberType>::value ||
-                          std::is_floating_point<QNumberType>::value,
+        static_assert(math::is_qnumber_v<QNumberType> ||
+                          std::is_floating_point_v<QNumberType>,
             "Fir can only be instantiated with math::QNumber types.");
 
     public:
-        Fir(math::RecursiveBuffer<QNumberType, N> b);
+        explicit Fir(const math::RecursiveBuffer<QNumberType, N>& b) noexcept;
 
-        QNumberType Filter(QNumberType input);
-        void Enable();
-        void Disable();
-        void Reset();
+        QNumberType Filter(QNumberType input) noexcept;
+        void Enable() noexcept;
+        void Disable() noexcept;
+        void Reset() noexcept;
 
     private:
         bool enabled = true;
 
-        math::Index n;
+        [[no_unique_address]] math::Index n;
         math::RecursiveBuffer<QNumberType, N> b;
         math::RecursiveBuffer<QNumberType, N> x;
     };
@@ -32,45 +35,48 @@ namespace filters::passive
     ////    Implementation    ////
 
     template<typename QNumberType, std::size_t N>
-    Fir<QNumberType, N>::Fir(math::RecursiveBuffer<QNumberType, N> b)
+    Fir<QNumberType, N>::Fir(const math::RecursiveBuffer<QNumberType, N>& b) noexcept
         : b(b)
     {
         Reset();
     }
 
     template<typename QNumberType, std::size_t N>
-    QNumberType Fir<QNumberType, N>::Filter(QNumberType input)
+    OPTIMIZE_FOR_SPEED QNumberType Fir<QNumberType, N>::Filter(QNumberType input) noexcept
     {
-        QNumberType output{ 0.0f };
-
-        if (!enabled)
+        if (!enabled) [[unlikely]]
             return input;
 
         x.Update(input);
 
-        for (auto i = 0; i < b.Size(); i++)
-            output += b[n - i] * x[n - i];
+        QNumberType output{};
+        for (std::size_t i = 0; i < N; ++i)
+            output += b[n - static_cast<int32_t>(i)] * x[n - static_cast<int32_t>(i)];
 
         return output;
     }
 
     template<typename QNumberType, std::size_t N>
-    void Fir<QNumberType, N>::Enable()
+    void Fir<QNumberType, N>::Enable() noexcept
     {
         enabled = true;
     }
 
     template<typename QNumberType, std::size_t N>
-    void Fir<QNumberType, N>::Disable()
+    void Fir<QNumberType, N>::Disable() noexcept
     {
         enabled = false;
     }
 
     template<typename QNumberType, std::size_t N>
-    void Fir<QNumberType, N>::Reset()
+    void Fir<QNumberType, N>::Reset() noexcept
     {
         x.Reset();
     }
-}
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class Fir<float, 3>;
+    extern template class Fir<math::Q15, 3>;
+    extern template class Fir<math::Q31, 3>;
 #endif
+}

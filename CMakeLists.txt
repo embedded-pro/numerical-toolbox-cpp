@@ -6,7 +6,7 @@ endif()
 
 option(CMAKE_COMPILE_WARNING_AS_ERROR "Enable warnings-as-error" On)
 option(NUMERICAL_TOOLBOX_INCLUDE_DEFAULT_INIT "Include default initialization code; turn off when providing custom initialization" On)
-option(NUMERICAL_TOOLBOX_BUILD_EXAMPLES "Enable build of the examples" Off)
+option(NUMERICAL_TOOLBOX_BUILD_SIMULATOR "Enable build of the Qt simulator applications" Off)
 option(NUMERICAL_TOOLBOX_BUILD_TESTS "Enable build of the tests" Off)
 option(NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS "Enable compiler optimizations for numerical routines" On)
 
@@ -14,11 +14,19 @@ if (NUMERICAL_TOOLBOX_BUILD_TESTS)
     # CTest cannot be included before the first project() statement, but Embedded Infastructure
     # Library needs to see that test utilities need to be built.
     set(BUILD_TESTING On)
+    add_definitions(-DNUMERICAL_TOOLBOX_ENABLE_ASSERTIONS=1)
 endif()
 
 if (NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS)
     add_definitions(-DNumericalToolbox_ENABLE_OPTIMIZATIONS=1)
 endif()
+
+if (EMIL_ENABLE_COVERAGE)
+    add_definitions(-DNUMERICAL_TOOLBOX_COVERAGE_BUILD=1)
+endif()
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+include(NumericalHeaderLibrary)
 
 add_definitions(-DEMIL_ENABLE_TRACING=1)
 
@@ -31,59 +39,31 @@ if (NUMERICAL_TOOLBOX_STANDALONE)
         GIT_TAG        0bd0158e69add0726123305906128b51fecef234 # Unreleased
     )
 
+    set(EMIL_INCLUDE_MBEDTLS Off CACHE BOOL "" FORCE)
     set(EMIL_INCLUDE_ECHO Off CACHE BOOL "" FORCE)
     set(EMIL_FETCH_ECHO_COMPILERS Off CACHE BOOL "" FORCE)
     set(EMIL_BUILD_ECHO_COMPILERS Off CACHE BOOL "" FORCE)
     set(EMIL_ENABLE_DOCKER_TOOLS Off CACHE BOOL "" FORCE)
-    set(EMIL_INCLUDE_MBEDTLS Off CACHE BOOL "" FORCE)
 
     FetchContent_MakeAvailable(emil)
-
-    if (EMIL_HOST_BUILD)
-        FetchContent_Declare(
-            cucumber-cpp-runner
-            GIT_REPOSITORY https://github.com/philips-software/amp-cucumber-cpp-runner.git
-            GIT_TAG        d8b8c030c0bea97f1c41cc5229a927b2d06f5290 # v3.0.0
-        )
-
-        FetchContent_MakeAvailable(cucumber-cpp-runner)
-    endif()
 endif()
 
-project(numerical-toolbox LANGUAGES C CXX ASM VERSION 1.0.0) # x-release-please-version
+project(numerical-toolbox LANGUAGES C CXX ASM VERSION 2.0.0) # x-release-please-version
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
 
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    set(CMAKE_C_FLAGS_DEBUG "-Og -g" CACHE STRING "C Debug flags" FORCE)
+    set(CMAKE_CXX_FLAGS_DEBUG "-Og -g" CACHE STRING "C++ Debug flags" FORCE)
+endif()
+
 if (NUMERICAL_TOOLBOX_STANDALONE)
-    # Configure Git to use HTTPS instead of SSH for GitHub
     execute_process(
         COMMAND git config --global url.https://github.com/.insteadOf git@github.com:
         RESULT_VARIABLE GIT_CONFIG_RESULT
         OUTPUT_QUIET
         ERROR_QUIET
-    )
-    
-    FetchContent_Declare(
-        sciplot
-        GIT_REPOSITORY          https://github.com/sciplot/sciplot.git
-        GIT_TAG                 v0.2.2
-        GIT_SHALLOW             TRUE
-        GIT_SUBMODULES_RECURSE  TRUE
-    )
-    
-    FetchContent_GetProperties(sciplot)
-    if(NOT sciplot_POPULATED)
-        FetchContent_Populate(sciplot)
-    endif()
-
-    add_library(sciplot INTERFACE)
-    target_include_directories(sciplot INTERFACE 
-        ${sciplot_SOURCE_DIR}
-        OPTIONS 
-        -Wno-error           # Disable -Werror for sciplot headers
-        -Wno-unused-variable # Disable specific warning
-        -Wno-sign-compare    # Disable specific warning
     )
 endif()
 
@@ -102,23 +82,18 @@ if (NUMERICAL_TOOLBOX_BUILD_TESTS)
     emil_enable_testing()
 endif()
 
-add_subdirectory(examples)
 add_subdirectory(numerical)
 
-if(TARGET yaml-cpp)
-    emil_exclude_from_clang_format(yaml-cpp)
-
-    get_target_property(yaml_cpp_compile_options yaml-cpp COMPILE_OPTIONS)
-    if(yaml_cpp_compile_options)
-        list(REMOVE_ITEM yaml_cpp_compile_options /WX -Werror)
-        set_target_properties(yaml-cpp PROPERTIES COMPILE_OPTIONS "${yaml_cpp_compile_options}")
-    endif()
-    
-    set_target_properties(yaml-cpp PROPERTIES COMPILE_WARNING_AS_ERROR OFF)
+if (NUMERICAL_TOOLBOX_BUILD_SIMULATOR)
+    add_subdirectory(simulator)
 endif()
 
-emil_clangformat_directories(examples DIRECTORIES .)
 emil_clangformat_directories(numerical DIRECTORIES .)
+
+if (NUMERICAL_TOOLBOX_BUILD_SIMULATOR)
+    emil_clangformat_directories(simulator DIRECTORIES .)
+endif()
+
 emil_coverage_targets(DIRECTORIES .)
 
 if (NUMERICAL_TOOLBOX_STANDALONE)

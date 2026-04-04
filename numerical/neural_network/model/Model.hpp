@@ -1,10 +1,14 @@
-#ifndef NEURAL_NETWORK_MODEL_HPP
-#define NEURAL_NETWORK_MODEL_HPP
+#pragma once
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
 
 #include "infra/util/BoundedVector.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/neural_network/layer/Layer.hpp"
 #include "numerical/neural_network/losses/Loss.hpp"
-#include "numerical/neural_network/optimizer/Optimizer.hpp"
+#include "numerical/optimization/Optimizer.hpp"
 #include <functional>
 #include <tuple>
 #include <utility>
@@ -112,7 +116,7 @@ namespace neural_network
 
         OutputVector Forward(const InputVector& input);
         InputVector Backward(const OutputVector& output_gradient);
-        void Train(Optimizer<QNumberType, TotalParameters>& optimizer, Loss<QNumberType, TotalParameters>& loss, const ParameterVector& initialParameters);
+        void Train(optimization::Optimizer<QNumberType, TotalParameters>& optimizer, Loss<QNumberType, TotalParameters>& loss, const ParameterVector& initialParameters);
         void SetParameters(const ParameterVector& parameters);
         ParameterVector GetParameters() const;
 
@@ -120,8 +124,14 @@ namespace neural_network
         template<std::size_t... Is>
         OutputVector ForwardImpl(const InputVector& input, std::index_sequence<Is...>);
 
+        template<std::size_t I, typename InputType>
+        void ForwardLayer(const InputType& layerInput);
+
         template<std::size_t... Is>
         InputVector BackwardImpl(const OutputVector& output_gradient, std::index_sequence<Is...>);
+
+        template<std::size_t I, typename GradType>
+        InputVector BackwardLayer(const GradType& gradient);
 
         template<std::size_t... Is>
         void SetParametersImpl(const ParameterVector& parameters, std::index_sequence<Is...>);
@@ -146,7 +156,8 @@ namespace neural_network
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
     typename Model<QNumberType, InputSize, OutputSize, Layers...>::OutputVector
-    Model<QNumberType, InputSize, OutputSize, Layers...>::Forward(const InputVector& input)
+        OPTIMIZE_FOR_SPEED
+        Model<QNumberType, InputSize, OutputSize, Layers...>::Forward(const InputVector& input)
     {
         currentInput = input;
         return ForwardImpl(input, std::make_index_sequence<sizeof...(Layers)>{});
@@ -154,14 +165,15 @@ namespace neural_network
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
     typename Model<QNumberType, InputSize, OutputSize, Layers...>::InputVector
-    Model<QNumberType, InputSize, OutputSize, Layers...>::Backward(const OutputVector& output_gradient)
+        OPTIMIZE_FOR_SPEED
+        Model<QNumberType, InputSize, OutputSize, Layers...>::Backward(const OutputVector& output_gradient)
     {
         return BackwardImpl(output_gradient, std::make_index_sequence<sizeof...(Layers)>{});
     }
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
     void Model<QNumberType, InputSize, OutputSize, Layers...>::Train(
-        Optimizer<QNumberType, TotalParameters>& optimizer,
+        optimization::Optimizer<QNumberType, TotalParameters>& optimizer,
         Loss<QNumberType, TotalParameters>& loss,
         const ParameterVector& initialParameters)
     {
@@ -187,7 +199,17 @@ namespace neural_network
     typename Model<QNumberType, InputSize, OutputSize, Layers...>::OutputVector
     Model<QNumberType, InputSize, OutputSize, Layers...>::ForwardImpl(const InputVector& input, std::index_sequence<Is...>)
     {
-        return OutputVector();
+        ForwardLayer<0>(input);
+        return std::get<sizeof...(Layers) - 1>(layers).Output();
+    }
+
+    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
+    template<std::size_t I, typename InputType>
+    void Model<QNumberType, InputSize, OutputSize, Layers...>::ForwardLayer(const InputType& layerInput)
+    {
+        std::get<I>(layers).Forward(layerInput);
+        if constexpr (I + 1 < sizeof...(Layers))
+            ForwardLayer<I + 1>(std::get<I>(layers).Output());
     }
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
@@ -195,7 +217,19 @@ namespace neural_network
     typename Model<QNumberType, InputSize, OutputSize, Layers...>::InputVector
     Model<QNumberType, InputSize, OutputSize, Layers...>::BackwardImpl(const OutputVector& output_gradient, std::index_sequence<Is...>)
     {
-        return InputVector();
+        return BackwardLayer<sizeof...(Layers) - 1>(output_gradient);
+    }
+
+    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
+    template<std::size_t I, typename GradType>
+    typename Model<QNumberType, InputSize, OutputSize, Layers...>::InputVector
+    Model<QNumberType, InputSize, OutputSize, Layers...>::BackwardLayer(const GradType& gradient)
+    {
+        auto& inputGrad = std::get<I>(layers).Backward(gradient);
+        if constexpr (I == 0)
+            return inputGrad;
+        else
+            return BackwardLayer<I - 1>(inputGrad);
     }
 
     template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
@@ -251,5 +285,3 @@ namespace neural_network
         offset += Layer::ParameterSize;
     }
 }
-
-#endif

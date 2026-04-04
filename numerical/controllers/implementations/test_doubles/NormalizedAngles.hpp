@@ -8,7 +8,7 @@ namespace controllers
     template<typename T>
     T CreateNormalizedAngle(float angle)
     {
-        const float TWO_PI = 2.0f * M_PI;
+        const float TWO_PI = 2.0f * math::pi;
         const float MAX_VALUE = 0.9999f;
 
         if (std::abs(angle) < 1e-6f)

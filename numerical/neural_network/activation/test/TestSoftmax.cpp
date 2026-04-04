@@ -57,3 +57,62 @@ TYPED_TEST(TestSoftmax, ComparativeTest)
 
     EXPECT_LT(math::ToFloat(y1), math::ToFloat(y2));
 }
+
+TYPED_TEST(TestSoftmax, ForwardVectorNormalizesToOne)
+{
+    if constexpr (!std::is_floating_point_v<TypeParam>)
+        GTEST_SKIP() << "Softmax vector ops exceed Q-number range";
+
+    constexpr std::size_t Size = 3;
+    TypeParam input[Size] = { TypeParam(-0.3f), TypeParam(-0.5f), TypeParam(-0.2f) };
+    TypeParam output[Size] = {};
+
+    this->activation.ForwardVector(output, input);
+
+    float sum = 0.0f;
+    for (std::size_t i = 0; i < Size; ++i)
+        sum += math::ToFloat(output[i]);
+
+    EXPECT_NEAR(sum, 1.0f, 0.01f);
+}
+
+TYPED_TEST(TestSoftmax, ForwardVectorPreservesOrdering)
+{
+    if constexpr (!std::is_floating_point_v<TypeParam>)
+        GTEST_SKIP() << "Softmax vector ops exceed Q-number range";
+
+    constexpr std::size_t Size = 3;
+    TypeParam input[Size] = { TypeParam(-0.5f), TypeParam(-0.2f), TypeParam(-0.8f) };
+    TypeParam output[Size] = {};
+
+    this->activation.ForwardVector(output, input);
+
+    EXPECT_GT(math::ToFloat(output[1]), math::ToFloat(output[0]));
+    EXPECT_GT(math::ToFloat(output[0]), math::ToFloat(output[2]));
+}
+
+TYPED_TEST(TestSoftmax, BackwardVectorProducesCorrectGradient)
+{
+    if constexpr (!std::is_floating_point_v<TypeParam>)
+        GTEST_SKIP() << "Softmax vector ops exceed Q-number range";
+
+    constexpr std::size_t Size = 3;
+    TypeParam input[Size] = { TypeParam(-0.3f), TypeParam(-0.5f), TypeParam(-0.2f) };
+    TypeParam output[Size] = {};
+    this->activation.ForwardVector(output, input);
+
+    TypeParam outputGradient[Size] = { TypeParam(0.9999f), TypeParam(0.0f), TypeParam(0.0f) };
+    TypeParam result[Size] = {};
+
+    this->activation.BackwardVector(result, input, output, outputGradient);
+
+    float dot = 0.0f;
+    for (std::size_t i = 0; i < Size; ++i)
+        dot += math::ToFloat(outputGradient[i]) * math::ToFloat(output[i]);
+
+    for (std::size_t i = 0; i < Size; ++i)
+    {
+        float expected = math::ToFloat(output[i]) * (math::ToFloat(outputGradient[i]) - dot);
+        EXPECT_NEAR(math::ToFloat(result[i]), expected, 0.01f);
+    }
+}

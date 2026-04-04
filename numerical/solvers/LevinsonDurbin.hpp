@@ -1,6 +1,10 @@
-#ifndef SOLVERS_LEVINSON_DURBIN_HPP
-#define SOLVERS_LEVINSON_DURBIN_HPP
+#pragma once
 
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
+
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Toeplitz.hpp"
 #include "numerical/solvers/Solver.hpp"
 
@@ -26,7 +30,8 @@ namespace solvers
 
     template<typename T, std::size_t N>
     typename LevinsonDurbin<T, N>::SolutionVector
-    LevinsonDurbin<T, N>::Solve(const InputMatrix& A, const InputVector& b)
+        OPTIMIZE_FOR_SPEED
+        LevinsonDurbin<T, N>::Solve(const InputMatrix& A, const InputVector& b)
     {
         really_assert(IsToeplitz(A));
 
@@ -79,5 +84,3 @@ namespace solvers
         return LevinsonDurbin<T, N>();
     }
 }
-
-#endif

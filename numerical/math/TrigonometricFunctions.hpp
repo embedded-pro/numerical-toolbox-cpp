@@ -1,6 +1,4 @@
-#ifndef MATH_TRIGONOMETRIC_FUNCTIONS_HPP
-#define MATH_TRIGONOMETRIC_FUNCTIONS_HPP
-
+#pragma once
 #include "numerical/math/QNumber.hpp"
 
 namespace math
@@ -15,5 +13,3 @@ namespace math
         virtual QNumberType Phase(const QNumberType& real, const QNumberType& imag) const = 0;
     };
 }
-
-#endif

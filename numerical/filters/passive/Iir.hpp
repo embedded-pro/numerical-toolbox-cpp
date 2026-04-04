@@ -1,31 +1,33 @@
-#ifndef FILTERS_PASSIVE_IIR_HPP
-#define FILTERS_PASSIVE_IIR_HPP
+#pragma once
 
-#include "infra/util/MemoryRange.hpp"
-#include "numerical/math/QNumber.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/RecursiveBuffer.hpp"
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("O3", "fast-math")
+#endif
 
 namespace filters::passive
 {
     template<typename QNumberType, std::size_t P, std::size_t Q>
     class Iir
     {
-        static_assert(math::is_qnumber<QNumberType>::value ||
-                          std::is_floating_point<QNumberType>::value,
+        static_assert(math::is_qnumber_v<QNumberType> ||
+                          std::is_floating_point_v<QNumberType>,
             "Iir can only be instantiated with math::QNumber types.");
 
     public:
-        Iir(math::RecursiveBuffer<QNumberType, P> b, math::RecursiveBuffer<QNumberType, Q> a);
+        Iir(const math::RecursiveBuffer<QNumberType, P>& b, const math::RecursiveBuffer<QNumberType, Q>& a) noexcept;
 
-        QNumberType Filter(QNumberType input);
-        void Enable();
-        void Disable();
-        void Reset();
+        QNumberType Filter(QNumberType input) noexcept;
+        void Enable() noexcept;
+        void Disable() noexcept;
+        void Reset() noexcept;
 
     private:
         bool enabled = true;
 
-        math::Index n;
+        [[no_unique_address]] math::Index n;
         math::RecursiveBuffer<QNumberType, Q> a;
         math::RecursiveBuffer<QNumberType, P> b;
         math::RecursiveBuffer<QNumberType, Q> y;
@@ -35,55 +37,57 @@ namespace filters::passive
     ////    Implementation    ////
 
     template<typename QNumberType, std::size_t P, std::size_t Q>
-    Iir<QNumberType, P, Q>::Iir(math::RecursiveBuffer<QNumberType, P> b, math::RecursiveBuffer<QNumberType, Q> a)
-        : b(b)
-        , a(a)
+    Iir<QNumberType, P, Q>::Iir(const math::RecursiveBuffer<QNumberType, P>& b, const math::RecursiveBuffer<QNumberType, Q>& a) noexcept
+        : a(a)
+        , b(b)
     {
         Reset();
     }
 
     template<typename QNumberType, std::size_t P, std::size_t Q>
-    QNumberType Iir<QNumberType, P, Q>::Filter(QNumberType input)
+    OPTIMIZE_FOR_SPEED QNumberType Iir<QNumberType, P, Q>::Filter(QNumberType input) noexcept
     {
-        QNumberType feedforward{ 0.0f };
-        QNumberType feedback{ 0.0f };
-
-        if (!enabled)
+        if (!enabled) [[unlikely]]
             return input;
 
         x.Update(input);
 
-        for (auto i = 0; i < b.Size(); i++)
-            feedforward += b[n - i] * x[n - i];
+        QNumberType feedforward{};
+        for (std::size_t i = 0; i < P; ++i)
+            feedforward += b[n - static_cast<int32_t>(i)] * x[n - static_cast<int32_t>(i)];
 
-        for (auto i = 0; i < a.Size(); i++)
-            feedback += a[n - i] * y[n - i];
+        QNumberType feedback{};
+        for (std::size_t i = 0; i < Q; ++i)
+            feedback += a[n - static_cast<int32_t>(i)] * y[n - static_cast<int32_t>(i)];
 
-        auto output = feedback + feedforward;
-
+        const auto output = feedforward + feedback;
         y.Update(output);
 
         return output;
     }
 
     template<typename QNumberType, std::size_t P, std::size_t Q>
-    void Iir<QNumberType, P, Q>::Enable()
+    void Iir<QNumberType, P, Q>::Enable() noexcept
     {
         enabled = true;
     }
 
     template<typename QNumberType, std::size_t P, std::size_t Q>
-    void Iir<QNumberType, P, Q>::Disable()
+    void Iir<QNumberType, P, Q>::Disable() noexcept
     {
         enabled = false;
     }
 
     template<typename QNumberType, std::size_t P, std::size_t Q>
-    void Iir<QNumberType, P, Q>::Reset()
+    void Iir<QNumberType, P, Q>::Reset() noexcept
     {
         x.Reset();
         y.Reset();
     }
-}
 
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class Iir<float, 3, 3>;
+    extern template class Iir<math::Q15, 3, 3>;
+    extern template class Iir<math::Q31, 3, 3>;
 #endif
+}

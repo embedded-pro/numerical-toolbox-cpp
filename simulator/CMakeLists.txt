@@ -1,0 +1,8 @@
+add_subdirectory(utils)
+add_subdirectory(widgets)
+add_subdirectory(analysis)
+add_subdirectory(controllers)
+add_subdirectory(dynamics)
+add_subdirectory(estimators)
+add_subdirectory(filters)
+add_subdirectory(neural_network)

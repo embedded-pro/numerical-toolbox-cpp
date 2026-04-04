@@ -1,5 +1,4 @@
-#ifndef SOLVERS_SOLVER_HPP
-#define SOLVERS_SOLVER_HPP
+#pragma once
 
 #include "numerical/math/Matrix.hpp"
 
@@ -21,5 +20,3 @@ namespace solvers
         virtual SolutionVector Solve(const InputMatrix& a, const InputVector& b) = 0;
     };
 }
-
-#endif
