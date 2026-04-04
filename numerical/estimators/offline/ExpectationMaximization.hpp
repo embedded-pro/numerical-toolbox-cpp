@@ -11,6 +11,7 @@
 #include <array>
 #include <cmath>
 #include <limits>
+#include <utility>
 
 namespace estimators
 {
@@ -66,8 +67,20 @@ namespace estimators
             const std::array<MeasurementVector, MaxSteps>& observations,
             std::size_t numSteps);
 
-        static StateMatrix SymmetrizeState(const StateMatrix& M);
-        static MeasurementCovariance SymmetrizeMeasurement(const MeasurementCovariance& M);
+        OPTIMIZE_FOR_SPEED std::pair<StateMatrix, StateMatrix> ComputeTransitionUpdate(
+            const StateMatrix& transitionCrossCov,
+            const StateMatrix& laggedStateCov,
+            const StateMatrix& currentStateCov,
+            std::size_t numSteps) const;
+
+        OPTIMIZE_FOR_SPEED std::pair<MeasurementMatrix, MeasurementCovariance> ComputeObservationUpdate(
+            const math::Matrix<float, MeasurementSize, StateSize>& obsStateCrossCov,
+            const StateMatrix& fullStateCov,
+            const MeasurementCovariance& obsOuterSum,
+            std::size_t numSteps) const;
+
+        template<std::size_t N>
+        static math::SquareMatrix<float, N> Symmetrize(const math::SquareMatrix<float, N>& M);
     };
 
     // Implementation //
@@ -123,12 +136,12 @@ namespace estimators
             const std::array<MeasurementVector, MaxSteps>& observations,
             std::size_t numSteps)
     {
-        StateMatrix A{};
-        StateMatrix B{};
-        StateMatrix C{};
-        StateMatrix D{};
-        math::Matrix<float, MeasurementSize, StateSize> W{};
-        MeasurementCovariance sumZZT{};
+        StateMatrix transitionCrossCov{};
+        StateMatrix laggedStateCov{};
+        StateMatrix currentStateCov{};
+        StateMatrix fullStateCov{};
+        math::Matrix<float, MeasurementSize, StateSize> obsStateCrossCov{};
+        MeasurementCovariance obsOuterSum{};
 
         for (std::size_t t = 0; t < numSteps; ++t)
         {
@@ -137,42 +150,22 @@ namespace estimators
             const auto xxT = xS * xS.Transpose();
             const auto PxxT = PS + xxT;
 
-            // S2 / B: t = 0 .. T-2
             if (t < numSteps - 1)
-                B += PxxT;
+                laggedStateCov += PxxT;
 
-            // S3_F / C and S1 / A: t = 1 .. T-1
             if (t >= 1)
             {
-                C += PxxT;
-                A += smootherOutput.lagCrossCovariances[t] + xS * smootherOutput.smoothedMeans[t - 1].Transpose();
+                currentStateCov += PxxT;
+                transitionCrossCov += smootherOutput.lagCrossCovariances[t] + xS * smootherOutput.smoothedMeans[t - 1].Transpose();
             }
 
-            // S3_H / D, W, sumZZT: t = 0 .. T-1
-            D += PxxT;
-            W += observations[t] * xS.Transpose();
-            sumZZT += observations[t] * observations[t].Transpose();
+            fullStateCov += PxxT;
+            obsStateCrossCov += observations[t] * xS.Transpose();
+            obsOuterSum += observations[t] * observations[t].Transpose();
         }
 
-        // F_new = A * B^{-1}  →  SolveSystem(B, A^T)^T
-        const auto F_new = solvers::SolveSystem<float, StateSize, StateSize>(
-            B, A.Transpose())
-                               .Transpose();
-
-        // Q_new = (C - F_new * A^T) / (T-1), symmetrized + PD-regularized
-        const float invTm1 = 1.0f / static_cast<float>(numSteps - 1);
-        auto Q_new = SymmetrizeState((C - F_new * A.Transpose()) * invTm1);
-        Q_new += StateMatrix::Identity() * 1e-6f;
-
-        // H_new = W * D^{-1}  →  SolveSystem(D, W^T)^T
-        const auto H_new = solvers::SolveSystem<float, StateSize, MeasurementSize>(
-            D, W.Transpose())
-                               .Transpose();
-
-        // R_new = (sumZZT - H_new * W^T) / T, symmetrized + PD-regularized
-        const float invT = 1.0f / static_cast<float>(numSteps);
-        auto R_new = SymmetrizeMeasurement((sumZZT - H_new * W.Transpose()) * invT);
-        R_new += MeasurementCovariance::Identity() * 1e-6f;
+        const auto [F_new, Q_new] = ComputeTransitionUpdate(transitionCrossCov, laggedStateCov, currentStateCov, numSteps);
+        const auto [H_new, R_new] = ComputeObservationUpdate(obsStateCrossCov, fullStateCov, obsOuterSum, numSteps);
 
         return EmParameters{
             F_new,
@@ -185,15 +178,47 @@ namespace estimators
     }
 
     template<std::size_t StateSize, std::size_t MeasurementSize, std::size_t MaxSteps>
-    typename ExpectationMaximization<StateSize, MeasurementSize, MaxSteps>::StateMatrix
-    ExpectationMaximization<StateSize, MeasurementSize, MaxSteps>::SymmetrizeState(const StateMatrix& M)
+    OPTIMIZE_FOR_SPEED
+        std::pair<typename ExpectationMaximization<StateSize, MeasurementSize, MaxSteps>::StateMatrix,
+            typename ExpectationMaximization<StateSize, MeasurementSize, MaxSteps>::StateMatrix>
+        ExpectationMaximization<StateSize, MeasurementSize, MaxSteps>::ComputeTransitionUpdate(
+            const StateMatrix& transitionCrossCov,
+            const StateMatrix& laggedStateCov,
+            const StateMatrix& currentStateCov,
+            std::size_t numSteps) const
     {
-        return (M + M.Transpose()) * 0.5f;
+        const auto F_new = solvers::SolveSystem<float, StateSize, StateSize>(
+            laggedStateCov, transitionCrossCov.Transpose())
+                               .Transpose();
+        const float invTm1 = 1.0f / static_cast<float>(numSteps - 1);
+        auto Q_new = Symmetrize<StateSize>((currentStateCov - F_new * transitionCrossCov.Transpose()) * invTm1);
+        Q_new += StateMatrix::Identity() * 1e-6f;
+        return { F_new, Q_new };
     }
 
     template<std::size_t StateSize, std::size_t MeasurementSize, std::size_t MaxSteps>
-    typename ExpectationMaximization<StateSize, MeasurementSize, MaxSteps>::MeasurementCovariance
-    ExpectationMaximization<StateSize, MeasurementSize, MaxSteps>::SymmetrizeMeasurement(const MeasurementCovariance& M)
+    OPTIMIZE_FOR_SPEED
+        std::pair<typename ExpectationMaximization<StateSize, MeasurementSize, MaxSteps>::MeasurementMatrix,
+            typename ExpectationMaximization<StateSize, MeasurementSize, MaxSteps>::MeasurementCovariance>
+        ExpectationMaximization<StateSize, MeasurementSize, MaxSteps>::ComputeObservationUpdate(
+            const math::Matrix<float, MeasurementSize, StateSize>& obsStateCrossCov,
+            const StateMatrix& fullStateCov,
+            const MeasurementCovariance& obsOuterSum,
+            std::size_t numSteps) const
+    {
+        const auto H_new = solvers::SolveSystem<float, StateSize, MeasurementSize>(
+            fullStateCov, obsStateCrossCov.Transpose())
+                               .Transpose();
+        const float invT = 1.0f / static_cast<float>(numSteps);
+        auto R_new = Symmetrize<MeasurementSize>((obsOuterSum - H_new * obsStateCrossCov.Transpose()) * invT);
+        R_new += MeasurementCovariance::Identity() * 1e-6f;
+        return { H_new, R_new };
+    }
+
+    template<std::size_t StateSize, std::size_t MeasurementSize, std::size_t MaxSteps>
+    template<std::size_t N>
+    math::SquareMatrix<float, N>
+    ExpectationMaximization<StateSize, MeasurementSize, MaxSteps>::Symmetrize(const math::SquareMatrix<float, N>& M)
     {
         return (M + M.Transpose()) * 0.5f;
     }

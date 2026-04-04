@@ -240,10 +240,12 @@ namespace filters::passive
 **ALWAYS update documentation for every change:**
 
 - Create or update `doc/{domain}/{AlgorithmName}.md` for every new or modified algorithm
-- Use `doc/TEMPLATE.md` as the starting template for new documentation files
-- Include: mathematical background, implementation details, usage examples, numerical properties
+- Use `doc/TEMPLATE.md` as the starting template — follow its structure exactly
+- Documentation is **design-first**: cover mathematical theory, algorithm behaviour, complexity, pitfalls, and connections to other algorithms
+- **Do NOT add implementation details** (class names, template parameters, header paths)
+- **Do NOT add usage code examples** — the implementation follows the doc, not the other way around
 - Update `doc/{domain}/README.md` if a new algorithm is added
-- Documentation must stay in sync with code changes
+- Keep documentation in sync with algorithmic changes
 
 ---
 
@@ -256,8 +258,9 @@ namespace filters::passive
 5. **Create or update tests** using `TYPED_TEST` pattern for every change
 6. **Update `CMakeLists.txt`** if new files were added
 7. **Update documentation** in `doc/` for every algorithm added or changed
-8. **Build and test**: run `cmake --build --preset host` and `ctest --preset host`
-9. **Hand off to reviewer** using the handoff button
+8. **Add launch configuration** to `.vscode/launch.json` if a new simulator was created — follow the existing `cppdbg` entry pattern; insert before the generic `"Linux Debug"` entry
+9. **Build and test**: run `cmake --build --preset host` and `ctest --preset host`
+10. **Hand off to reviewer** using the handoff button
 
 ## What NOT to Do
 

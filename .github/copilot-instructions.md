@@ -73,11 +73,11 @@ Place code here when it is:
 
 When implementing or modifying algorithms:
 - **ALWAYS UPDATE DOCUMENTATION**: Each algorithm must have corresponding documentation in `doc/`
-- Include mathematical background and theory
-- Provide implementation details and considerations
-- Add usage examples and expected behaviors
-- Document numerical properties and limitations
-- Keep documentation in sync with code changes
+- Follow the structure defined in `doc/TEMPLATE.md` exactly
+- Documentation is **design-first**: describe mathematical theory, algorithm behaviour, complexity, pitfalls, and connections — not how the code is written
+- **Do NOT include implementation details** (e.g., class names, template parameters, header paths)
+- **Do NOT include usage examples or code snippets** — the implementation must follow what the doc describes, not the other way around
+- Keep documentation in sync with algorithmic changes (not code-level changes)
 
 ## Design Principles
 
@@ -114,6 +114,30 @@ These are the most important architectural directives in this codebase. Every ne
 - **Naming convention**: Targets follow `numerical.simulator.<domain>.<algorithm>.<layer>` (e.g., `numerical.simulator.controllers.lqr.application`).
 - **Library code reuse**: Use `numerical_add_header_library()` and `numerical_add_coverage_sources()` from `cmake/NumericalHeaderLibrary.cmake` for all `numerical/` targets.
 - **Compiler options blocks**: Every simulator target repeats the same MSVC/GCC warning suppression — keep this consistent across all targets.
+- **Launch configuration**: Every new simulator MUST have a corresponding entry added to `.vscode/launch.json`. Follow the existing pattern exactly:
+  ```json
+  {
+    "name": "<SimulatorName> Simulator",
+    "type": "cppdbg",
+    "request": "launch",
+    "program": "${workspaceFolder}/build/host/simulator/<domain>/<SimulatorFolder>/Debug/numerical.simulator.<domain>.<snake_case_name>",
+    "args": [],
+    "stopAtEntry": false,
+    "cwd": "${workspaceFolder}",
+    "environment": [],
+    "externalConsole": false,
+    "MIMode": "gdb",
+    "miDebuggerPath": "/usr/bin/gdb",
+    "setupCommands": [
+      {
+        "description": "Enable pretty-printing for gdb",
+        "text": "-enable-pretty-printing",
+        "ignoreFailures": true
+      }
+    ]
+  }
+  ```
+  Insert the new entry before the generic `"Linux Debug"` configuration, which must remain last.
 
 ## Coding Style and Patterns
 
@@ -402,8 +426,6 @@ When implementing a new algorithm:
 4. **Write comprehensive tests** for all numeric types
 5. **Document in `doc/`** with:
    - Mathematical background
-   - Implementation details
-   - Usage examples
    - Numerical considerations (stability, range, precision)
 6. **Consider SIMD optimizations** where applicable using `math::SingleInstructionMultipleData`
 
