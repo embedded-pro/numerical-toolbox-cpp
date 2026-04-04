@@ -8,5 +8,6 @@ target_link_libraries(numerical.optimization_test PUBLIC
 )
 
 target_sources(numerical.optimization_test PRIVATE
+    TestBayesianOptimization.cpp
     TestGradientDescent.cpp
 )

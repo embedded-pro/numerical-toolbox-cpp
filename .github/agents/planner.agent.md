@@ -75,6 +75,7 @@ For each file to create or modify, specify:
 
 #### Build Integration
 - `CMakeLists.txt` changes using `numerical_add_header_library()` and `numerical_add_coverage_sources()`
+- If a new simulator is created: add a `cppdbg` launch entry to `.vscode/launch.json` following the existing pattern (program path, GDB setup, insert before `"Linux Debug"`)
 - Build commands: `cmake --preset host && cmake --build --preset host`
 - Test commands: `ctest --preset host`
 

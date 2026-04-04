@@ -114,6 +114,30 @@ These are the most important architectural directives in this codebase. Every ne
 - **Naming convention**: Targets follow `numerical.simulator.<domain>.<algorithm>.<layer>` (e.g., `numerical.simulator.controllers.lqr.application`).
 - **Library code reuse**: Use `numerical_add_header_library()` and `numerical_add_coverage_sources()` from `cmake/NumericalHeaderLibrary.cmake` for all `numerical/` targets.
 - **Compiler options blocks**: Every simulator target repeats the same MSVC/GCC warning suppression — keep this consistent across all targets.
+- **Launch configuration**: Every new simulator MUST have a corresponding entry added to `.vscode/launch.json`. Follow the existing pattern exactly:
+  ```json
+  {
+    "name": "<SimulatorName> Simulator",
+    "type": "cppdbg",
+    "request": "launch",
+    "program": "${workspaceFolder}/build/host/simulator/<domain>/<SimulatorFolder>/Debug/numerical.simulator.<domain>.<snake_case_name>",
+    "args": [],
+    "stopAtEntry": false,
+    "cwd": "${workspaceFolder}",
+    "environment": [],
+    "externalConsole": false,
+    "MIMode": "gdb",
+    "miDebuggerPath": "/usr/bin/gdb",
+    "setupCommands": [
+      {
+        "description": "Enable pretty-printing for gdb",
+        "text": "-enable-pretty-printing",
+        "ignoreFailures": true
+      }
+    ]
+  }
+  ```
+  Insert the new entry before the generic `"Linux Debug"` configuration, which must remain last.
 
 ## Coding Style and Patterns
 

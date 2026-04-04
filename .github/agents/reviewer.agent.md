@@ -177,6 +177,7 @@ End with a summary: total criticals, warnings, suggestions, and overall verdict 
 - [ ] `target_link_libraries` uses `${NUMERICAL_VISIBILITY}` variable
 - [ ] No circular dependencies between targets
 - [ ] Test subdirectory added via `add_subdirectory(test)`
+- [ ] If a new simulator was created: `.vscode/launch.json` has a new `cppdbg` entry with the correct program path and inserted before the generic `"Linux Debug"` entry
 
 ### 15. Code Quality Tools (WARNING)
 

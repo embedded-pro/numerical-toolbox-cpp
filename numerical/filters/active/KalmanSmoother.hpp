@@ -73,6 +73,15 @@ namespace filters
             const MeasurementMatrix& H,
             std::size_t numSteps,
             SmootherOutput& output);
+
+        [[nodiscard]] OPTIMIZE_FOR_SPEED float ComputeLogLikelihoodContribution(
+            const MeasurementVector& innovation,
+            const MeasurementCovariance& innovationCovariance) const;
+
+        [[nodiscard]] OPTIMIZE_FOR_SPEED StateMatrix ComputeSmootherGain(
+            const StateMatrix& filteredCovariance,
+            const StateMatrix& stateTransition,
+            const StateMatrix& predictedCovariance) const;
     };
 
     // Implementation //
@@ -114,7 +123,6 @@ namespace filters
         predictedCovariances_[0] = initialCovariance;
 
         float logLikelihood = 0.0f;
-        const float logTwoPi = std::log(2.0f * std::numbers::pi_v<float>);
 
         for (std::size_t t = 0; t < numSteps; ++t)
         {
@@ -135,18 +143,7 @@ namespace filters
 
             kalmanGains_[t] = K;
 
-            // Log-likelihood contribution: -0.5 * (log det S + nu^T S^{-1} nu + M*log(2pi))
-            const auto L = solvers::CholeskyDecomposition(S);
-            const auto S_inv_nu = solvers::SolveSystem<float, MeasurementSize, 1>(S, nu);
-            float logDetS = 0.0f;
-            float quadForm = 0.0f;
-            for (std::size_t i = 0; i < MeasurementSize; ++i)
-            {
-                logDetS += std::log(L.at(i, i));
-                quadForm += nu.at(i, 0) * S_inv_nu.at(i, 0);
-            }
-            logDetS *= 2.0f;
-            logLikelihood += -0.5f * (logDetS + quadForm + static_cast<float>(MeasurementSize) * logTwoPi);
+            logLikelihood += ComputeLogLikelihoodContribution(nu, S);
 
             if (t < numSteps - 1)
             {
@@ -174,11 +171,7 @@ namespace filters
         for (std::size_t t = numSteps - 2;; --t)
         {
             // RTS smoother gain: G_t = P_{t|t} F^T (P_{t+1|t})^{-1}
-            // Solve P_{t+1|t} * G_t^T = F * P_{t|t}  then transpose
-            const auto G_t = solvers::SolveSystem<float, StateSize, StateSize>(
-                predictedCovariances_[t + 1],
-                F * filteredCovariances_[t])
-                                 .Transpose();
+            const auto G_t = ComputeSmootherGain(filteredCovariances_[t], F, predictedCovariances_[t + 1]);
 
             const auto deltaP = output.smoothedCovariances[t + 1] - predictedCovariances_[t + 1];
             output.smoothedMeans[t] = filteredMeans_[t] + G_t * (output.smoothedMeans[t + 1] - predictedMeans_[t + 1]);
@@ -205,6 +198,38 @@ namespace filters
             if (t == 0)
                 break;
         }
+    }
+
+    template<std::size_t StateSize, std::size_t MeasurementSize, std::size_t MaxSteps>
+    OPTIMIZE_FOR_SPEED float
+    KalmanSmoother<StateSize, MeasurementSize, MaxSteps>::ComputeLogLikelihoodContribution(
+        const MeasurementVector& innovation,
+        const MeasurementCovariance& innovationCovariance) const
+    {
+        const auto L = solvers::CholeskyDecomposition(innovationCovariance);
+        const auto sInvNu = solvers::SolveSystem<float, MeasurementSize, 1>(innovationCovariance, innovation);
+        float logDetS = 0.0f;
+        float quadForm = 0.0f;
+        for (std::size_t i = 0; i < MeasurementSize; ++i)
+        {
+            logDetS += std::log(L.at(i, i));
+            quadForm += innovation.at(i, 0) * sInvNu.at(i, 0);
+        }
+        logDetS *= 2.0f;
+        return -0.5f * (logDetS + quadForm + static_cast<float>(MeasurementSize) * std::log(2.0f * std::numbers::pi_v<float>));
+    }
+
+    template<std::size_t StateSize, std::size_t MeasurementSize, std::size_t MaxSteps>
+    OPTIMIZE_FOR_SPEED
+        typename KalmanSmoother<StateSize, MeasurementSize, MaxSteps>::StateMatrix
+        KalmanSmoother<StateSize, MeasurementSize, MaxSteps>::ComputeSmootherGain(
+            const StateMatrix& filteredCovariance,
+            const StateMatrix& stateTransition,
+            const StateMatrix& predictedCovariance) const
+    {
+        return solvers::SolveSystem<float, StateSize, StateSize>(
+            predictedCovariance, stateTransition * filteredCovariance)
+            .Transpose();
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD

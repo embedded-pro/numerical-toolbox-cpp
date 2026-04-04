@@ -9,14 +9,18 @@ target_link_libraries(numerical.optimization ${NUMERICAL_VISIBILITY}
     infra.util
     numerical.math
     numerical.neural_network.losses
+    numerical.solver
 )
 
 target_sources(numerical.optimization PRIVATE
+    BayesianOptimization.hpp
+    BlackBoxObjective.hpp
     GradientDescent.hpp
     Optimizer.hpp
 )
 
 numerical_add_coverage_sources(numerical.optimization
+    BayesianOptimization.cpp
     GradientDescent.cpp
 )
 

@@ -258,8 +258,9 @@ namespace filters::passive
 5. **Create or update tests** using `TYPED_TEST` pattern for every change
 6. **Update `CMakeLists.txt`** if new files were added
 7. **Update documentation** in `doc/` for every algorithm added or changed
-8. **Build and test**: run `cmake --build --preset host` and `ctest --preset host`
-9. **Hand off to reviewer** using the handoff button
+8. **Add launch configuration** to `.vscode/launch.json` if a new simulator was created — follow the existing `cppdbg` entry pattern; insert before the generic `"Linux Debug"` entry
+9. **Build and test**: run `cmake --build --preset host` and `ctest --preset host`
+10. **Hand off to reviewer** using the handoff button
 
 ## What NOT to Do
 
