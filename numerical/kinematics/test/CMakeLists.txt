@@ -9,4 +9,5 @@ target_link_libraries(numerical.kinematics_test PUBLIC
 
 target_sources(numerical.kinematics_test PRIVATE
     TestForwardKinematics.cpp
+    TestInverseKinematics.cpp
 )

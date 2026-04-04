@@ -76,4 +76,16 @@ namespace math
                 result.at(r, c) = a.at(r, 0) * b.at(c, 0);
         return result;
     }
+
+    template<typename T>
+    ALWAYS_INLINE_HOT T DotProduct(const Vector3<T>& a, const Vector3<T>& b)
+    {
+        return a.at(0, 0) * b.at(0, 0) + a.at(1, 0) * b.at(1, 0) + a.at(2, 0) * b.at(2, 0);
+    }
+
+    template<typename T>
+    ALWAYS_INLINE_HOT T VectorNorm(const Vector3<T>& v)
+    {
+        return std::sqrt(DotProduct(v, v));
+    }
 }
