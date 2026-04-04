@@ -7,16 +7,19 @@ target_include_directories(numerical.estimators.offline ${NUMERICAL_VISIBILITY}
 
 target_link_libraries(numerical.estimators.offline ${NUMERICAL_VISIBILITY}
     infra.util
+    numerical.filters.active
     numerical.math
     numerical.solver
 )
 
 target_sources(numerical.estimators.offline PRIVATE
+    ExpectationMaximization.hpp
     LinearRegression.hpp
     YuleWalker.hpp
 )
 
 numerical_add_coverage_sources(numerical.estimators.offline
+    ExpectationMaximization.cpp
     LinearRegression.cpp
     YuleWalker.cpp
 )

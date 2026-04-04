@@ -10,5 +10,6 @@ target_link_libraries(numerical.filters.active_test PUBLIC
 target_sources(numerical.filters.active_test PRIVATE
     TestExtendedKalmanFilter.cpp
     TestKalmanFilter.cpp
+    TestKalmanSmoother.cpp
     TestUnscentedKalmanFilter.cpp
 )
