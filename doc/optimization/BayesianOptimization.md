@@ -63,11 +63,11 @@ inactive entries.
 
 ## Complexity Analysis
 
-| Case    | Time per iteration       | Space           | Notes |
-|---------|--------------------------|-----------------|-------|
-| Best    | $O(M^3)$                 | $O(M^2 + NP)$   | Dominated by GP solve |
-| Average | $O(M^3 + C \cdot P)$     | $O(M^2 + NP)$   | $C$ candidates, $P$ parameters |
-| Worst   | $O(M^3 + C \cdot P)$     | $O(M^2 + NP)$   | Same as average |
+| Case    | Time per iteration   | Space         | Notes                          |
+|---------|----------------------|---------------|--------------------------------|
+| Best    | $O(M^3)$             | $O(M^2 + NP)$ | Dominated by GP solve          |
+| Average | $O(M^3 + C \cdot P)$ | $O(M^2 + NP)$ | $C$ candidates, $P$ parameters |
+| Worst   | $O(M^3 + C \cdot P)$ | $O(M^2 + NP)$ | Same as average                |
 
 Where $M$ = maximum observations, $C$ = candidate count, $P$ = parameter count, $N$ = current number of observations.
 
