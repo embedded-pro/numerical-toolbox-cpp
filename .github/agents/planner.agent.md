@@ -63,6 +63,8 @@ For each file to create or modify, specify:
 - Typed test pattern using `TYPED_TEST` for multiple numeric types
 - Test suite covering `float`, `math::Q15`, `math::Q31`
 - Key test cases: numerical accuracy, edge cases, boundary conditions, stability
+- **TDD**: All use cases and acceptance criteria are specified as concrete test cases in the plan BEFORE implementation begins. Production code exists only to satisfy those tests.
+- **StrictMock only**: All mock objects use `testing::StrictMock<MockType>` — `NiceMock` is forbidden in this codebase.
 - Coverage sources: explicit template instantiation `.cpp` files when `EMIL_ENABLE_COVERAGE` is set
 
 #### Documentation Update
@@ -147,6 +149,8 @@ Before finalizing, verify the plan against these constraints:
 - [ ] `TYPED_TEST_SUITE` macro outside anonymous namespace
 - [ ] Numerical accuracy verified against known reference values
 - [ ] Edge cases: zero input, maximum range, saturation conditions
+- [ ] All mocks use `testing::StrictMock<MockType>` — no `NiceMock`, no bare mock instantiation
+- [ ] No pure virtual destructors in interfaces — use `= default` or omit
 
 ### Documentation — ALWAYS UPDATED
 - [ ] `doc/{domain}/{AlgorithmName}.md` created or updated for every change

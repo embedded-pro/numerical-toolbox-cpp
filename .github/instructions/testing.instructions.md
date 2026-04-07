@@ -71,12 +71,19 @@ TEST_F(TestDare, solves_simple_system)
 - Test macros (`TEST_F`, `TYPED_TEST`) go **outside** the anonymous namespace
 - Include `<gtest/gtest.h>` (not `<gmock/gmock.h>`) unless gmock matchers are needed
 - Use `testing::StrictMock<MockType>` for strict mock expectations
+- **ONLY `StrictMock`**: Never use `testing::NiceMock<>` or bare mock instantiation — `NiceMock` silences unexpected-call warnings, masking test gaps; `StrictMock` enforces all interactions explicitly
 - Test all three numeric types: `float`, `math::Q15`, `math::Q31`
 - Test numerical accuracy against known reference values (not just "doesn't crash")
 - Test edge cases: zero input, maximum range values, saturation conditions
 - Test one behavior per test — keep tests focused
 - Use descriptive test names that explain the scenario
 - Allman brace style and PascalCase naming apply to test code too
+
+## TDD Approach
+
+- **Clarify requirements first**: Before writing any code, define and document all use cases, inputs, outputs, and edge cases as test cases
+- **Write tests before implementation**: Tests define the expected behavior; implementation exists only to satisfy the tests
+- **Red-Green-Refactor cycle**: Write a failing test, make it pass with minimal code, then refactor while keeping tests green
 
 ## Coverage for Template Code
 

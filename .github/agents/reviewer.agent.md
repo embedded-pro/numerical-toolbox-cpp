@@ -104,6 +104,7 @@ End with a summary: total criticals, warnings, suggestions, and overall verdict 
 - [ ] No trailing whitespace
 - [ ] Blank line between method definitions
 - [ ] `public:` before `private:` in class declarations
+- [ ] Brace initialization `{}` used — not parenthesis `()` — for all variable/object initialization
 
 ### 7. Function Size (WARNING)
 
@@ -121,6 +122,7 @@ End with a summary: total criticals, warnings, suggestions, and overall verdict 
 - [ ] **DIP**: Dependencies injected via constructor, depend on abstractions
 - [ ] **DRY**: No duplicated code blocks (>3 similar lines = extract helper or template)
 - [ ] Existing utility components reused (e.g., `RecursiveBuffer` for delay lines)
+- [ ] No pure virtual destructors (`virtual ~Foo() = 0`) — use `= default` if a virtual destructor is needed; omit if class is never deleted polymorphically
 
 ### 9. Error Handling (WARNING)
 
@@ -156,6 +158,8 @@ End with a summary: total criticals, warnings, suggestions, and overall verdict 
 - [ ] Edge cases tested: zero input, maximum range, saturation conditions
 - [ ] No heap allocation in tests
 - [ ] Tests follow Arrange-Act-Assert pattern
+- [ ] **Only `StrictMock`**: `testing::StrictMock<MockType>` used for ALL mocks — `testing::NiceMock<>` and bare `Mock<>` are forbidden
+- [ ] Test cases and use cases defined upfront (TDD) — tests exist before or alongside the implementation
 
 ### 13. Documentation Alignment (CRITICAL)
 
