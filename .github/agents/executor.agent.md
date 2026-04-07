@@ -121,6 +121,8 @@ namespace filters::passive
 - **`const` correctness**: Mark all non-mutating methods `const`
 - **`constexpr`**: Use for compile-time calculations and lookup tables
 - **Fixed-size types**: Prefer `uint8_t`, `int32_t`, etc., over `int`
+- **Brace initialization**: Use `{}` for all variable and object initialization — `T value{}` not `T value()`, `Foo obj{arg}` not `Foo obj(arg)`.
+- **No pure virtual destructors**: Never use `virtual ~Interface() = 0`. Use `= default` or omit the destructor. Pure virtual dtors add a thunk and body, wasting embedded memory.
 
 ### Error Handling
 
@@ -179,6 +181,8 @@ Rules:
 - Fixture class and type aliases inside anonymous `namespace {}`
 - Test macros (`TEST_F`, `TYPED_TEST`) outside anonymous namespace
 - Include `<gtest/gtest.h>` (not `<gmock/gmock.h>`) unless gmock matchers are needed
+- Use **only** `testing::StrictMock<MockType>` — never `testing::NiceMock<>` or bare `Mock<>` instantiation
+- Follow TDD: define all use cases and expected behaviors as tests BEFORE implementing production code
 - Test numerical accuracy against known reference values
 - Test edge cases: zero input, maximum range, saturation
 
@@ -255,7 +259,7 @@ namespace filters::passive
 2. **Search for existing patterns** in the codebase — follow them exactly
 3. **Implement changes** one file at a time, following all rules above
 4. **Add `#pragma GCC optimize` and `OPTIMIZE_FOR_SPEED`** to all algorithm headers
-5. **Create or update tests** using `TYPED_TEST` pattern for every change
+5. **Define and write tests first** (TDD): specify use cases and edge cases as `TYPED_TEST` or `TEST_F` tests before implementing production code; use only `testing::StrictMock<>` for mocks
 6. **Update `CMakeLists.txt`** if new files were added
 7. **Update documentation** in `doc/` for every algorithm added or changed
 8. **Add launch configuration** to `.vscode/launch.json` if a new simulator was created — follow the existing `cppdbg` entry pattern; insert before the generic `"Linux Debug"` entry

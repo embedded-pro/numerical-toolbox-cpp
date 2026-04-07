@@ -169,6 +169,23 @@ These are the most important architectural directives in this codebase. Every ne
 - Do not add function/method docstrings unless the API is non-obvious to a domain expert
 - Acceptable exceptions: legal headers, `NOLINT` annotations, and brief clarifications of non-trivial math or domain-specific constants
 
+### Initialization
+
+Use brace initialization `{}` for all variables and objects:
+
+```cpp
+// GOOD
+T value{};
+Foo obj{arg1, arg2};
+std::array<float, 4> buffer{};
+
+// BAD
+T value();        // declares a function, not a variable (most vexing parse)
+Foo obj(arg1);    // use braces instead
+```
+
+Parenthesis `()` may be used only when brace initialization causes a narrowing conversion or parsing ambiguity.
+
 ### Error Handling
 
 - Use `std::optional` for functions that may not return a value
@@ -180,6 +197,8 @@ These are the most important architectural directives in this codebase. Every ne
 - Write unit tests using GoogleTest
 - Test with multiple numeric types (float, Q15, Q31) using typed tests
 - Mock dependencies for isolation
+- **Only `StrictMock`**: Use `testing::StrictMock<MockType>` for all mocks; `testing::NiceMock<>` and bare `Mock<>` are forbidden
+- **TDD**: Clarify all requirements and use cases as test cases before writing implementation code
 - Aim for high code coverage, especially in numerical algorithms
 - Verify numerical accuracy and stability
 - Test edge cases and boundary conditions
@@ -192,6 +211,7 @@ These are the most important architectural directives in this codebase. Every ne
 - Fixture class and type aliases go inside an anonymous `namespace {}`
 - Test macros (`TEST_F`, `TYPED_TEST`) go **outside** the anonymous namespace
 - Include `<gtest/gtest.h>` (not `<gmock/gmock.h>`) unless gmock matchers are needed
+- **Only `StrictMock`**: All mock objects must use `testing::StrictMock<MockType>` — never `testing::NiceMock<>` or bare mock types
 
 #### Typed Test Pattern (multiple types)
 
@@ -307,12 +327,16 @@ class Algorithm
 {
     T coefficient; // Works with float, Q15, Q31
 };
+
+// Brace initialization
+T value{};
+Foo obj{arg1, arg2};
 ```
 
 ## Additional Guidelines
 
 - **RAII**: Use Resource Acquisition Is Initialization for resource management
-- **INTERFACES**: Define interfaces (pure virtual classes) for testability and flexibility
+- **INTERFACES**: Define interfaces (pure virtual classes) for testability and flexibility; **never declare `virtual ~Interface() = 0`** — pure virtual destructors force thunk emission in embedded binaries; use `virtual ~Interface() = default` or omit if the class is never deleted polymorphically
 - **NAMESPACE**: Use appropriate namespaces by domain:
   - `analysis::` - Signal analysis algorithms
   - `control_analysis::` - Control system analysis (Frequency Response, Root Locus)

@@ -64,12 +64,14 @@ Apply `OPTIMIZE_FOR_SPEED` (from `numerical/math/CompilerOptimizations.hpp`) on 
 - Self-documenting code — avoid unnecessary comments
 - `const` on all non-mutating methods, `constexpr` where possible
 - Fixed-size types: `uint8_t`, `int32_t`, etc.
+- **Brace initialization**: Use `{}` for all variable and object initialization — `T value{}` not `T value()`, `Foo obj{arg}` not `Foo obj(arg)`. Parenthesis `()` may be used only when brace initialization causes a narrowing conversion or ambiguity.
 
 ## Design
 
 - SOLID principles — constructor injection, depend on abstractions
 - DRY — extract shared logic into helpers or templates
 - RAII for resource management
+- **No pure virtual destructors**: Never declare `virtual ~Interface() = 0`. Pure virtual destructors force the compiler to emit a thunk and a separate body, wasting memory on embedded targets. Use `virtual ~Interface() = default` if a virtual destructor is required, or omit it entirely when the class is never deleted through a base pointer.
 - No virtual calls in ISR-callable or real-time critical paths
 
 ## Documentation — MANDATORY
