@@ -30,6 +30,7 @@ namespace estimators
 
         EstimationMetrics Update(const InputMatrix& X, const math::Matrix<T, 1, 1>& y) override;
         const CoefficientsMatrix& Coefficients() const override;
+        void SetCoefficients(const CoefficientsMatrix& initial);
 
         template<typename... Args>
         static InputMatrix& MakeRegressor(InputMatrix& regressor, Args&&... args);
@@ -84,6 +85,12 @@ namespace estimators
     const typename RecursiveLeastSquares<T, Features>::CoefficientsMatrix& RecursiveLeastSquares<T, Features>::Coefficients() const
     {
         return theta;
+    }
+
+    template<typename T, std::size_t Features>
+    void RecursiveLeastSquares<T, Features>::SetCoefficients(const CoefficientsMatrix& initial)
+    {
+        theta = initial;
     }
 
     template<typename T, std::size_t Features>

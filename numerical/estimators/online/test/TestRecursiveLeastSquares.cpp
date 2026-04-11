@@ -159,6 +159,20 @@ TYPED_TEST(RecursiveLeastSquaresTest, InitializesWithDefaultCovariance)
     EXPECT_TRUE(AreFloatsNear(coef.at(1, 0), this->MakeValue(0.0f)));
 }
 
+TYPED_TEST(RecursiveLeastSquaresTest, SetCoefficientsSeedsInitialTheta)
+{
+    typename TestFixture::EstimatorType rls(0.99f);
+
+    typename TestFixture::EstimatorType::CoefficientsMatrix initial;
+    initial.at(0, 0) = this->MakeValue(5.0f);
+    initial.at(1, 0) = this->MakeValue(3.0f);
+    rls.SetCoefficients(initial);
+
+    const auto& coef = rls.Coefficients();
+    EXPECT_TRUE(AreFloatsNear(coef.at(0, 0), this->MakeValue(5.0f)));
+    EXPECT_TRUE(AreFloatsNear(coef.at(1, 0), this->MakeValue(3.0f)));
+}
+
 TYPED_TEST(RecursiveLeastSquaresTest, SingleFeatureNoIntercept)
 {
     constexpr std::size_t SingleFeature = 1;
