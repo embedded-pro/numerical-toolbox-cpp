@@ -92,7 +92,7 @@ where $n$ = state size, $m$ = input size, $p$ = measurement size.
 - **Stability:** The separation principle guarantees stability only when both the LQR gain and the Kalman Filter produce stable designs individually. Verify that the observer eigenvalues are well within the unit disc.
 - **Fixed-point arithmetic:** LQG is not recommended for Q15/Q31 types unless the operating range can be normalised to $[-1, 1]$ for all state, input, and measurement signals. Use `float` unless the target platform lacks an FPU.
 
-## Pitfalls and Limitations
+## Pitfalls & Edge Cases
 
 - **Model uncertainty:** LQG is optimal only for the assumed model. Unmodelled dynamics (e.g., flexible modes, time delays) can destabilise the closed loop. LQG/LTR (loop transfer recovery) or robust variants should be considered when model fidelity is limited.
 - **Non-minimum-phase systems:** LQG does not guarantee good robustness margins for non-minimum-phase plants. The loop gain can drop, resulting in poor disturbance rejection.

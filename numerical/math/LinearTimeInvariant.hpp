@@ -59,9 +59,8 @@ namespace math
         // Factory: C = I (OutputSize must equal StateSize), D = 0
         static LinearTimeInvariant WithFullStateOutput(
             const StateMatrix& stateTransition, const InputMatrix& inputMatrix)
+        requires(OutputSize == StateSize)
         {
-            static_assert(OutputSize == StateSize,
-                "WithFullStateOutput requires OutputSize == StateSize");
             LinearTimeInvariant lti;
             lti.A = stateTransition;
             lti.B = inputMatrix;

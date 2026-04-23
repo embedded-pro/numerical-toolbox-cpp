@@ -222,13 +222,10 @@ namespace filters
         const auto L = solvers::CholeskyDecomposition(innovationCovariance);
         const auto sInvNu = solvers::SolveSystem<float, MeasurementSize, 1>(innovationCovariance, innovation);
         float logDetS = 0.0f;
-        float quadForm = 0.0f;
         for (std::size_t i = 0; i < MeasurementSize; ++i)
-        {
             logDetS += std::log(L.at(i, i));
-            quadForm += innovation.at(i, 0) * sInvNu.at(i, 0);
-        }
         logDetS *= 2.0f;
+        const float quadForm = (innovation.Transpose() * sInvNu).at(0, 0);
         return -0.5f * (logDetS + quadForm + static_cast<float>(MeasurementSize) * log2pi);
     }
 

@@ -184,3 +184,71 @@ TYPED_TEST(MatrixTest, MultiplicationRangeCheck)
         }
     }
 }
+
+namespace
+{
+    class MatrixBlockTest : public ::testing::Test
+    {
+    protected:
+        math::Matrix<float, 4, 4> dest{};
+        math::Matrix<float, 2, 2> src{
+            { 0.1f, 0.2f },
+            { 0.3f, 0.4f }
+        };
+    };
+}
+
+TEST_F(MatrixBlockTest, SetBlock_writes_correct_elements)
+{
+    dest.SetBlock(src, 1, 1);
+
+    EXPECT_FLOAT_EQ(dest.at(1, 1), 0.1f);
+    EXPECT_FLOAT_EQ(dest.at(1, 2), 0.2f);
+    EXPECT_FLOAT_EQ(dest.at(2, 1), 0.3f);
+    EXPECT_FLOAT_EQ(dest.at(2, 2), 0.4f);
+    EXPECT_FLOAT_EQ(dest.at(0, 0), 0.0f);
+    EXPECT_FLOAT_EQ(dest.at(3, 3), 0.0f);
+}
+
+TEST_F(MatrixBlockTest, GetBlock_reads_correct_elements)
+{
+    math::Matrix<float, 4, 4> m{
+        { 0.0f, 0.0f, 0.0f, 0.0f },
+        { 0.0f, 0.1f, 0.2f, 0.0f },
+        { 0.0f, 0.3f, 0.4f, 0.0f },
+        { 0.0f, 0.0f, 0.0f, 0.0f }
+    };
+
+    auto block = m.GetBlock<2, 2>(1, 1);
+
+    EXPECT_FLOAT_EQ(block.at(0, 0), 0.1f);
+    EXPECT_FLOAT_EQ(block.at(0, 1), 0.2f);
+    EXPECT_FLOAT_EQ(block.at(1, 0), 0.3f);
+    EXPECT_FLOAT_EQ(block.at(1, 1), 0.4f);
+}
+
+TEST_F(MatrixBlockTest, GetColumn_reads_correct_column)
+{
+    math::Matrix<float, 3, 3> m{
+        { 0.1f, 0.2f, 0.3f },
+        { 0.4f, 0.5f, 0.6f },
+        { 0.7f, 0.8f, 0.9f }
+    };
+
+    auto col = m.GetColumn(1);
+
+    EXPECT_FLOAT_EQ(col.at(0, 0), 0.2f);
+    EXPECT_FLOAT_EQ(col.at(1, 0), 0.5f);
+    EXPECT_FLOAT_EQ(col.at(2, 0), 0.8f);
+}
+
+TEST_F(MatrixBlockTest, SetBlock_then_GetBlock_roundtrip)
+{
+    dest.SetBlock(src, 2, 2);
+    auto result = dest.GetBlock<2, 2>(2, 2);
+
+    EXPECT_FLOAT_EQ(result.at(0, 0), src.at(0, 0));
+    EXPECT_FLOAT_EQ(result.at(0, 1), src.at(0, 1));
+    EXPECT_FLOAT_EQ(result.at(1, 0), src.at(1, 0));
+    EXPECT_FLOAT_EQ(result.at(1, 1), src.at(1, 1));
+}

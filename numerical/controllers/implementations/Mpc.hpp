@@ -28,19 +28,6 @@ namespace controllers
         std::optional<math::Vector<T, InputSize>> uMax;
     };
 
-    namespace detail
-    {
-        template<typename T, std::size_t DestRows, std::size_t DestCols, std::size_t SrcRows, std::size_t SrcCols>
-        ALWAYS_INLINE_HOT void SetBlock(math::Matrix<T, DestRows, DestCols>& dest,
-            const math::Matrix<T, SrcRows, SrcCols>& src,
-            std::size_t rowOffset, std::size_t colOffset)
-        {
-            for (std::size_t r = 0; r < SrcRows; ++r)
-                for (std::size_t c = 0; c < SrcCols; ++c)
-                    dest.at(rowOffset + r, colOffset + c) = src.at(r, c);
-        }
-    }
-
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t PredictionHorizon, std::size_t ControlHorizon = PredictionHorizon>
     class Mpc
         : public StateFeedbackController<T, StateSize, InputSize>
@@ -143,7 +130,7 @@ namespace controllers
         for (std::size_t k = 0; k < PredictionHorizon; ++k)
         {
             Apow = Apow * A;
-            detail::SetBlock(psi, Apow, k * StateSize, 0);
+            psi.SetBlock(Apow, k * StateSize, 0);
         }
 
         return psi;
@@ -153,18 +140,19 @@ namespace controllers
     OPTIMIZE_FOR_SPEED auto Mpc<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>::BuildTheta(
         const StateMatrix& A, const InputMatrix& B) const -> PredictionInputMatrix
     {
+        std::array<StateMatrix, PredictionHorizon + 1> aPowers;
+        aPowers[0] = StateMatrix::Identity();
+        for (std::size_t p = 1; p <= PredictionHorizon; ++p)
+            aPowers[p] = aPowers[p - 1] * A;
+
         PredictionInputMatrix theta;
 
         for (std::size_t k = 0; k < PredictionHorizon; ++k)
         {
             for (std::size_t j = 0; j < ControlHorizon && j <= k; ++j)
             {
-                auto ApowLocal = StateMatrix::Identity();
-                for (std::size_t p = 0; p < k - j; ++p)
-                    ApowLocal = ApowLocal * A;
-
-                auto block = ApowLocal * B;
-                detail::SetBlock(theta, block, k * StateSize, j * InputSize);
+                auto block = aPowers[k - j] * B;
+                theta.SetBlock(block, k * StateSize, j * InputSize);
             }
         }
 
@@ -186,12 +174,12 @@ namespace controllers
                                  ? *weights.terminalP
                                  : weights.Q;
 
-            detail::SetBlock(qBar, Qk, k * StateSize, k * StateSize);
+            qBar.SetBlock(Qk, k * StateSize, k * StateSize);
         }
 
         AugmentedInputWeight rBar;
         for (std::size_t k = 0; k < ControlHorizon; ++k)
-            detail::SetBlock(rBar, weights.R, k * InputSize, k * InputSize);
+            rBar.SetBlock(weights.R, k * InputSize, k * InputSize);
 
         auto thetaT = theta.Transpose();
         hessian = thetaT * qBar * theta + rBar;
@@ -204,15 +192,26 @@ namespace controllers
         if (!constraints.uMin && !constraints.uMax)
             return;
 
-        for (std::size_t k = 0; k < ControlHorizon; ++k)
+        if (constraints.uMin && constraints.uMax)
         {
-            for (std::size_t i = 0; i < InputSize; ++i)
-            {
-                if (constraints.uMin)
+            for (std::size_t k = 0; k < ControlHorizon; ++k)
+                for (std::size_t i = 0; i < InputSize; ++i)
+                {
+                    auto& val = u.at(k * InputSize + i, 0);
+                    val = std::max(std::min(val, constraints.uMax->at(i, 0)), constraints.uMin->at(i, 0));
+                }
+        }
+        else if (constraints.uMin)
+        {
+            for (std::size_t k = 0; k < ControlHorizon; ++k)
+                for (std::size_t i = 0; i < InputSize; ++i)
                     u.at(k * InputSize + i, 0) = std::max(u.at(k * InputSize + i, 0), constraints.uMin->at(i, 0));
-                if (constraints.uMax)
+        }
+        else
+        {
+            for (std::size_t k = 0; k < ControlHorizon; ++k)
+                for (std::size_t i = 0; i < InputSize; ++i)
                     u.at(k * InputSize + i, 0) = std::min(u.at(k * InputSize + i, 0), constraints.uMax->at(i, 0));
-            }
         }
     }
 
@@ -223,17 +222,13 @@ namespace controllers
     {
         auto effectiveState = reference ? state - *reference : state;
         auto g = gradientMatrix * effectiveState;
-
-        ControlVector negG;
-        for (std::size_t i = 0; i < TotalControlDim; ++i)
-            negG.at(i, 0) = T(-1.0f) * g.at(i, 0);
+        auto negG = g * T(-1.0f);
 
         auto uOptimal = solvers::SolveSystem<T, TotalControlDim, 1>(hessian, negG);
         ApplyConstraints(uOptimal);
 
         for (std::size_t k = 0; k < ControlHorizon; ++k)
-            for (std::size_t i = 0; i < InputSize; ++i)
-                controlSequence[k].at(i, 0) = uOptimal.at(k * InputSize + i, 0);
+            controlSequence[k] = uOptimal.template GetBlock<InputSize, 1>(k * InputSize, 0);
 
         return controlSequence[0];
     }

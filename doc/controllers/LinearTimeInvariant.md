@@ -62,7 +62,7 @@ Controllability and observability are prerequisites for LQR and Kalman Filter st
 - **Fixed-point use:** LTI matrices are suitable for Q15/Q31 when all matrix entries and intermediate products remain within $[-1, 1]$. For real physical systems with gains exceeding unity, scale the representation (e.g., normalise state and input ranges) before using fixed-point arithmetic.
 - **Identity construction:** When building the $C = I$ case (full-state output), use $0.9999$ rather than $1.0$ for Q15 compatibility, since $1.0$ is not representable in the Q15 format.
 
-## Pitfalls and Limitations
+## Pitfalls & Edge Cases
 
 - **Time-varying systems:** The LTI model is invalid for systems whose matrices $A$, $B$, $C$, $D$ depend on time or operating point. Use scheduling or re-linearisation for such plants.
 - **Nonlinear plants:** State-space linearisation is valid only in a neighbourhood of the operating point. Large deviations from the linearisation point invalidate the model.
