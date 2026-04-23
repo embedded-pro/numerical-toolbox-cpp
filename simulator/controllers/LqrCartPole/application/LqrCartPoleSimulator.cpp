@@ -27,9 +27,6 @@ namespace simulator::controllers::lqr
 
     void LqrCartPoleSimulator::RecomputeGain()
     {
-        auto A = plant.LinearizedA(configuration.simulation.dt);
-        auto B = plant.LinearizedB(configuration.simulation.dt);
-
         auto& w = configuration.weights;
 
         StateMatrix Q{
@@ -41,10 +38,10 @@ namespace simulator::controllers::lqr
 
         math::SquareMatrix<float, inputSize> R{ { w.rForce } };
 
-        lqr = std::make_unique<::controllers::Lqr<float, stateSize, inputSize>>(A, B, Q, R);
+        lqr.emplace(plant.Linearize(configuration.simulation.dt), Q, R);
     }
 
-    float LqrCartPoleSimulator::ComputeControlForce() const
+    float LqrCartPoleSimulator::ComputeControlForce()
     {
         auto& s = plant.GetState();
 

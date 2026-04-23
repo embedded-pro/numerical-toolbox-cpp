@@ -1,5 +1,6 @@
 #include "numerical/filters/active/KalmanFilter.hpp"
 #include "numerical/filters/active/KalmanSmoother.hpp"
+#include "numerical/math/LinearTimeInvariant.hpp"
 #include <cmath>
 #include <gtest/gtest.h>
 
@@ -107,4 +108,16 @@ TEST_F(TestKalmanSmoother, smoothed_covariance_at_first_step_less_than_prior)
 
     EXPECT_LT(output.smoothedCovariances[0].at(0, 0), P0.at(0, 0));
     EXPECT_LT(output.smoothedCovariances[0].at(1, 1), P0.at(1, 1));
+}
+
+TEST_F(TestKalmanSmoother, smooth_with_lti_matches_smooth_with_matrices)
+{
+    auto plant = math::LinearTimeInvariant<float, 2, 1, 1>{ F, {}, H, {} };
+
+    const auto outputMatrices = smoother.Smooth(F, H, Q, R, observations, T, x0, P0);
+    const auto outputLti = smoother.Smooth(plant, Q, R, observations, T, x0, P0);
+
+    EXPECT_NEAR(outputMatrices.smoothedMeans[0].at(0, 0), outputLti.smoothedMeans[0].at(0, 0), 1e-5f);
+    EXPECT_NEAR(outputMatrices.smoothedMeans[0].at(1, 0), outputLti.smoothedMeans[0].at(1, 0), 1e-5f);
+    EXPECT_NEAR(outputMatrices.logLikelihood, outputLti.logLikelihood, 1e-4f);
 }

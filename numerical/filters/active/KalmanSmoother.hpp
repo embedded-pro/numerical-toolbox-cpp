@@ -5,6 +5,7 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/solvers/CholeskyDecomposition.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
@@ -44,6 +45,17 @@ namespace filters
         OPTIMIZE_FOR_SPEED SmootherOutput Smooth(
             const StateMatrix& F,
             const MeasurementMatrix& H,
+            const StateMatrix& Q,
+            const MeasurementCovariance& R,
+            const std::array<MeasurementVector, MaxSteps>& observations,
+            std::size_t numSteps,
+            const StateVector& initialState,
+            const StateMatrix& initialCovariance);
+
+        // Convenience overload: extracts F = plant.A, H = plant.C from the LTI model.
+        // LTI template args: <float, StateSize, 1, MeasurementSize> (InputSize unused for smoother)
+        OPTIMIZE_FOR_SPEED SmootherOutput Smooth(
+            const math::LinearTimeInvariant<float, StateSize, 1, MeasurementSize>& plant,
             const StateMatrix& Q,
             const MeasurementCovariance& R,
             const std::array<MeasurementVector, MaxSteps>& observations,
@@ -231,6 +243,21 @@ namespace filters
         return solvers::SolveSystem<float, StateSize, StateSize>(
             predictedCovariance, stateTransition * filteredCovariance)
             .Transpose();
+    }
+
+    template<std::size_t StateSize, std::size_t MeasurementSize, std::size_t MaxSteps>
+    OPTIMIZE_FOR_SPEED
+        typename KalmanSmoother<StateSize, MeasurementSize, MaxSteps>::SmootherOutput
+        KalmanSmoother<StateSize, MeasurementSize, MaxSteps>::Smooth(
+            const math::LinearTimeInvariant<float, StateSize, 1, MeasurementSize>& plant,
+            const StateMatrix& Q,
+            const MeasurementCovariance& R,
+            const std::array<MeasurementVector, MaxSteps>& observations,
+            std::size_t numSteps,
+            const StateVector& initialState,
+            const StateMatrix& initialCovariance)
+    {
+        return Smooth(plant.A, plant.C, Q, R, observations, numSteps, initialState, initialCovariance);
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD

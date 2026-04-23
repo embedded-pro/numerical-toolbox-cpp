@@ -5,8 +5,9 @@
 #endif
 
 #include "infra/util/ReallyAssert.hpp"
-#include "numerical/controllers/interfaces/LqrController.hpp"
+#include "numerical/controllers/interfaces/StateFeedbackController.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/solvers/DiscreteAlgebraicRiccatiEquation.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 
@@ -14,21 +15,26 @@ namespace controllers
 {
     template<typename T, std::size_t StateSize, std::size_t InputSize>
     class Lqr
-        : public LqrController<T, StateSize, InputSize>
+        : public StateFeedbackController<T, StateSize, InputSize>
     {
+        using Base = StateFeedbackController<T, StateSize, InputSize>;
+
     public:
-        using typename LqrController<T, StateSize, InputSize>::StateMatrix;
-        using typename LqrController<T, StateSize, InputSize>::InputMatrix;
-        using typename LqrController<T, StateSize, InputSize>::StateVector;
-        using typename LqrController<T, StateSize, InputSize>::InputVector;
-        using typename LqrController<T, StateSize, InputSize>::GainMatrix;
+        using typename Base::InputVector;
+        using typename Base::StateVector;
+        using StateMatrix = math::SquareMatrix<T, StateSize>;
+        using InputMatrix = math::Matrix<T, StateSize, InputSize>;
+        using GainMatrix = math::Matrix<T, InputSize, StateSize>;
         using InputWeightMatrix = math::SquareMatrix<T, InputSize>;
 
         Lqr(const StateMatrix& A, const InputMatrix& B, const StateMatrix& Q, const InputWeightMatrix& R);
         explicit Lqr(const GainMatrix& precomputedGain);
 
+        Lqr(const math::LinearTimeInvariant<T, StateSize, InputSize>& plant,
+            const StateMatrix& Q, const InputWeightMatrix& R);
+
         InputVector ComputeControl(const StateVector& state) override;
-        [[nodiscard]] const GainMatrix& GetGain() const override;
+        [[nodiscard]] const GainMatrix& GetGain() const;
         [[nodiscard]] const StateMatrix& GetRiccatiSolution() const;
 
     private:
@@ -75,6 +81,13 @@ namespace controllers
         really_assert(riccatiSolutionAvailable);
         return riccatiSolution;
     }
+
+    template<typename T, std::size_t StateSize, std::size_t InputSize>
+    Lqr<T, StateSize, InputSize>::Lqr(
+        const math::LinearTimeInvariant<T, StateSize, InputSize>& plant,
+        const StateMatrix& Q, const InputWeightMatrix& R)
+        : Lqr(plant.A, plant.B, Q, R)
+    {}
 
     template<typename T, std::size_t StateSize, std::size_t InputSize>
     OPTIMIZE_FOR_SPEED void Lqr<T, StateSize, InputSize>::ComputeGain(

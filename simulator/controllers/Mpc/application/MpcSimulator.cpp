@@ -4,9 +4,9 @@
 
 namespace simulator::controllers
 {
-    void MpcSimulator::Configure(const StateSpacePlant& plant, const Configuration& config)
+    void MpcSimulator::Configure(const math::LinearTimeInvariant<float, 2, 1>& ltiPlant, const Configuration& config)
     {
-        this->plant = plant;
+        plant = ltiPlant;
         configuration = config;
     }
 
@@ -26,15 +26,6 @@ namespace simulator::controllers
         auto duration = configuration.simulation.duration;
         auto numSamples = static_cast<std::size_t>(duration / dt);
 
-        auto A = math::SquareMatrix<float, 2>{
-            { plant.A[0][0], plant.A[0][1] },
-            { plant.A[1][0], plant.A[1][1] }
-        };
-        auto B = math::Matrix<float, 2, 1>{
-            { plant.B[0][0] },
-            { plant.B[1][0] }
-        };
-
         auto weights = ::controllers::MpcWeights<float, 2, 1>{};
         weights.Q = math::SquareMatrix<float, 2>{
             { configuration.weights.stateWeight, 0.0f },
@@ -51,7 +42,7 @@ namespace simulator::controllers
             constraints.uMax = math::Vector<float, 1>{ configuration.constraints.uMax };
         }
 
-        auto mpc = ::controllers::Mpc<float, 2, 1, 10, 10>(A, B, weights, constraints);
+        auto mpc = ::controllers::Mpc<float, 2, 1, 10, 10>(plant, weights, constraints);
 
         auto ref = math::Vector<float, 2>{ configuration.referencePosition, 0.0f };
         mpc.SetReference(ref);
@@ -77,7 +68,7 @@ namespace simulator::controllers
                             configuration.weights.controlWeight * u.at(0, 0) * u.at(0, 0);
             response.cost.push_back(costStep);
 
-            state = A * state + B * u;
+            state = plant.Step(state, u);
         }
 
         return response;

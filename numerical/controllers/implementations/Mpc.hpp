@@ -1,7 +1,8 @@
 #pragma once
 
-#include "numerical/controllers/interfaces/MpcController.hpp"
+#include "numerical/controllers/interfaces/StateFeedbackController.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 #include <algorithm>
 #include <optional>
@@ -42,19 +43,24 @@ namespace controllers
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t PredictionHorizon, std::size_t ControlHorizon = PredictionHorizon>
     class Mpc
-        : public MpcController<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>
+        : public StateFeedbackController<T, StateSize, InputSize>
     {
-        using Base = MpcController<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>;
+        using Base = StateFeedbackController<T, StateSize, InputSize>;
+
+        static_assert(PredictionHorizon > 0,
+            "Prediction horizon must be positive");
+        static_assert(ControlHorizon > 0 && ControlHorizon <= PredictionHorizon,
+            "Control horizon must be positive and not exceed prediction horizon");
 
         static constexpr std::size_t TotalControlDim = ControlHorizon * InputSize;
         static constexpr std::size_t TotalStateDim = PredictionHorizon * StateSize;
 
     public:
-        using typename Base::ControlSequence;
-        using typename Base::InputMatrix;
         using typename Base::InputVector;
-        using typename Base::StateMatrix;
         using typename Base::StateVector;
+        using StateMatrix = math::SquareMatrix<T, StateSize>;
+        using InputMatrix = math::Matrix<T, StateSize, InputSize>;
+        using ControlSequence = std::array<InputVector, ControlHorizon>;
         using InputWeightMatrix = math::SquareMatrix<T, InputSize>;
 
         using HessianMatrix = math::SquareMatrix<T, TotalControlDim>;
@@ -64,11 +70,15 @@ namespace controllers
             const MpcWeights<T, StateSize, InputSize>& weights,
             const MpcConstraints<T, InputSize>& constraints = MpcConstraints<T, InputSize>{});
 
+        Mpc(const math::LinearTimeInvariant<T, StateSize, InputSize>& plant,
+            const MpcWeights<T, StateSize, InputSize>& weights,
+            const MpcConstraints<T, InputSize>& constraints = MpcConstraints<T, InputSize>{});
+
         Mpc(const HessianMatrix& precomputedH, const GradientMatrix& precomputedF,
             const MpcConstraints<T, InputSize>& constraints = MpcConstraints<T, InputSize>{});
 
         InputVector ComputeControl(const StateVector& state) override;
-        [[nodiscard]] const ControlSequence& GetControlSequence() const override;
+        [[nodiscard]] const ControlSequence& GetControlSequence() const;
 
         void SetReference(const StateVector& reference);
         void ClearReference();
@@ -113,6 +123,14 @@ namespace controllers
         : hessian(precomputedH)
         , gradientMatrix(precomputedF)
         , constraints(constraints)
+    {}
+
+    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t PredictionHorizon, std::size_t ControlHorizon>
+    Mpc<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>::Mpc(
+        const math::LinearTimeInvariant<T, StateSize, InputSize>& plant,
+        const MpcWeights<T, StateSize, InputSize>& weights,
+        const MpcConstraints<T, InputSize>& constraints)
+        : Mpc(plant.A, plant.B, weights, constraints)
     {}
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t PredictionHorizon, std::size_t ControlHorizon>

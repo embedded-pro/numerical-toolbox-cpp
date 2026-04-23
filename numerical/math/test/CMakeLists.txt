@@ -9,6 +9,7 @@ target_link_libraries(numerical.math_test PUBLIC
 
 target_sources(numerical.math_test PRIVATE
     TestComplexNumber.cpp
+    TestLinearTimeInvariant.cpp
     TestQNumber.cpp
     TestMatrix.cpp
     TestRecursiveBuffer.cpp

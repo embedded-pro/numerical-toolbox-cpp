@@ -101,7 +101,7 @@ namespace simulator::controllers::view
         return config;
     }
 
-    StateSpacePlant MpcConfigurationPanel::CreatePlant() const
+    math::LinearTimeInvariant<float, 2, 1> MpcConfigurationPanel::CreatePlant() const
     {
         float dt = static_cast<float>(sampleTimeSpinBox->value());
 

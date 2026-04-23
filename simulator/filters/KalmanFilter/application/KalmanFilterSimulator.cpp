@@ -2,6 +2,7 @@
 #include "numerical/filters/active/ExtendedKalmanFilter.hpp"
 #include "numerical/filters/active/KalmanFilter.hpp"
 #include "numerical/filters/active/UnscentedKalmanFilter.hpp"
+#include "numerical/math/LinearTimeInvariant.hpp"
 #include <cmath>
 #include <random>
 
@@ -99,10 +100,14 @@ namespace simulator::filters
         auto R = MeasCov{ { rVar } };
 
         ::filters::KalmanFilter<float, 2, 1> kf(initialState, initialP);
-        kf.SetStateTransition(StateMat{
-            { 1.0f, dt },
-            { -(g / L) * dt, 1.0f - b * dt } });
-        kf.SetMeasurementMatrix(math::Matrix<float, 1, 2>{ { 1.0f, 0.0f } });
+        {
+            auto kfPlant = math::LinearTimeInvariant<float, 2, 1, 1>::Autonomous(
+                StateMat{
+                    { 1.0f, dt },
+                    { -(g / L) * dt, 1.0f - b * dt } },
+                math::Matrix<float, 1, 2>{ { 1.0f, 0.0f } });
+            kf.SetPlant(kfPlant);
+        }
         kf.SetProcessNoise(Q);
         kf.SetMeasurementNoise(R);
 

@@ -1,4 +1,5 @@
 #include "numerical/filters/active/KalmanFilter.hpp"
+#include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/math/Tolerance.hpp"
 #include <gtest/gtest.h>
 
@@ -437,4 +438,57 @@ TYPED_TEST(KalmanFilterTest, JosephFormPreservesPositiveDefiniteness)
                     math::ToFloat(P.at(0, 1)) * math::ToFloat(P.at(1, 0));
         EXPECT_GE(det, 0.0f);
     }
+}
+
+namespace
+{
+    class KalmanFilterWithControlTest : public ::testing::Test
+    {
+    protected:
+        math::SquareMatrix<float, 2> A{
+            { 1.0f, 0.1f },
+            { 0.0f, 1.0f }
+        };
+        math::Matrix<float, 1, 2> C{
+            { 1.0f, 0.0f }
+        };
+        math::Matrix<float, 2, 1> B{
+            { 0.0f },
+            { 0.1f }
+        };
+        math::SquareMatrix<float, 2> Q{
+            { 0.01f, 0.0f },
+            { 0.0f, 0.01f }
+        };
+        math::SquareMatrix<float, 1> R{ { 0.1f } };
+
+        math::Vector<float, 2> zeroState{};
+        math::SquareMatrix<float, 2> identity{
+            { 1.0f, 0.0f },
+            { 0.0f, 1.0f }
+        };
+    };
+}
+
+TEST_F(KalmanFilterWithControlTest, set_plant_equivalent_to_individual_setters)
+{
+    filters::KalmanFilter<float, 2, 1, 1> filterA{ zeroState, identity };
+    filters::KalmanFilter<float, 2, 1, 1> filterB{ zeroState, identity };
+
+    filterA.SetStateTransition(A);
+    filterA.SetMeasurementMatrix(C);
+    filterA.SetControlInputMatrix(B);
+    filterA.SetProcessNoise(Q);
+    filterA.SetMeasurementNoise(R);
+
+    auto plant = math::LinearTimeInvariant<float, 2, 1, 1>{ A, B, C, {} };
+    filterB.SetPlant(plant);
+    filterB.SetProcessNoise(Q);
+    filterB.SetMeasurementNoise(R);
+
+    filterA.Predict(math::Vector<float, 1>{ { 1.0f } });
+    filterB.Predict(math::Vector<float, 1>{ { 1.0f } });
+
+    EXPECT_NEAR(math::ToFloat(filterA.GetState().at(0, 0)), math::ToFloat(filterB.GetState().at(0, 0)), 1e-5f);
+    EXPECT_NEAR(math::ToFloat(filterA.GetState().at(1, 0)), math::ToFloat(filterB.GetState().at(1, 0)), 1e-5f);
 }

@@ -1,4 +1,5 @@
 #include "numerical/controllers/implementations/Mpc.hpp"
+#include "numerical/math/LinearTimeInvariant.hpp"
 #include <gtest/gtest.h>
 
 namespace
@@ -724,4 +725,34 @@ TEST_F(TestMpc, different_horizons_clear_reference)
 
     auto u2 = mpc.ComputeControl(state);
     EXPECT_NEAR(u2.at(0, 0), 0.0f, 1e-4f);
+}
+
+TEST_F(TestMpc, mpc_from_lti_matches_mpc_from_matrices)
+{
+    math::SquareMatrix<float, 2> A{
+        { 1.0f, 0.1f },
+        { 0.0f, 1.0f }
+    };
+    math::Matrix<float, 2, 1> B{
+        { 0.005f },
+        { 0.1f }
+    };
+
+    controllers::MpcWeights<float, 2, 1> weights;
+    weights.Q = math::SquareMatrix<float, 2>{
+        { 10.0f, 0.0f },
+        { 0.0f, 1.0f }
+    };
+    weights.R = math::SquareMatrix<float, 1>{ { 0.1f } };
+
+    auto plant = math::LinearTimeInvariant<float, 2, 1>::WithFullStateOutput(A, B);
+
+    controllers::Mpc<float, 2, 1, 5, 5> mpcFromMatrices{ A, B, weights };
+    controllers::Mpc<float, 2, 1, 5, 5> mpcFromLti{ plant, weights };
+
+    math::Vector<float, 2> state{ { 1.0f }, { 0.0f } };
+    auto uMatrices = mpcFromMatrices.ComputeControl(state);
+    auto uLti = mpcFromLti.ComputeControl(state);
+
+    EXPECT_NEAR(uMatrices.at(0, 0), uLti.at(0, 0), 1e-4f);
 }

@@ -2,7 +2,7 @@
 
 #include "numerical/controllers/implementations/Lqr.hpp"
 #include "simulator/controllers/LqrCartPole/application/CartPolePlant.hpp"
-#include <memory>
+#include <optional>
 
 namespace simulator::controllers::lqr
 {
@@ -40,7 +40,7 @@ namespace simulator::controllers::lqr
         [[nodiscard]] float Step(float externalForce = 0.0f);
         void SetState(const CartPoleState& state);
 
-        [[nodiscard]] float ComputeControlForce() const;
+        [[nodiscard]] float ComputeControlForce();
         [[nodiscard]] const CartPoleState& GetState() const;
         [[nodiscard]] const CartPoleParameters& GetPlantParameters() const;
         [[nodiscard]] float GetDt() const;
@@ -51,6 +51,6 @@ namespace simulator::controllers::lqr
 
         LqrCartPoleConfig configuration;
         CartPolePlant plant;
-        std::unique_ptr<LqrController> lqr;
+        std::optional<LqrController> lqr;
     };
 }

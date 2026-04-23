@@ -1,5 +1,6 @@
 #pragma once
 
+#include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/math/Matrix.hpp"
 
 namespace simulator::controllers::lqr
@@ -43,6 +44,7 @@ namespace simulator::controllers::lqr
 
         [[nodiscard]] StateMatrix LinearizedA(float dt) const;
         [[nodiscard]] InputMatrix LinearizedB(float dt) const;
+        [[nodiscard]] math::LinearTimeInvariant<float, stateSize, inputSize> Linearize(float dt) const;
 
     private:
         CartPoleParameters parameters;

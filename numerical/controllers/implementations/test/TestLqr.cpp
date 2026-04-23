@@ -1,4 +1,5 @@
 #include "numerical/controllers/implementations/Lqr.hpp"
+#include "numerical/math/LinearTimeInvariant.hpp"
 #include <gtest/gtest.h>
 
 namespace
@@ -86,4 +87,29 @@ TEST_F(TestLqr, dare_constructor_stores_riccati_solution)
     controllers::Lqr<float, 1, 1> lqr(A, B, Q, R);
 
     EXPECT_GT(lqr.GetRiccatiSolution().at(0, 0), 0.0f);
+}
+
+TEST_F(TestLqr, lqr_from_lti_matches_lqr_from_matrices)
+{
+    math::SquareMatrix<float, 2> A{
+        { 1.0f, 0.1f },
+        { 0.0f, 1.0f }
+    };
+    math::Matrix<float, 2, 1> B{
+        { 0.0f },
+        { 0.1f }
+    };
+    math::SquareMatrix<float, 2> Q{
+        { 10.0f, 0.0f },
+        { 0.0f, 1.0f }
+    };
+    math::SquareMatrix<float, 1> R{ { 0.1f } };
+
+    auto plant = math::LinearTimeInvariant<float, 2, 1>::WithFullStateOutput(A, B);
+
+    controllers::Lqr<float, 2, 1> lqrFromMatrices{ A, B, Q, R };
+    controllers::Lqr<float, 2, 1> lqrFromLti{ plant, Q, R };
+
+    EXPECT_NEAR(lqrFromMatrices.GetGain().at(0, 0), lqrFromLti.GetGain().at(0, 0), 1e-4f);
+    EXPECT_NEAR(lqrFromMatrices.GetGain().at(0, 1), lqrFromLti.GetGain().at(0, 1), 1e-4f);
 }
