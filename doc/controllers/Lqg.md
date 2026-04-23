@@ -77,10 +77,10 @@ At each time step $k$:
 
 ## Complexity Analysis
 
-| Step         | Time           | Space      | Notes |
-|--------------|----------------|------------|-------|
-| Construction | $O(n^3)$       | $O(n^2)$   | DARE solve for LQR gain |
-| ComputeControl | $O(n^2 + nm)$ | $O(1)$     | KF update + LQR multiply |
+| Step           | Time          | Space    | Notes                    |
+|----------------|---------------|----------|--------------------------|
+| Construction   | $O(n^3)$      | $O(n^2)$ | DARE solve for LQR gain  |
+| ComputeControl | $O(n^2 + nm)$ | $O(1)$   | KF update + LQR multiply |
 
 where $n$ = state size, $m$ = input size, $p$ = measurement size.
 
@@ -112,12 +112,12 @@ $$A = \begin{bmatrix} 1 & 0.1 \\ 0 & 1 \end{bmatrix}, \quad B = \begin{bmatrix} 
 
 **Online loop (per sample):**
 
-| Step | Operation | Notes |
-|------|-----------|-------|
-| 1 | Receive sensor measurement $y_k$ | Noisy position reading |
-| 2 | $\hat{x}_{k\|k} = \hat{x}_{k\|k-1} + K_f(y_k - C\hat{x}_{k\|k-1})$ | Kalman update |
-| 3 | $u_k = -K \hat{x}_{k\|k}$ | LQR control law |
-| 4 | $\hat{x}_{k+1\|k} = A \hat{x}_{k\|k} + B u_k$ | Kalman predict |
+| Step | Operation                                                          | Notes                  |
+|------|--------------------------------------------------------------------|------------------------|
+| 1    | Receive sensor measurement $y_k$                                   | Noisy position reading |
+| 2    | $\hat{x}_{k\|k} = \hat{x}_{k\|k-1} + K_f(y_k - C\hat{x}_{k\|k-1})$ | Kalman update          |
+| 3    | $u_k = -K \hat{x}_{k\|k}$                                          | LQR control law        |
+| 4    | $\hat{x}_{k+1\|k} = A \hat{x}_{k\|k} + B u_k$                      | Kalman predict         |
 
 Starting from initial position $x_0 = [1, 0]^T$, the LQG regulator drives the position to zero while the Kalman Filter's estimated trajectory converges to the true state despite measurement noise.
 
