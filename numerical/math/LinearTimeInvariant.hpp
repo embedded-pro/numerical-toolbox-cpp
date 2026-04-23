@@ -15,7 +15,8 @@ namespace math
     //   y_k     = C x_k + D u_k
     //
     // Template args: <T, StateSize=n, InputSize=m, OutputSize=p>
-    // Default OutputSize = StateSize (full-state output, C = I, D = 0).
+    // OutputSize defaults to StateSize. All matrices are zero-initialised by default;
+    // use the WithFullStateOutput factory to get C = I.
     template<typename T,
         std::size_t StateSize,
         std::size_t InputSize,

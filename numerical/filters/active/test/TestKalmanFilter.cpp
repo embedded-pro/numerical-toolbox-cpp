@@ -492,3 +492,37 @@ TEST_F(KalmanFilterWithControlTest, set_plant_equivalent_to_individual_setters)
     EXPECT_NEAR(math::ToFloat(filterA.GetState().at(0, 0)), math::ToFloat(filterB.GetState().at(0, 0)), 1e-5f);
     EXPECT_NEAR(math::ToFloat(filterA.GetState().at(1, 0)), math::ToFloat(filterB.GetState().at(1, 0)), 1e-5f);
 }
+
+TEST_F(KalmanFilterWithControlTest, set_plant_with_control_size_zero_accepts_any_input_dimension)
+{
+    // ControlSize == 0 but plant has InputSize == 2 — only A and C should be extracted
+    math::SquareMatrix<float, 2> F{
+        { 0.9f, 0.1f },
+        { 0.0f, 0.8f }
+    };
+    math::Matrix<float, 1, 2> H{
+        { 1.0f, 0.0f }
+    };
+
+    math::Vector<float, 2> initialState{};
+    math::SquareMatrix<float, 2> initialCov{
+        { 1.0f, 0.0f },
+        { 0.0f, 1.0f }
+    };
+
+    filters::KalmanFilter<float, 2, 1, 0> filter{ initialState, initialCov };
+
+    math::LinearTimeInvariant<float, 2, 2, 1> plant;
+    plant.A = F;
+    plant.C = H;
+
+    filter.SetPlant(plant);
+    filter.SetProcessNoise(math::SquareMatrix<float, 2>{ { 0.01f, 0.0f }, { 0.0f, 0.01f } });
+    filter.SetMeasurementNoise(math::SquareMatrix<float, 1>{ { 0.1f } });
+
+    filter.Predict();
+    filter.Update(math::Vector<float, 1>{ { 1.0f } });
+
+    // State should have moved from zero toward the measurement
+    EXPECT_NE(math::ToFloat(filter.GetState().at(0, 0)), 0.0f);
+}

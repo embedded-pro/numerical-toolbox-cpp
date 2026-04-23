@@ -3,6 +3,7 @@
 #endif
 
 #include "numerical/controllers/implementations/Lqg.hpp"
+#include <cmath>
 #include <gtest/gtest.h>
 
 namespace

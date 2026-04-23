@@ -141,3 +141,101 @@ TYPED_TEST(TestLinearTimeInvariant, step_called_twice_propagates_state_correctly
     EXPECT_NEAR(this->ToF(x.at(0, 0)), 0.005f, 5e-3f);
     EXPECT_NEAR(this->ToF(x.at(1, 0)), 0.095f, 5e-3f);
 }
+
+namespace
+{
+    class TestLinearTimeInvariantFloat : public ::testing::Test
+    {};
+}
+
+TEST_F(TestLinearTimeInvariantFloat, three_state_system_step_and_output)
+{
+    auto A = math::SquareMatrix<float, 3>{
+        { 0.9f, 0.1f, 0.0f },
+        { 0.0f, 0.8f, 0.1f },
+        { 0.0f, 0.0f, 0.7f }
+    };
+    auto B = math::Matrix<float, 3, 1>{ { 0.0f }, { 0.0f }, { 0.1f } };
+
+    auto lti = math::LinearTimeInvariant<float, 3, 1>::WithFullStateOutput(A, B);
+
+    math::Vector<float, 3> x{ { 1.0f }, { 0.5f }, { 0.25f } };
+    math::Vector<float, 1> u{ { 2.0f } };
+
+    auto xNext = lti.Step(x, u);
+    EXPECT_NEAR(xNext.at(0, 0), 0.9f * 1.0f + 0.1f * 0.5f, 1e-5f);
+    EXPECT_NEAR(xNext.at(1, 0), 0.8f * 0.5f + 0.1f * 0.25f, 1e-5f);
+    EXPECT_NEAR(xNext.at(2, 0), 0.7f * 0.25f + 0.1f * 2.0f, 1e-5f);
+
+    // C = I, D = 0, so Output(x, u) == x
+    auto y = lti.Output(x, u);
+    EXPECT_NEAR(y.at(0, 0), x.at(0, 0), 5e-3f);
+    EXPECT_NEAR(y.at(1, 0), x.at(1, 0), 5e-3f);
+    EXPECT_NEAR(y.at(2, 0), x.at(2, 0), 5e-3f);
+}
+
+TEST_F(TestLinearTimeInvariantFloat, four_state_system_step)
+{
+    auto lti = math::LinearTimeInvariant<float, 4, 1>::WithFullStateOutput(
+        math::SquareMatrix<float, 4>{
+            { 0.9f, 0.1f, 0.0f, 0.0f },
+            { 0.0f, 0.8f, 0.1f, 0.0f },
+            { 0.0f, 0.0f, 0.7f, 0.1f },
+            { 0.0f, 0.0f, 0.0f, 0.6f } },
+        math::Matrix<float, 4, 1>{ { 0.0f }, { 0.0f }, { 0.0f }, { 0.1f } });
+
+    math::Vector<float, 4> x{ { 1.0f }, { 0.0f }, { 0.0f }, { 0.0f } };
+    math::Vector<float, 1> u{ { 1.0f } };
+
+    auto xNext = lti.Step(x, u);
+    EXPECT_NEAR(xNext.at(0, 0), 0.9f, 1e-5f);
+    EXPECT_NEAR(xNext.at(3, 0), 0.1f, 1e-5f);
+}
+
+TEST_F(TestLinearTimeInvariantFloat, four_state_single_output_autonomous)
+{
+    auto A = math::SquareMatrix<float, 4>{
+        { 0.9f, 0.0f, 0.0f, 0.0f },
+        { 0.0f, 0.8f, 0.0f, 0.0f },
+        { 0.0f, 0.0f, 0.7f, 0.0f },
+        { 0.0f, 0.0f, 0.0f, 0.6f }
+    };
+    auto C = math::Matrix<float, 1, 4>{ { 1.0f, 0.0f, 0.0f, 0.0f } };
+
+    auto lti = math::LinearTimeInvariant<float, 4, 1, 1>::Autonomous(A, C);
+
+    for (std::size_t r = 0; r < 4; ++r)
+        EXPECT_NEAR(lti.B.at(r, 0), 0.0f, 1e-5f);
+
+    math::Vector<float, 4> x{ { 1.0f }, { 0.5f }, { 0.25f }, { 0.1f } };
+    math::Vector<float, 1> u{};
+    auto xNext = lti.Step(x, u);
+    EXPECT_NEAR(xNext.at(0, 0), 0.9f, 1e-5f);
+}
+
+TEST_F(TestLinearTimeInvariantFloat, two_state_two_input_with_full_state_output)
+{
+    auto A = math::SquareMatrix<float, 2>{
+        { 0.9f, 0.0f },
+        { 0.0f, 0.8f }
+    };
+    auto B = math::Matrix<float, 2, 2>{
+        { 0.1f, 0.0f },
+        { 0.0f, 0.1f }
+    };
+
+    auto lti = math::LinearTimeInvariant<float, 2, 2>::WithFullStateOutput(A, B);
+
+    // C must be identity
+    EXPECT_NEAR(lti.C.at(0, 0), 1.0f, 5e-3f);
+    EXPECT_NEAR(lti.C.at(1, 1), 1.0f, 5e-3f);
+    EXPECT_NEAR(lti.C.at(0, 1), 0.0f, 5e-3f);
+    EXPECT_NEAR(lti.C.at(1, 0), 0.0f, 5e-3f);
+
+    math::Vector<float, 2> x{ { 1.0f }, { 0.5f } };
+    math::Vector<float, 2> u{ { 1.0f }, { 2.0f } };
+
+    auto xNext = lti.Step(x, u);
+    EXPECT_NEAR(xNext.at(0, 0), 0.9f + 0.1f, 1e-5f);
+    EXPECT_NEAR(xNext.at(1, 0), 0.4f + 0.2f, 1e-5f);
+}

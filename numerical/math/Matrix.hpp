@@ -114,14 +114,14 @@ namespace math
         [[nodiscard]] constexpr T Trace() const;
 
         template<size_t SrcRows, size_t SrcCols>
-        ALWAYS_INLINE_HOT constexpr void SetBlock(const Matrix<T, SrcRows, SrcCols>& src,
+        constexpr void SetBlock(const Matrix<T, SrcRows, SrcCols>& src,
             size_type rowOffset, size_type colOffset);
 
         template<size_t BlockRows, size_t BlockCols>
-        [[nodiscard]] ALWAYS_INLINE_HOT constexpr Matrix<T, BlockRows, BlockCols> GetBlock(
+        [[nodiscard]] constexpr Matrix<T, BlockRows, BlockCols> GetBlock(
             size_type rowOffset, size_type colOffset) const;
 
-        [[nodiscard]] ALWAYS_INLINE_HOT constexpr Matrix<T, Rows, 1> GetColumn(size_type col) const;
+        [[nodiscard]] constexpr Matrix<T, Rows, 1> GetColumn(size_type col) const;
 
     private:
         std::array<T, Rows * Cols> data;
@@ -308,7 +308,7 @@ namespace math
 
     template<typename T, size_t Rows, size_t Cols>
     template<size_t SrcRows, size_t SrcCols>
-    ALWAYS_INLINE_HOT constexpr void
+    constexpr void
     Matrix<T, Rows, Cols>::SetBlock(const Matrix<T, SrcRows, SrcCols>& src,
         size_type rowOffset, size_type colOffset)
     {
@@ -321,7 +321,7 @@ namespace math
 
     template<typename T, size_t Rows, size_t Cols>
     template<size_t BlockRows, size_t BlockCols>
-    [[nodiscard]] ALWAYS_INLINE_HOT constexpr Matrix<T, BlockRows, BlockCols>
+    [[nodiscard]] constexpr Matrix<T, BlockRows, BlockCols>
     Matrix<T, Rows, Cols>::GetBlock(size_type rowOffset, size_type colOffset) const
     {
         static_assert(BlockRows <= Rows && BlockCols <= Cols,
@@ -334,7 +334,7 @@ namespace math
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    [[nodiscard]] ALWAYS_INLINE_HOT constexpr Matrix<T, Rows, 1>
+    [[nodiscard]] constexpr Matrix<T, Rows, 1>
     Matrix<T, Rows, Cols>::GetColumn(size_type col) const
     {
         Vector<T, Rows> result;

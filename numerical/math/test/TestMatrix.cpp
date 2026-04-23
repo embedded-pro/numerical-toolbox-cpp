@@ -1,5 +1,8 @@
 #include "numerical/math/Matrix.hpp"
+#include <algorithm>
+#include <cmath>
 #include <gtest/gtest.h>
+#include <type_traits>
 
 namespace
 {

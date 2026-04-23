@@ -756,3 +756,67 @@ TEST_F(TestMpc, mpc_from_lti_matches_mpc_from_matrices)
 
     EXPECT_NEAR(uMatrices.at(0, 0), uLti.at(0, 0), 1e-4f);
 }
+
+TEST_F(TestMpc, umin_only_constraint_clamps_lower_bound)
+{
+    math::SquareMatrix<float, 2> A{
+        { 1.0f, 0.1f },
+        { 0.0f, 1.0f }
+    };
+    math::Matrix<float, 2, 1> B{
+        { 0.005f },
+        { 0.1f }
+    };
+
+    controllers::MpcWeights<float, 2, 1> weights;
+    weights.Q = math::SquareMatrix<float, 2>{ { 100.0f, 0.0f }, { 0.0f, 100.0f } };
+    weights.R = math::SquareMatrix<float, 1>{ { 0.01f } };
+
+    controllers::MpcConstraints<float, 1> constraints;
+    constraints.uMin = math::Vector<float, 1>{ -0.3f };
+    // uMax intentionally not set
+
+    controllers::Mpc<float, 2, 1, 5, 5> mpc(A, B, weights, constraints);
+
+    // Negative state drives control negative; clamp should enforce lower bound
+    math::Vector<float, 2> state{ -10.0f, 0.0f };
+    auto u = mpc.ComputeControl(state);
+
+    EXPECT_GE(u.at(0, 0), -0.3f);
+
+    auto seq = mpc.GetControlSequence();
+    for (std::size_t k = 0; k < seq.size(); ++k)
+        EXPECT_GE(seq[k].at(0, 0), -0.3f);
+}
+
+TEST_F(TestMpc, umax_only_constraint_clamps_upper_bound)
+{
+    math::SquareMatrix<float, 2> A{
+        { 1.0f, 0.1f },
+        { 0.0f, 1.0f }
+    };
+    math::Matrix<float, 2, 1> B{
+        { 0.005f },
+        { 0.1f }
+    };
+
+    controllers::MpcWeights<float, 2, 1> weights;
+    weights.Q = math::SquareMatrix<float, 2>{ { 100.0f, 0.0f }, { 0.0f, 100.0f } };
+    weights.R = math::SquareMatrix<float, 1>{ { 0.01f } };
+
+    controllers::MpcConstraints<float, 1> constraints;
+    constraints.uMax = math::Vector<float, 1>{ 0.3f };
+    // uMin intentionally not set
+
+    controllers::Mpc<float, 2, 1, 5, 5> mpc(A, B, weights, constraints);
+
+    // Positive state drives control positive; clamp should enforce upper bound
+    math::Vector<float, 2> state{ 10.0f, 0.0f };
+    auto u = mpc.ComputeControl(state);
+
+    EXPECT_LE(u.at(0, 0), 0.3f);
+
+    auto seq = mpc.GetControlSequence();
+    for (std::size_t k = 0; k < seq.size(); ++k)
+        EXPECT_LE(seq[k].at(0, 0), 0.3f);
+}

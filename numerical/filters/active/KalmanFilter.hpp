@@ -40,7 +40,8 @@ namespace filters
         void SetPlant(const math::LinearTimeInvariant<QNumberType, StateSize, ControlSize, MeasurementSize>& plant)
         requires(ControlSize > 0);
 
-        void SetPlant(const math::LinearTimeInvariant<QNumberType, StateSize, 1, MeasurementSize>& plant)
+        template<std::size_t PlantInputSize>
+        void SetPlant(const math::LinearTimeInvariant<QNumberType, StateSize, PlantInputSize, MeasurementSize>& plant)
         requires(ControlSize == 0);
 
         void Predict();
@@ -94,8 +95,9 @@ namespace filters
     }
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
+    template<std::size_t PlantInputSize>
     void KalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::SetPlant(
-        const math::LinearTimeInvariant<QNumberType, StateSize, 1, MeasurementSize>& plant)
+        const math::LinearTimeInvariant<QNumberType, StateSize, PlantInputSize, MeasurementSize>& plant)
     requires(ControlSize == 0)
     {
         SetStateTransition(plant.A);

@@ -53,9 +53,10 @@ namespace filters
             const StateMatrix& initialCovariance);
 
         // Convenience overload: extracts F = plant.A, H = plant.C from the LTI model.
-        // LTI template args: <float, StateSize, 1, MeasurementSize> (InputSize unused for smoother)
+        // InputSize is not used; any plant input dimension is accepted.
+        template<std::size_t PlantInputSize>
         OPTIMIZE_FOR_SPEED SmootherOutput Smooth(
-            const math::LinearTimeInvariant<float, StateSize, 1, MeasurementSize>& plant,
+            const math::LinearTimeInvariant<float, StateSize, PlantInputSize, MeasurementSize>& plant,
             const StateMatrix& Q,
             const MeasurementCovariance& R,
             const std::array<MeasurementVector, MaxSteps>& observations,
@@ -243,10 +244,11 @@ namespace filters
     }
 
     template<std::size_t StateSize, std::size_t MeasurementSize, std::size_t MaxSteps>
+    template<std::size_t PlantInputSize>
     OPTIMIZE_FOR_SPEED
         typename KalmanSmoother<StateSize, MeasurementSize, MaxSteps>::SmootherOutput
         KalmanSmoother<StateSize, MeasurementSize, MaxSteps>::Smooth(
-            const math::LinearTimeInvariant<float, StateSize, 1, MeasurementSize>& plant,
+            const math::LinearTimeInvariant<float, StateSize, PlantInputSize, MeasurementSize>& plant,
             const StateMatrix& Q,
             const MeasurementCovariance& R,
             const std::array<MeasurementVector, MaxSteps>& observations,
