@@ -49,11 +49,11 @@ Controllability and observability are prerequisites for LQR and Kalman Filter st
 
 ## Complexity Analysis
 
-| Operation      | Time   | Space  | Notes                                  |
-|----------------|--------|--------|----------------------------------------|
-| Step (state)   | $O(n^2 + nm)$ | $O(n)$ | One matrix-vector multiply per term   |
-| Output         | $O(pn + pm)$ | $O(p)$ | One matrix-vector multiply per term    |
-| Construction   | $O(1)$ | $O(n^2 + nm + pn + pm)$ | Value-type struct, no allocation |
+| Operation    | Time          | Space                   | Notes                               |
+|--------------|---------------|-------------------------|-------------------------------------|
+| Step (state) | $O(n^2 + nm)$ | $O(n)$                  | One matrix-vector multiply per term |
+| Output       | $O(pn + pm)$  | $O(p)$                  | One matrix-vector multiply per term |
+| Construction | $O(1)$        | $O(n^2 + nm + pn + pm)$ | Value-type struct, no allocation    |
 
 ## Numerical Considerations
 
