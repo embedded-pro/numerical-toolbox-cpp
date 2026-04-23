@@ -14,6 +14,7 @@ target_sources(numerical.math PRIVATE
     ComplexNumber.hpp
     Geometry3D.hpp
     HyperbolicFunctions.hpp
+    LinearTimeInvariant.hpp
     Matrix.hpp
     QNumber.hpp
     RecursiveBuffer.hpp
@@ -26,6 +27,7 @@ target_sources(numerical.math PRIVATE
 
 numerical_add_coverage_sources(numerical.math
     ComplexNumber.cpp
+    LinearTimeInvariant.cpp
     Matrix.cpp
     QNumber.cpp
 )

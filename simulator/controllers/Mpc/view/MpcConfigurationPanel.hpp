@@ -20,7 +20,7 @@ namespace simulator::controllers::view
         explicit MpcConfigurationPanel(QWidget* parent = nullptr);
 
         MpcSimulator::Configuration GetConfiguration() const;
-        StateSpacePlant CreatePlant() const;
+        math::LinearTimeInvariant<float, 2, 1> CreatePlant() const;
         QString GetPlantDescription() const;
 
     signals:

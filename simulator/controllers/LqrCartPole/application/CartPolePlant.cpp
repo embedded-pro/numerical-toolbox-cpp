@@ -107,4 +107,10 @@ namespace simulator::controllers::lqr
             { -dt / (mc * l) },
         };
     }
+
+    math::LinearTimeInvariant<float, stateSize, inputSize> CartPolePlant::Linearize(float dt) const
+    {
+        return math::LinearTimeInvariant<float, stateSize, inputSize>::WithFullStateOutput(
+            LinearizedA(dt), LinearizedB(dt));
+    }
 }

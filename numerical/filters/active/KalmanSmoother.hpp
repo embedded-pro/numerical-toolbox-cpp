@@ -5,6 +5,7 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/solvers/CholeskyDecomposition.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
@@ -44,6 +45,18 @@ namespace filters
         OPTIMIZE_FOR_SPEED SmootherOutput Smooth(
             const StateMatrix& F,
             const MeasurementMatrix& H,
+            const StateMatrix& Q,
+            const MeasurementCovariance& R,
+            const std::array<MeasurementVector, MaxSteps>& observations,
+            std::size_t numSteps,
+            const StateVector& initialState,
+            const StateMatrix& initialCovariance);
+
+        // Convenience overload: extracts F = plant.A, H = plant.C from the LTI model.
+        // InputSize is not used; any plant input dimension is accepted.
+        template<std::size_t PlantInputSize>
+        OPTIMIZE_FOR_SPEED SmootherOutput Smooth(
+            const math::LinearTimeInvariant<float, StateSize, PlantInputSize, MeasurementSize>& plant,
             const StateMatrix& Q,
             const MeasurementCovariance& R,
             const std::array<MeasurementVector, MaxSteps>& observations,
@@ -210,13 +223,10 @@ namespace filters
         const auto L = solvers::CholeskyDecomposition(innovationCovariance);
         const auto sInvNu = solvers::SolveSystem<float, MeasurementSize, 1>(innovationCovariance, innovation);
         float logDetS = 0.0f;
-        float quadForm = 0.0f;
         for (std::size_t i = 0; i < MeasurementSize; ++i)
-        {
             logDetS += std::log(L.at(i, i));
-            quadForm += innovation.at(i, 0) * sInvNu.at(i, 0);
-        }
         logDetS *= 2.0f;
+        const float quadForm = (innovation.Transpose() * sInvNu).at(0, 0);
         return -0.5f * (logDetS + quadForm + static_cast<float>(MeasurementSize) * log2pi);
     }
 
@@ -231,6 +241,22 @@ namespace filters
         return solvers::SolveSystem<float, StateSize, StateSize>(
             predictedCovariance, stateTransition * filteredCovariance)
             .Transpose();
+    }
+
+    template<std::size_t StateSize, std::size_t MeasurementSize, std::size_t MaxSteps>
+    template<std::size_t PlantInputSize>
+    OPTIMIZE_FOR_SPEED
+        typename KalmanSmoother<StateSize, MeasurementSize, MaxSteps>::SmootherOutput
+        KalmanSmoother<StateSize, MeasurementSize, MaxSteps>::Smooth(
+            const math::LinearTimeInvariant<float, StateSize, PlantInputSize, MeasurementSize>& plant,
+            const StateMatrix& Q,
+            const MeasurementCovariance& R,
+            const std::array<MeasurementVector, MaxSteps>& observations,
+            std::size_t numSteps,
+            const StateVector& initialState,
+            const StateMatrix& initialCovariance)
+    {
+        return Smooth(plant.A, plant.C, Q, R, observations, numSteps, initialState, initialCovariance);
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD

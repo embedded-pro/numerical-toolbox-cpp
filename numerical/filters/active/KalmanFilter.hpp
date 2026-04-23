@@ -2,6 +2,7 @@
 
 #include "numerical/filters/active/KalmanFilterBase.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/LinearTimeInvariant.hpp"
 
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC optimize("O3", "fast-math")
@@ -31,6 +32,17 @@ namespace filters
 
         void SetControlInputMatrix(const ControlMatrix& B)
         requires(ControlSize > 0);
+
+        // Convenience: configure F, H (and B when ControlSize > 0) from an LTI plant.
+        // LTI template args: <T, StateSize, ControlSize, MeasurementSize>
+        // Maps: plant.A -> state transition (F), plant.C -> measurement matrix (H),
+        //       plant.B -> control input matrix (B, only when ControlSize > 0)
+        void SetPlant(const math::LinearTimeInvariant<QNumberType, StateSize, ControlSize, MeasurementSize>& plant)
+        requires(ControlSize > 0);
+
+        template<std::size_t PlantInputSize>
+        void SetPlant(const math::LinearTimeInvariant<QNumberType, StateSize, PlantInputSize, MeasurementSize>& plant)
+        requires(ControlSize == 0);
 
         void Predict();
 
@@ -70,6 +82,26 @@ namespace filters
     requires(ControlSize > 0)
     {
         controlInputMatrix = B;
+    }
+
+    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
+    void KalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::SetPlant(
+        const math::LinearTimeInvariant<QNumberType, StateSize, ControlSize, MeasurementSize>& plant)
+    requires(ControlSize > 0)
+    {
+        SetStateTransition(plant.A);
+        SetMeasurementMatrix(plant.C);
+        SetControlInputMatrix(plant.B);
+    }
+
+    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
+    template<std::size_t PlantInputSize>
+    void KalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::SetPlant(
+        const math::LinearTimeInvariant<QNumberType, StateSize, PlantInputSize, MeasurementSize>& plant)
+    requires(ControlSize == 0)
+    {
+        SetStateTransition(plant.A);
+        SetMeasurementMatrix(plant.C);
     }
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>

@@ -7,16 +7,19 @@ target_include_directories(numerical.controllers.implementations ${NUMERICAL_VIS
 
 target_link_libraries(numerical.controllers.implementations ${NUMERICAL_VISIBILITY}
     numerical.controllers.interfaces
+    numerical.filters.active
     numerical.solver
 )
 
 target_sources(numerical.controllers.implementations PRIVATE
+    Lqg.hpp
     Lqr.hpp
     Mpc.hpp
     PidIncremental.hpp
 )
 
 numerical_add_coverage_sources(numerical.controllers.implementations
+    Lqg.cpp
     Lqr.cpp
     Mpc.cpp
     PidIncremental.cpp

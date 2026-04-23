@@ -113,6 +113,16 @@ namespace math
         [[nodiscard]] static constexpr Matrix Identity();
         [[nodiscard]] constexpr T Trace() const;
 
+        template<size_t SrcRows, size_t SrcCols>
+        constexpr void SetBlock(const Matrix<T, SrcRows, SrcCols>& src,
+            size_type rowOffset, size_type colOffset);
+
+        template<size_t BlockRows, size_t BlockCols>
+        [[nodiscard]] constexpr Matrix<T, BlockRows, BlockCols> GetBlock(
+            size_type rowOffset, size_type colOffset) const;
+
+        [[nodiscard]] constexpr Matrix<T, Rows, 1> GetColumn(size_type col) const;
+
     private:
         std::array<T, Rows * Cols> data;
     };
@@ -292,6 +302,45 @@ namespace math
             sum += at(i, i);
 
         return sum;
+    }
+
+    // Implementation of new block methods //
+
+    template<typename T, size_t Rows, size_t Cols>
+    template<size_t SrcRows, size_t SrcCols>
+    constexpr void
+    Matrix<T, Rows, Cols>::SetBlock(const Matrix<T, SrcRows, SrcCols>& src,
+        size_type rowOffset, size_type colOffset)
+    {
+        static_assert(SrcRows <= Rows && SrcCols <= Cols,
+            "Source block exceeds destination matrix dimensions");
+        for (size_type r = 0; r < SrcRows; ++r)
+            for (size_type c = 0; c < SrcCols; ++c)
+                at(rowOffset + r, colOffset + c) = src.at(r, c);
+    }
+
+    template<typename T, size_t Rows, size_t Cols>
+    template<size_t BlockRows, size_t BlockCols>
+    [[nodiscard]] constexpr Matrix<T, BlockRows, BlockCols>
+    Matrix<T, Rows, Cols>::GetBlock(size_type rowOffset, size_type colOffset) const
+    {
+        static_assert(BlockRows <= Rows && BlockCols <= Cols,
+            "Requested block exceeds source matrix dimensions");
+        Matrix<T, BlockRows, BlockCols> result;
+        for (size_type r = 0; r < BlockRows; ++r)
+            for (size_type c = 0; c < BlockCols; ++c)
+                result.at(r, c) = at(rowOffset + r, colOffset + c);
+        return result;
+    }
+
+    template<typename T, size_t Rows, size_t Cols>
+    [[nodiscard]] constexpr Matrix<T, Rows, 1>
+    Matrix<T, Rows, Cols>::GetColumn(size_type col) const
+    {
+        Vector<T, Rows> result;
+        for (size_type r = 0; r < Rows; ++r)
+            result.at(r, 0) = at(r, col);
+        return result;
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD

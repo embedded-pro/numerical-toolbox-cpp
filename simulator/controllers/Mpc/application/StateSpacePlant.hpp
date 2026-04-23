@@ -1,17 +1,9 @@
 #pragma once
 
-#include <vector>
+#include "numerical/math/LinearTimeInvariant.hpp"
 
 namespace simulator::controllers
 {
-    struct StateSpacePlant
-    {
-        std::vector<std::vector<float>> A;
-        std::vector<std::vector<float>> B;
-        std::size_t stateSize;
-        std::size_t inputSize;
-    };
-
-    StateSpacePlant MakeDoubleIntegrator(float dt);
-    StateSpacePlant MakeFirstOrderWithIntegrator(float gain, float timeConstant, float dt);
+    math::LinearTimeInvariant<float, 2, 1> MakeDoubleIntegrator(float dt);
+    math::LinearTimeInvariant<float, 2, 1> MakeFirstOrderWithIntegrator(float gain, float timeConstant, float dt);
 }

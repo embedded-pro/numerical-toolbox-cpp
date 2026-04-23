@@ -1,6 +1,6 @@
 #pragma once
 
-#include "simulator/controllers/Mpc/application/StateSpacePlant.hpp"
+#include "numerical/math/LinearTimeInvariant.hpp"
 #include <vector>
 
 namespace simulator::controllers
@@ -43,14 +43,14 @@ namespace simulator::controllers
             float referencePosition = 1.0f;
         };
 
-        void Configure(const StateSpacePlant& plant, const Configuration& config);
+        void Configure(const math::LinearTimeInvariant<float, 2, 1>& plant, const Configuration& config);
         MpcTimeResponse ComputeStepResponse();
         MpcTimeResponse ComputeConstrainedResponse();
 
     private:
         MpcTimeResponse Simulate(bool enableConstraints);
 
-        StateSpacePlant plant;
+        math::LinearTimeInvariant<float, 2, 1> plant;
         Configuration configuration;
     };
 }

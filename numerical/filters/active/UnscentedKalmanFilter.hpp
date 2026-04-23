@@ -4,6 +4,7 @@
 #include "numerical/filters/active/KalmanFilterBase.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/solvers/CholeskyDecomposition.hpp"
+#include <algorithm>
 #include <array>
 #include <cmath>
 
@@ -128,11 +129,9 @@ namespace filters
         weightsMean[0] = lambda / (n + lambda);
         weightsCovariance[0] = lambda / (n + lambda) + (1.0f - parameters.alpha * parameters.alpha + parameters.beta);
 
-        for (std::size_t i = 1; i < SigmaPointCount; ++i)
-        {
-            weightsMean[i] = 1.0f / (2.0f * (n + lambda));
-            weightsCovariance[i] = 1.0f / (2.0f * (n + lambda));
-        }
+        const float wRest = 1.0f / (2.0f * (n + lambda));
+        std::fill(weightsMean.begin() + 1, weightsMean.end(), wRest);
+        std::fill(weightsCovariance.begin() + 1, weightsCovariance.end(), wRest);
     }
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
@@ -148,10 +147,7 @@ namespace filters
         // σᵢ = x̂ ± √(n+λ) · column_i(L)
         for (std::size_t i = 0; i < StateSize; ++i)
         {
-            StateVector column;
-            for (std::size_t j = 0; j < StateSize; ++j)
-                column.at(j, 0) = QNumberType(math::ToFloat(L.at(j, i)) * scaleFactor);
-
+            auto column = L.GetColumn(i) * QNumberType(scaleFactor);
             sigmaPoints[i + 1] = this->state() + column;
             sigmaPoints[i + 1 + StateSize] = this->state() - column;
         }
@@ -165,10 +161,7 @@ namespace filters
     {
         math::Vector<QNumberType, VectorSize> result;
         for (std::size_t i = 0; i < SigmaPointCount; ++i)
-            for (std::size_t j = 0; j < VectorSize; ++j)
-                result.at(j, 0) = QNumberType(
-                    math::ToFloat(result.at(j, 0)) +
-                    weightsMean[i] * math::ToFloat(points[i].at(j, 0)));
+            result = result + points[i] * QNumberType(weightsMean[i]);
         return result;
     }
 
@@ -184,11 +177,7 @@ namespace filters
         {
             auto diff = points[i] - mean;
             auto outer = diff * diff.Transpose();
-            for (std::size_t r = 0; r < Size; ++r)
-                for (std::size_t c = 0; c < Size; ++c)
-                    result.at(r, c) = QNumberType(
-                        math::ToFloat(result.at(r, c)) +
-                        weightsCovariance[i] * math::ToFloat(outer.at(r, c)));
+            result = result + outer * QNumberType(weightsCovariance[i]);
         }
         return result;
     }
@@ -207,11 +196,7 @@ namespace filters
             auto stateDiff = statePoints[i] - stateMean;
             auto measDiff = measurementPoints[i] - measurementMean;
             auto outer = stateDiff * measDiff.Transpose();
-            for (std::size_t r = 0; r < StateSize; ++r)
-                for (std::size_t c = 0; c < MeasurementSize; ++c)
-                    result.at(r, c) = QNumberType(
-                        math::ToFloat(result.at(r, c)) +
-                        weightsCovariance[i] * math::ToFloat(outer.at(r, c)));
+            result = result + outer * QNumberType(weightsCovariance[i]);
         }
         return result;
     }

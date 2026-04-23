@@ -3,26 +3,28 @@
 
 namespace simulator::controllers
 {
-    StateSpacePlant MakeDoubleIntegrator(float dt)
+    math::LinearTimeInvariant<float, 2, 1> MakeDoubleIntegrator(float dt)
     {
-        return StateSpacePlant{
-            .A = { { 1.0f, dt }, { 0.0f, 1.0f } },
-            .B = { { 0.5f * dt * dt }, { dt } },
-            .stateSize = 2,
-            .inputSize = 1
-        };
+        return math::LinearTimeInvariant<float, 2, 1>::WithFullStateOutput(
+            math::SquareMatrix<float, 2>{
+                { 1.0f, dt },
+                { 0.0f, 1.0f } },
+            math::Matrix<float, 2, 1>{
+                { 0.5f * dt * dt },
+                { dt } });
     }
 
-    StateSpacePlant MakeFirstOrderWithIntegrator(float gain, float timeConstant, float dt)
+    math::LinearTimeInvariant<float, 2, 1> MakeFirstOrderWithIntegrator(float gain, float timeConstant, float dt)
     {
         auto a = std::exp(-dt / timeConstant);
         auto b = gain * (1.0f - a);
 
-        return StateSpacePlant{
-            .A = { { 1.0f, dt }, { 0.0f, a } },
-            .B = { { 0.0f }, { b } },
-            .stateSize = 2,
-            .inputSize = 1
-        };
+        return math::LinearTimeInvariant<float, 2, 1>::WithFullStateOutput(
+            math::SquareMatrix<float, 2>{
+                { 1.0f, dt },
+                { 0.0f, a } },
+            math::Matrix<float, 2, 1>{
+                { 0.0f },
+                { b } });
     }
 }
