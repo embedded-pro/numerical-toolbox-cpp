@@ -1,7 +1,7 @@
 ---
 description: "Use when a detailed implementation plan is needed before writing code. Produces structured, actionable plans that follow all numerical-toolbox constraints: no heap allocation, fixed-point arithmetic, real-time determinism, SOLID principles, and project conventions. Best for new algorithms, architectural changes, or multi-file modifications."
 tools: [read, search, web]
-model: "Claude Opus 4.6"
+model: "claude-opus-4-8"
 handoffs:
   - label: "Start Implementation"
     agent: executor

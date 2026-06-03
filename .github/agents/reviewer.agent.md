@@ -1,7 +1,7 @@
 ---
 description: "Use when reviewing code changes in numerical-toolbox. Performs structured code review against all project standards: memory safety (no heap), numeric type correctness (float/Q15/Q31), fixed-point arithmetic safety, embedded optimizations, documentation alignment, SOLID principles, and test coverage with typed tests."
 tools: [read, search]
-model: "GPT-5.4"
+model: "claude-sonnet-4-6"
 handoffs:
   - label: "Fix Issues"
     agent: executor
