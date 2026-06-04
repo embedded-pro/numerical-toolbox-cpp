@@ -1,21 +1,9 @@
-FROM gabrielfrasantos/embedded-devcontainer-cpp:latest@sha256:5fe0d1ae0ab020db875964752d4e9e07e54718ea54733b5f7a8c81753cd48027
+FROM gabrielfrasantos/embedded-devcontainer-cpp:v7.2.0@sha256:5fe0d1ae0ab020db875964752d4e9e07e54718ea54733b5f7a8c81753cd48027
 
-HEALTHCHECK NONE
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gnuplot-qt=6.0.0+dfsg1-1ubuntu3 \
-    qt6-base-dev=6.4.2+dfsg-21.1build5 \
-    libgl1-mesa-dev=25.2.8-0ubuntu0.24.04.1 \
-    libxkbcommon-dev=1.6.0-1build1 \
-    libxkbcommon-x11-0=1.6.0-1build1 \
-    libxcb-xinerama0=1.15-1ubuntu2 \
-    libxcb-cursor0=0.1.4-1build1 \
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-RUN xwin --accept-license splat --include-debug-libs --preserve-ms-arch-notation --output /winsdk \
-    && rm -rf /root/.xwin-cache
-
-RUN pip3 install --break-system-packages --no-cache-dir aqtinstall==3.3.0 \
-    && aqt install-qt windows desktop 6.4.2 win64_msvc2019_64 --outputdir /opt/qt6-windows \
-    && pip3 uninstall --break-system-packages -y aqtinstall \
-    && rm -rf /tmp/aqt*
+HEALTHCHECK NONE

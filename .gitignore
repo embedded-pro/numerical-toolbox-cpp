@@ -5,3 +5,8 @@ build/
 out/
 megalinter-reports/
 install/
+
+# Claude Code - personal/generated
+.claude/settings.local.json
+.claude/skills/
+.agents/
