@@ -40,7 +40,6 @@
   "postCreateCommand": {
     "submodule.update": "git submodule update --init --recursive",
     "config.core.autocrlf": "git config --replace-all core.autocrlf false",
-    "config.core.eol": "git config --replace-all core.eol lf",
-    "config.core.editor": "git config --global core.editor 'code --wait'"
+    "config.core.eol": "git config --replace-all core.eol lf"
   }
 }
