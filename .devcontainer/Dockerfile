@@ -2,6 +2,7 @@ FROM gabrielfrasantos/embedded-devcontainer-cpp:v7.2.0@sha256:5fe0d1ae0ab020db87
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
+# hadolint ignore=DL3008
 RUN --mount=type=bind,source=.devcontainer/apt-requirements.json,target=/tmp/apt-requirements.json \
     apt-get update \
     && apt-get install -y --no-install-recommends jq \
