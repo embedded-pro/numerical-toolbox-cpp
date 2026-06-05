@@ -1,5 +1,39 @@
 # Changelog
 
+## [2.1.0](https://github.com/embedded-pro/numerical-toolbox-cpp/compare/v2.0.0...v2.1.0) (2026-06-05)
+
+
+### Features
+
+* Add bayesian opmization ([#138](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/138)) ([dbf40cc](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/dbf40cc34e69e6236a2751cfbc49acb3b2606953))
+* Introduce LQG and State spaces ([#143](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/143)) ([85a9bba](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/85a9bba50ded19899e5eabd0bfa47e559c7b26e0))
+
+
+### Miscellaneous
+
+* Add caveman ([#154](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/154)) ([ab70e5b](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/ab70e5b8426b2f598d783b93dcae5a5c33abf51d))
+* Add inverse kinematics ([#136](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/136)) ([36ff77e](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/36ff77e5ee95f7b9a62e51b4be5bce01fae2e4af))
+* Add new structure ([#113](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/113)) ([fca4c0d](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/fca4c0d3f16fb696441fe9b413ef2279e2a57ccf))
+* Improve gui ([#119](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/119)) ([cb6187b](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/cb6187b8143cd34895372b7d9038c1e6c52b26c6))
+* Include missing simulators ([#116](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/116)) ([8154c04](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/8154c043c7895051e5811313911e22207123b3d3))
+* Lqr simulator ([#95](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/95)) ([87a1aa9](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/87a1aa9aa06c8c3996a31d22f92918cd8742376b))
+* Revert "chore: add caveman" ([#155](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/155)) ([db58f39](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/db58f39e60fc12a52b23aad9cd3c7f84ab6e30da))
+
+
+### Build System
+
+* **deps:** Bump gabrielfrasantos/embedded-devcontainer-cpp ([#147](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/147)) ([b0361c1](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/b0361c1f25fcafcdc1f862cb025a041103413ebe))
+* **deps:** Bump gabrielfrasantos/embedded-devcontainer-cpp ([#149](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/149)) ([a6bc91c](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/a6bc91c0cb36152d306e26fd53854fb2f760608c))
+* **deps:** Bump gabrielfrasantos/embedded-devcontainer-cpp ([#152](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/152)) ([3fe736c](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/3fe736c3afbd0d460403c93b286a724d51c4d221))
+* **deps:** Bump github/codeql-action ([#142](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/142)) ([9e1145e](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/9e1145e93138a1cb6e6e815616219d4dbf9ce937))
+* **deps:** Bump github/codeql-action ([#150](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/150)) ([90d97a3](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/90d97a302cee21de96a3ad0f79583d1a5176f854))
+* **deps:** Bump googleapis/release-please-action from 4.4.1 to 5.0.0 ([#145](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/145)) ([e48d9d6](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/e48d9d6f70ea67734a07bc46aca9ed46730db951))
+* **deps:** Bump the patch-minor-action-updates group across 1 directory with 2 updates ([#146](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/146)) ([a387759](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/a387759c57d5b6ee25725a1650c50546debdc007))
+* **deps:** Bump the patch-minor-action-updates group with 2 updates ([#151](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/151)) ([ad34da1](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/ad34da156700c33f2c38547c49ea317c1fcb444d))
+* **deps:** Bump the patch-minor-action-updates group with 3 updates ([#129](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/129)) ([bd50760](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/bd50760fd8e518faa7e2078c2426d85f8ac2f661))
+* **deps:** Bump the patch-minor-action-updates group with 3 updates ([#141](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/141)) ([c940780](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/c9407802cbcbeeb25627efcd1a8a0b9c17d50388))
+* **deps:** Bump the patch-minor-action-updates group with 3 updates ([#148](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/148)) ([e867959](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/e867959adf0a8191471b7d802852690e14955357))
+
 ## [2.0.0](https://github.com/embedded-pro/numerical-toolbox-cpp/compare/v1.0.0...v2.0.0) (2026-03-24)
 
 
