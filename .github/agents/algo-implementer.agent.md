@@ -17,7 +17,9 @@ Authoritative rules: `AGENTS.md`. Recipe: `roadmap/DEPLOYMENT.md`. Follow both e
 2. Produce, per `roadmap/DEPLOYMENT.md`: the `.hpp`, coverage `.cpp`, `test/Test*.cpp`,
    `doc/<domain>/<Name>.md`, and the CMake edits.
 3. Build and test; fix until green (scope to the target/test where possible).
-4. Report file paths + test result. Nothing else.
+4. Remove the algorithm's row from `ROADMAP.md` and add it to the matching category row
+   in `README.md`'s Documentation table.
+5. Report file paths + test result. Nothing else.
 
 ## Hard rules
 
