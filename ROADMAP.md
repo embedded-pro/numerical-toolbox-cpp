@@ -7,13 +7,13 @@ ordered **easiest → hardest to implement** within the constraints of this libr
 
 Difficulty legend:
 
-| Stars | Meaning | Typical effort |
-|-------|---------|----------------|
-| ★☆☆☆☆ | Trivial primitive — a few methods, minimal math | Hours |
-| ★★☆☆☆ | Easy — well-defined recurrence, small state | Half day |
-| ★★★☆☆ | Moderate — real algorithm, still finite/bounded | 1–2 days |
-| ★★★★☆ | Advanced — non-trivial linear algebra / numerics | Several days |
-| ★★★★★ | Hard / research-grade — iterative eigen-numerics or adaptive theory | 1+ week |
+| Stars | Meaning                                                             | Typical effort |
+|-------|---------------------------------------------------------------------|----------------|
+| ★☆☆☆☆ | Trivial primitive — a few methods, minimal math                     | Hours          |
+| ★★☆☆☆ | Easy — well-defined recurrence, small state                         | Half day       |
+| ★★★☆☆ | Moderate — real algorithm, still finite/bounded                     | 1–2 days       |
+| ★★★★☆ | Advanced — non-trivial linear algebra / numerics                    | Several days   |
+| ★★★★★ | Hard / research-grade — iterative eigen-numerics or adaptive theory | 1+ week        |
 
 > **Numeric-type note.** DSP filters and fixed-gain trackers should template all three
 > types (`float`, `Q15`, `Q31`). Items marked *(float-first)* involve dynamic range or
@@ -24,55 +24,55 @@ Difficulty legend:
 
 ## Master list (by priority)
 
-| #  | Component | Target module | Difficulty |
-|----|-----------|---------------|------------|
-| 1  | Exponential Moving Average (one-pole) | `filters/passive` | ★☆☆☆☆ |
-| 2  | Moving Average (running-sum boxcar) | `filters/passive` | ★☆☆☆☆ |
-| 3  | Saturation / rate-limiter / slew blocks | `controllers` | ★☆☆☆☆ |
-| 4  | Bang-bang / hysteresis (relay) controller | `controllers` | ★☆☆☆☆ |
-| 5  | Peak / zero-crossing / RMS-envelope detectors | `analysis` | ★☆☆☆☆ |
-| 6  | Median filter | `filters/passive` | ★★☆☆☆ |
-| 7  | Feedforward / 2-DOF controller | `controllers` | ★★☆☆☆ |
-| 8  | Alpha-beta / alpha-beta-gamma filter | `filters/active` | ★★☆☆☆ |
-| 9  | Complementary filter | `filters/active` | ★★☆☆☆ |
-| 10 | Gain-scheduled controller | `controllers` | ★★☆☆☆ |
-| 11 | Convolution & correlation utilities | `analysis` | ★★☆☆☆ |
-| 12 | Polynomial least-squares curve fitting | `estimators/offline` | ★★☆☆☆ |
-| 13 | Goertzel algorithm | `analysis` | ★★☆☆☆ |
-| 14 | CIC (Cascaded Integrator-Comb) filter | `filters/passive` | ★★☆☆☆ |
-| 15 | Biquad / Second-Order-Section cascade | `filters/passive` | ★★★☆☆ |
-| 16 | Notch / comb filter | `filters/passive` | ★★★☆☆ |
-| 17 | Lead-lag compensator | `controllers` | ★★★☆☆ |
-| 18 | Quaternion type | `math` | ★★★☆☆ |
-| 19 | Luenberger observer + pole placement (Ackermann) | `controllers` | ★★★☆☆ |
-| 20 | Integral / servo state feedback (LQI) | `controllers` | ★★★☆☆ |
-| 21 | LMS / NLMS adaptive filter | `estimators/online` | ★★★☆☆ |
-| 22 | Savitzky-Golay filter | `filters/passive` | ★★★☆☆ |
-| 23 | CORDIC | `math` | ★★★☆☆ |
-| 24 | Runge-Kutta ODE integrators (RK4 + Dormand-Prince) | `solvers` | ★★★☆☆ |
-| 25 | Real-input FFT (RFFT) | `analysis` | ★★★☆☆ |
-| 26 | Controllability / Observability matrices & Gramians | `control_analysis` | ★★★☆☆ |
-| 27 | QR decomposition (Householder / Givens) | `solvers` | ★★★★☆ |
-| 28 | LU decomposition with partial pivoting | `solvers` | ★★★★☆ |
-| 29 | Matrix exponential (scaling & squaring + Padé) | `math` | ★★★★☆ |
-| 30 | Continuous → discrete conversion (`c2d`) | `math` | ★★★★☆ |
-| 31 | Lyapunov / Sylvester equation solvers | `solvers` | ★★★★☆ |
-| 32 | Transfer-function ↔ state-space conversion | `control_analysis` | ★★★★☆ |
-| 33 | Madgwick / Mahony AHRS | `filters/active` | ★★★★☆ |
-| 34 | Sliding Mode Control (SMC) | `robust_control` (new) | ★★★★☆ |
-| 35 | Disturbance Observer (DOB) | `robust_control` (new) | ★★★★☆ |
-| 36 | Active Disturbance Rejection Control (ADRC + ESO) | `robust_control` (new) | ★★★★☆ |
-| 37 | Hilbert transform / analytic signal / envelope | `analysis` | ★★★★☆ |
-| 38 | Discrete Wavelet Transform (Haar / Daubechies) | `analysis` | ★★★★☆ |
-| 39 | Square-root / Information Kalman filter | `filters/active` | ★★★★☆ |
-| 40 | Feedback linearization | `nonlinear_control` (new) | ★★★★☆ |
-| 41 | Backstepping controller | `nonlinear_control` (new) | ★★★★☆ |
-| 42 | Symmetric eigenvalue solver (Jacobi) | `solvers` | ★★★★★ |
-| 43 | Singular Value Decomposition (Golub-Kahan) | `solvers` | ★★★★★ |
-| 44 | Total Least Squares | `estimators/offline` | ★★★★★ |
-| 45 | IIR filter design (Butterworth/Chebyshev + bilinear) | `filters/passive` | ★★★★★ |
-| 46 | H∞ state-feedback control | `robust_control` (new) | ★★★★★ |
-| 47 | Model Reference Adaptive Control (MRAC) | `nonlinear_control` (new) | ★★★★★ |
+| #  | Component                                            | Target module             | Difficulty |
+|----|------------------------------------------------------|---------------------------|------------|
+| 1  | Exponential Moving Average (one-pole)                | `filters/passive`         | ★☆☆☆☆      |
+| 2  | Moving Average (running-sum boxcar)                  | `filters/passive`         | ★☆☆☆☆      |
+| 3  | Saturation / rate-limiter / slew blocks              | `controllers`             | ★☆☆☆☆      |
+| 4  | Bang-bang / hysteresis (relay) controller            | `controllers`             | ★☆☆☆☆      |
+| 5  | Peak / zero-crossing / RMS-envelope detectors        | `analysis`                | ★☆☆☆☆      |
+| 6  | Median filter                                        | `filters/passive`         | ★★☆☆☆      |
+| 7  | Feedforward / 2-DOF controller                       | `controllers`             | ★★☆☆☆      |
+| 8  | Alpha-beta / alpha-beta-gamma filter                 | `filters/active`          | ★★☆☆☆      |
+| 9  | Complementary filter                                 | `filters/active`          | ★★☆☆☆      |
+| 10 | Gain-scheduled controller                            | `controllers`             | ★★☆☆☆      |
+| 11 | Convolution & correlation utilities                  | `analysis`                | ★★☆☆☆      |
+| 12 | Polynomial least-squares curve fitting               | `estimators/offline`      | ★★☆☆☆      |
+| 13 | Goertzel algorithm                                   | `analysis`                | ★★☆☆☆      |
+| 14 | CIC (Cascaded Integrator-Comb) filter                | `filters/passive`         | ★★☆☆☆      |
+| 15 | Biquad / Second-Order-Section cascade                | `filters/passive`         | ★★★☆☆      |
+| 16 | Notch / comb filter                                  | `filters/passive`         | ★★★☆☆      |
+| 17 | Lead-lag compensator                                 | `controllers`             | ★★★☆☆      |
+| 18 | Quaternion type                                      | `math`                    | ★★★☆☆      |
+| 19 | Luenberger observer + pole placement (Ackermann)     | `controllers`             | ★★★☆☆      |
+| 20 | Integral / servo state feedback (LQI)                | `controllers`             | ★★★☆☆      |
+| 21 | LMS / NLMS adaptive filter                           | `estimators/online`       | ★★★☆☆      |
+| 22 | Savitzky-Golay filter                                | `filters/passive`         | ★★★☆☆      |
+| 23 | CORDIC                                               | `math`                    | ★★★☆☆      |
+| 24 | Runge-Kutta ODE integrators (RK4 + Dormand-Prince)   | `solvers`                 | ★★★☆☆      |
+| 25 | Real-input FFT (RFFT)                                | `analysis`                | ★★★☆☆      |
+| 26 | Controllability / Observability matrices & Gramians  | `control_analysis`        | ★★★☆☆      |
+| 27 | QR decomposition (Householder / Givens)              | `solvers`                 | ★★★★☆      |
+| 28 | LU decomposition with partial pivoting               | `solvers`                 | ★★★★☆      |
+| 29 | Matrix exponential (scaling & squaring + Padé)       | `math`                    | ★★★★☆      |
+| 30 | Continuous → discrete conversion (`c2d`)             | `math`                    | ★★★★☆      |
+| 31 | Lyapunov / Sylvester equation solvers                | `solvers`                 | ★★★★☆      |
+| 32 | Transfer-function ↔ state-space conversion           | `control_analysis`        | ★★★★☆      |
+| 33 | Madgwick / Mahony AHRS                               | `filters/active`          | ★★★★☆      |
+| 34 | Sliding Mode Control (SMC)                           | `robust_control` (new)    | ★★★★☆      |
+| 35 | Disturbance Observer (DOB)                           | `robust_control` (new)    | ★★★★☆      |
+| 36 | Active Disturbance Rejection Control (ADRC + ESO)    | `robust_control` (new)    | ★★★★☆      |
+| 37 | Hilbert transform / analytic signal / envelope       | `analysis`                | ★★★★☆      |
+| 38 | Discrete Wavelet Transform (Haar / Daubechies)       | `analysis`                | ★★★★☆      |
+| 39 | Square-root / Information Kalman filter              | `filters/active`          | ★★★★☆      |
+| 40 | Feedback linearization                               | `nonlinear_control` (new) | ★★★★☆      |
+| 41 | Backstepping controller                              | `nonlinear_control` (new) | ★★★★☆      |
+| 42 | Symmetric eigenvalue solver (Jacobi)                 | `solvers`                 | ★★★★★      |
+| 43 | Singular Value Decomposition (Golub-Kahan)           | `solvers`                 | ★★★★★      |
+| 44 | Total Least Squares                                  | `estimators/offline`      | ★★★★★      |
+| 45 | IIR filter design (Butterworth/Chebyshev + bilinear) | `filters/passive`         | ★★★★★      |
+| 46 | H∞ state-feedback control                            | `robust_control` (new)    | ★★★★★      |
+| 47 | Model Reference Adaptive Control (MRAC)              | `nonlinear_control` (new) | ★★★★★      |
 
 ---
 
@@ -397,35 +397,35 @@ range, matching the existing `dynamics/` convention.
 
 ### Manipulator list (by priority)
 
-| #   | Component | Target module | Difficulty |
-|-----|-----------|---------------|------------|
-| M1  | Prismatic / generic joint link | `dynamics` + `kinematics` | ★☆☆☆☆ |
-| M2  | Cubic / quintic polynomial joint trajectory | `trajectory` (new) | ★☆☆☆☆ |
-| M3  | Trapezoidal (LSPB) velocity profile | `trajectory` (new) | ★☆☆☆☆ |
-| M4  | Friction compensation (Coulomb + viscous + Stribeck) | `dynamics` | ★☆☆☆☆ |
-| M5  | PD + gravity compensation control | `controllers/manipulator` (new) | ★☆☆☆☆ |
-| M6  | Homogeneous transform / SE(3) + adjoint (twists) | `math` | ★★☆☆☆ |
-| M7  | Denavit-Hartenberg parameters | `kinematics` | ★★☆☆☆ |
-| M8  | Geometric / analytic Jacobian (6×N) | `kinematics` | ★★☆☆☆ |
-| M9  | S-curve (jerk-limited) trajectory | `trajectory` (new) | ★★☆☆☆ |
-| M10 | Cartesian path + orientation (SLERP) interpolation | `trajectory` (new) | ★★☆☆☆ |
-| M11 | Manipulability ellipsoid / Yoshikawa index | `kinematics` | ★★☆☆☆ |
-| M12 | Computed-torque (inverse-dynamics) control | `controllers/manipulator` (new) | ★★★☆☆ |
-| M13 | Full 6-DOF pose IK (position + orientation) | `kinematics` | ★★★☆☆ |
-| M14 | Redundancy resolution / null-space projection | `kinematics` | ★★★☆☆ |
-| M15 | Product-of-Exponentials forward kinematics | `kinematics` | ★★★☆☆ |
-| M16 | Momentum-based collision-detection observer | `estimators/online` | ★★★☆☆ |
-| M17 | Impedance / admittance control | `controllers/manipulator` (new) | ★★★☆☆ |
-| M18 | Operational-space (task-space) control | `controllers/manipulator` (new) | ★★★★☆ |
-| M19 | Hybrid position/force control | `controllers/manipulator` (new) | ★★★★☆ |
-| M20 | Passivity-based adaptive control (Slotine-Li) | `controllers/manipulator` (new) | ★★★★☆ |
-| M21 | Analytical IK (Pieper, wrist-partitioned 6R) | `kinematics` | ★★★★☆ |
-| M22 | Dynamic (base-parameter) identification | `estimators/offline` | ★★★★☆ |
-| M23 | Parallel-manipulator kinematics (Delta / Stewart-Gough) | `kinematics` | ★★★★☆ |
-| M24 | Mobile-manipulator / nonholonomic-base kinematics | `kinematics` | ★★★★☆ |
-| M25 | Cable-driven tension distribution | `controllers/manipulator` (new) | ★★★★☆ |
-| M26 | Continuum / soft constant-curvature kinematics | `kinematics` | ★★★★☆ |
-| M27 | Time-optimal path parameterization (TOPP) | `trajectory` (new) | ★★★★★ |
+| #   | Component                                               | Target module                   | Difficulty |
+|-----|---------------------------------------------------------|---------------------------------|------------|
+| M1  | Prismatic / generic joint link                          | `dynamics` + `kinematics`       | ★☆☆☆☆      |
+| M2  | Cubic / quintic polynomial joint trajectory             | `trajectory` (new)              | ★☆☆☆☆      |
+| M3  | Trapezoidal (LSPB) velocity profile                     | `trajectory` (new)              | ★☆☆☆☆      |
+| M4  | Friction compensation (Coulomb + viscous + Stribeck)    | `dynamics`                      | ★☆☆☆☆      |
+| M5  | PD + gravity compensation control                       | `controllers/manipulator` (new) | ★☆☆☆☆      |
+| M6  | Homogeneous transform / SE(3) + adjoint (twists)        | `math`                          | ★★☆☆☆      |
+| M7  | Denavit-Hartenberg parameters                           | `kinematics`                    | ★★☆☆☆      |
+| M8  | Geometric / analytic Jacobian (6×N)                     | `kinematics`                    | ★★☆☆☆      |
+| M9  | S-curve (jerk-limited) trajectory                       | `trajectory` (new)              | ★★☆☆☆      |
+| M10 | Cartesian path + orientation (SLERP) interpolation      | `trajectory` (new)              | ★★☆☆☆      |
+| M11 | Manipulability ellipsoid / Yoshikawa index              | `kinematics`                    | ★★☆☆☆      |
+| M12 | Computed-torque (inverse-dynamics) control              | `controllers/manipulator` (new) | ★★★☆☆      |
+| M13 | Full 6-DOF pose IK (position + orientation)             | `kinematics`                    | ★★★☆☆      |
+| M14 | Redundancy resolution / null-space projection           | `kinematics`                    | ★★★☆☆      |
+| M15 | Product-of-Exponentials forward kinematics              | `kinematics`                    | ★★★☆☆      |
+| M16 | Momentum-based collision-detection observer             | `estimators/online`             | ★★★☆☆      |
+| M17 | Impedance / admittance control                          | `controllers/manipulator` (new) | ★★★☆☆      |
+| M18 | Operational-space (task-space) control                  | `controllers/manipulator` (new) | ★★★★☆      |
+| M19 | Hybrid position/force control                           | `controllers/manipulator` (new) | ★★★★☆      |
+| M20 | Passivity-based adaptive control (Slotine-Li)           | `controllers/manipulator` (new) | ★★★★☆      |
+| M21 | Analytical IK (Pieper, wrist-partitioned 6R)            | `kinematics`                    | ★★★★☆      |
+| M22 | Dynamic (base-parameter) identification                 | `estimators/offline`            | ★★★★☆      |
+| M23 | Parallel-manipulator kinematics (Delta / Stewart-Gough) | `kinematics`                    | ★★★★☆      |
+| M24 | Mobile-manipulator / nonholonomic-base kinematics       | `kinematics`                    | ★★★★☆      |
+| M25 | Cable-driven tension distribution                       | `controllers/manipulator` (new) | ★★★★☆      |
+| M26 | Continuum / soft constant-curvature kinematics          | `kinematics`                    | ★★★★☆      |
+| M27 | Time-optimal path parameterization (TOPP)               | `trajectory` (new)              | ★★★★★      |
 
 ### Tier 1 — Trivial ★☆☆☆☆
 

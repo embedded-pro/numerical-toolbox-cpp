@@ -27,11 +27,11 @@ The canonical worked example is
 
 Each spec maps to this concrete artifact set when deployed into `numerical/`:
 
-| Spec file | Deploys to |
-|---|---|
+| Spec file           | Deploys to                                                              |
+|---------------------|-------------------------------------------------------------------------|
 | `implementation.md` | `numerical/<domain>/<Name>.hpp` + `<Name>.cpp` (coverage instantiation) |
-| `tests.md` | `numerical/<domain>/test/Test<Name>.cpp` |
-| `explanation.md` | `doc/<domain>/<Name>.md` (expanded to follow `doc/TEMPLATE.md`) |
+| `tests.md`          | `numerical/<domain>/test/Test<Name>.cpp`                                |
+| `explanation.md`    | `doc/<domain>/<Name>.md` (expanded to follow `doc/TEMPLATE.md`)         |
 
 Header shape (mirroring existing components such as `Fir.hpp`):
 
