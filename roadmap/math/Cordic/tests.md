@@ -14,8 +14,7 @@ class TestCordic : public ::testing::Test:
 
 ```
 sincos_zero:
-    Assert: SineCosine(0) ≈ { sin 0, cos 1 }
-
+    Assert: SineCosine(0) ≈ { sin 0, cos 0 }
 sincos_quarter_pi:
     Assert: SineCosine(π/4) ≈ { 0.7071, 0.7071 }
 
