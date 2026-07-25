@@ -19,6 +19,7 @@ resource-constrained embedded systems. Real-time, deterministic, no heap.
 - Forbidden: `new`/`delete`/`malloc`/`free`, `make_unique`/`make_shared`,
   `std::vector`/`string`/`deque`/`list`/`map`/`set`.
 - Use: `infra::BoundedVector<T>::WithMaxSize<N>`, `infra::BoundedString::WithStorage<N>`,
+  `infra::BoundedDeque<T>::WithMaxSize<N>`, `infra::BoundedList<T>::WithMaxSize<N>`,
   `std::array<T,N>`, `std::optional<T>`. Stack/static only. No recursion. **Tests too.**
 
 ## Embedded optimizations (algorithm headers)
@@ -49,8 +50,9 @@ resource-constrained embedded systems. Real-time, deterministic, no heap.
 ## Namespaces
 
 `analysis`, `windowing`, `control_analysis`, `controllers`, `dynamics`, `estimators`,
-`filters` (active), `filters::passive`, `math`, `neural_network`, `optimization`,
-`regularization`, `solvers`, and new: `trajectory`, `robust_control`, `nonlinear_control`.
+`filters` (active Kalman family — **not** `filters::active`), `filters::passive`, `math`,
+`neural_network`, `optimization`, `regularization`, `solvers`, and new: `trajectory`,
+`robust_control`, `nonlinear_control`.
 
 ## Testing
 
@@ -69,7 +71,7 @@ resource-constrained embedded systems. Real-time, deterministic, no heap.
 ## Docs
 
 Design-first `doc/<domain>/<Name>.md` per `doc/TEMPLATE.md`. Math/theory/complexity/pitfalls —
-no code, no class names, no usage examples.
+no code, no class names, no usage examples. Update `doc/<domain>/README.md` when adding a new algorithm.
 
 ## Assistant behavior — be terse
 
