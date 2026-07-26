@@ -40,9 +40,9 @@ DC gain is exactly 1. Group delay is constant at $(N-1)/2$ samples — the filte
 
 ## Complexity Analysis
 
-| Case    | Time   | Space   | Notes                              |
-|---------|--------|---------|------------------------------------|
-| All     | $O(1)$ | $O(N)$  | One add, one sub, one multiply     |
+| Case | Time   | Space  | Notes                          |
+|------|--------|--------|--------------------------------|
+| All  | $O(1)$ | $O(N)$ | One add, one sub, one multiply |
 
 The $O(1)$ time cost is the key advantage over the naive $O(N)$ direct-form sum.
 

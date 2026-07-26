@@ -43,7 +43,7 @@ TEST_F(TestMovingAverage, step_response_is_linear_ramp)
 TEST_F(TestMovingAverage, running_sum_matches_direct_average)
 {
     constexpr float tol = 1e-6f;
-    constexpr std::array<float, 8> seq{0.1f, 0.4f, 0.9f, 0.2f, 0.7f, 0.3f, 0.5f, 0.8f};
+    constexpr std::array<float, 8> seq{ 0.1f, 0.4f, 0.9f, 0.2f, 0.7f, 0.3f, 0.5f, 0.8f };
     std::array<float, 8> outputs{};
     for (std::size_t i = 0; i < seq.size(); ++i)
         outputs[i] = ma.Filter(seq[i]);

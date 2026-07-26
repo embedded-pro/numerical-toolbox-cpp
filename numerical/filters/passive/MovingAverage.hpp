@@ -30,8 +30,8 @@ namespace filters::passive
 
     template<typename T, std::size_t N>
     MovingAverage<T, N>::MovingAverage(T initial) noexcept
-        : sum{initial * static_cast<T>(N)}
-        , invN{T{1} / static_cast<T>(N)}
+        : sum{ initial * static_cast<T>(N) }
+        , invN{ T{ 1 } / static_cast<T>(N) }
     {
         for (std::size_t i = 0; i < N; ++i)
             window.Update(initial);
