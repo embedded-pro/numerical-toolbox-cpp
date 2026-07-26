@@ -63,13 +63,13 @@ pointwise complex product replaces the $O(MK)$ direct sum.
 
 ## Complexity Analysis
 
-| Operation           | Time          | Space (extra) | Notes                                 |
-|---------------------|---------------|---------------|---------------------------------------|
-| Linear convolution  | $O(MK)$       | $O(1)$        | Writes into caller-owned buffer       |
-| Circular convolution| $O(N^2)$      | $O(1)$        | Same as linear for equal-length input |
-| Cross-correlation   | $O(MK)$       | $O(K)$        | Reverses one operand on the stack     |
-| Auto-correlation    | $O(M^2)$      | $O(1)$        | Alias of cross-correlation            |
-| Fast convolution    | $O(L \log L)$ | $O(L)$        | $L = 2^{\lceil\log_2(M+K-1)\rceil}$  |
+| Operation            | Time          | Space (extra) | Notes                                 |
+|----------------------|---------------|---------------|---------------------------------------|
+| Linear convolution   | $O(MK)$       | $O(1)$        | Writes into caller-owned buffer       |
+| Circular convolution | $O(N^2)$      | $O(1)$        | Same as linear for equal-length input |
+| Cross-correlation    | $O(MK)$       | $O(K)$        | Reverses one operand on the stack     |
+| Auto-correlation     | $O(M^2)$      | $O(1)$        | Alias of cross-correlation            |
+| Fast convolution     | $O(L \log L)$ | $O(L)$        | $L = 2^{\lceil\log_2(M+K-1)\rceil}$   |
 
 The fast path is beneficial when $MK > L \log_2 L$, roughly when both operands exceed 32–64
 samples.
@@ -78,12 +78,12 @@ samples.
 
 Linear convolution of $x = [1, 2, 3]$ and $h = [1, 1]$ (output length $= 4$):
 
-| $n$ | Active $k$ range | Computation                   | $y[n]$ |
-|-----|------------------|-------------------------------|--------|
-| 0   | $k=0$            | $1 \cdot 1$                   | 1      |
-| 1   | $k=0,1$          | $2 \cdot 1 + 1 \cdot 1$       | 3      |
-| 2   | $k=1,2$          | $3 \cdot 1 + 2 \cdot 1$       | 5      |
-| 3   | $k=2$            | $3 \cdot 1$                   | 3      |
+| $n$ | Active $k$ range | Computation             | $y[n]$ |
+|-----|------------------|-------------------------|--------|
+| 0   | $k=0$            | $1 \cdot 1$             | 1      |
+| 1   | $k=0,1$          | $2 \cdot 1 + 1 \cdot 1$ | 3      |
+| 2   | $k=1,2$          | $3 \cdot 1 + 2 \cdot 1$ | 5      |
+| 3   | $k=2$            | $3 \cdot 1$             | 3      |
 
 Result: $[1, 3, 5, 3]$.
 
