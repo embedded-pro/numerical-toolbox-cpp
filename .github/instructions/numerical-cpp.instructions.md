@@ -1,5 +1,5 @@
 ---
-description: "Numerical C++ coding rules for numerical-toolbox: no heap allocation, bounded containers, template-based numeric types (float/Q15/Q31), embedded compiler optimizations, fixed-point arithmetic safety, Allman brace style, PascalCase naming, SOLID principles, const correctness."
+description: "Numerical C++ rules (float-only): no heap, bounded containers, generic template<typename T> instantiated for float, embedded pragmas, Allman/brace-init, SOLID, const-correct. Canonical: AGENTS.md."
 applyTo: "**/*.{hpp,cpp,h}"
 ---
 
@@ -20,21 +20,12 @@ Replace standard containers:
 - Use `std::optional<T>` for optional values
 - No recursion — stack usage must be predictable
 
-## Numeric Types — Template Support
+## Numeric Types — Float-Only
 
-Every algorithm MUST be templated to support all three numeric representations:
-- `float` — floating-point
-- `math::Q15` — 16-bit fixed-point (range: [-1, ~1])
-- `math::Q31` — 32-bit fixed-point (range: [-1, ~1])
-
+Write generic `template<typename T[, std::size_t N]>` with
+`static_assert(std::is_floating_point_v<T>, "...")`, and **instantiate/test `float` only**.
+Do not implement `Q15`/`Q31` — the generic `T` keeps that a cheap future add.
 Use `std::numbers::pi_v<float>` — never hardcode `3.14159265f`.
-
-## Fixed-Point Safety
-
-- Analyze overflow risk for Q15/Q31 intermediate values
-- Use saturating arithmetic where appropriate
-- Use higher-precision accumulators (e.g., Q31 for Q15 data)
-- Apply 0.9999 scaling for window functions to prevent overflow
 
 ## Embedded Optimizations
 
@@ -78,4 +69,4 @@ Apply `OPTIMIZE_FOR_SPEED` (from `numerical/math/CompilerOptimizations.hpp`) on 
 
 For every algorithm added or modified, update the corresponding `doc/{domain}/{AlgorithmName}.md` file. Follow `doc/TEMPLATE.md` exactly. Documentation is **design-first**: cover mathematical background, algorithm behaviour, complexity, pitfalls, and connections. Do **not** include implementation details, class names, template parameters, or usage code examples — docs describe the algorithm design; code follows from it.
 
-Full details: [copilot-instructions.md](../../.github/copilot-instructions.md)
+Canonical rules: [AGENTS.md](../../AGENTS.md).

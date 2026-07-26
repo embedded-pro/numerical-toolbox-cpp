@@ -75,6 +75,11 @@ xhost +local:docker
 > **Note:** The Dev Container sets `DISPLAY=host.docker.internal:0.0` to forward GUI windows over TCP. On Linux, if you prefer Unix socket forwarding, you can override `DISPLAY` to `:0` inside the container and add a bind mount for `/tmp/.X11-unix`.
 
 
+## Roadmap
+
+Planned algorithms and components are tracked in [ROADMAP.md](ROADMAP.md) — a prioritized backlog
+of DSP filters, controllers, estimators, and solvers ordered by implementation difficulty.
+
 ## Contributing
 
 Contributions, issues, and feature requests are welcome. Please check the contributing guidelines before submitting pull requests.

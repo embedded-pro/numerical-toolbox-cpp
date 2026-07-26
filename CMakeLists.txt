@@ -36,7 +36,7 @@ if (NUMERICAL_TOOLBOX_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/embedded-pro/embedded-infra-lib.git
-        GIT_TAG        0bd0158e69add0726123305906128b51fecef234 # Unreleased
+        GIT_TAG        2848dbf163a6ebf159e29f7f4f73b96f7773d20d # Unreleased
     )
 
     set(EMIL_INCLUDE_MBEDTLS Off CACHE BOOL "" FORCE)
