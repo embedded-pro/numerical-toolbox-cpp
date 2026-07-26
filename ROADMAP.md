@@ -27,8 +27,7 @@ Difficulty legend:
 
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
-| 8  | Alpha-beta / alpha-beta-gamma filter                 | `filters/active`          | ★★☆☆☆      |
-| 9  | Complementary filter                                 | `filters/active`          | ★★☆☆☆      |
+| 10 | Gain-scheduled controller                            | `controllers`             | ★★☆☆☆      |
 | 11 | Convolution & correlation utilities                  | `analysis`                | ★★☆☆☆      |
 | 12 | Polynomial least-squares curve fitting               | `estimators/offline`      | ★★☆☆☆      |
 | 13 | Goertzel algorithm                                   | `analysis`                | ★★☆☆☆      |
@@ -104,12 +103,6 @@ Difficulty legend:
 - **Embedded value:** Delivers most of the benefit of a Kalman filter at a fraction of the cost — no online covariance propagation.
 - **Algorithm / paper:** P. Kalata, "The tracking index: A generalized parameter for α-β and α-β-γ target trackers," *IEEE Trans. AES*, 20(2), 1984.
 - **Reuses:** `math::LinearTimeInvariant`, `filters/active` patterns.
-
-### 9. Complementary filter
-- **What:** Frequency-domain fusion of a fast/biased sensor (gyro) with a slow/noisy one (accel/mag): `θ = a·(θ+ω·Ts) + (1−a)·θ_accel`.
-- **Embedded value:** The default low-cost attitude/tilt estimator on every IMU-based project.
-- **Algorithm / paper:** W. T. Higgins, "A Comparison of Complementary and Kalman Filtering," *IEEE Trans. AES*, 11(3), 1975.
-- **Reuses:** `math::Geometry3D`, item 1.
 
 ### 10. Gain-scheduled controller
 - **What:** Interpolates a set of precomputed controller gains across a scheduling variable (speed, load, operating point).
