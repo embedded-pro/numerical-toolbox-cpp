@@ -28,7 +28,6 @@ Difficulty legend:
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
 | 10 | Gain-scheduled controller                            | `controllers`             | ★★☆☆☆      |
-| 11 | Convolution & correlation utilities                  | `analysis`                | ★★☆☆☆      |
 | 12 | Polynomial least-squares curve fitting               | `estimators/offline`      | ★★☆☆☆      |
 | 14 | CIC (Cascaded Integrator-Comb) filter                | `filters/passive`         | ★★☆☆☆      |
 | 15 | Biquad / Second-Order-Section cascade                | `filters/passive`         | ★★★☆☆      |
