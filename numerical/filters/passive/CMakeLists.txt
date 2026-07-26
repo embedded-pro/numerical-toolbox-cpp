@@ -14,6 +14,7 @@ target_sources(numerical.filters.passive PRIVATE
     ExponentialMovingAverage.hpp
     Fir.hpp
     Iir.hpp
+    MedianFilter.hpp
     MovingAverage.hpp
 )
 
@@ -21,6 +22,7 @@ numerical_add_coverage_sources(numerical.filters.passive
     ExponentialMovingAverage.cpp
     Fir.cpp
     Iir.cpp
+    MedianFilter.cpp
     MovingAverage.cpp
 )
 
