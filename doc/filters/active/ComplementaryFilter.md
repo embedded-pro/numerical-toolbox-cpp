@@ -54,10 +54,10 @@ where $\mathrm{WrapToPi}(x) = \bigl((x + \pi) \bmod 2\pi\bigr) - \pi$.
 
 ## Complexity Analysis
 
-| Operation | Time     | Space    | Notes                                         |
-|-----------|----------|----------|-----------------------------------------------|
-| Update    | $O(1)$   | $O(1)$   | 2 multiplies, 2 adds; 1 fmod when wrapping    |
-| Reset     | $O(1)$   | $O(1)$   | Single state write                            |
+| Operation | Time   | Space  | Notes                                      |
+|-----------|--------|--------|--------------------------------------------|
+| Update    | $O(1)$ | $O(1)$ | 2 multiplies, 2 adds; 1 fmod when wrapping |
+| Reset     | $O(1)$ | $O(1)$ | Single state write                         |
 
 Total storage: one angle word plus two constant coefficients.
 
@@ -88,13 +88,13 @@ and $\theta \to 0.2$ rad as $(1-\alpha)^n \to 0$.
 
 ## Variants & Generalizations
 
-| Variant                        | Key Difference                                                             |
-|--------------------------------|----------------------------------------------------------------------------|
-| **Mahony filter**              | 3-D quaternion formulation with integral gyro-bias estimator              |
-| **Madgwick filter**            | Gradient-descent quaternion fusion; no linearisation                       |
-| **Alpha-Beta filter**          | Fixed-gain tracking without a slow sensor; pure high-pass integration     |
-| **Kalman filter**              | Optimal (minimum-variance) fusion; requires noise covariance tuning        |
-| **Two-step complementary**     | Separate pitch/roll from heading; common on 6-DOF IMUs                    |
+| Variant                    | Key Difference                                                        |
+|----------------------------|-----------------------------------------------------------------------|
+| **Mahony filter**          | 3-D quaternion formulation with integral gyro-bias estimator          |
+| **Madgwick filter**        | Gradient-descent quaternion fusion; no linearisation                  |
+| **Alpha-Beta filter**      | Fixed-gain tracking without a slow sensor; pure high-pass integration |
+| **Kalman filter**          | Optimal (minimum-variance) fusion; requires noise covariance tuning   |
+| **Two-step complementary** | Separate pitch/roll from heading; common on 6-DOF IMUs                |
 
 ## Applications
 
@@ -105,12 +105,12 @@ and $\theta \to 0.2$ rad as $(1-\alpha)^n \to 0$.
 
 ## Connections to Other Algorithms
 
-| Algorithm                                               | Relationship                                                                |
-|---------------------------------------------------------|-----------------------------------------------------------------------------|
-| [Exponential Moving Average](../passive/ExponentialMovingAverage.md) | The low-pass path in isolation; $\alpha_{EMA} = 1-\alpha_{CF}$ |
-| [Alpha-Beta Filter](AlphaBetaFilter.md)                 | Complementary filter without a slow-sensor reference; fixed-gain tracker    |
-| [AHRS Madgwick/Mahony](AhrsMadgwickMahony.md)           | 3-D quaternion generalization with gyro-bias estimation                     |
-| [Kalman Filter](KalmanFilter.md)                        | Statistically optimal generalization requiring $Q$ and $R$ tuning           |
+| Algorithm                                                            | Relationship                                                             |
+|----------------------------------------------------------------------|--------------------------------------------------------------------------|
+| [Exponential Moving Average](../passive/ExponentialMovingAverage.md) | The low-pass path in isolation; $\alpha_{EMA} = 1-\alpha_{CF}$           |
+| [Alpha-Beta Filter](AlphaBetaFilter.md)                              | Complementary filter without a slow-sensor reference; fixed-gain tracker |
+| [AHRS Madgwick/Mahony](AhrsMadgwickMahony.md)                        | 3-D quaternion generalization with gyro-bias estimation                  |
+| [Kalman Filter](KalmanFilter.md)                                     | Statistically optimal generalization requiring $Q$ and $R$ tuning        |
 
 ## References & Further Reading
 
