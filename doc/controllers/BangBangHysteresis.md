@@ -45,9 +45,9 @@ A wider band reduces $f_s$ (protecting relays and power stages) at the cost of a
 
 ## Complexity Analysis
 
-| Case  | Time    | Space   | Notes                              |
-|-------|---------|---------|------------------------------------|
-| All   | $O(1)$  | $O(1)$  | Two comparisons, one state bit, one select |
+| Case | Time   | Space  | Notes                                      |
+|------|--------|--------|--------------------------------------------|
+| All  | $O(1)$ | $O(1)$ | Two comparisons, one state bit, one select |
 
 No arithmetic on the signal path — only comparisons — so the relay introduces no numerical error and is exactly representable in any floating-point format.
 
@@ -55,13 +55,13 @@ No arithmetic on the signal path — only comparisons — so the relay introduce
 
 **Setup:** band $[\theta_L, \theta_H] = [-0.2, 0.2]$, outputs $u_L = 0$, $u_H = 1$, initial state Low.
 
-| Step | $x[k]$ | Condition                  | $s[k]$ | $u[k]$ |
-|------|--------|----------------------------|--------|--------|
-| 1    | 0.0    | Low, $x < 0.2$             | Low    | 0      |
-| 2    | 0.3    | Low, $x \geq 0.2$ → switch | High   | 1      |
-| 3    | 0.1    | High, $x > -0.2$ → hold    | High   | 1      |
-| 4    | −0.3   | High, $x \leq -0.2$ → switch | Low  | 0      |
-| 5    | 0.0    | Low, $x < 0.2$ → hold     | Low    | 0      |
+| Step | $x[k]$ | Condition                    | $s[k]$ | $u[k]$ |
+|------|--------|------------------------------|--------|--------|
+| 1    | 0.0    | Low, $x < 0.2$               | Low    | 0      |
+| 2    | 0.3    | Low, $x \geq 0.2$ → switch   | High   | 1      |
+| 3    | 0.1    | High, $x > -0.2$ → hold      | High   | 1      |
+| 4    | −0.3   | High, $x \leq -0.2$ → switch | Low    | 0      |
+| 5    | 0.0    | Low, $x < 0.2$ → hold        | Low    | 0      |
 
 ## Pitfalls & Edge Cases
 
@@ -73,12 +73,12 @@ No arithmetic on the signal path — only comparisons — so the relay introduce
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **Plain comparator** | $\Delta = 0$; no memory, chatters on noise |
-| **Asymmetric band** | $\theta_H$ and $\theta_L$ not symmetric around the set-point; biases the duty cycle |
-| **Three-state relay** | Adds a dead-band output level $u_0$; used in motor direction control |
-| **Adaptive hysteresis** | Band width tracks signal variance online to maintain a target switching rate |
+| Variant                                   | Key Difference                                                                                            |
+|-------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| **Plain comparator**                      | $\Delta = 0$; no memory, chatters on noise                                                                |
+| **Asymmetric band**                       | $\theta_H$ and $\theta_L$ not symmetric around the set-point; biases the duty cycle                       |
+| **Three-state relay**                     | Adds a dead-band output level $u_0$; used in motor direction control                                      |
+| **Adaptive hysteresis**                   | Band width tracks signal variance online to maintain a target switching rate                              |
 | **Relay feedback test (Åström–Hägglund)** | Deliberate oscillation under relay feedback to identify the ultimate gain/period for automatic PID tuning |
 
 ## Applications
@@ -91,10 +91,10 @@ No arithmetic on the signal path — only comparisons — so the relay introduce
 
 ## Connections to Other Algorithms
 
-| Algorithm | Relationship |
-|-----------|-------------|
-| [PID Controller](Pid.md) | The relay's limit cycle can be used to identify PID tuning parameters via the Åström–Hägglund relay-feedback test |
-| [Saturation / Rate Limiter](SaturationRateLimiter.md) | Continuous-output counterpart for actuator constraint; often combined with a relay in cascaded loops |
+| Algorithm                                             | Relationship                                                                                                      |
+|-------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
+| [PID Controller](Pid.md)                              | The relay's limit cycle can be used to identify PID tuning parameters via the Åström–Hägglund relay-feedback test |
+| [Saturation / Rate Limiter](SaturationRateLimiter.md) | Continuous-output counterpart for actuator constraint; often combined with a relay in cascaded loops              |
 
 ## References & Further Reading
 
