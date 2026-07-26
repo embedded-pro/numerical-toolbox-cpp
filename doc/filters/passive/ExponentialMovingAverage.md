@@ -60,22 +60,22 @@ hence the name "exponential" moving average.
 
 ## Complexity Analysis
 
-| Case    | Time   | Space  | Notes                                   |
-|---------|--------|--------|-----------------------------------------|
-| Best    | O(1)   | O(1)   | Single MAC per sample, one state word   |
-| Average | O(1)   | O(1)   | Identical regardless of input           |
-| Worst   | O(1)   | O(1)   | No data-dependent branches on hot path  |
+| Case    | Time | Space | Notes                                  |
+|---------|------|-------|----------------------------------------|
+| Best    | O(1) | O(1)  | Single MAC per sample, one state word  |
+| Average | O(1) | O(1)  | Identical regardless of input          |
+| Worst   | O(1) | O(1)  | No data-dependent branches on hot path |
 
 ## Step-by-Step Walkthrough
 
 Suppose $\alpha = 0.5$, $y[-1] = 0$, and the input is the unit impulse $x = [1, 0, 0, 0, \ldots]$.
 
-| $n$ | $x[n]$ | $x[n] - y[n-1]$ | $\alpha \cdot \Delta$ | $y[n]$  |
-|-----|--------|------------------|-----------------------|---------|
-| 0   | 1      | $1 - 0 = 1$      | $0.5$                 | $0.5$   |
-| 1   | 0      | $0 - 0.5 = -0.5$ | $-0.25$               | $0.25$  |
-| 2   | 0      | $0 - 0.25 = -0.25$| $-0.125$             | $0.125$ |
-| 3   | 0      | $0 - 0.125 = -0.125$| $-0.0625$          | $0.0625$|
+| $n$ | $x[n]$ | $x[n] - y[n-1]$      | $\alpha \cdot \Delta$ | $y[n]$   |
+|-----|--------|----------------------|-----------------------|----------|
+| 0   | 1      | $1 - 0 = 1$          | $0.5$                 | $0.5$    |
+| 1   | 0      | $0 - 0.5 = -0.5$     | $-0.25$               | $0.25$   |
+| 2   | 0      | $0 - 0.25 = -0.25$   | $-0.125$              | $0.125$  |
+| 3   | 0      | $0 - 0.125 = -0.125$ | $-0.0625$             | $0.0625$ |
 
 Each output is half the previous, confirming $h[n] = (0.5)^{n+1}$.
 
