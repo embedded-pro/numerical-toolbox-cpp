@@ -24,12 +24,9 @@ Difficulty legend:
 
 ## Master list (by priority)
 
+
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
-| 2  | Moving Average (running-sum boxcar)                  | `filters/passive`         | ★☆☆☆☆      |
-| 3  | Saturation / rate-limiter / slew blocks              | `controllers`             | ★☆☆☆☆      |
-| 4  | Bang-bang / hysteresis (relay) controller            | `controllers`             | ★☆☆☆☆      |
-| 6  | Median filter                                        | `filters/passive`         | ★★☆☆☆      |
 | 8  | Alpha-beta / alpha-beta-gamma filter                 | `filters/active`          | ★★☆☆☆      |
 | 9  | Complementary filter                                 | `filters/active`          | ★★☆☆☆      |
 | 10 | Gain-scheduled controller                            | `controllers`             | ★★☆☆☆      |
@@ -71,7 +68,6 @@ Difficulty legend:
 | 46 | H∞ state-feedback control                            | `robust_control` (new)    | ★★★★★      |
 | 47 | Model Reference Adaptive Control (MRAC)              | `nonlinear_control` (new) | ★★★★★      |
 
-
 ---
 
 ## Tier 1 — Trivial primitives ★☆☆☆☆
@@ -103,12 +99,6 @@ Difficulty legend:
 ---
 
 ## Tier 2 — Easy ★★☆☆☆
-
-### 6. Median filter
-- **What:** Sliding-window running median over a bounded window.
-- **Embedded value:** Non-linear rejection of impulsive/salt-and-pepper spikes that linear filters smear; ideal for noisy ADC/sensor streams.
-- **Algorithm / paper:** T. Huang, G. Yang, G. Tang, "A fast two-dimensional median filtering algorithm," *IEEE Trans. ASSP*, 27(1), 1979.
-- **Reuses:** `std::array` window with bounded insertion sort (no heap).
 
 ### 8. Alpha-beta / alpha-beta-gamma filter
 - **What:** Fixed-gain steady-state tracker for position/velocity(/acceleration) states.
