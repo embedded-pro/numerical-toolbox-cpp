@@ -27,7 +27,6 @@ Difficulty legend:
 
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
-| 13 | Goertzel algorithm                                   | `analysis`                | ★★☆☆☆      |
 | 15 | Biquad / Second-Order-Section cascade                | `filters/passive`         | ★★★☆☆      |
 | 16 | Notch / comb filter                                  | `filters/passive`         | ★★★☆☆      |
 | 17 | Lead-lag compensator                                 | `controllers`             | ★★★☆☆      |

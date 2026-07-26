@@ -16,6 +16,7 @@ target_sources(numerical.analysis PRIVATE
     DiscreteCosineTransform.hpp
     FastFourierTransform.hpp
     FastFourierTransformRadix2Impl.hpp
+    GoertzelAlgorithm.hpp
     PowerDensitySpectrum.hpp
     SignalDetectors.hpp
 )
@@ -23,6 +24,7 @@ target_sources(numerical.analysis PRIVATE
 numerical_add_coverage_sources(numerical.analysis
     ConvolutionCorrelation.cpp
     FastFourierTransformRadix2Impl.cpp
+    GoertzelAlgorithm.cpp
     PowerDensitySpectrum.cpp
     SignalDetectors.cpp
 )

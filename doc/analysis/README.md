@@ -10,6 +10,7 @@ Signal analysis algorithms for frequency-domain decomposition and spectral estim
 | [Power Spectral Density](PowerDensitySpectrum.md)       | Estimation of signal power distribution across frequencies using Welch's method                  |
 | [Discrete Cosine Transform](DiscreteCosineTransform.md) | Real-valued frequency decomposition via cosine basis functions, computed through FFT             |
 | [Signal Detectors](SignalDetectors.md)                  | Peak hold, zero-crossing counter, and RMS envelope detectors for real-time signal monitoring     |
+| [Goertzel Algorithm](GoertzelAlgorithm.md)              | Single-bin DFT via a second-order recurrence for O(N) tone detection with O(1) memory            |
 
 ## Sub-domains
 
