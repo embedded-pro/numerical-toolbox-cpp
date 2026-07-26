@@ -11,6 +11,7 @@ target_link_libraries(numerical.controllers_test PUBLIC
 target_sources(numerical.controllers_test PRIVATE
     TestBangBangHysteresis.cpp
     TestFeedforward2Dof.cpp
+    TestGainScheduledController.cpp
     TestLqg.cpp
     TestLqr.cpp
     TestMpc.cpp
