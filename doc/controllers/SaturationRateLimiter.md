@@ -34,11 +34,11 @@ Applying the rate limiter before the saturator is essential. If the order were r
 
 ## Complexity Analysis
 
-| Case    | Time     | Space    | Notes                                      |
-|---------|----------|----------|--------------------------------------------|
-| Best    | $O(1)$   | $O(1)$   | Two compare-and-select operations          |
-| Average | $O(1)$   | $O(1)$   | One multiply + two compares for rate limit |
-| Worst   | $O(1)$   | $O(1)$   | Fixed instruction count; no branching on size |
+| Case    | Time   | Space  | Notes                                         |
+|---------|--------|--------|-----------------------------------------------|
+| Best    | $O(1)$ | $O(1)$ | Two compare-and-select operations             |
+| Average | $O(1)$ | $O(1)$ | One multiply + two compares for rate limit    |
+| Worst   | $O(1)$ | $O(1)$ | Fixed instruction count; no branching on size |
 
 Each block maintains at most two scalar parameters and one scalar state word. The hot path is branch-light: `min`/`max` compile to conditional-move instructions on modern architectures.
 
