@@ -24,9 +24,9 @@ Difficulty legend:
 
 ## Master list (by priority)
 
+
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
-| 6  | Median filter                                        | `filters/passive`         | ★★☆☆☆      |
 | 9  | Complementary filter                                 | `filters/active`          | ★★☆☆☆      |
 | 10 | Gain-scheduled controller                            | `controllers`             | ★★☆☆☆      |
 | 11 | Convolution & correlation utilities                  | `analysis`                | ★★☆☆☆      |
@@ -98,18 +98,6 @@ Difficulty legend:
 ---
 
 ## Tier 2 — Easy ★★☆☆☆
-
-### 6. Median filter
-- **What:** Sliding-window running median over a bounded window.
-- **Embedded value:** Non-linear rejection of impulsive/salt-and-pepper spikes that linear filters smear; ideal for noisy ADC/sensor streams.
-- **Algorithm / paper:** T. Huang, G. Yang, G. Tang, "A fast two-dimensional median filtering algorithm," *IEEE Trans. ASSP*, 27(1), 1979.
-- **Reuses:** `std::array` window with bounded insertion sort (no heap).
-
-### 7. Feedforward / 2-DOF controller
-- **What:** Adds a reference/disturbance feedforward path to an existing feedback loop (two-degree-of-freedom structure).
-- **Embedded value:** Improves tracking and disturbance rejection without sacrificing feedback stability margins.
-- **Algorithm / paper:** Åström & Murray, *Feedback Systems*, Ch. 12 (Feedforward and 2-DOF design).
-- **Reuses:** Existing controller interfaces; composable wrapper.
 
 ### 8. Alpha-beta / alpha-beta-gamma filter
 - **What:** Fixed-gain steady-state tracker for position/velocity(/acceleration) states.
