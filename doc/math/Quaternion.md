@@ -88,14 +88,14 @@ the formula degenerates; a normalized linear interpolation (nlerp) is substitute
 
 ## Complexity Analysis
 
-| Operation             | Time   | Space | Notes                                  |
-|-----------------------|--------|-------|----------------------------------------|
-| Hamilton product      | O(1)   | O(1)  | 16 multiply-adds, scalar only          |
-| Vector rotate         | O(1)   | O(1)  | 15 multiply-adds via cross-product     |
-| To rotation matrix    | O(1)   | O(1)  | 9 elements, 16 multiplications         |
-| From rotation matrix  | O(1)   | O(1)  | Branch on largest diagonal             |
-| SLERP                 | O(1)   | O(1)  | 1 acos + 2 sin + scalar blends         |
-| Euler conversion      | O(1)   | O(1)  | 2 atan2 + 1 asin                       |
+| Operation            | Time | Space | Notes                              |
+|----------------------|------|-------|------------------------------------|
+| Hamilton product     | O(1) | O(1)  | 16 multiply-adds, scalar only      |
+| Vector rotate        | O(1) | O(1)  | 15 multiply-adds via cross-product |
+| To rotation matrix   | O(1) | O(1)  | 9 elements, 16 multiplications     |
+| From rotation matrix | O(1) | O(1)  | Branch on largest diagonal         |
+| SLERP                | O(1) | O(1)  | 1 acos + 2 sin + scalar blends     |
+| Euler conversion     | O(1) | O(1)  | 2 atan2 + 1 asin                   |
 
 All operations are stack-only with no heap allocation.
 
