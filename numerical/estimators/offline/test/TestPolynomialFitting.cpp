@@ -1,7 +1,7 @@
 #include "numerical/estimators/offline/PolynomialFitting.hpp"
 #include "numerical/math/Tolerance.hpp"
-#include <gtest/gtest.h>
 #include <cmath>
+#include <gtest/gtest.h>
 
 namespace
 {

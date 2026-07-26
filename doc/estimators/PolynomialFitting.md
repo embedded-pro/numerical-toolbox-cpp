@@ -51,13 +51,13 @@ This requires exactly $d$ multiplications and $d$ additions — optimal for a de
 
 ## Complexity Analysis
 
-| Phase                                 | Time               | Space       | Notes                              |
-|---------------------------------------|--------------------|-------------|------------------------------------|
-| Build $\mathbf{V}$                    | $O(n\,d)$          | $O(n\,d)$   | Incremental powers, no `pow()`     |
-| Form $\mathbf{V}^\top\mathbf{V}$      | $O(n\,d^2)$        | $O(d^2)$    | Symmetric, only upper half needed  |
-| Form $\mathbf{V}^\top\mathbf{y}$      | $O(n\,d)$          | $O(d)$      | Matrix-vector product              |
-| Solve $(d+1)\times(d+1)$ system       | $O(d^3)$           | $O(d^2)$    | Gaussian elimination               |
-| Predict (Horner)                      | $O(d)$             | $O(1)$      | One MAC per coefficient            |
+| Phase                            | Time        | Space     | Notes                             |
+|----------------------------------|-------------|-----------|-----------------------------------|
+| Build $\mathbf{V}$               | $O(n\,d)$   | $O(n\,d)$ | Incremental powers, no `pow()`    |
+| Form $\mathbf{V}^\top\mathbf{V}$ | $O(n\,d^2)$ | $O(d^2)$  | Symmetric, only upper half needed |
+| Form $\mathbf{V}^\top\mathbf{y}$ | $O(n\,d)$   | $O(d)$    | Matrix-vector product             |
+| Solve $(d+1)\times(d+1)$ system  | $O(d^3)$    | $O(d^2)$  | Gaussian elimination              |
+| Predict (Horner)                 | $O(d)$      | $O(1)$    | One MAC per coefficient           |
 
 All dimensions are compile-time constants; no heap allocation is required.
 
@@ -66,11 +66,11 @@ All dimensions are compile-time constants; no heap allocation is required.
 **Data:** $n = 4$ samples, $d = 2$ (quadratic fit).
 
 | $x_i$ | $y_i$ |
-|--------|--------|
-| 0      | 1      |
-| 1      | 0.75   |
-| 2      | 1      |
-| 3      | 1.75   |
+|-------|-------|
+| 0     | 1     |
+| 1     | 0.75  |
+| 2     | 1     |
+| 3     | 1.75  |
 
 **Step 1 — Build $\mathbf{V}$:**
 
@@ -111,13 +111,13 @@ $$p(1.5) = 0.25\cdot1.5^2 - 0.5\cdot1.5 + 1 = 0.5625 - 0.75 + 1 = 0.8125$$
 
 ## Variants & Generalizations
 
-| Variant                           | Key Difference                                                                |
-|-----------------------------------|-------------------------------------------------------------------------------|
-| Orthogonal polynomial basis       | Uses Legendre/Chebyshev basis instead of monomials; much better conditioning  |
-| Weighted least squares            | Each sample weighted differently (e.g., by measurement precision)             |
-| Regularized (Ridge) fitting       | Adds $\lambda\|\mathbf{c}\|^2$ to damp large coefficients                     |
-| Constrained fitting               | Enforces derivative constraints at endpoints                                  |
-| Savitzky-Golay smoothing          | Sliding-window polynomial fit for real-time derivative estimation             |
+| Variant                     | Key Difference                                                               |
+|-----------------------------|------------------------------------------------------------------------------|
+| Orthogonal polynomial basis | Uses Legendre/Chebyshev basis instead of monomials; much better conditioning |
+| Weighted least squares      | Each sample weighted differently (e.g., by measurement precision)            |
+| Regularized (Ridge) fitting | Adds $\lambda\|\mathbf{c}\|^2$ to damp large coefficients                    |
+| Constrained fitting         | Enforces derivative constraints at endpoints                                 |
+| Savitzky-Golay smoothing    | Sliding-window polynomial fit for real-time derivative estimation            |
 
 ## Applications
 
@@ -145,11 +145,11 @@ graph LR
     RLS -.->|"online counterpart"| PF
 ```
 
-| Algorithm                                                         | Relationship                                                    |
-|-------------------------------------------------------------------|-----------------------------------------------------------------|
-| [Gaussian Elimination](../solvers/GaussianElimination.md)         | Solves the normal equations                                     |
-| [Linear Regression](LinearRegression.md)                         | Polynomial fitting is linear regression with polynomial features |
-| [Recursive Least Squares](RecursiveLeastSquares.md)              | Online / streaming counterpart for time-varying models          |
+| Algorithm                                                 | Relationship                                                     |
+|-----------------------------------------------------------|------------------------------------------------------------------|
+| [Gaussian Elimination](../solvers/GaussianElimination.md) | Solves the normal equations                                      |
+| [Linear Regression](LinearRegression.md)                  | Polynomial fitting is linear regression with polynomial features |
+| [Recursive Least Squares](RecursiveLeastSquares.md)       | Online / streaming counterpart for time-varying models           |
 
 ## References & Further Reading
 
