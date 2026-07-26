@@ -12,4 +12,5 @@ target_link_libraries(numerical.filters.passive_test PUBLIC
 target_sources(numerical.filters.passive_test PRIVATE
     TestFir.cpp
     TestIir.cpp
+    TestMovingAverage.cpp
 )
