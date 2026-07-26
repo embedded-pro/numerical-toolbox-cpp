@@ -32,6 +32,8 @@ Read the spec's three files first (`implementation.md`, `tests.md`, `explanation
    `cmake --preset host && cmake --build --preset host && ctest --preset host`
    (scope to the target/test where possible).
 
-**Report**: the file paths created/edited + the test result. Nothing else.
+7. **Remove roadmap spec** — delete the entire `roadmap/<domain>/<Name>/` directory once all tests are green.
+
+**Report**: the file paths created/edited/deleted + the test result. Nothing else.
 
 Recap: float-only (generic `T`, `float` instantiation), no heap, no comments, terse.

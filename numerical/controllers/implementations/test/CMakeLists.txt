@@ -13,5 +13,6 @@ target_sources(numerical.controllers_test PRIVATE
     TestLqr.cpp
     TestMpc.cpp
     TestPidIncremental.cpp
+    TestSaturationRateLimiter.cpp
     TestStateFeedbackController.cpp
 )

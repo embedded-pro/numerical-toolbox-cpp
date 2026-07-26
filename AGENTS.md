@@ -60,6 +60,8 @@ resource-constrained embedded systems. Real-time, deterministic, no heap.
 - **`StrictMock` only** (no `NiceMock`/bare). Fixture + aliases in an anonymous namespace; macros outside it.
 - **No redundant tests** — implement exactly the spec's enumerated cases, one behavior per test,
   Arrange/Act/Assert, `EXPECT_NEAR` + `math::Tolerance<float>()`. No heap.
+**Coverage ≥ 90 %** — measured by SonarQube. Every new algorithm must reach this threshold
+  before merge; CI fails below it.
 
 ## CMake (numerical/ targets)
 
