@@ -26,10 +26,10 @@ namespace filters
         };
 
         AlphaBetaFilter(T alpha, T beta, T Ts)
-            requires(Order == 2);
+        requires(Order == 2);
 
         AlphaBetaFilter(T alpha, T beta, T gamma, T Ts)
-            requires(Order == 3);
+        requires(Order == 3);
 
         OPTIMIZE_FOR_SPEED T Filter(T measuredPosition);
 
@@ -54,7 +54,7 @@ namespace filters
 
     template<typename T, std::size_t Order>
     AlphaBetaFilter<T, Order>::AlphaBetaFilter(T alpha, T beta, T Ts)
-        requires(Order == 2)
+    requires(Order == 2)
         : samplePeriod{ Ts }
         , gainAlpha{ alpha }
         , gainBeta{ beta }
@@ -65,7 +65,7 @@ namespace filters
 
     template<typename T, std::size_t Order>
     AlphaBetaFilter<T, Order>::AlphaBetaFilter(T alpha, T beta, T gamma, T Ts)
-        requires(Order == 3)
+    requires(Order == 3)
         : samplePeriod{ Ts }
         , gainAlpha{ alpha }
         , gainBeta{ beta }

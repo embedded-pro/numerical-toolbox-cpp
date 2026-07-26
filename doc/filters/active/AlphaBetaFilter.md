@@ -48,11 +48,11 @@ Violation of the second bound causes oscillatory divergence.
 
 ## Complexity Analysis
 
-| Case    | Time   | Space    | Notes |
-|---------|--------|----------|-------|
-| Best    | $O(1)$ | $O(N)$   | $N \in \{2, 3\}$ state words plus fixed scalars |
-| Average | $O(1)$ | $O(N)$   | same |
-| Worst   | $O(1)$ | $O(N)$   | gains are precomputed; no covariance update |
+| Case    | Time   | Space  | Notes                                           |
+|---------|--------|--------|-------------------------------------------------|
+| Best    | $O(1)$ | $O(N)$ | $N \in \{2, 3\}$ state words plus fixed scalars |
+| Average | $O(1)$ | $O(N)$ | same                                            |
+| Worst   | $O(1)$ | $O(N)$ | gains are precomputed; no covariance update     |
 
 The hot path is a handful of fused multiply-add operations: predict costs 2–4 MACs, correct costs 2–3 MACs.
 
@@ -60,12 +60,12 @@ The hot path is a handful of fused multiply-add operations: predict costs 2–4 
 
 Consider an order-2 filter with $\alpha = 0.5$, $\beta = 0.1$, $T_s = 1.0\,\text{s}$, measuring a ramp $z[n] = 0.2n$.
 
-| Step | $z$ | $\hat{p}^-$ | $\hat{v}^-$ | $r$ | $\hat{p}$ | $\hat{v}$ |
-|------|-----|-------------|-------------|-----|-----------|-----------|
-| 0 (seed) | 0.0 | — | — | — | 0.0 | 0.0 |
-| 1 | 0.2 | 0.0 | 0.0 | 0.2 | 0.10 | 0.020 |
-| 2 | 0.4 | 0.12 | 0.020 | 0.28 | 0.26 | 0.048 |
-| … | … | … | … | … | … | … |
+| Step     | $z$ | $\hat{p}^-$ | $\hat{v}^-$ | $r$  | $\hat{p}$ | $\hat{v}$ |
+|----------|-----|-------------|-------------|------|-----------|-----------|
+| 0 (seed) | 0.0 | —           | —           | —    | 0.0       | 0.0       |
+| 1        | 0.2 | 0.0         | 0.0         | 0.2  | 0.10      | 0.020     |
+| 2        | 0.4 | 0.12        | 0.020       | 0.28 | 0.26      | 0.048     |
+| …        | …   | …           | …           | …    | …         | …         |
 
 After several hundred steps, $\hat{v} \to 0.2$ and lag $\to 0$.
 
