@@ -11,12 +11,14 @@ target_link_libraries(numerical.filters.passive ${NUMERICAL_VISIBILITY}
 )
 
 target_sources(numerical.filters.passive PRIVATE
+    ExponentialMovingAverage.hpp
     Fir.hpp
     Iir.hpp
     MovingAverage.hpp
 )
 
 numerical_add_coverage_sources(numerical.filters.passive
+    ExponentialMovingAverage.cpp
     Fir.cpp
     Iir.cpp
     MovingAverage.cpp
