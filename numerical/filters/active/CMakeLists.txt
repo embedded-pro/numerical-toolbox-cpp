@@ -13,6 +13,7 @@ target_link_libraries(numerical.filters.active ${NUMERICAL_VISIBILITY}
 
 target_sources(numerical.filters.active PRIVATE
     AlphaBetaFilter.hpp
+    ComplementaryFilter.hpp
     ExtendedKalmanFilter.hpp
     KalmanFilter.hpp
     KalmanFilterBase.hpp
@@ -22,6 +23,7 @@ target_sources(numerical.filters.active PRIVATE
 
 numerical_add_coverage_sources(numerical.filters.active
     AlphaBetaFilter.cpp
+    ComplementaryFilter.cpp
     ExtendedKalmanFilter.cpp
     KalmanFilter.cpp
     KalmanFilterBase.cpp
