@@ -38,11 +38,11 @@ This is structurally identical to an exponential moving average applied to the s
 
 ## Complexity Analysis
 
-| Detector             | Time per sample | State words |
-|----------------------|-----------------|-------------|
-| Peak Hold            | O(1) — 1 mul, 1 compare, 1 abs | 1 scalar |
-| Zero-Crossing Counter | O(1) — 1 compare, 1 abs | 1 scalar + 1 uint32 |
-| RMS Envelope         | O(1) — 1 MAC + 1 sqrt | 1 scalar |
+| Detector              | Time per sample                | State words         |
+|-----------------------|--------------------------------|---------------------|
+| Peak Hold             | O(1) — 1 mul, 1 compare, 1 abs | 1 scalar            |
+| Zero-Crossing Counter | O(1) — 1 compare, 1 abs        | 1 scalar + 1 uint32 |
+| RMS Envelope          | O(1) — 1 MAC + 1 sqrt          | 1 scalar            |
 
 No buffers, no windows, no dynamic allocation.
 
