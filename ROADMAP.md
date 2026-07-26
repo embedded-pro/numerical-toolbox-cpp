@@ -27,8 +27,6 @@ Difficulty legend:
 
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
-| 10 | Gain-scheduled controller                            | `controllers`             | ★★☆☆☆      |
-| 12 | Polynomial least-squares curve fitting               | `estimators/offline`      | ★★☆☆☆      |
 | 13 | Goertzel algorithm                                   | `analysis`                | ★★☆☆☆      |
 | 15 | Biquad / Second-Order-Section cascade                | `filters/passive`         | ★★★☆☆      |
 | 16 | Notch / comb filter                                  | `filters/passive`         | ★★★☆☆      |
