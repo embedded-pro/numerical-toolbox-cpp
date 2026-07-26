@@ -7,7 +7,6 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 
 #include <cassert>
-#include <cmath>
 #include <numbers>
 #include <type_traits>
 
@@ -24,15 +23,12 @@ namespace filters::passive
         OPTIMIZE_FOR_SPEED T Filter(T input) noexcept;
         void Reset(T value = T{}) noexcept;
         void SetAlpha(T alpha) noexcept;
-        void Enable() noexcept;
-        void Disable() noexcept;
 
         static T AlphaFromCutoff(T cutoffHz, T sampleRateHz) noexcept;
 
     private:
         T alpha;
         T state;
-        bool enabled{ true };
     };
 
     ////    Implementation    ////
@@ -48,8 +44,6 @@ namespace filters::passive
     template<typename T>
     OPTIMIZE_FOR_SPEED T ExponentialMovingAverage<T>::Filter(T input) noexcept
     {
-        if (!enabled) [[unlikely]]
-            return input;
         state = state + alpha * (input - state);
         return state;
     }
@@ -65,18 +59,6 @@ namespace filters::passive
     {
         assert(newAlpha > T{} && newAlpha <= T{ 1 });
         alpha = newAlpha;
-    }
-
-    template<typename T>
-    void ExponentialMovingAverage<T>::Enable() noexcept
-    {
-        enabled = true;
-    }
-
-    template<typename T>
-    void ExponentialMovingAverage<T>::Disable() noexcept
-    {
-        enabled = false;
     }
 
     template<typename T>

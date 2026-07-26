@@ -63,12 +63,18 @@ TEST_F(TestExponentialMovingAverage, reset_clears_state)
     EXPECT_NEAR(ema.Filter(nextInput), 0.5f * nextInput, 1e-6f);
 }
 
-TEST_F(TestExponentialMovingAverage, disabled_passes_through)
+TEST_F(TestExponentialMovingAverage, set_alpha_changes_smoothing)
 {
     ema.Filter(1.0f);
-    ema.Disable();
+    ema.SetAlpha(1.0f);
 
-    const float input{ 0.4f };
-    EXPECT_NEAR(ema.Filter(input), input, 1e-6f);
-    EXPECT_NEAR(ema.Filter(0.9f), 0.9f, 1e-6f);
+    EXPECT_NEAR(ema.Filter(0.0f), 0.0f, 1e-6f);
+}
+
+TEST_F(TestExponentialMovingAverage, alpha_from_cutoff_produces_valid_alpha)
+{
+    const float alpha{ filters::passive::ExponentialMovingAverage<float>::AlphaFromCutoff(100.0f, 1000.0f) };
+    EXPECT_GT(alpha, 0.0f);
+    EXPECT_LE(alpha, 1.0f);
+    EXPECT_NEAR(alpha, 0.3859f, 1e-3f);
 }
