@@ -27,7 +27,6 @@ Difficulty legend:
 
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
-| 8  | Alpha-beta / alpha-beta-gamma filter                 | `filters/active`          | ★★☆☆☆      |
 | 10 | Gain-scheduled controller                            | `controllers`             | ★★☆☆☆      |
 | 11 | Convolution & correlation utilities                  | `analysis`                | ★★☆☆☆      |
 | 12 | Polynomial least-squares curve fitting               | `estimators/offline`      | ★★☆☆☆      |
