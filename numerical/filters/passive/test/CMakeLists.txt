@@ -13,4 +13,5 @@ target_sources(numerical.filters.passive_test PRIVATE
     TestExponentialMovingAverage.cpp
     TestFir.cpp
     TestIir.cpp
+    TestMovingAverage.cpp
 )
