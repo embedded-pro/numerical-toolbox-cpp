@@ -25,6 +25,7 @@ Difficulty legend:
 ## Master list (by priority)
 
 <<<<<<< Updated upstream
+
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
 | 1  | Exponential Moving Average (one-pole)                | `filters/passive`         | ★☆☆☆☆      |
@@ -75,54 +76,55 @@ Difficulty legend:
 | 46 | H∞ state-feedback control                            | `robust_control` (new)    | ★★★★★      |
 | 47 | Model Reference Adaptive Control (MRAC)              | `nonlinear_control` (new) | ★★★★★      |
 =======
-| #  | Component | Target module | Difficulty |
-|----|-----------|---------------|------------|
-| 2  | Moving Average (running-sum boxcar) | `filters/passive` | ★☆☆☆☆ |
-| 3  | Saturation / rate-limiter / slew blocks | `controllers` | ★☆☆☆☆ |
-| 4  | Bang-bang / hysteresis (relay) controller | `controllers` | ★☆☆☆☆ |
-| 5  | Peak / zero-crossing / RMS-envelope detectors | `analysis` | ★☆☆☆☆ |
-| 6  | Median filter | `filters/passive` | ★★☆☆☆ |
-| 7  | Feedforward / 2-DOF controller | `controllers` | ★★☆☆☆ |
-| 8  | Alpha-beta / alpha-beta-gamma filter | `filters/active` | ★★☆☆☆ |
-| 9  | Complementary filter | `filters/active` | ★★☆☆☆ |
-| 10 | Gain-scheduled controller | `controllers` | ★★☆☆☆ |
-| 11 | Convolution & correlation utilities | `analysis` | ★★☆☆☆ |
-| 12 | Polynomial least-squares curve fitting | `estimators/offline` | ★★☆☆☆ |
-| 13 | Goertzel algorithm | `analysis` | ★★☆☆☆ |
-| 14 | CIC (Cascaded Integrator-Comb) filter | `filters/passive` | ★★☆☆☆ |
-| 15 | Biquad / Second-Order-Section cascade | `filters/passive` | ★★★☆☆ |
-| 16 | Notch / comb filter | `filters/passive` | ★★★☆☆ |
-| 17 | Lead-lag compensator | `controllers` | ★★★☆☆ |
-| 18 | Quaternion type | `math` | ★★★☆☆ |
-| 19 | Luenberger observer + pole placement (Ackermann) | `controllers` | ★★★☆☆ |
-| 20 | Integral / servo state feedback (LQI) | `controllers` | ★★★☆☆ |
-| 21 | LMS / NLMS adaptive filter | `estimators/online` | ★★★☆☆ |
-| 22 | Savitzky-Golay filter | `filters/passive` | ★★★☆☆ |
-| 23 | CORDIC | `math` | ★★★☆☆ |
-| 24 | Runge-Kutta ODE integrators (RK4 + Dormand-Prince) | `solvers` | ★★★☆☆ |
-| 25 | Real-input FFT (RFFT) | `analysis` | ★★★☆☆ |
-| 26 | Controllability / Observability matrices & Gramians | `control_analysis` | ★★★☆☆ |
-| 27 | QR decomposition (Householder / Givens) | `solvers` | ★★★★☆ |
-| 28 | LU decomposition with partial pivoting | `solvers` | ★★★★☆ |
-| 29 | Matrix exponential (scaling & squaring + Padé) | `math` | ★★★★☆ |
-| 30 | Continuous → discrete conversion (`c2d`) | `math` | ★★★★☆ |
-| 31 | Lyapunov / Sylvester equation solvers | `solvers` | ★★★★☆ |
-| 32 | Transfer-function ↔ state-space conversion | `control_analysis` | ★★★★☆ |
-| 33 | Madgwick / Mahony AHRS | `filters/active` | ★★★★☆ |
-| 34 | Sliding Mode Control (SMC) | `robust_control` (new) | ★★★★☆ |
-| 35 | Disturbance Observer (DOB) | `robust_control` (new) | ★★★★☆ |
-| 36 | Active Disturbance Rejection Control (ADRC + ESO) | `robust_control` (new) | ★★★★☆ |
-| 37 | Hilbert transform / analytic signal / envelope | `analysis` | ★★★★☆ |
-| 38 | Discrete Wavelet Transform (Haar / Daubechies) | `analysis` | ★★★★☆ |
-| 39 | Square-root / Information Kalman filter | `filters/active` | ★★★★☆ |
-| 40 | Feedback linearization | `nonlinear_control` (new) | ★★★★☆ |
-| 41 | Backstepping controller | `nonlinear_control` (new) | ★★★★☆ |
-| 42 | Symmetric eigenvalue solver (Jacobi) | `solvers` | ★★★★★ |
-| 43 | Singular Value Decomposition (Golub-Kahan) | `solvers` | ★★★★★ |
-| 44 | Total Least Squares | `estimators/offline` | ★★★★★ |
-| 45 | IIR filter design (Butterworth/Chebyshev + bilinear) | `filters/passive` | ★★★★★ |
-| 46 | H∞ state-feedback control | `robust_control` (new) | ★★★★★ |
-| 47 | Model Reference Adaptive Control (MRAC) | `nonlinear_control` (new) | ★★★★★ |
+| #  | Component                                            | Target module             | Difficulty |
+|----|------------------------------------------------------|---------------------------|------------|
+| 2  | Moving Average (running-sum boxcar)                  | `filters/passive`         | ★☆☆☆☆      |
+| 3  | Saturation / rate-limiter / slew blocks              | `controllers`             | ★☆☆☆☆      |
+| 4  | Bang-bang / hysteresis (relay) controller            | `controllers`             | ★☆☆☆☆      |
+| 5  | Peak / zero-crossing / RMS-envelope detectors        | `analysis`                | ★☆☆☆☆      |
+| 6  | Median filter                                        | `filters/passive`         | ★★☆☆☆      |
+| 7  | Feedforward / 2-DOF controller                       | `controllers`             | ★★☆☆☆      |
+| 8  | Alpha-beta / alpha-beta-gamma filter                 | `filters/active`          | ★★☆☆☆      |
+| 9  | Complementary filter                                 | `filters/active`          | ★★☆☆☆      |
+| 10 | Gain-scheduled controller                            | `controllers`             | ★★☆☆☆      |
+| 11 | Convolution & correlation utilities                  | `analysis`                | ★★☆☆☆      |
+| 12 | Polynomial least-squares curve fitting               | `estimators/offline`      | ★★☆☆☆      |
+| 13 | Goertzel algorithm                                   | `analysis`                | ★★☆☆☆      |
+| 14 | CIC (Cascaded Integrator-Comb) filter                | `filters/passive`         | ★★☆☆☆      |
+| 15 | Biquad / Second-Order-Section cascade                | `filters/passive`         | ★★★☆☆      |
+| 16 | Notch / comb filter                                  | `filters/passive`         | ★★★☆☆      |
+| 17 | Lead-lag compensator                                 | `controllers`             | ★★★☆☆      |
+| 18 | Quaternion type                                      | `math`                    | ★★★☆☆      |
+| 19 | Luenberger observer + pole placement (Ackermann)     | `controllers`             | ★★★☆☆      |
+| 20 | Integral / servo state feedback (LQI)                | `controllers`             | ★★★☆☆      |
+| 21 | LMS / NLMS adaptive filter                           | `estimators/online`       | ★★★☆☆      |
+| 22 | Savitzky-Golay filter                                | `filters/passive`         | ★★★☆☆      |
+| 23 | CORDIC                                               | `math`                    | ★★★☆☆      |
+| 24 | Runge-Kutta ODE integrators (RK4 + Dormand-Prince)   | `solvers`                 | ★★★☆☆      |
+| 25 | Real-input FFT (RFFT)                                | `analysis`                | ★★★☆☆      |
+| 26 | Controllability / Observability matrices & Gramians  | `control_analysis`        | ★★★☆☆      |
+| 27 | QR decomposition (Householder / Givens)              | `solvers`                 | ★★★★☆      |
+| 28 | LU decomposition with partial pivoting               | `solvers`                 | ★★★★☆      |
+| 29 | Matrix exponential (scaling & squaring + Padé)       | `math`                    | ★★★★☆      |
+| 30 | Continuous → discrete conversion (`c2d`)             | `math`                    | ★★★★☆      |
+| 31 | Lyapunov / Sylvester equation solvers                | `solvers`                 | ★★★★☆      |
+| 32 | Transfer-function ↔ state-space conversion           | `control_analysis`        | ★★★★☆      |
+| 33 | Madgwick / Mahony AHRS                               | `filters/active`          | ★★★★☆      |
+| 34 | Sliding Mode Control (SMC)                           | `robust_control` (new)    | ★★★★☆      |
+| 35 | Disturbance Observer (DOB)                           | `robust_control` (new)    | ★★★★☆      |
+| 36 | Active Disturbance Rejection Control (ADRC + ESO)    | `robust_control` (new)    | ★★★★☆      |
+| 37 | Hilbert transform / analytic signal / envelope       | `analysis`                | ★★★★☆      |
+| 38 | Discrete Wavelet Transform (Haar / Daubechies)       | `analysis`                | ★★★★☆      |
+| 39 | Square-root / Information Kalman filter              | `filters/active`          | ★★★★☆      |
+| 40 | Feedback linearization                               | `nonlinear_control` (new) | ★★★★☆      |
+| 41 | Backstepping controller                              | `nonlinear_control` (new) | ★★★★☆      |
+| 42 | Symmetric eigenvalue solver (Jacobi)                 | `solvers`                 | ★★★★★      |
+| 43 | Singular Value Decomposition (Golub-Kahan)           | `solvers`                 | ★★★★★      |
+| 44 | Total Least Squares                                  | `estimators/offline`      | ★★★★★      |
+| 45 | IIR filter design (Butterworth/Chebyshev + bilinear) | `filters/passive`         | ★★★★★      |
+| 46 | H∞ state-feedback control                            | `robust_control` (new)    | ★★★★★      |
+| 47 | Model Reference Adaptive Control (MRAC)              | `nonlinear_control` (new) | ★★★★★      |
+
 >>>>>>> Stashed changes
 
 ---

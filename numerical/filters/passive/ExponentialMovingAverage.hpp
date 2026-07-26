@@ -5,7 +5,6 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
-
 #include <cassert>
 #include <cmath>
 #include <numbers>
