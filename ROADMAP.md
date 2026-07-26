@@ -30,7 +30,6 @@ Difficulty legend:
 | 10 | Gain-scheduled controller                            | `controllers`             | ★★☆☆☆      |
 | 11 | Convolution & correlation utilities                  | `analysis`                | ★★☆☆☆      |
 | 12 | Polynomial least-squares curve fitting               | `estimators/offline`      | ★★☆☆☆      |
-| 13 | Goertzel algorithm                                   | `analysis`                | ★★☆☆☆      |
 | 14 | CIC (Cascaded Integrator-Comb) filter                | `filters/passive`         | ★★☆☆☆      |
 | 15 | Biquad / Second-Order-Section cascade                | `filters/passive`         | ★★★☆☆      |
 | 16 | Notch / comb filter                                  | `filters/passive`         | ★★★☆☆      |

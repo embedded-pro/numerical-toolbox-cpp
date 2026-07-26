@@ -15,12 +15,14 @@ target_sources(numerical.analysis PRIVATE
     DiscreteCosineTransform.hpp
     FastFourierTransform.hpp
     FastFourierTransformRadix2Impl.hpp
+    GoertzelAlgorithm.hpp
     PowerDensitySpectrum.hpp
     SignalDetectors.hpp
 )
 
 numerical_add_coverage_sources(numerical.analysis
     FastFourierTransformRadix2Impl.cpp
+    GoertzelAlgorithm.cpp
     PowerDensitySpectrum.cpp
     SignalDetectors.cpp
 )
