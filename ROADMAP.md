@@ -27,7 +27,6 @@ Difficulty legend:
 
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
-| 11 | Convolution & correlation utilities                  | `analysis`                | ★★☆☆☆      |
 | 13 | Goertzel algorithm                                   | `analysis`                | ★★☆☆☆      |
 | 14 | CIC (Cascaded Integrator-Comb) filter                | `filters/passive`         | ★★☆☆☆      |
 | 15 | Biquad / Second-Order-Section cascade                | `filters/passive`         | ★★★☆☆      |

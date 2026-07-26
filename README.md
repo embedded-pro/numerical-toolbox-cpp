@@ -16,7 +16,7 @@ Refer to the documentation to quickly integrate and utilize the library's signal
 
 | Category                                                           | Description                                                          |
 |--------------------------------------------------------------------|----------------------------------------------------------------------|
-| [Analysis](doc/analysis/README.md)                                 | FFT, Power Spectral Density, DCT, Window Functions, Signal Detectors  |
+| [Analysis](doc/analysis/README.md)                                 | FFT, Power Spectral Density, DCT, Window Functions, Signal Detectors, Convolution & Correlation  |
 | [Control Analysis](doc/control_analysis/README.md)                 | Frequency Response, Root Locus                                        |
 | [Controllers](doc/controllers/README.md)                           | Bang-Bang/Hysteresis, PID, LQR, MPC, Saturation, Rate Limiter, Slew-Limited Saturation, Feedforward/2-DOF, Gain-Scheduled Controller |
 | [Dynamics](doc/dynamics/README.md)                                 | Euler-Lagrange, Newton-Euler, Recursive Newton-Euler, ABA            |
