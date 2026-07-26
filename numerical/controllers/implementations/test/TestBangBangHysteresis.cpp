@@ -1,5 +1,6 @@
 #include "numerical/controllers/implementations/BangBangHysteresis.hpp"
 #include "gtest/gtest.h"
+#include <array>
 
 namespace
 {
