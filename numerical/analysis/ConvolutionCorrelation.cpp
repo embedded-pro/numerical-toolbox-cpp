@@ -23,4 +23,10 @@ namespace analysis
 
     template std::size_t ArgMaxLag<float, 9>(
         const infra::BoundedVector<float>::WithMaxSize<9>&);
+
+    template void FastConvolution<float, 3, 3, 8>(
+        const infra::BoundedVector<float>::WithMaxSize<3>&,
+        const infra::BoundedVector<float>::WithMaxSize<3>&,
+        infra::BoundedVector<float>::WithMaxSize<5>&,
+        FastFourierTransform<float>&);
 }
