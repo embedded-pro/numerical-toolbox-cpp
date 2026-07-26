@@ -46,11 +46,11 @@ This is a sinc-like response that suppresses high-frequency content before the r
 
 ## Complexity Analysis
 
-| Case    | Time per input sample | Space | Notes |
-|---------|-----------------------|-------|-------|
-| Best    | $O(N)$               | $O(N \cdot M)$ | $N$ integrator ops; comb only at decimation points |
-| Average | $O(N)$               | $O(N \cdot M)$ | Same |
-| Worst   | $O(N)$               | $O(N \cdot M)$ | Comb adds $N$ differencing ops at rate $f_s/R$ |
+| Case    | Time per input sample | Space          | Notes                                              |
+|---------|-----------------------|----------------|----------------------------------------------------|
+| Best    | $O(N)$                | $O(N \cdot M)$ | $N$ integrator ops; comb only at decimation points |
+| Average | $O(N)$                | $O(N \cdot M)$ | Same                                               |
+| Worst   | $O(N)$                | $O(N \cdot M)$ | Comb adds $N$ differencing ops at rate $f_s/R$     |
 
 The integrator section executes $N$ additions per input sample. The comb section executes $N$ subtractions once every $R$ input samples. There are no multiplications in the signal path.
 
