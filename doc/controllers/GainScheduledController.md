@@ -40,11 +40,11 @@ Gain scheduling does not guarantee closed-loop stability in general. The standar
 
 ## Complexity Analysis
 
-| Case | Time | Space | Notes |
-|------|------|-------|-------|
-| Schedule (linear search) | $O(N + p)$ | $O(1)$ | $N$ interval scan, $p$ blends |
-| Schedule (binary search) | $O(\log N + p)$ | $O(1)$ | Preferred for large tables |
-| Construction | $O(N)$ | $O(N \cdot p)$ | Monotonicity assertion |
+| Case                     | Time            | Space          | Notes                         |
+|--------------------------|-----------------|----------------|-------------------------------|
+| Schedule (linear search) | $O(N + p)$      | $O(1)$         | $N$ interval scan, $p$ blends |
+| Schedule (binary search) | $O(\log N + p)$ | $O(1)$         | Preferred for large tables    |
+| Construction             | $O(N)$          | $O(N \cdot p)$ | Monotonicity assertion        |
 
 All storage is stack-allocated. The table occupies $N \cdot p$ words; the active gain vector occupies $p$ words. No dynamic allocation occurs at any point.
 
@@ -71,12 +71,12 @@ All storage is stack-allocated. The table occupies $N \cdot p$ words; the active
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|---------------|
-| **Bilinear / 2-D scheduling** | Gains indexed by two variables (e.g., speed and load); uses bilinear interpolation on a grid |
+| Variant                            | Key Difference                                                                                             |
+|------------------------------------|------------------------------------------------------------------------------------------------------------|
+| **Bilinear / 2-D scheduling**      | Gains indexed by two variables (e.g., speed and load); uses bilinear interpolation on a grid               |
 | **LPV (Linear Parameter-Varying)** | Gains are polynomial functions of $\sigma$; stability guaranteed by parameter-dependent Lyapunov functions |
-| **Velocity-form scheduling** | Gains on incremental (velocity-form) controllers avoid output steps at scheduling transitions |
-| **Bumpless transfer** | State initialisation at switchover prevents transients when $\sigma$ jumps discontinuously |
+| **Velocity-form scheduling**       | Gains on incremental (velocity-form) controllers avoid output steps at scheduling transitions              |
+| **Bumpless transfer**              | State initialisation at switchover prevents transients when $\sigma$ jumps discontinuously                 |
 
 ## Applications
 
@@ -87,11 +87,11 @@ All storage is stack-allocated. The table occupies $N \cdot p$ words; the active
 
 ## Connections to Other Algorithms
 
-| Algorithm | Relationship |
-|-----------|-------------|
-| [LQR](Lqr.md) | Common source of the per-breakpoint gain sets; each $\mathbf{g}_i$ is an LQR solution at the $i$-th linearised operating point |
-| [Feedforward/2-DOF](Feedforward2Dof.md) | Complementary structure: the feedforward path can also be gain-scheduled to account for reference-dependent plant changes |
-| [MPC](Mpc.md) | Alternative that solves an optimisation online; eliminates the need for offline scheduling but requires more computation |
+| Algorithm                               | Relationship                                                                                                                   |
+|-----------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| [LQR](Lqr.md)                           | Common source of the per-breakpoint gain sets; each $\mathbf{g}_i$ is an LQR solution at the $i$-th linearised operating point |
+| [Feedforward/2-DOF](Feedforward2Dof.md) | Complementary structure: the feedforward path can also be gain-scheduled to account for reference-dependent plant changes      |
+| [MPC](Mpc.md)                           | Alternative that solves an optimisation online; eliminates the need for offline scheduling but requires more computation       |
 
 ## References & Further Reading
 
