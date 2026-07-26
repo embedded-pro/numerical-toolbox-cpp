@@ -31,11 +31,11 @@ The output clamp $\text{sat}(u, u_{min}, u_{max})$ acts on the combined command 
 
 ## Complexity Analysis
 
-| Case    | Time     | Space    | Notes                                        |
-|---------|----------|----------|----------------------------------------------|
-| Best    | $O(1)$   | $O(1)$   | Wrapper adds one addition and one clamp       |
-| Average | $O(1)$   | $O(1)$   | Cost dominated by the injected components    |
-| Worst   | $O(1)$   | $O(1)$   | State lives entirely inside injected objects |
+| Case    | Time   | Space  | Notes                                        |
+|---------|--------|--------|----------------------------------------------|
+| Best    | $O(1)$ | $O(1)$ | Wrapper adds one addition and one clamp      |
+| Average | $O(1)$ | $O(1)$ | Cost dominated by the injected components    |
+| Worst   | $O(1)$ | $O(1)$ | State lives entirely inside injected objects |
 
 ## Step-by-Step Walkthrough
 
