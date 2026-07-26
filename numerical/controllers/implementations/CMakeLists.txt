@@ -12,6 +12,7 @@ target_link_libraries(numerical.controllers.implementations ${NUMERICAL_VISIBILI
 )
 
 target_sources(numerical.controllers.implementations PRIVATE
+    BangBangHysteresis.hpp
     Lqg.hpp
     Lqr.hpp
     Mpc.hpp
@@ -19,6 +20,7 @@ target_sources(numerical.controllers.implementations PRIVATE
 )
 
 numerical_add_coverage_sources(numerical.controllers.implementations
+    BangBangHysteresis.cpp
     Lqg.cpp
     Lqr.cpp
     Mpc.cpp

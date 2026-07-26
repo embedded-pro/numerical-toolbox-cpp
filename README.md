@@ -18,7 +18,7 @@ Refer to the documentation to quickly integrate and utilize the library's signal
 |--------------------------------------------------------------------|----------------------------------------------------------------------|
 | [Analysis](doc/analysis/README.md)                                 | FFT, Power Spectral Density, DCT, Window Functions                    |
 | [Control Analysis](doc/control_analysis/README.md)                 | Frequency Response, Root Locus                                        |
-| [Controllers](doc/controllers/README.md)                           | PID, LQR, MPC                                                        |
+| [Controllers](doc/controllers/README.md)                           | Bang-Bang/Hysteresis, PID, LQR, MPC                                  |
 | [Dynamics](doc/dynamics/README.md)                                 | Euler-Lagrange, Newton-Euler, Recursive Newton-Euler, ABA            |
 | [Estimators](doc/estimators/README.md)                             | Linear Regression, Yule-Walker (offline), Recursive Least Squares (online) |
 | [Filters](doc/filters/README.md)                                   | Kalman, Extended Kalman, Unscented Kalman, FIR, IIR, Moving Average  |
