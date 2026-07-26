@@ -18,8 +18,7 @@ namespace analysis
 
     public:
         explicit PeakHold(T decay = T{ 1 })
-            : peak{ T{ 0 } }
-            , decay{ decay }
+            : decay{ decay }
         {}
 
         OPTIMIZE_FOR_SPEED T Update(T x)
@@ -35,7 +34,7 @@ namespace analysis
         }
 
     private:
-        T peak;
+        T peak{ T{ 0 } };
         T decay;
     };
 
@@ -46,9 +45,7 @@ namespace analysis
 
     public:
         explicit ZeroCrossingCounter(T hysteresis = T{ 0 })
-            : previous{ T{ 0 } }
-            , count{ 0 }
-            , hysteresis{ hysteresis }
+            : hysteresis{ hysteresis }
         {}
 
         OPTIMIZE_FOR_SPEED bool Update(T x)
@@ -72,8 +69,8 @@ namespace analysis
         }
 
     private:
-        T previous;
-        uint32_t count;
+        T previous{ T{ 0 } };
+        uint32_t count{ 0 };
         T hysteresis;
     };
 
@@ -85,7 +82,6 @@ namespace analysis
     public:
         explicit RmsEnvelope(T alpha)
             : alpha{ alpha }
-            , meanSquare{ T{ 0 } }
         {}
 
         OPTIMIZE_FOR_SPEED T Update(T x)
@@ -101,7 +97,7 @@ namespace analysis
 
     private:
         T alpha;
-        T meanSquare;
+        T meanSquare{ T{ 0 } };
     };
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
