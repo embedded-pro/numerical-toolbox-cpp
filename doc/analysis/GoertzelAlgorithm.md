@@ -48,10 +48,10 @@ Frequency resolution is $\Delta f = f_s / N$.
 
 ## Complexity Analysis
 
-| Case    | Time   | Space  | Notes                                        |
-|---------|--------|--------|----------------------------------------------|
-| Per sample | $O(1)$ | $O(1)$ | One multiply, two adds, no table lookup  |
-| Full block | $O(N)$ | $O(1)$ | Two state words; trig only at block end  |
+| Case       | Time   | Space  | Notes                                   |
+|------------|--------|--------|-----------------------------------------|
+| Per sample | $O(1)$ | $O(1)$ | One multiply, two adds, no table lookup |
+| Full block | $O(N)$ | $O(1)$ | Two state words; trig only at block end |
 
 For $B$ bins of interest the total cost is $O(BN)$. An FFT computing all $N$ bins costs $O(N\log N)$, so the Goertzel approach is cheaper when $B \ll \log_2 N$ — typically $B \le 4$ for a 256-point transform.
 
@@ -65,7 +65,7 @@ $c = 2\cos(\pi/2) = 0$
 |-----|--------|----------------------------------------|
 | 0   | 1      | $1 + 0 - 0 = 1$                        |
 | 1   | 0      | $0 + 0 - 1 = -1$                       |
-| 2   | -1     | $-1 + 0 - 0 = -1$  (note: $s[-1]=0$)  |
+| 2   | -1     | $-1 + 0 - 0 = -1$  (note: $s[-1]=0$)   |
 | 3   | 0      | $0 + 0 - (-1) = 1$                     |
 
 $\cos(2\pi/4) = 0$, $\sin(2\pi/4) = 1$
