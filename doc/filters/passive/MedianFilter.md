@@ -72,6 +72,22 @@ floating-point streams on embedded targets.
 For $N \le 9$ the insertion-sort inner loop is unrolled by the compiler and runs in a handful of
 compare-and-swap operations — faster in practice than histogram maintenance.
 
+## Step-by-Step Walkthrough
+
+Input: $x = [0.1, 0.1, 0.9, 0.1, 0.1]$, window size $N = 3$, initial window pre-seeded with $0.0$.
+
+| $n$ | $x[n]$ | Window (ring buffer) | Sorted scratch          | $y[n]$ |
+|-----|--------|----------------------|-------------------------|--------|
+| 0   | 0.1    | [0.0, 0.0, 0.1]      | [0.0, **0.0**, 0.1]     | 0.0    |
+| 1   | 0.1    | [0.0, 0.1, 0.1]      | [0.0, **0.1**, 0.1]     | 0.1    |
+| 2   | 0.9    | [0.1, 0.1, 0.9]      | [0.1, **0.1**, 0.9]     | 0.1    |
+| 3   | 0.1    | [0.1, 0.9, 0.1]      | [0.1, **0.1**, 0.9]     | 0.1    |
+| 4   | 0.1    | [0.9, 0.1, 0.1]      | [0.1, **0.1**, 0.9]     | 0.1    |
+
+The bold value is the median at index $\lfloor 3/2 \rfloor = 1$. The spike at $n = 2$ ($x = 0.9$)
+appears in only one of the three window slots at any given time, so it is never the majority and
+never reaches the output.
+
 ## Pitfalls & Edge Cases
 
 - **Even window length**: the two central order statistics may differ, requiring an average; use odd
