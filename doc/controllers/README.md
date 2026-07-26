@@ -12,3 +12,4 @@ Feedback control algorithms for regulating dynamic systems in real time.
 | [LQG Controller](Lqg.md) | Linear Quadratic Gaussian — output-feedback optimal control via LQR + Kalman Filter     |
 | [MPC Controller](Mpc.md) | Model Predictive Controller — receding-horizon optimal control with constraint handling |
 | [Linear Time-Invariant Model](LinearTimeInvariant.md) | Discrete-time state-space plant model (A, B, C, D) shared across controllers and filters |
+| [Feedforward / 2-DOF Controller](Feedforward2Dof.md) | Feedforward + feedback wrapper for decoupled reference tracking and disturbance rejection |
