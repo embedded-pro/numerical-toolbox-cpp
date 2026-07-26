@@ -10,5 +10,6 @@ target_link_libraries(numerical.estimators.offline_test PUBLIC
 target_sources(numerical.estimators.offline_test PRIVATE
     TestExpectationMaximization.cpp
     TestLinearRegression.cpp
+    TestPolynomialFitting.cpp
     TestYuleWalker.cpp
 )
