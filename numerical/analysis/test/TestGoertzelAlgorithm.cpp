@@ -3,6 +3,7 @@
 #include "gmock/gmock.h"
 #include <cmath>
 #include <numbers>
+#include <array>
 
 namespace
 {
