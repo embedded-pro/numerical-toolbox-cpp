@@ -16,7 +16,7 @@ Refer to the documentation to quickly integrate and utilize the library's signal
 
 | Category                                                           | Description                                                          |
 |--------------------------------------------------------------------|----------------------------------------------------------------------|
-| [Analysis](doc/analysis/README.md)                                 | FFT, Power Spectral Density, DCT, Window Functions                    |
+| [Analysis](doc/analysis/README.md)                                 | FFT, Power Spectral Density, DCT, Window Functions, Signal Detectors  |
 | [Control Analysis](doc/control_analysis/README.md)                 | Frequency Response, Root Locus                                        |
 | [Controllers](doc/controllers/README.md)                           | PID, LQR, MPC                                                        |
 | [Dynamics](doc/dynamics/README.md)                                 | Euler-Lagrange, Newton-Euler, Recursive Newton-Euler, ABA            |

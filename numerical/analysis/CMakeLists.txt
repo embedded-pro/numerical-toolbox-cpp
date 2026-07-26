@@ -16,11 +16,13 @@ target_sources(numerical.analysis PRIVATE
     FastFourierTransform.hpp
     FastFourierTransformRadix2Impl.hpp
     PowerDensitySpectrum.hpp
+    SignalDetectors.hpp
 )
 
 numerical_add_coverage_sources(numerical.analysis
     FastFourierTransformRadix2Impl.cpp
     PowerDensitySpectrum.cpp
+    SignalDetectors.cpp
 )
 
 add_subdirectory(test)

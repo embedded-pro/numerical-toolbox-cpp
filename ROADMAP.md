@@ -29,7 +29,6 @@ Difficulty legend:
 | 1  | Exponential Moving Average (one-pole)                | `filters/passive`         | ★☆☆☆☆      |
 | 3  | Saturation / rate-limiter / slew blocks              | `controllers`             | ★☆☆☆☆      |
 | 4  | Bang-bang / hysteresis (relay) controller            | `controllers`             | ★☆☆☆☆      |
-| 5  | Peak / zero-crossing / RMS-envelope detectors        | `analysis`                | ★☆☆☆☆      |
 | 6  | Median filter                                        | `filters/passive`         | ★★☆☆☆      |
 | 7  | Feedforward / 2-DOF controller                       | `controllers`             | ★★☆☆☆      |
 | 8  | Alpha-beta / alpha-beta-gamma filter                 | `filters/active`          | ★★☆☆☆      |
