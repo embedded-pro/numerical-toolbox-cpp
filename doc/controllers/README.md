@@ -6,6 +6,7 @@ Feedback control algorithms for regulating dynamic systems in real time.
 
 | Algorithm                | Description                                                                             |
 |--------------------------|-----------------------------------------------------------------------------------------|
+| [Bang-Bang / Hysteresis Controller](BangBangHysteresis.md) | Two-state relay controller with Schmitt-trigger dead-band to prevent chatter |
 | [PID Controller](Pid.md) | Proportional-Integral-Derivative controller using a discrete recursive formulation      |
 | [LQR Controller](Lqr.md) | Linear Quadratic Regulator — optimal state-feedback control minimizing a quadratic cost |
 | [LQG Controller](Lqg.md) | Linear Quadratic Gaussian — output-feedback optimal control via LQR + Kalman Filter     |

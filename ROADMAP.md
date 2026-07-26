@@ -29,7 +29,6 @@ Difficulty legend:
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
 | 1  | Exponential Moving Average (one-pole)                | `filters/passive`         | ★☆☆☆☆      |
-| 4  | Bang-bang / hysteresis (relay) controller            | `controllers`             | ★☆☆☆☆      |
 | 5  | Peak / zero-crossing / RMS-envelope detectors        | `analysis`                | ★☆☆☆☆      |
 | 6  | Median filter                                        | `filters/passive`         | ★★☆☆☆      |
 | 7  | Feedforward / 2-DOF controller                       | `controllers`             | ★★☆☆☆      |
@@ -145,12 +144,6 @@ Difficulty legend:
 - **Embedded value:** Reusable safety wrappers around any controller output; a prerequisite for correct anti-windup.
 - **Algorithm / paper:** K. J. Åström, R. M. Murray, *Feedback Systems* (2008), actuator saturation & windup.
 - **Reuses:** Scalar/`Vector` templates.
-
-### 4. Bang-bang / hysteresis (relay) controller
-- **What:** Two-state relay output with a Schmitt-trigger dead-band to prevent chatter.
-- **Embedded value:** The standard control law for thermostats, level control, and power-stage on/off regulation.
-- **Algorithm / paper:** Åström & Murray, *Feedback Systems*, relay feedback; Ya. Z. Tsypkin, *Relay Control Systems* (1984).
-- **Reuses:** `controllers` interfaces.
 
 ### 5. Peak / zero-crossing / RMS-envelope detectors
 - **What:** Lightweight feature extractors: rising/falling peak hold, sign-change (zero-crossing) counter, and RMS envelope via one-pole on `x²`.
