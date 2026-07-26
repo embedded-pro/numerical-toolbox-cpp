@@ -27,7 +27,6 @@ Difficulty legend:
 
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
-| 7  | Feedforward / 2-DOF controller                       | `controllers`             | ★★☆☆☆      |
 | 8  | Alpha-beta / alpha-beta-gamma filter                 | `filters/active`          | ★★☆☆☆      |
 | 9  | Complementary filter                                 | `filters/active`          | ★★☆☆☆      |
 | 10 | Gain-scheduled controller                            | `controllers`             | ★★☆☆☆      |
@@ -100,12 +99,6 @@ Difficulty legend:
 ---
 
 ## Tier 2 — Easy ★★☆☆☆
-
-### 7. Feedforward / 2-DOF controller
-- **What:** Adds a reference/disturbance feedforward path to an existing feedback loop (two-degree-of-freedom structure).
-- **Embedded value:** Improves tracking and disturbance rejection without sacrificing feedback stability margins.
-- **Algorithm / paper:** Åström & Murray, *Feedback Systems*, Ch. 12 (Feedforward and 2-DOF design).
-- **Reuses:** Existing controller interfaces; composable wrapper.
 
 ### 8. Alpha-beta / alpha-beta-gamma filter
 - **What:** Fixed-gain steady-state tracker for position/velocity(/acceleration) states.
