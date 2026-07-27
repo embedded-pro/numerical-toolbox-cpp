@@ -53,10 +53,10 @@ units.
 
 ## Complexity Analysis
 
-| Case | Time       | Space      | Notes                                        |
-|------|------------|------------|----------------------------------------------|
-| All  | $O(W)$     | $O(W)$     | One multiply-accumulate per tap per sample   |
-| Init | $O(P^3)$   | $O(P^2 W)$ | Constexpr kernel precomputed at compile time |
+| Case | Time     | Space      | Notes                                        |
+|------|----------|------------|----------------------------------------------|
+| All  | $O(W)$   | $O(W)$     | One multiply-accumulate per tap per sample   |
+| Init | $O(P^3)$ | $O(P^2 W)$ | Constexpr kernel precomputed at compile time |
 
 The runtime cost is $W$ multiply-adds — identical to a length-$W$ FIR filter. The $O(P^3)$
 Gaussian elimination occurs entirely at compile time with zero runtime overhead.
