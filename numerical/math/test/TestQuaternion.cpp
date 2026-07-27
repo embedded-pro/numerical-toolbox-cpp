@@ -148,3 +148,127 @@ TEST_F(TestQuaternion, EulerRoundTrip)
     EXPECT_NEAR(euler.at(1, 0), pitch, math::Tolerance<float>());
     EXPECT_NEAR(euler.at(2, 0), yaw, math::Tolerance<float>());
 }
+
+TEST_F(TestQuaternion, UnaryNegation)
+{
+    auto q = math::Quaternion<float>::FromAxisAngle(
+        math::Vector3<float>{ { 0.0f }, { 0.0f }, { 1.0f } }, 0.5f);
+    auto neg = -q;
+    EXPECT_NEAR(neg.w, -q.w, math::Tolerance<float>());
+    EXPECT_NEAR(neg.x, -q.x, math::Tolerance<float>());
+    EXPECT_NEAR(neg.y, -q.y, math::Tolerance<float>());
+    EXPECT_NEAR(neg.z, -q.z, math::Tolerance<float>());
+}
+
+TEST_F(TestQuaternion, InverseOfUnitQuaternion)
+{
+    auto q = math::Quaternion<float>::FromAxisAngle(
+        math::Vector3<float>{ { 1.0f }, { 0.0f }, { 0.0f } }, 0.8f);
+    auto r = q * q.Inverse();
+    EXPECT_NEAR(r.w, 1.0f, math::Tolerance<float>());
+    EXPECT_NEAR(r.x, 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(r.y, 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(r.z, 0.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestQuaternion, SquaredNormOfUnitQuaternion)
+{
+    auto q = math::Quaternion<float>::FromAxisAngle(
+        math::Vector3<float>{ { 0.0f }, { 1.0f }, { 0.0f } }, 1.2f);
+    EXPECT_NEAR(q.SquaredNorm(), 1.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestQuaternion, NormalizedReturnsNewCopy)
+{
+    math::Quaternion<float> scaled{ 2.0f, 0.0f, 0.0f, 0.0f };
+    auto n = scaled.Normalized();
+    EXPECT_NEAR(n.Norm(), 1.0f, math::Tolerance<float>());
+    EXPECT_NEAR(scaled.Norm(), 2.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestQuaternion, FromRotationMatrixXDominant)
+{
+    auto q = math::Quaternion<float>::FromAxisAngle(
+        math::Vector3<float>{ { 1.0f }, { 0.0f }, { 0.0f } },
+        std::numbers::pi_v<float>);
+    auto r = q.ToRotationMatrix();
+    auto qPrime = math::Quaternion<float>::FromRotationMatrix(r);
+    bool sameRotation =
+        (std::abs(qPrime.w - q.w) < math::Tolerance<float>() && std::abs(qPrime.x - q.x) < math::Tolerance<float>() &&
+            std::abs(qPrime.y - q.y) < math::Tolerance<float>() && std::abs(qPrime.z - q.z) < math::Tolerance<float>()) ||
+        (std::abs(qPrime.w + q.w) < math::Tolerance<float>() && std::abs(qPrime.x + q.x) < math::Tolerance<float>() &&
+            std::abs(qPrime.y + q.y) < math::Tolerance<float>() && std::abs(qPrime.z + q.z) < math::Tolerance<float>());
+    EXPECT_TRUE(sameRotation);
+}
+
+TEST_F(TestQuaternion, FromRotationMatrixYDominant)
+{
+    auto q = math::Quaternion<float>::FromAxisAngle(
+        math::Vector3<float>{ { 0.0f }, { 1.0f }, { 0.0f } },
+        std::numbers::pi_v<float>);
+    auto r = q.ToRotationMatrix();
+    auto qPrime = math::Quaternion<float>::FromRotationMatrix(r);
+    bool sameRotation =
+        (std::abs(qPrime.w - q.w) < math::Tolerance<float>() && std::abs(qPrime.x - q.x) < math::Tolerance<float>() &&
+            std::abs(qPrime.y - q.y) < math::Tolerance<float>() && std::abs(qPrime.z - q.z) < math::Tolerance<float>()) ||
+        (std::abs(qPrime.w + q.w) < math::Tolerance<float>() && std::abs(qPrime.x + q.x) < math::Tolerance<float>() &&
+            std::abs(qPrime.y + q.y) < math::Tolerance<float>() && std::abs(qPrime.z + q.z) < math::Tolerance<float>());
+    EXPECT_TRUE(sameRotation);
+}
+
+TEST_F(TestQuaternion, FromRotationMatrixZDominant)
+{
+    auto q = math::Quaternion<float>::FromAxisAngle(
+        math::Vector3<float>{ { 0.0f }, { 0.0f }, { 1.0f } },
+        std::numbers::pi_v<float>);
+    auto r = q.ToRotationMatrix();
+    auto qPrime = math::Quaternion<float>::FromRotationMatrix(r);
+    bool sameRotation =
+        (std::abs(qPrime.w - q.w) < math::Tolerance<float>() && std::abs(qPrime.x - q.x) < math::Tolerance<float>() &&
+            std::abs(qPrime.y - q.y) < math::Tolerance<float>() && std::abs(qPrime.z - q.z) < math::Tolerance<float>()) ||
+        (std::abs(qPrime.w + q.w) < math::Tolerance<float>() && std::abs(qPrime.x + q.x) < math::Tolerance<float>() &&
+            std::abs(qPrime.y + q.y) < math::Tolerance<float>() && std::abs(qPrime.z + q.z) < math::Tolerance<float>());
+    EXPECT_TRUE(sameRotation);
+}
+
+TEST_F(TestQuaternion, SlerpAntipodalFlipsSignAndMatchesDirectPath)
+{
+    auto a = math::Quaternion<float>::FromAxisAngle(
+        math::Vector3<float>{ { 1.0f }, { 0.0f }, { 0.0f } }, 0.4f);
+    auto b = math::Quaternion<float>::FromAxisAngle(
+        math::Vector3<float>{ { 0.0f }, { 0.0f }, { 1.0f } }, 0.6f);
+    auto s1 = math::Quaternion<float>::Slerp(a, b, 0.5f);
+    auto s2 = math::Quaternion<float>::Slerp(a, -b, 0.5f);
+    bool sameRotation =
+        (std::abs(s1.w - s2.w) < math::Tolerance<float>() && std::abs(s1.x - s2.x) < math::Tolerance<float>() &&
+            std::abs(s1.y - s2.y) < math::Tolerance<float>() && std::abs(s1.z - s2.z) < math::Tolerance<float>()) ||
+        (std::abs(s1.w + s2.w) < math::Tolerance<float>() && std::abs(s1.x + s2.x) < math::Tolerance<float>() &&
+            std::abs(s1.y + s2.y) < math::Tolerance<float>() && std::abs(s1.z + s2.z) < math::Tolerance<float>());
+    EXPECT_TRUE(sameRotation);
+}
+
+TEST_F(TestQuaternion, SlerpNearParallelFallsBackToLerp)
+{
+    auto a = math::Quaternion<float>::Identity();
+    auto b = math::Quaternion<float>::FromAxisAngle(
+        math::Vector3<float>{ { 0.0f }, { 0.0f }, { 1.0f } }, 1e-4f);
+    auto mid = math::Quaternion<float>::Slerp(a, b, 0.5f);
+    auto expected = math::Quaternion<float>::FromAxisAngle(
+        math::Vector3<float>{ { 0.0f }, { 0.0f }, { 1.0f } }, 5e-5f);
+    EXPECT_NEAR(mid.w, expected.w, math::Tolerance<float>());
+    EXPECT_NEAR(mid.z, expected.z, math::Tolerance<float>());
+}
+
+TEST_F(TestQuaternion, ToEulerGimbalLockPositivePitch)
+{
+    auto q = math::Quaternion<float>::FromEulerZYX(0.0f, std::numbers::pi_v<float> / 2.0f, 0.0f);
+    auto euler = q.ToEulerZYX();
+    EXPECT_NEAR(euler.at(1, 0), std::numbers::pi_v<float> / 2.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestQuaternion, ToEulerGimbalLockNegativePitch)
+{
+    auto q = math::Quaternion<float>::FromEulerZYX(0.0f, -std::numbers::pi_v<float> / 2.0f, 0.0f);
+    auto euler = q.ToEulerZYX();
+    EXPECT_NEAR(euler.at(1, 0), -std::numbers::pi_v<float> / 2.0f, math::Tolerance<float>());
+}
