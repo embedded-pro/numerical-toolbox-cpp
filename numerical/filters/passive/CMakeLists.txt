@@ -18,6 +18,7 @@ target_sources(numerical.filters.passive PRIVATE
     MedianFilter.hpp
     MovingAverage.hpp
     NotchCombFilter.hpp
+    SavitzkyGolayFilter.hpp
 )
 
 numerical_add_coverage_sources(numerical.filters.passive
@@ -28,6 +29,7 @@ numerical_add_coverage_sources(numerical.filters.passive
     MedianFilter.cpp
     MovingAverage.cpp
     NotchCombFilter.cpp
+    SavitzkyGolayFilter.cpp
 )
 
 add_subdirectory(test)
