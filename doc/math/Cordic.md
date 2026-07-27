@@ -67,11 +67,11 @@ to handle the full $[-\pi, \pi]$ range.
 
 ## Complexity Analysis
 
-| Metric | Value |
-|--------|-------|
-| Time   | $O(N)$ — exactly $N$ shift-add steps per call |
-| Space  | $O(N)$ — angle table in ROM; $O(1)$ working registers |
-| Cycle count | Fixed, data-independent — no branch on input value |
+| Metric      | Value                                                 |
+|-------------|-------------------------------------------------------|
+| Time        | $O(N)$ — exactly $N$ shift-add steps per call         |
+| Space       | $O(N)$ — angle table in ROM; $O(1)$ working registers |
+| Cycle count | Fixed, data-independent — no branch on input value    |
 
 One additional bit of precision is gained per iteration. $N = 16$ yields approximately 16-bit
 accuracy; $N = 20$ reaches the limits of single-precision float.
@@ -80,13 +80,13 @@ accuracy; $N = 20$ reaches the limits of single-precision float.
 
 Compute $\sin(\pi/6) = 0.5$ with $N = 4$ for brevity (gain $K_4 \approx 0.6352$).
 
-| $i$ | $\theta_i$ | $\sigma_i$ | $x_i$   | $y_i$   | $z_i$  |
-|-----|------------|------------|---------|---------|--------|
-| —   | —          | —          | 0.6352  | 0.0000  | 0.5236 |
-| 0   | 0.7854     | +1         | 0.6352  | 0.6352  | −0.2618|
-| 1   | 0.4636     | −1         | 0.7940  | 0.3176  | 0.2018 |
-| 2   | 0.2450     | +1         | 0.7147  | 0.5122  | −0.0432|
-| 3   | 0.1244     | −1         | 0.8425  | 0.4248  | 0.0812 |
+| $i$ | $\theta_i$ | $\sigma_i$ | $x_i$  | $y_i$  | $z_i$   |
+|-----|------------|------------|--------|--------|---------|
+| —   | —          | —          | 0.6352 | 0.0000 | 0.5236  |
+| 0   | 0.7854     | +1         | 0.6352 | 0.6352 | −0.2618 |
+| 1   | 0.4636     | −1         | 0.7940 | 0.3176 | 0.2018  |
+| 2   | 0.2450     | +1         | 0.7147 | 0.5122 | −0.0432 |
+| 3   | 0.1244     | −1         | 0.8425 | 0.4248 | 0.0812  |
 
 After iteration 3: $y_4 \approx 0.43$, improving toward 0.5 as $N$ grows.
 
