@@ -93,8 +93,10 @@ namespace control_analysis
             for (std::size_t c = 0; c < Cols; ++c)
             {
                 T v = M.at(r, c);
-                if (v < T(0)) v = -v;
-                if (v > maxVal) maxVal = v;
+                if (v < T(0))
+                    v = -v;
+                if (v > maxVal)
+                    maxVal = v;
             }
         return maxVal;
     }
@@ -142,8 +144,13 @@ namespace control_analysis
             for (std::size_t r = pivotRow; r < Rows; ++r)
             {
                 T v = copy.at(r, col);
-                if (v < T(0)) v = -v;
-                if (v > maxVal) { maxVal = v; maxRow = r; }
+                if (v < T(0))
+                    v = -v;
+                if (v > maxVal)
+                {
+                    maxVal = v;
+                    maxRow = r;
+                }
             }
 
             if (maxVal <= threshold)
@@ -179,8 +186,10 @@ namespace control_analysis
             for (std::size_t c = 0; c < n; ++c)
             {
                 T d = a.at(r, c) - b.at(r, c);
-                if (d < T(0)) d = -d;
-                if (d > maxDiff) maxDiff = d;
+                if (d < T(0))
+                    d = -d;
+                if (d > maxDiff)
+                    maxDiff = d;
             }
         return maxDiff;
     }
