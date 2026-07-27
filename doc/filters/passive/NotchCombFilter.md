@@ -54,10 +54,10 @@ Poles at the same locations. The system is stable if and only if $|g| < 1$.
 
 ## Complexity Analysis
 
-| Case    | Time    | Space   | Notes                            |
-|---------|---------|---------|----------------------------------|
-| Notch   | $O(1)$  | $O(1)$  | Fixed biquad; 2 multiplies/adds  |
-| Comb    | $O(1)$  | $O(D)$  | Single circular-buffer read/write|
+| Case  | Time   | Space  | Notes                             |
+|-------|--------|--------|-----------------------------------|
+| Notch | $O(1)$ | $O(1)$ | Fixed biquad; 2 multiplies/adds   |
+| Comb  | $O(1)$ | $O(D)$ | Single circular-buffer read/write |
 
 ## Step-by-Step Walkthrough
 
@@ -115,6 +115,6 @@ Impulse response: $[1, 0, 0, 0, -1, 0, 0, 0, 0, \ldots]$ — zeros at 0, fs/4, f
 ## References & Further Reading
 
 - R. Bristow-Johnson, "Cookbook formulae for audio EQ biquad filter coefficients",
-  https://www.w3.org/TR/audio-eq-cookbook/
+  <https://www.w3.org/TR/audio-eq-cookbook/>
 - R. G. Lyons, *Understanding Digital Signal Processing*, 3rd ed., Prentice Hall, 2011, Ch. 6.
 - A. V. Oppenheim & R. W. Schafer, *Discrete-Time Signal Processing*, 3rd ed., Ch. 5.
