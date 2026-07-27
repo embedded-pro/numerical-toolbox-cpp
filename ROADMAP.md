@@ -34,7 +34,6 @@ Difficulty legend:
 | 23 | CORDIC                                               | `math`                    | ★★★☆☆      |
 | 24 | Runge-Kutta ODE integrators (RK4 + Dormand-Prince)   | `solvers`                 | ★★★☆☆      |
 | 25 | Real-input FFT (RFFT)                                | `analysis`                | ★★★☆☆      |
-| 26 | Controllability / Observability matrices & Gramians  | `control_analysis`        | ★★★☆☆      |
 | 27 | QR decomposition (Householder / Givens)              | `solvers`                 | ★★★★☆      |
 | 28 | LU decomposition with partial pivoting               | `solvers`                 | ★★★★☆      |
 | 29 | Matrix exponential (scaling & squaring + Padé)       | `math`                    | ★★★★☆      |
