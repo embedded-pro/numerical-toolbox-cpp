@@ -200,7 +200,7 @@ namespace control_analysis
         const SquareMatrix& A, const SquareMatrix& Q)
     {
         constexpr std::size_t maxIter{ 200 };
-        constexpr T convTol{ T(1e-9) };
+        constexpr T convTol{ T(1e-6) };
         SquareMatrix X{ Q };
         SquareMatrix At{ A.Transpose() };
 
@@ -231,5 +231,13 @@ namespace control_analysis
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class ControllabilityObservability<float, 2, 1, 1>;
+    extern template std::size_t ControllabilityObservability<float, 2, 1, 1>::Rank<2, 2>(
+        const math::Matrix<float, 2, 2>&, float);
+    extern template float ControllabilityObservability<float, 2, 1, 1>::MaxAbsValue<2, 2>(
+        const math::Matrix<float, 2, 2>&);
+    extern template void ControllabilityObservability<float, 2, 1, 1>::SwapRows<2, 2>(
+        math::Matrix<float, 2, 2>&, std::size_t, std::size_t);
+    extern template void ControllabilityObservability<float, 2, 1, 1>::EliminateBelow<2, 2>(
+        math::Matrix<float, 2, 2>&, std::size_t, std::size_t, float);
 #endif
 }

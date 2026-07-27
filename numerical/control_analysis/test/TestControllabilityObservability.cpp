@@ -165,6 +165,40 @@ TEST_F(TestControllabilityObservability, gramian_solves_discrete_lyapunov)
     EXPECT_NEAR(maxResidual, 0.0f, 1e-3f);
 }
 
+TEST_F(TestControllabilityObservability, observability_gramian_solves_discrete_lyapunov)
+{
+    LTI stablePlant;
+    stablePlant.A = math::Matrix<float, 2, 2>{
+        { 0.0f, 1.0f },
+        { -0.2f, -0.3f }
+    };
+    stablePlant.B = math::Matrix<float, 2, 1>{
+        { 0.0f },
+        { 1.0f }
+    };
+    stablePlant.C = math::Matrix<float, 1, 2>{
+        { 1.0f, 0.0f }
+    };
+    stablePlant.D = math::Matrix<float, 1, 1>{
+        { 0.0f }
+    };
+
+    auto Wo = CO::ObservabilityGramian(stablePlant);
+    auto CtC = stablePlant.C.Transpose() * stablePlant.C;
+    auto residual = stablePlant.A.Transpose() * Wo * stablePlant.A - Wo + CtC;
+
+    float maxResidual{ 0.0f };
+    for (std::size_t r = 0; r < 2; ++r)
+        for (std::size_t c = 0; c < 2; ++c)
+        {
+            float v = residual.at(r, c);
+            if (v < 0.0f) v = -v;
+            if (v > maxResidual) maxResidual = v;
+        }
+
+    EXPECT_NEAR(maxResidual, 0.0f, 1e-3f);
+}
+
 TEST_F(TestControllabilityObservability, gramian_is_symmetric_positive_definite)
 {
     LTI stablePlant;
