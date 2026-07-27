@@ -89,15 +89,12 @@ namespace control_analysis
     T ControllabilityObservability<T, n, m, p>::MaxAbsValue(const math::Matrix<T, Rows, Cols>& M)
     {
         T maxVal{ T(0) };
-        for (std::size_t r = 0; r < Rows; ++r)
-            for (std::size_t c = 0; c < Cols; ++c)
-            {
-                T v = M.at(r, c);
-                if (v < T(0))
-                    v = -v;
-                if (v > maxVal)
-                    maxVal = v;
-            }
+        for (const auto& v : M)
+        {
+            T av = v < T(0) ? -v : v;
+            if (av > maxVal)
+                maxVal = av;
+        }
         return maxVal;
     }
 
@@ -106,12 +103,9 @@ namespace control_analysis
     void ControllabilityObservability<T, n, m, p>::SwapRows(
         math::Matrix<T, Rows, Cols>& M, std::size_t r1, std::size_t r2)
     {
-        for (std::size_t c = 0; c < Cols; ++c)
-        {
-            T tmp = M.at(r1, c);
-            M.at(r1, c) = M.at(r2, c);
-            M.at(r2, c) = tmp;
-        }
+        auto row1 = M.template GetBlock<1, Cols>(r1, 0);
+        M.SetBlock(M.template GetBlock<1, Cols>(r2, 0), r1, 0);
+        M.SetBlock(row1, r2, 0);
     }
 
     template<typename T, std::size_t n, std::size_t m, std::size_t p>
@@ -181,17 +175,7 @@ namespace control_analysis
     T ControllabilityObservability<T, n, m, p>::MaxAbsDiff(
         const SquareMatrix& a, const SquareMatrix& b)
     {
-        T maxDiff{ T(0) };
-        for (std::size_t r = 0; r < n; ++r)
-            for (std::size_t c = 0; c < n; ++c)
-            {
-                T d = a.at(r, c) - b.at(r, c);
-                if (d < T(0))
-                    d = -d;
-                if (d > maxDiff)
-                    maxDiff = d;
-            }
-        return maxDiff;
+        return MaxAbsValue(a - b);
     }
 
     template<typename T, std::size_t n, std::size_t m, std::size_t p>
