@@ -12,6 +12,7 @@ target_sources(numerical.controllers_test PRIVATE
     TestBangBangHysteresis.cpp
     TestFeedforward2Dof.cpp
     TestGainScheduledController.cpp
+    TestLeadLagCompensator.cpp
     TestLqg.cpp
     TestLqr.cpp
     TestMpc.cpp

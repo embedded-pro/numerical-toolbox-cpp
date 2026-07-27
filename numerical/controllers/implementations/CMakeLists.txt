@@ -15,6 +15,7 @@ target_sources(numerical.controllers.implementations PRIVATE
     BangBangHysteresis.hpp
     Feedforward2Dof.hpp
     GainScheduledController.hpp
+    LeadLagCompensator.hpp
     Lqg.hpp
     Lqr.hpp
     Mpc.hpp
@@ -26,6 +27,7 @@ numerical_add_coverage_sources(numerical.controllers.implementations
     BangBangHysteresis.cpp
     Feedforward2Dof.cpp
     GainScheduledController.cpp
+    LeadLagCompensator.cpp
     Lqg.cpp
     Lqr.cpp
     Mpc.cpp
