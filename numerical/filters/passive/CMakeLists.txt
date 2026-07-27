@@ -17,6 +17,7 @@ target_sources(numerical.filters.passive PRIVATE
     Iir.hpp
     MedianFilter.hpp
     MovingAverage.hpp
+    NotchCombFilter.hpp
 )
 
 numerical_add_coverage_sources(numerical.filters.passive
@@ -26,6 +27,7 @@ numerical_add_coverage_sources(numerical.filters.passive
     Iir.cpp
     MedianFilter.cpp
     MovingAverage.cpp
+    NotchCombFilter.cpp
 )
 
 add_subdirectory(test)
