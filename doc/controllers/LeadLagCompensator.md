@@ -60,9 +60,9 @@ Parameters: $K=1$, $z=1\,\text{rad/s}$, $p=10\,\text{rad/s}$, $T_s = 0.01\,\text
 Unit-step response (first two samples):
 
 | $n$ | $x[n]$ | $b_0 x[n]$ | $b_1 x[n-1]$ | $-a_1 y[n-1]$ | $y[n]$ |
-|-----|--------|-----------|-------------|--------------|--------|
-| 0   | 1      | 0.9571    | 0           | 0            | 0.9571 |
-| 1   | 1      | 0.9571    | −0.9476     | 0.8664       | 0.8759 |
+|-----|--------|------------|--------------|---------------|--------|
+| 0   | 1      | 0.9571     | 0            | 0             | 0.9571 |
+| 1   | 1      | 0.9571     | −0.9476      | 0.8664        | 0.8759 |
 
 The first output (≈ 0.957) already exceeds the DC steady-state gain of 0.1, illustrating the phase-lead kick.
 
