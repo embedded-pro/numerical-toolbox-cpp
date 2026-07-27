@@ -7,7 +7,6 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/math/Matrix.hpp"
-#include <cmath>
 #include <cstddef>
 #include <type_traits>
 
@@ -27,14 +26,27 @@ namespace control_analysis
 
         OPTIMIZE_FOR_SPEED static CtrbMatrix ControllabilityMatrix(const LTI& plant);
         OPTIMIZE_FOR_SPEED static ObsvMatrix ObservabilityMatrix(const LTI& plant);
-        static std::size_t Rank(const CtrbMatrix& M, T tol);
-        static std::size_t RankObsv(const ObsvMatrix& M, T tol);
+
+        template<std::size_t Rows, std::size_t Cols>
+        static std::size_t Rank(const math::Matrix<T, Rows, Cols>& M, T tol);
+
         static bool IsControllable(const LTI& plant, T tol = T(1e-6));
         static bool IsObservable(const LTI& plant, T tol = T(1e-6));
         OPTIMIZE_FOR_SPEED static SquareMatrix ControllabilityGramian(const LTI& plant);
         OPTIMIZE_FOR_SPEED static SquareMatrix ObservabilityGramian(const LTI& plant);
 
     private:
+        template<std::size_t Rows, std::size_t Cols>
+        static T MaxAbsValue(const math::Matrix<T, Rows, Cols>& M);
+
+        template<std::size_t Rows, std::size_t Cols>
+        static void SwapRows(math::Matrix<T, Rows, Cols>& M, std::size_t r1, std::size_t r2);
+
+        template<std::size_t Rows, std::size_t Cols>
+        static void EliminateBelow(
+            math::Matrix<T, Rows, Cols>& M, std::size_t pivotRow, std::size_t col, T pivotVal);
+
+        static T MaxAbsDiff(const SquareMatrix& a, const SquareMatrix& b);
         static SquareMatrix SolveDiscreteLyapunov(const SquareMatrix& A, const SquareMatrix& Q);
     };
 
@@ -73,124 +85,72 @@ namespace control_analysis
     }
 
     template<typename T, std::size_t n, std::size_t m, std::size_t p>
-    std::size_t ControllabilityObservability<T, n, m, p>::Rank(const CtrbMatrix& M, T tol)
+    template<std::size_t Rows, std::size_t Cols>
+    T ControllabilityObservability<T, n, m, p>::MaxAbsValue(const math::Matrix<T, Rows, Cols>& M)
     {
-        constexpr std::size_t rows = n;
-        constexpr std::size_t cols = n * m;
-        math::Matrix<T, rows, cols> copy{ M };
-
-        T largestPivot{ T(0) };
-        for (std::size_t r = 0; r < rows; ++r)
-            for (std::size_t c = 0; c < cols; ++c)
+        T maxVal{ T(0) };
+        for (std::size_t r = 0; r < Rows; ++r)
+            for (std::size_t c = 0; c < Cols; ++c)
             {
-                T v = copy.at(r, c);
-                if (v < T(0))
-                    v = -v;
-                if (v > largestPivot)
-                    largestPivot = v;
+                T v = M.at(r, c);
+                if (v < T(0)) v = -v;
+                if (v > maxVal) maxVal = v;
             }
-
-        T threshold{ tol * largestPivot };
-        std::size_t rank{ 0 };
-        std::size_t pivotRow{ 0 };
-
-        for (std::size_t col = 0; col < cols && pivotRow < rows; ++col)
-        {
-            std::size_t maxRow{ pivotRow };
-            T maxVal{ T(0) };
-            for (std::size_t r = pivotRow; r < rows; ++r)
-            {
-                T v = copy.at(r, col);
-                if (v < T(0))
-                    v = -v;
-                if (v > maxVal)
-                {
-                    maxVal = v;
-                    maxRow = r;
-                }
-            }
-
-            if (maxVal <= threshold)
-                continue;
-
-            for (std::size_t c = 0; c < cols; ++c)
-            {
-                T tmp = copy.at(pivotRow, c);
-                copy.at(pivotRow, c) = copy.at(maxRow, c);
-                copy.at(maxRow, c) = tmp;
-            }
-
-            T pivotVal = copy.at(pivotRow, col);
-            for (std::size_t r = pivotRow + 1; r < rows; ++r)
-            {
-                T factor = copy.at(r, col) / pivotVal;
-                for (std::size_t c = col; c < cols; ++c)
-                    copy.at(r, c) -= factor * copy.at(pivotRow, c);
-            }
-
-            ++rank;
-            ++pivotRow;
-        }
-
-        return rank;
+        return maxVal;
     }
 
     template<typename T, std::size_t n, std::size_t m, std::size_t p>
-    std::size_t ControllabilityObservability<T, n, m, p>::RankObsv(const ObsvMatrix& M, T tol)
+    template<std::size_t Rows, std::size_t Cols>
+    void ControllabilityObservability<T, n, m, p>::SwapRows(
+        math::Matrix<T, Rows, Cols>& M, std::size_t r1, std::size_t r2)
     {
-        constexpr std::size_t rows = n * p;
-        constexpr std::size_t cols = n;
-        math::Matrix<T, rows, cols> copy{ M };
+        for (std::size_t c = 0; c < Cols; ++c)
+        {
+            T tmp = M.at(r1, c);
+            M.at(r1, c) = M.at(r2, c);
+            M.at(r2, c) = tmp;
+        }
+    }
 
-        T largestPivot{ T(0) };
-        for (std::size_t r = 0; r < rows; ++r)
-            for (std::size_t c = 0; c < cols; ++c)
-            {
-                T v = copy.at(r, c);
-                if (v < T(0))
-                    v = -v;
-                if (v > largestPivot)
-                    largestPivot = v;
-            }
+    template<typename T, std::size_t n, std::size_t m, std::size_t p>
+    template<std::size_t Rows, std::size_t Cols>
+    void ControllabilityObservability<T, n, m, p>::EliminateBelow(
+        math::Matrix<T, Rows, Cols>& M, std::size_t pivotRow, std::size_t col, T pivotVal)
+    {
+        for (std::size_t r = pivotRow + 1; r < Rows; ++r)
+        {
+            T factor = M.at(r, col) / pivotVal;
+            for (std::size_t c = col; c < Cols; ++c)
+                M.at(r, c) -= factor * M.at(pivotRow, c);
+        }
+    }
 
-        T threshold{ tol * largestPivot };
+    template<typename T, std::size_t n, std::size_t m, std::size_t p>
+    template<std::size_t Rows, std::size_t Cols>
+    std::size_t ControllabilityObservability<T, n, m, p>::Rank(
+        const math::Matrix<T, Rows, Cols>& M, T tol)
+    {
+        math::Matrix<T, Rows, Cols> copy{ M };
+        T threshold{ tol * MaxAbsValue(copy) };
         std::size_t rank{ 0 };
         std::size_t pivotRow{ 0 };
 
-        for (std::size_t col = 0; col < cols && pivotRow < rows; ++col)
+        for (std::size_t col = 0; col < Cols && pivotRow < Rows; ++col)
         {
             std::size_t maxRow{ pivotRow };
             T maxVal{ T(0) };
-            for (std::size_t r = pivotRow; r < rows; ++r)
+            for (std::size_t r = pivotRow; r < Rows; ++r)
             {
                 T v = copy.at(r, col);
-                if (v < T(0))
-                    v = -v;
-                if (v > maxVal)
-                {
-                    maxVal = v;
-                    maxRow = r;
-                }
+                if (v < T(0)) v = -v;
+                if (v > maxVal) { maxVal = v; maxRow = r; }
             }
 
             if (maxVal <= threshold)
                 continue;
 
-            for (std::size_t c = 0; c < cols; ++c)
-            {
-                T tmp = copy.at(pivotRow, c);
-                copy.at(pivotRow, c) = copy.at(maxRow, c);
-                copy.at(maxRow, c) = tmp;
-            }
-
-            T pivotVal = copy.at(pivotRow, col);
-            for (std::size_t r = pivotRow + 1; r < rows; ++r)
-            {
-                T factor = copy.at(r, col) / pivotVal;
-                for (std::size_t c = col; c < cols; ++c)
-                    copy.at(r, c) -= factor * copy.at(pivotRow, c);
-            }
-
+            SwapRows(copy, pivotRow, maxRow);
+            EliminateBelow(copy, pivotRow, col, copy.at(pivotRow, col));
             ++rank;
             ++pivotRow;
         }
@@ -207,7 +167,22 @@ namespace control_analysis
     template<typename T, std::size_t n, std::size_t m, std::size_t p>
     bool ControllabilityObservability<T, n, m, p>::IsObservable(const LTI& plant, T tol)
     {
-        return RankObsv(ObservabilityMatrix(plant), tol) == n;
+        return Rank(ObservabilityMatrix(plant), tol) == n;
+    }
+
+    template<typename T, std::size_t n, std::size_t m, std::size_t p>
+    T ControllabilityObservability<T, n, m, p>::MaxAbsDiff(
+        const SquareMatrix& a, const SquareMatrix& b)
+    {
+        T maxDiff{ T(0) };
+        for (std::size_t r = 0; r < n; ++r)
+            for (std::size_t c = 0; c < n; ++c)
+            {
+                T d = a.at(r, c) - b.at(r, c);
+                if (d < T(0)) d = -d;
+                if (d > maxDiff) maxDiff = d;
+            }
+        return maxDiff;
     }
 
     template<typename T, std::size_t n, std::size_t m, std::size_t p>
@@ -217,29 +192,15 @@ namespace control_analysis
     {
         constexpr std::size_t maxIter{ 200 };
         constexpr T convTol{ T(1e-9) };
-
         SquareMatrix X{ Q };
         SquareMatrix At{ A.Transpose() };
 
         for (std::size_t iter = 0; iter < maxIter; ++iter)
         {
             SquareMatrix Xnext{ A * X * At + Q };
-
-            T maxDiff{ T(0) };
-            for (std::size_t r = 0; r < n; ++r)
-                for (std::size_t c = 0; c < n; ++c)
-                {
-                    T d = Xnext.at(r, c) - X.at(r, c);
-                    if (d < T(0))
-                        d = -d;
-                    if (d > maxDiff)
-                        maxDiff = d;
-                }
-
+            if (MaxAbsDiff(Xnext, X) < convTol)
+                return Xnext;
             X = Xnext;
-
-            if (maxDiff < convTol)
-                return X;
         }
 
         return SquareMatrix{};
@@ -249,17 +210,14 @@ namespace control_analysis
     OPTIMIZE_FOR_SPEED typename ControllabilityObservability<T, n, m, p>::SquareMatrix
     ControllabilityObservability<T, n, m, p>::ControllabilityGramian(const LTI& plant)
     {
-        SquareMatrix Q{ plant.B * plant.B.Transpose() };
-        return SolveDiscreteLyapunov(plant.A, Q);
+        return SolveDiscreteLyapunov(plant.A, plant.B * plant.B.Transpose());
     }
 
     template<typename T, std::size_t n, std::size_t m, std::size_t p>
     OPTIMIZE_FOR_SPEED typename ControllabilityObservability<T, n, m, p>::SquareMatrix
     ControllabilityObservability<T, n, m, p>::ObservabilityGramian(const LTI& plant)
     {
-        SquareMatrix Q{ plant.C.Transpose() * plant.C };
-        SquareMatrix At{ plant.A.Transpose() };
-        return SolveDiscreteLyapunov(At, Q);
+        return SolveDiscreteLyapunov(plant.A.Transpose(), plant.C.Transpose() * plant.C);
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
