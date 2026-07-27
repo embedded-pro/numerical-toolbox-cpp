@@ -12,10 +12,12 @@ target_link_libraries(numerical.estimators.online ${NUMERICAL_VISIBILITY}
 
 target_sources(numerical.estimators.online PRIVATE
     RecursiveLeastSquares.hpp
+    LmsAdaptiveFilter.hpp
 )
 
 numerical_add_coverage_sources(numerical.estimators.online
     RecursiveLeastSquares.cpp
+    LmsAdaptiveFilter.cpp
 )
 
 add_subdirectory(test)
