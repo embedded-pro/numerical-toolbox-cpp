@@ -12,6 +12,7 @@ target_link_libraries(numerical.math ${NUMERICAL_VISIBILITY}
 target_sources(numerical.math PRIVATE
     AdvancedFunctions.hpp
     ComplexNumber.hpp
+    Cordic.hpp
     Geometry3D.hpp
     HyperbolicFunctions.hpp
     LinearTimeInvariant.hpp
@@ -28,6 +29,7 @@ target_sources(numerical.math PRIVATE
 
 numerical_add_coverage_sources(numerical.math
     ComplexNumber.cpp
+    Cordic.cpp
     LinearTimeInvariant.cpp
     Matrix.cpp
     QNumber.cpp
