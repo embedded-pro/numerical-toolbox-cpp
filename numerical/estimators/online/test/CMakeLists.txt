@@ -9,4 +9,5 @@ target_link_libraries(numerical.estimators.online_test PUBLIC
 
 target_sources(numerical.estimators.online_test PRIVATE
     TestRecursiveLeastSquares.cpp
+    TestLmsAdaptiveFilter.cpp
 )

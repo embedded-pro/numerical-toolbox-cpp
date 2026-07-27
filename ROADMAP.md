@@ -30,7 +30,6 @@ Difficulty legend:
 | 15 | Biquad / Second-Order-Section cascade                | `filters/passive`         | ★★★☆☆      |
 | 19 | Luenberger observer + pole placement (Ackermann)     | `controllers`             | ★★★☆☆      |
 | 20 | Integral / servo state feedback (LQI)                | `controllers`             | ★★★☆☆      |
-| 21 | LMS / NLMS adaptive filter                           | `estimators/online`       | ★★★☆☆      |
 | 22 | Savitzky-Golay filter                                | `filters/passive`         | ★★★☆☆      |
 | 23 | CORDIC                                               | `math`                    | ★★★☆☆      |
 | 24 | Runge-Kutta ODE integrators (RK4 + Dormand-Prince)   | `solvers`                 | ★★★☆☆      |
@@ -165,12 +164,6 @@ Difficulty legend:
 - **Embedded value:** Removes steady-state offset under constant references/disturbances — the practical version of LQR.
 - **Algorithm / paper:** B. D. O. Anderson, J. B. Moore, *Optimal Control: Linear Quadratic Methods* (1990).
 - **Reuses:** [Lqr.hpp](numerical/controllers/implementations/Lqr.hpp), [DARE](numerical/solvers/DiscreteAlgebraicRiccatiEquation.hpp).
-
-### 21. LMS / NLMS adaptive filter
-- **What:** Least-Mean-Squares (and normalized) adaptive FIR with steepest-descent weight update.
-- **Embedded value:** Adaptive noise cancellation, echo cancellation, system identification, active vibration control — a DSP staple.
-- **Algorithm / paper:** B. Widrow, M. Hoff, "Adaptive switching circuits," *IRE WESCON*, 1960; S. Haykin, *Adaptive Filter Theory*.
-- **Reuses:** [RecursiveLeastSquares.hpp](numerical/estimators/online/RecursiveLeastSquares.hpp) patterns, `math::Vector`.
 
 ### 22. Savitzky-Golay filter
 - **What:** Convolution smoother that fits a local polynomial, preserving peak height/width and giving smoothed derivatives.
