@@ -12,4 +12,5 @@ target_sources(numerical.solvers_test PRIVATE
     TestDurandKerner.cpp
     TestGaussianElimination.cpp
     TestLevinsonDurbin.cpp
+    TestRungeKuttaIntegrators.cpp
 )
