@@ -261,14 +261,16 @@ TEST_F(TestQuaternion, SlerpNearParallelFallsBackToLerp)
 
 TEST_F(TestQuaternion, ToEulerGimbalLockPositivePitch)
 {
-    auto q = math::Quaternion<float>::FromEulerZYX(0.0f, std::numbers::pi_v<float> / 2.0f, 0.0f);
+    // w=0.72, y=0.72 → sinP = 2*0.72*0.72 = 1.0368 > 1, forcing copysign branch
+    math::Quaternion<float> q{ 0.72f, 0.0f, 0.72f, 0.0f };
     auto euler = q.ToEulerZYX();
     EXPECT_NEAR(euler.at(1, 0), std::numbers::pi_v<float> / 2.0f, math::Tolerance<float>());
 }
 
 TEST_F(TestQuaternion, ToEulerGimbalLockNegativePitch)
 {
-    auto q = math::Quaternion<float>::FromEulerZYX(0.0f, -std::numbers::pi_v<float> / 2.0f, 0.0f);
+    // w=0.72, y=-0.72 → sinP = -1.0368 < -1, forcing copysign with negative sign
+    math::Quaternion<float> q{ 0.72f, 0.0f, -0.72f, 0.0f };
     auto euler = q.ToEulerZYX();
     EXPECT_NEAR(euler.at(1, 0), -std::numbers::pi_v<float> / 2.0f, math::Tolerance<float>());
 }
