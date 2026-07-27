@@ -32,7 +32,6 @@ Difficulty legend:
 | 20 | Integral / servo state feedback (LQI)                | `controllers`             | ★★★☆☆      |
 | 21 | LMS / NLMS adaptive filter                           | `estimators/online`       | ★★★☆☆      |
 | 22 | Savitzky-Golay filter                                | `filters/passive`         | ★★★☆☆      |
-| 23 | CORDIC                                               | `math`                    | ★★★☆☆      |
 | 24 | Runge-Kutta ODE integrators (RK4 + Dormand-Prince)   | `solvers`                 | ★★★☆☆      |
 | 25 | Real-input FFT (RFFT)                                | `analysis`                | ★★★☆☆      |
 | 26 | Controllability / Observability matrices & Gramians  | `control_analysis`        | ★★★☆☆      |
