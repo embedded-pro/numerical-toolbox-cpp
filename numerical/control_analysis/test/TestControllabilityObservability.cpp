@@ -192,8 +192,10 @@ TEST_F(TestControllabilityObservability, observability_gramian_solves_discrete_l
         for (std::size_t c = 0; c < 2; ++c)
         {
             float v = residual.at(r, c);
-            if (v < 0.0f) v = -v;
-            if (v > maxResidual) maxResidual = v;
+            if (v < 0.0f)
+                v = -v;
+            if (v > maxResidual)
+                maxResidual = v;
         }
 
     EXPECT_NEAR(maxResidual, 0.0f, 1e-3f);
