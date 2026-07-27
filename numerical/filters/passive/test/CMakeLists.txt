@@ -16,4 +16,5 @@ target_sources(numerical.filters.passive_test PRIVATE
     TestIir.cpp
     TestMedianFilter.cpp
     TestMovingAverage.cpp
+    TestNotchCombFilter.cpp
 )

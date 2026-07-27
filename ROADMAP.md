@@ -28,7 +28,6 @@ Difficulty legend:
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
 | 15 | Biquad / Second-Order-Section cascade                | `filters/passive`         | ★★★☆☆      |
-| 16 | Notch / comb filter                                  | `filters/passive`         | ★★★☆☆      |
 | 17 | Lead-lag compensator                                 | `controllers`             | ★★★☆☆      |
 | 18 | Quaternion type                                      | `math`                    | ★★★☆☆      |
 | 19 | Luenberger observer + pole placement (Ackermann)     | `controllers`             | ★★★☆☆      |
