@@ -72,10 +72,10 @@ The 7th stage $k_7 = f(y_5, u, t+h)$ equals the first stage of the next accepted
 
 ## Complexity Analysis
 
-| Integrator     | RHS evaluations per accepted step | State memory   |
-|----------------|----------------------------------|----------------|
-| RK4 (fixed)    | 4 (always)                       | $O(n_s)$       |
-| Dormand-Prince | 6 (with FSAL), 7 on first step   | $O(n_s)$       |
+| Integrator     | RHS evaluations per accepted step | State memory |
+|----------------|-----------------------------------|--------------|
+| RK4 (fixed)    | 4 (always)                        | $O(n_s)$     |
+| Dormand-Prince | 6 (with FSAL), 7 on first step    | $O(n_s)$     |
 
 All intermediate stage vectors are stack-allocated. No heap is used. The cost of one step is $O(s \cdot n_s)$ where $s$ is the stage count plus the cost of evaluating $f$.
 
@@ -83,13 +83,13 @@ All intermediate stage vectors are stack-allocated. No heap is used. The cost of
 
 **Scalar decay** $\dot{x} = -x$, $x(0) = 1$, exact solution $x(t) = e^{-t}$, $h = 0.1$:
 
-| Stage | Formula                                           | Value       |
-|-------|---------------------------------------------------|-------------|
-| $k_1$ | $f(1, 0) = -1$                                    | $-1$        |
-| $k_2$ | $f(1 - 0.05, 0.05) = -0.95$                       | $-0.95$     |
-| $k_3$ | $f(1 - 0.0475, 0.05) = -0.9525$                   | $-0.9525$   |
-| $k_4$ | $f(1 - 0.09525, 0.1) = -0.90475$                  | $-0.90475$  |
-| $x_1$ | $1 + (0.1/6)(-1 - 1.9 - 1.905 - 0.90475)$        | $\approx 0.90484$ |
+| Stage | Formula                                   | Value             |
+|-------|-------------------------------------------|-------------------|
+| $k_1$ | $f(1, 0) = -1$                            | $-1$              |
+| $k_2$ | $f(1 - 0.05, 0.05) = -0.95$               | $-0.95$           |
+| $k_3$ | $f(1 - 0.0475, 0.05) = -0.9525$           | $-0.9525$         |
+| $k_4$ | $f(1 - 0.09525, 0.1) = -0.90475$          | $-0.90475$        |
+| $x_1$ | $1 + (0.1/6)(-1 - 1.9 - 1.905 - 0.90475)$ | $\approx 0.90484$ |
 
 Exact: $e^{-0.1} \approx 0.90484$. Agreement to six significant figures — consistent with $O(h^5)$ local error.
 
@@ -103,14 +103,14 @@ Exact: $e^{-0.1} \approx 0.90484$. Agreement to six significant figures — cons
 
 ## Variants & Generalizations
 
-| Variant                      | Key Difference                                                                        |
-|------------------------------|---------------------------------------------------------------------------------------|
-| **Euler (1st order)**        | One stage; $O(h)$ global error; useful only for rough prototyping                    |
-| **RK4 (this)**               | Four stages; $O(h^4)$ global error; standard fixed-step workhorse                    |
-| **Dormand-Prince (this)**    | Seven stages; $O(h^5)$ propagator with built-in $O(h^4)$ error estimate              |
-| **Bogacki-Shampine RK23**    | Three-stage embedded pair; lower overhead for mildly stiff or smooth problems        |
-| **Adams-Bashforth**          | Multi-step; reuses past evaluations; efficient but requires startup phase             |
-| **Implicit RK / SDIRK**      | Solves a nonlinear system at each stage; suitable for stiff problems at the cost of a linear solve per step |
+| Variant                   | Key Difference                                                                                              |
+|---------------------------|-------------------------------------------------------------------------------------------------------------|
+| **Euler (1st order)**     | One stage; $O(h)$ global error; useful only for rough prototyping                                           |
+| **RK4 (this)**            | Four stages; $O(h^4)$ global error; standard fixed-step workhorse                                           |
+| **Dormand-Prince (this)** | Seven stages; $O(h^5)$ propagator with built-in $O(h^4)$ error estimate                                     |
+| **Bogacki-Shampine RK23** | Three-stage embedded pair; lower overhead for mildly stiff or smooth problems                               |
+| **Adams-Bashforth**       | Multi-step; reuses past evaluations; efficient but requires startup phase                                   |
+| **Implicit RK / SDIRK**   | Solves a nonlinear system at each stage; suitable for stiff problems at the cost of a linear solve per step |
 
 ## Applications
 
@@ -134,12 +134,12 @@ graph LR
     C2D -.->|"exact linear alternative"| RK
 ```
 
-| Algorithm                  | Relationship                                                                                  |
-|----------------------------|-----------------------------------------------------------------------------------------------|
-| `dynamics/` models         | Provide the right-hand side $f(x, u, t)$ that RK integrates                                  |
-| Extended Kalman Filter     | Uses RK to propagate the state prediction step between measurements                           |
-| MPC Controller             | Uses RK to simulate the plant over a prediction horizon                                       |
-| ContinuousToDiscrete       | Exact matrix-exponential discretization — an alternative for linear, time-invariant systems   |
+| Algorithm              | Relationship                                                                                |
+|------------------------|---------------------------------------------------------------------------------------------|
+| `dynamics/` models     | Provide the right-hand side $f(x, u, t)$ that RK integrates                                 |
+| Extended Kalman Filter | Uses RK to propagate the state prediction step between measurements                         |
+| MPC Controller         | Uses RK to simulate the plant over a prediction horizon                                     |
+| ContinuousToDiscrete   | Exact matrix-exponential discretization — an alternative for linear, time-invariant systems |
 
 ## References & Further Reading
 
