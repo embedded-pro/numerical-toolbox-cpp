@@ -37,7 +37,29 @@ namespace math
         std::array<T, 2> Rotate(std::array<T, 2> v, T angle) const;
 
     private:
-        static constexpr std::array<T, Iterations> BuildAtanTable()
+        struct VectoringResult
+        {
+            T x;
+            T angle;
+        };
+
+        VectoringResult VectoringMode(T xv, T yv) const
+        {
+            T z{ T(0) };
+            for (std::size_t i = 0; i < Iterations; ++i)
+            {
+                T d{ (yv >= T(0)) ? T(-1) : T(1) };
+                T pow2i{ T(1) / static_cast<T>(std::size_t(1) << i) };
+                T xNew{ xv - d * yv * pow2i };
+                T yNew{ yv + d * xv * pow2i };
+                z -= d * atanTable[i];
+                xv = xNew;
+                yv = yNew;
+            }
+            return VectoringResult{ xv, z };
+        }
+
+        static std::array<T, Iterations> BuildAtanTable()
         {
             std::array<T, Iterations> table{};
             for (std::size_t i = 0; i < Iterations; ++i)
@@ -45,7 +67,7 @@ namespace math
             return table;
         }
 
-        static constexpr T ComputeK()
+        static T ComputeK()
         {
             T k{ T(1) };
             for (std::size_t i = 0; i < Iterations; ++i)
@@ -53,8 +75,8 @@ namespace math
             return k;
         }
 
-        static constexpr std::array<T, Iterations> atanTable{ BuildAtanTable() };
-        static constexpr T K{ ComputeK() };
+        static inline const std::array<T, Iterations> atanTable{ BuildAtanTable() };
+        static inline const T K{ ComputeK() };
     };
 
     template<typename T, std::size_t Iterations>
@@ -120,20 +142,8 @@ namespace math
             quadrantOffset = -pi;
         }
 
-        T z{ T(0) };
-
-        for (std::size_t i = 0; i < Iterations; ++i)
-        {
-            T d{ (yv >= T(0)) ? T(-1) : T(1) };
-            T pow2i{ T(1) / static_cast<T>(std::size_t(1) << i) };
-            T xNew{ xv - d * yv * pow2i };
-            T yNew{ yv + d * xv * pow2i };
-            z -= d * atanTable[i];
-            xv = xNew;
-            yv = yNew;
-        }
-
-        return z + quadrantOffset;
+        auto res = VectoringMode(xv, yv);
+        return res.angle + quadrantOffset;
     }
 
     template<typename T, std::size_t Iterations>
@@ -141,20 +151,8 @@ namespace math
     {
         T xv{ (x < T(0)) ? -x : x };
         T yv{ (y < T(0)) ? -y : y };
-        T z{ T(0) };
-
-        for (std::size_t i = 0; i < Iterations; ++i)
-        {
-            T d{ (yv >= T(0)) ? T(-1) : T(1) };
-            T pow2i{ T(1) / static_cast<T>(std::size_t(1) << i) };
-            T xNew{ xv - d * yv * pow2i };
-            T yNew{ yv + d * xv * pow2i };
-            z -= d * atanTable[i];
-            xv = xNew;
-            yv = yNew;
-        }
-
-        return K * xv;
+        auto res = VectoringMode(xv, yv);
+        return K * res.x;
     }
 
     template<typename T, std::size_t Iterations>

@@ -87,6 +87,24 @@ TEST_F(TestCordic, RotateVector)
     EXPECT_NEAR(result[1], 1.0f, math::Tolerance<float>());
 }
 
+TEST_F(TestCordic, SinCosAboveHalfPi)
+{
+    const float angle{ 2.0f };
+    const float tol{ 1.0f / static_cast<float>(1 << 15) };
+    auto result = cordic.SineCosine(angle);
+    EXPECT_NEAR(result.sin, std::sin(angle), tol);
+    EXPECT_NEAR(result.cos, std::cos(angle), tol);
+}
+
+TEST_F(TestCordic, SinCosBelowNegHalfPi)
+{
+    const float angle{ -2.0f };
+    const float tol{ 1.0f / static_cast<float>(1 << 15) };
+    auto result = cordic.SineCosine(angle);
+    EXPECT_NEAR(result.sin, std::sin(angle), tol);
+    EXPECT_NEAR(result.cos, std::cos(angle), tol);
+}
+
 TEST_F(TestCordic, AccuracyScalesWithIterations)
 {
     math::Cordic<float, 8> cordic8{};
