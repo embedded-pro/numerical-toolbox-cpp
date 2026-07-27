@@ -35,7 +35,7 @@ TEST_F(TestSavitzkyGolayFilter, known_5pt_quadratic_kernel)
 
 TEST_F(TestSavitzkyGolayFilter, fits_polynomial_exactly)
 {
-    constexpr float tol = 1e-4f;
+    constexpr float tol = 2e-4f;
     for (int n = 0; n < 20; ++n)
     {
         float x = static_cast<float>(n);

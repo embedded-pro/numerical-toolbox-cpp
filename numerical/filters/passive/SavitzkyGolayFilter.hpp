@@ -6,6 +6,7 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Matrix.hpp"
 #include <array>
 #include <cstddef>
 #include <type_traits>
@@ -14,38 +15,10 @@ namespace filters::passive
 {
     namespace detail
     {
-        template<typename T, std::size_t Rows, std::size_t Cols>
-        struct SgMatrix
-        {
-            std::array<T, Rows * Cols> data{};
-
-            constexpr T& at(std::size_t r, std::size_t c)
-            {
-                return data[r * Cols + c];
-            }
-
-            constexpr const T& at(std::size_t r, std::size_t c) const
-            {
-                return data[r * Cols + c];
-            }
-        };
-
-        template<typename T, std::size_t Window, std::size_t Order>
-        constexpr SgMatrix<T, Order + 1, Order + 1> ComputeAtA(
-            const SgMatrix<T, Window, Order + 1>& A)
-        {
-            SgMatrix<T, Order + 1, Order + 1> result{};
-            for (std::size_t i = 0; i < Order + 1; ++i)
-                for (std::size_t j = 0; j < Order + 1; ++j)
-                    for (std::size_t k = 0; k < Window; ++k)
-                        result.at(i, j) += A.at(k, i) * A.at(k, j);
-            return result;
-        }
-
         template<typename T, std::size_t N>
-        constexpr SgMatrix<T, N, N> InvertLu(SgMatrix<T, N, N> M)
+        constexpr math::Matrix<T, N, N> InvertLu(math::Matrix<T, N, N> M)
         {
-            SgMatrix<T, N, N> inv{};
+            math::Matrix<T, N, N> inv{};
             for (std::size_t i = 0; i < N; ++i)
                 inv.at(i, i) = T{ 1 };
 
@@ -78,25 +51,12 @@ namespace filters::passive
             return inv;
         }
 
-        template<typename T, std::size_t Window, std::size_t Order>
-        constexpr SgMatrix<T, Order + 1, Window> ComputeProjection(
-            const SgMatrix<T, Window, Order + 1>& A,
-            const SgMatrix<T, Order + 1, Order + 1>& AtAinv)
-        {
-            SgMatrix<T, Order + 1, Window> result{};
-            for (std::size_t i = 0; i < Order + 1; ++i)
-                for (std::size_t j = 0; j < Window; ++j)
-                    for (std::size_t k = 0; k < Order + 1; ++k)
-                        result.at(i, j) += AtAinv.at(i, k) * A.at(j, k);
-            return result;
-        }
-
         template<typename T, std::size_t Window, std::size_t Order, std::size_t Deriv>
         constexpr std::array<T, Window> ComputeKernel()
         {
             constexpr std::size_t half = (Window - 1) / 2;
 
-            SgMatrix<T, Window, Order + 1> A{};
+            math::Matrix<T, Window, Order + 1> A{};
             for (std::size_t row = 0; row < Window; ++row)
             {
                 T offset = static_cast<T>(static_cast<int>(row) - static_cast<int>(half));
@@ -108,9 +68,19 @@ namespace filters::passive
                 }
             }
 
-            auto AtA = ComputeAtA<T, Window, Order>(A);
+            math::Matrix<T, Order + 1, Order + 1> AtA{};
+            for (std::size_t i = 0; i < Order + 1; ++i)
+                for (std::size_t j = 0; j < Order + 1; ++j)
+                    for (std::size_t k = 0; k < Window; ++k)
+                        AtA.at(i, j) += A.at(k, i) * A.at(k, j);
+
             auto AtAinv = InvertLu<T, Order + 1>(AtA);
-            auto C = ComputeProjection<T, Window, Order>(A, AtAinv);
+
+            math::Matrix<T, Order + 1, Window> C{};
+            for (std::size_t i = 0; i < Order + 1; ++i)
+                for (std::size_t j = 0; j < Window; ++j)
+                    for (std::size_t k = 0; k < Order + 1; ++k)
+                        C.at(i, j) += AtAinv.at(i, k) * A.at(j, k);
 
             std::array<T, Window> coeffs{};
             for (std::size_t j = 0; j < Window; ++j)
