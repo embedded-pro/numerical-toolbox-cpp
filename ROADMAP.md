@@ -29,7 +29,6 @@ Difficulty legend:
 |----|------------------------------------------------------|---------------------------|------------|
 | 15 | Biquad / Second-Order-Section cascade                | `filters/passive`         | ★★★☆☆      |
 | 20 | Integral / servo state feedback (LQI)                | `controllers`             | ★★★☆☆      |
-| 22 | Savitzky-Golay filter                                | `filters/passive`         | ★★★☆☆      |
 | 24 | Runge-Kutta ODE integrators (RK4 + Dormand-Prince)   | `solvers`                 | ★★★☆☆      |
 | 25 | Real-input FFT (RFFT)                                | `analysis`                | ★★★☆☆      |
 | 26 | Controllability / Observability matrices & Gramians  | `control_analysis`        | ★★★☆☆      |
