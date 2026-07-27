@@ -63,10 +63,10 @@ namespace solvers
         OdeSystem<T, StateSize, InputSize>& system_;
         T absTol_;
         T relTol_;
-        T hMin_;
-        T hMax_;
-        bool fsalValid_;
-        StateVector lastStage_;
+        T hMin_{ T{ 1e-10 } };
+        T hMax_{ T{ 1 } };
+        bool fsalValid_{ false };
+        StateVector lastStage_{};
     };
 
     template<typename T, std::size_t StateSize>
@@ -87,10 +87,10 @@ namespace solvers
         OdeSystem<T, StateSize, 0>& system_;
         T absTol_;
         T relTol_;
-        T hMin_;
-        T hMax_;
-        bool fsalValid_;
-        StateVector lastStage_;
+        T hMin_{ T{ 1e-10 } };
+        T hMax_{ T{ 1 } };
+        bool fsalValid_{ false };
+        StateVector lastStage_{};
     };
 
     // Implementation //
@@ -181,10 +181,6 @@ namespace solvers
         : system_{ system }
         , absTol_{ absTol }
         , relTol_{ relTol }
-        , hMin_{ T{ 1e-10 } }
-        , hMax_{ T{ 1 } }
-        , fsalValid_{ false }
-        , lastStage_{}
     {}
 
     template<typename T, std::size_t StateSize, std::size_t InputSize>
@@ -211,10 +207,6 @@ namespace solvers
         : system_{ system }
         , absTol_{ absTol }
         , relTol_{ relTol }
-        , hMin_{ T{ 1e-10 } }
-        , hMax_{ T{ 1 } }
-        , fsalValid_{ false }
-        , lastStage_{}
     {}
 
     template<typename T, std::size_t StateSize>
