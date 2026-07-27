@@ -14,6 +14,7 @@ target_sources(numerical.controllers_test PRIVATE
     TestGainScheduledController.cpp
     TestLqg.cpp
     TestLqr.cpp
+    TestLuenbergerObserver.cpp
     TestMpc.cpp
     TestPidIncremental.cpp
     TestSaturationRateLimiter.cpp

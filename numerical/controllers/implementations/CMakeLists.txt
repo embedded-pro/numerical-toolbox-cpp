@@ -17,6 +17,7 @@ target_sources(numerical.controllers.implementations PRIVATE
     GainScheduledController.hpp
     Lqg.hpp
     Lqr.hpp
+    LuenbergerObserver.hpp
     Mpc.hpp
     PidIncremental.hpp
     SaturationRateLimiter.hpp
@@ -28,6 +29,7 @@ numerical_add_coverage_sources(numerical.controllers.implementations
     GainScheduledController.cpp
     Lqg.cpp
     Lqr.cpp
+    LuenbergerObserver.cpp
     Mpc.cpp
     PidIncremental.cpp
     SaturationRateLimiter.cpp
