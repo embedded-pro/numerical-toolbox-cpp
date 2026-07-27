@@ -1,3 +1,4 @@
+#include "numerical/solvers/DormandPrince45.hpp"
 #include "numerical/solvers/RungeKuttaIntegrators.hpp"
 
 namespace solvers
