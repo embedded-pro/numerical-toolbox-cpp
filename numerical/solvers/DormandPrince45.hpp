@@ -201,7 +201,10 @@ namespace solvers
             const StateVector& x, const InputVector& u, T t, T hSuggested)
     {
         return detail::DpStepImpl<T, StateSize>(
-            [&](const StateVector& sx, T st) { return system_.Derivative(sx, u, st); },
+            [&](const StateVector& sx, T st)
+            {
+                return system_.Derivative(sx, u, st);
+            },
             x, t, hSuggested, absTol_, relTol_, hMin_, hMax_, fsalValid_, lastStage_);
     }
 
@@ -230,7 +233,10 @@ namespace solvers
         DormandPrince45<T, StateSize, 0>::Step(const StateVector& x, T t, T hSuggested)
     {
         return detail::DpStepImpl<T, StateSize>(
-            [&](const StateVector& sx, T st) { return system_.Derivative(sx, st); },
+            [&](const StateVector& sx, T st)
+            {
+                return system_.Derivative(sx, st);
+            },
             x, t, hSuggested, absTol_, relTol_, hMin_, hMax_, fsalValid_, lastStage_);
     }
 
