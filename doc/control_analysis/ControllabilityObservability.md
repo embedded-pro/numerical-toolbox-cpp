@@ -50,12 +50,12 @@ Rank is computed by Gaussian elimination with partial pivoting on a working copy
 
 ## Complexity Analysis
 
-| Operation | Time | Space | Notes |
-|---|---|---|---|
-| Controllability matrix | $O(n^2 m)$ per column, $n$ columns → $O(n^3 m)$ | $O(nm)$ output | Iterative matmul |
-| Observability matrix | $O(n^2 p)$ per row-block, $n$ blocks → $O(n^3 p)$ | $O(np)$ output | Iterative matmul |
-| Rank (Gaussian elim) | $O(r^2 \min(r,c))$ where $r,c$ are matrix dims | $O(rc)$ copy | Partial pivoting |
-| Gramian (Lyapunov fixed-point) | $O(K n^3)$ iterations | $O(n^2)$ | Up to 200 iterations |
+| Operation                      | Time                                              | Space          | Notes                |
+|--------------------------------|---------------------------------------------------|----------------|----------------------|
+| Controllability matrix         | $O(n^2 m)$ per column, $n$ columns → $O(n^3 m)$   | $O(nm)$ output | Iterative matmul     |
+| Observability matrix           | $O(n^2 p)$ per row-block, $n$ blocks → $O(n^3 p)$ | $O(np)$ output | Iterative matmul     |
+| Rank (Gaussian elim)           | $O(r^2 \min(r,c))$ where $r,c$ are matrix dims    | $O(rc)$ copy   | Partial pivoting     |
+| Gramian (Lyapunov fixed-point) | $O(K n^3)$ iterations                             | $O(n^2)$       | Up to 200 iterations |
 
 ## Step-by-Step Walkthrough
 
