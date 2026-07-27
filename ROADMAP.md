@@ -30,7 +30,6 @@ Difficulty legend:
 | 15 | Biquad / Second-Order-Section cascade                | `filters/passive`         | ★★★☆☆      |
 | 16 | Notch / comb filter                                  | `filters/passive`         | ★★★☆☆      |
 | 17 | Lead-lag compensator                                 | `controllers`             | ★★★☆☆      |
-| 18 | Quaternion type                                      | `math`                    | ★★★☆☆      |
 | 19 | Luenberger observer + pole placement (Ackermann)     | `controllers`             | ★★★☆☆      |
 | 20 | Integral / servo state feedback (LQI)                | `controllers`             | ★★★☆☆      |
 | 21 | LMS / NLMS adaptive filter                           | `estimators/online`       | ★★★☆☆      |

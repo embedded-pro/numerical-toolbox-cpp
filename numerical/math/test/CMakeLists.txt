@@ -12,6 +12,7 @@ target_sources(numerical.math_test PRIVATE
     TestLinearTimeInvariant.cpp
     TestQNumber.cpp
     TestMatrix.cpp
+    TestQuaternion.cpp
     TestRecursiveBuffer.cpp
     TestStatistics.cpp
     TestToeplitz.cpp

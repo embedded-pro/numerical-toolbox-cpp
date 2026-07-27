@@ -17,6 +17,7 @@ target_sources(numerical.math PRIVATE
     LinearTimeInvariant.hpp
     Matrix.hpp
     QNumber.hpp
+    Quaternion.hpp
     RecursiveBuffer.hpp
     SingleInstructionMultipleData.hpp
     Statistics.hpp
@@ -30,6 +31,7 @@ numerical_add_coverage_sources(numerical.math
     LinearTimeInvariant.cpp
     Matrix.cpp
     QNumber.cpp
+    Quaternion.cpp
 )
 
 add_subdirectory(test)
