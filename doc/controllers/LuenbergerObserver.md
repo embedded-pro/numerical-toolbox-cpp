@@ -49,10 +49,10 @@ Ackermann's formula requires $\mathcal{O}$ to be invertible, which holds if and 
 
 ## Complexity Analysis
 
-| Phase              | Time           | Space     | Notes                                               |
-|--------------------|----------------|-----------|-----------------------------------------------------|
-| Design (Ackermann) | $O(n^3)$       | $O(n^2)$  | Observability matrix build + linear solve           |
-| Update (per step)  | $O(n^2 + np)$  | $O(n^2)$  | Matrix-vector products; dominant cost is $A\hat{x}$ |
+| Phase              | Time          | Space    | Notes                                               |
+|--------------------|---------------|----------|-----------------------------------------------------|
+| Design (Ackermann) | $O(n^3)$      | $O(n^2)$ | Observability matrix build + linear solve           |
+| Update (per step)  | $O(n^2 + np)$ | $O(n^2)$ | Matrix-vector products; dominant cost is $A\hat{x}$ |
 
 The design phase is offline. The real-time cost per sample is dominated by the $n \times n$ state-transition multiply.
 
@@ -90,13 +90,13 @@ $$L = \varphi_d(A) \cdot \begin{bmatrix}0\\1\end{bmatrix} = \begin{bmatrix}1.5\\
 
 ## Variants & Generalizations
 
-| Variant                         | Key Difference                                                                                 |
-|---------------------------------|-----------------------------------------------------------------------------------------------|
-| **Kalman Filter**               | Stochastic design — minimizes covariance rather than placing poles; handles noise statistics  |
-| **Extended Luenberger Observer**| Linearizes a nonlinear plant around the estimate for quasi-linear operation                   |
-| **Unknown-Input Observer**      | Estimates states in the presence of unmeasured disturbances                                   |
-| **Reduced-Order Observer**      | Estimates only the unmeasured states, using measured outputs directly                         |
-| **Continuous-time observer**    | Uses $\dot{\hat{x}} = A\hat{x} + Bu + L(y - C\hat{x})$; same structure, continuous pole placement |
+| Variant                          | Key Difference                                                                                    |
+|----------------------------------|---------------------------------------------------------------------------------------------------|
+| **Kalman Filter**                | Stochastic design — minimizes covariance rather than placing poles; handles noise statistics      |
+| **Extended Luenberger Observer** | Linearizes a nonlinear plant around the estimate for quasi-linear operation                       |
+| **Unknown-Input Observer**       | Estimates states in the presence of unmeasured disturbances                                       |
+| **Reduced-Order Observer**       | Estimates only the unmeasured states, using measured outputs directly                             |
+| **Continuous-time observer**     | Uses $\dot{\hat{x}} = A\hat{x} + Bu + L(y - C\hat{x})$; same structure, continuous pole placement |
 
 ## Applications
 
@@ -120,12 +120,12 @@ graph LR
     KF -.->|"stochastic counterpart"| LO
 ```
 
-| Algorithm                                                      | Relationship                                                              |
-|----------------------------------------------------------------|---------------------------------------------------------------------------|
-| [Linear Time-Invariant Model](LinearTimeInvariant.md)          | Supplies the $(A, B, C, D)$ matrices used in both design and update steps |
-| [Gaussian Elimination](../solvers/GaussianElimination.md)      | Solves $\mathcal{O} x = e_n$ inside Ackermann's formula                   |
-| [LQR Controller](Lqr.md)                                       | Primary consumer of the observer's state estimate                         |
-| [Kalman Filter](../filters/active/KalmanFilter.md)             | Stochastic counterpart; adds noise covariance propagation                 |
+| Algorithm                                                 | Relationship                                                              |
+|-----------------------------------------------------------|---------------------------------------------------------------------------|
+| [Linear Time-Invariant Model](LinearTimeInvariant.md)     | Supplies the $(A, B, C, D)$ matrices used in both design and update steps |
+| [Gaussian Elimination](../solvers/GaussianElimination.md) | Solves $\mathcal{O} x = e_n$ inside Ackermann's formula                   |
+| [LQR Controller](Lqr.md)                                  | Primary consumer of the observer's state estimate                         |
+| [Kalman Filter](../filters/active/KalmanFilter.md)        | Stochastic counterpart; adds noise covariance propagation                 |
 
 ## References & Further Reading
 
