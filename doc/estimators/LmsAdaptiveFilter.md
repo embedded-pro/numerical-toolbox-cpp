@@ -44,9 +44,9 @@ a sufficient condition being $\mu < 2 / (N \cdot \sigma_x^2)$. For NLMS the stab
 
 ## Complexity Analysis
 
-| Case    | Time        | Space      | Notes                                          |
-|---------|-------------|------------|------------------------------------------------|
-| Any     | $O(N)$      | $O(N)$     | Two dot products + one AXPY, all length $N$    |
+| Case | Time   | Space  | Notes                                       |
+|------|--------|--------|---------------------------------------------|
+| Any  | $O(N)$ | $O(N)$ | Two dot products + one AXPY, all length $N$ |
 
 No covariance matrix is stored; memory is exactly two vectors of length $N$ (weights and delay line).
 
@@ -54,11 +54,11 @@ No covariance matrix is stored; memory is exactly two vectors of length $N$ (wei
 
 Consider a 2-tap system with true plant $\mathbf{w}^* = [0.5,\ 0.5]^\top$, $\mu = 0.1$, and a white input sequence.
 
-| Step | Input | Delay line $\mathbf{x}$ | Output $y$ | Desired $d$ | Error $e$ | Weight update direction |
-|------|-------|------------------------|-----------|-------------|-----------|------------------------|
-| 1    | 1.0   | [1.0, 0.0]             | 0.0       | 0.5         | 0.5       | $+0.05\mathbf{x}$     |
-| 2    | 0.8   | [0.8, 1.0]             | 0.04      | 0.9         | 0.86      | $+0.086\mathbf{x}$    |
-| …    | …     | …                      | …         | …           | …         | converges to $\mathbf{w}^*$ |
+| Step | Input | Delay line $\mathbf{x}$ | Output $y$ | Desired $d$ | Error $e$ | Weight update direction     |
+|------|-------|-------------------------|------------|-------------|-----------|-----------------------------|
+| 1    | 1.0   | [1.0, 0.0]              | 0.0        | 0.5         | 0.5       | $+0.05\mathbf{x}$           |
+| 2    | 0.8   | [0.8, 1.0]              | 0.04       | 0.9         | 0.86      | $+0.086\mathbf{x}$          |
+| …    | …     | …                       | …          | …           | …         | converges to $\mathbf{w}^*$ |
 
 After many iterations the error approaches zero and the weights stabilize near $[0.5,\ 0.5]^\top$.
 
