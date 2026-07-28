@@ -168,14 +168,13 @@ TEST_F(TestBiquadCascade, peaking_boosts_center_freq)
     for (int i = 0; i < settleSamples; ++i)
         bq.Filter(std::sin(static_cast<float>(i) * w));
 
-    float maxAmp{ 0.0f };
+    double sumSquares{ 0.0 };
     for (int i = settleSamples; i < settleSamples + measureSamples; ++i)
     {
         const float y{ bq.Filter(std::sin(static_cast<float>(i) * w)) };
-        const float absY{ y < 0.0f ? -y : y };
-        if (absY > maxAmp)
-            maxAmp = absY;
+        sumSquares += static_cast<double>(y) * y;
     }
 
-    EXPECT_NEAR(maxAmp, std::pow(10.0f, gainDb / 20.0f), 0.05f);
+    const float amplitude{ static_cast<float>(std::sqrt(2.0 * sumSquares / measureSamples)) };
+    EXPECT_NEAR(amplitude, std::pow(10.0f, gainDb / 20.0f), math::Tolerance<float>());
 }
