@@ -28,7 +28,6 @@ Difficulty legend:
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
 | 15 | Biquad / Second-Order-Section cascade                | `filters/passive`         | ★★★☆☆      |
-| 20 | Integral / servo state feedback (LQI)                | `controllers`             | ★★★☆☆      |
 | 27 | QR decomposition (Householder / Givens)              | `solvers`                 | ★★★★☆      |
 | 28 | LU decomposition with partial pivoting               | `solvers`                 | ★★★★☆      |
 | 29 | Matrix exponential (scaling & squaring + Padé)       | `math`                    | ★★★★☆      |
