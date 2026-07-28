@@ -109,8 +109,10 @@ namespace solvers
         template<typename T>
         T DpClamp(T val, T lo, T hi)
         {
-            if (val < lo) return lo;
-            if (val > hi) return hi;
+            if (val < lo)
+                return lo;
+            if (val > hi)
+                return hi;
             return val;
         }
 
@@ -208,7 +210,10 @@ namespace solvers
             const StateVector& x, const InputVector& u, T t, T hSuggested)
     {
         return detail::DpStepImpl<T, StateSize>(
-            [this, &u](const StateVector& sx, T st) { return system_.Derivative(sx, u, st); },
+            [this, &u](const StateVector& sx, T st)
+            {
+                return system_.Derivative(sx, u, st);
+            },
             x, t, hSuggested,
             detail::DpConfig<T>{ absTol_, relTol_, hMin_, hMax_ },
             fsalValid_, lastStage_);
@@ -235,7 +240,10 @@ namespace solvers
         DormandPrince45<T, StateSize, 0>::Step(const StateVector& x, T t, T hSuggested)
     {
         return detail::DpStepImpl<T, StateSize>(
-            [this](const StateVector& sx, T st) { return system_.Derivative(sx, st); },
+            [this](const StateVector& sx, T st)
+            {
+                return system_.Derivative(sx, st);
+            },
             x, t, hSuggested,
             detail::DpConfig<T>{ absTol_, relTol_, hMin_, hMax_ },
             fsalValid_, lastStage_);
