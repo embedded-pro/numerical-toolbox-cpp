@@ -4,10 +4,9 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
-#include "numerical/math/CompilerOptimizations.hpp"
-
 #include "infra/util/BoundedVector.hpp"
 #include "numerical/analysis/FastFourierTransform.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/ComplexNumber.hpp"
 #include <cmath>
 #include <numbers>

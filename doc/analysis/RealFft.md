@@ -51,10 +51,10 @@ interleave back to $x$.
 
 ## Complexity Analysis
 
-| Case    | Time              | Space                   | Notes                                          |
-|---------|-------------------|-------------------------|------------------------------------------------|
-| Forward | $O(N \log N / 2)$ | $O(N)$ stack (bounded)  | Two half-length DFTs plus $O(N)$ combine pass  |
-| Inverse | $O(N \log N / 2)$ | $O(N)$ stack (bounded)  | Two half-length IDFTs plus interleave pass     |
+| Case    | Time              | Space                  | Notes                                         |
+|---------|-------------------|------------------------|-----------------------------------------------|
+| Forward | $O(N \log N / 2)$ | $O(N)$ stack (bounded) | Two half-length DFTs plus $O(N)$ combine pass |
+| Inverse | $O(N \log N / 2)$ | $O(N)$ stack (bounded) | Two half-length IDFTs plus interleave pass    |
 
 The constant factor is approximately half that of a complex $N$-point FFT because
 both sub-DFTs exploit real-input symmetry internally (they receive real-only vectors).

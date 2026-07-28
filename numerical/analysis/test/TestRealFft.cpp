@@ -76,7 +76,7 @@ TEST_F(TestRealFft, single_real_sinusoid_hits_one_bin)
 TEST_F(TestRealFft, matches_reference_complex_fft)
 {
     static constexpr std::array<float, N> signal{ 0.1f, 0.3f, -0.2f, 0.5f, 0.4f, -0.1f, 0.0f, 0.2f,
-                                                   -0.3f, 0.6f, 0.1f, -0.4f, 0.2f, 0.0f, -0.1f, 0.3f };
+        -0.3f, 0.6f, 0.1f, -0.4f, 0.2f, 0.0f, -0.1f, 0.3f };
     input.resize(N);
     for (std::size_t n{ 0 }; n < N; ++n)
         input[n] = signal[n];
@@ -113,7 +113,7 @@ TEST_F(TestRealFft, nyquist_and_dc_are_real)
 TEST_F(TestRealFft, inverse_is_left_inverse)
 {
     static constexpr std::array<float, N> signal{ 0.5f, -0.3f, 0.1f, 0.8f, -0.6f, 0.2f, 0.0f, -0.4f,
-                                                   0.7f, -0.1f, 0.3f, -0.5f, 0.4f, 0.1f, -0.2f, 0.6f };
+        0.7f, -0.1f, 0.3f, -0.5f, 0.4f, 0.1f, -0.2f, 0.6f };
     input.resize(N);
     for (std::size_t n{ 0 }; n < N; ++n)
         input[n] = signal[n];
@@ -130,9 +130,9 @@ TEST_F(TestRealFft, linearity_holds)
     static constexpr float a{ 2.0f };
     static constexpr float b{ 0.5f };
     static constexpr std::array<float, N> x1{ 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f,
-                                               1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f };
+        1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f };
     static constexpr std::array<float, N> x2{ 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f,
-                                               0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f };
+        0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f };
 
     typename infra::BoundedVector<float>::template WithMaxSize<N> in1{};
     typename infra::BoundedVector<float>::template WithMaxSize<N> in2{};
