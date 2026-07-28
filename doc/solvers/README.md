@@ -11,3 +11,4 @@ Numerical solvers for linear systems, polynomial roots, and matrix equations.
 | [Levinson-Durbin](LevinsonDurbin.md)                                       | Fast solver for Toeplitz linear systems exploiting structural symmetry |
 | [Durand-Kerner](DurandKerner.md)                                           | Simultaneous iterative root-finder for polynomials                     |
 | [Discrete Algebraic Riccati Equation](DiscreteAlgebraicRiccatiEquation.md) | Iterative solver for the DARE arising in LQR and Kalman filter design  |
+| [Runge-Kutta ODE Integrators](RungeKuttaIntegrators.md)                    | Fixed-step RK4 and adaptive Dormand-Prince RK45 for ODE integration    |

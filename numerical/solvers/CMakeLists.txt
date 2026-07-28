@@ -13,9 +13,12 @@ target_link_libraries(numerical.solver ${NUMERICAL_VISIBILITY}
 target_sources(numerical.solver PRIVATE
     CholeskyDecomposition.hpp
     DiscreteAlgebraicRiccatiEquation.hpp
+    DormandPrince45.hpp
     DurandKerner.hpp
     GaussianElimination.hpp
     LevinsonDurbin.hpp
+    OdeSystem.hpp
+    RungeKuttaIntegrators.hpp
     Solver.hpp
 )
 
@@ -23,6 +26,7 @@ numerical_add_coverage_sources(numerical.solver
     DiscreteAlgebraicRiccatiEquation.cpp
     DurandKerner.cpp
     GaussianElimination.cpp
+    RungeKuttaIntegrators.cpp
 )
 
 add_subdirectory(test)
