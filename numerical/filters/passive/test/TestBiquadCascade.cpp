@@ -114,3 +114,68 @@ TEST_F(TestBiquadCascade, reset_clears_state)
             filters::passive::Biquad<float>::LowPass(fc, fs, Q).b0,
         1e-5f);
 }
+
+TEST_F(TestBiquadCascade, bandpass_attenuates_dc)
+{
+    filters::passive::Biquad<float> bq{ filters::passive::Biquad<float>::BandPass(fc, fs, Q) };
+
+    for (int i = 0; i < 500; ++i)
+        bq.Filter(1.0f);
+
+    EXPECT_NEAR(bq.Filter(1.0f), 0.0f, 1e-4f);
+}
+
+TEST_F(TestBiquadCascade, notch_rejects_center_freq)
+{
+    filters::passive::Biquad<float> bq{ filters::passive::Biquad<float>::Notch(fc, fs, Q) };
+    const float w{ 2.0f * std::numbers::pi_v<float> * fc / fs };
+    constexpr int settleSamples{ 500 };
+    constexpr int measureSamples{ 100 };
+
+    for (int i = 0; i < settleSamples; ++i)
+        bq.Filter(std::sin(static_cast<float>(i) * w));
+
+    float maxAmp{ 0.0f };
+    for (int i = settleSamples; i < settleSamples + measureSamples; ++i)
+    {
+        const float y{ bq.Filter(std::sin(static_cast<float>(i) * w)) };
+        const float absY{ y < 0.0f ? -y : y };
+        if (absY > maxAmp)
+            maxAmp = absY;
+    }
+
+    EXPECT_LT(maxAmp, 0.01f);
+}
+
+TEST_F(TestBiquadCascade, notch_passes_dc)
+{
+    filters::passive::Biquad<float> bq{ filters::passive::Biquad<float>::Notch(fc, fs, Q) };
+
+    for (int i = 0; i < 500; ++i)
+        bq.Filter(1.0f);
+
+    EXPECT_NEAR(bq.Filter(1.0f), 1.0f, 1e-3f);
+}
+
+TEST_F(TestBiquadCascade, peaking_boosts_center_freq)
+{
+    constexpr float gainDb{ 6.0f };
+    filters::passive::Biquad<float> bq{ filters::passive::Biquad<float>::Peaking(fc, fs, Q, gainDb) };
+    const float w{ 2.0f * std::numbers::pi_v<float> * fc / fs };
+    constexpr int settleSamples{ 500 };
+    constexpr int measureSamples{ 100 };
+
+    for (int i = 0; i < settleSamples; ++i)
+        bq.Filter(std::sin(static_cast<float>(i) * w));
+
+    float maxAmp{ 0.0f };
+    for (int i = settleSamples; i < settleSamples + measureSamples; ++i)
+    {
+        const float y{ bq.Filter(std::sin(static_cast<float>(i) * w)) };
+        const float absY{ y < 0.0f ? -y : y };
+        if (absY > maxAmp)
+            maxAmp = absY;
+    }
+
+    EXPECT_NEAR(maxAmp, std::pow(10.0f, gainDb / 20.0f), 0.05f);
+}
