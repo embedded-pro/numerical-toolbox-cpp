@@ -25,6 +25,15 @@ namespace solvers
     namespace detail
     {
         template<typename T>
+        struct DpConfig
+        {
+            T absTol;
+            T relTol;
+            T hMin;
+            T hMax;
+        };
+
+        template<typename T>
         T DpClamp(T val, T lo, T hi);
 
         template<typename T, std::size_t StateSize>
@@ -40,7 +49,7 @@ namespace solvers
                 DerivFn deriv,
                 const math::Vector<T, StateSize>& x,
                 T t, T hSuggested,
-                T absTol, T relTol, T hMin, T hMax,
+                const DpConfig<T>& cfg,
                 bool& fsalValid, math::Vector<T, StateSize>& lastStage);
     }
 
@@ -63,7 +72,7 @@ namespace solvers
         OdeSystem<T, StateSize, InputSize>& system_;
         T absTol_;
         T relTol_;
-        T hMin_{ T{ 1e-10 } };
+        T hMin_{ static_cast<T>(1e-10) };
         T hMax_{ T{ 1 } };
         bool fsalValid_{ false };
         StateVector lastStage_{};
@@ -87,7 +96,7 @@ namespace solvers
         OdeSystem<T, StateSize, 0>& system_;
         T absTol_;
         T relTol_;
-        T hMin_{ T{ 1e-10 } };
+        T hMin_{ static_cast<T>(1e-10) };
         T hMax_{ T{ 1 } };
         bool fsalValid_{ false };
         StateVector lastStage_{};
@@ -100,7 +109,9 @@ namespace solvers
         template<typename T>
         T DpClamp(T val, T lo, T hi)
         {
-            return val < lo ? lo : (val > hi ? hi : val);
+            if (val < lo) return lo;
+            if (val > hi) return hi;
+            return val;
         }
 
         template<typename T, std::size_t StateSize>
@@ -126,12 +137,12 @@ namespace solvers
                 DerivFn deriv,
                 const math::Vector<T, StateSize>& x,
                 T t, T hSuggested,
-                T absTol, T relTol, T hMin, T hMax,
+                const DpConfig<T>& cfg,
                 bool& fsalValid, math::Vector<T, StateSize>& lastStage)
         {
             using StateVector = math::Vector<T, StateSize>;
 
-            T h{ DpClamp(hSuggested, hMin, hMax) };
+            T h{ DpClamp(hSuggested, cfg.hMin, cfg.hMax) };
 
             StateVector k1{ fsalValid ? lastStage : deriv(x, t) };
             StateVector k2{ deriv(x + k1 * (T{ 1 } / T{ 5 } * h), t + T{ 1 } / T{ 5 } * h) };
@@ -158,10 +169,10 @@ namespace solvers
                 x + k1 * (T{ 5179 } / T{ 57600 } * h) + k3 * (T{ 7571 } / T{ 16695 } * h) + k4 * (T{ 393 } / T{ 640 } * h * T{ -1 }) + k5 * (T{ 92097 } / T{ 339200 } * h) + k6 * (T{ 187 } / T{ 2100 } * h) + k7 * (T{ 1 } / T{ 40 } * h)
             };
 
-            T err{ DpWeightedNorm(y5 - y4, x, absTol, relTol) };
-            T scaledErr{ err <= T{ 0 } ? T{ 1e-10 } : err };
-            T factor{ DpClamp(T{ 0.9 } * std::pow(scaledErr, T{ -1 } / T{ 5 }), T{ 0.2 }, T{ 5 }) };
-            T hNew{ DpClamp(h * factor, hMin, hMax) };
+            T err{ DpWeightedNorm(y5 - y4, x, cfg.absTol, cfg.relTol) };
+            T scaledErr{ err <= T{ 0 } ? static_cast<T>(1e-10) : err };
+            T factor{ DpClamp(static_cast<T>(0.9) * std::pow(scaledErr, T{ -1 } / T{ 5 }), static_cast<T>(0.2), T{ 5 }) };
+            T hNew{ DpClamp(h * factor, cfg.hMin, cfg.hMax) };
 
             if (err <= T{ 1 })
             {
@@ -197,11 +208,10 @@ namespace solvers
             const StateVector& x, const InputVector& u, T t, T hSuggested)
     {
         return detail::DpStepImpl<T, StateSize>(
-            [&](const StateVector& sx, T st)
-            {
-                return system_.Derivative(sx, u, st);
-            },
-            x, t, hSuggested, absTol_, relTol_, hMin_, hMax_, fsalValid_, lastStage_);
+            [this, &u](const StateVector& sx, T st) { return system_.Derivative(sx, u, st); },
+            x, t, hSuggested,
+            detail::DpConfig<T>{ absTol_, relTol_, hMin_, hMax_ },
+            fsalValid_, lastStage_);
     }
 
     template<typename T, std::size_t StateSize>
@@ -225,11 +235,10 @@ namespace solvers
         DormandPrince45<T, StateSize, 0>::Step(const StateVector& x, T t, T hSuggested)
     {
         return detail::DpStepImpl<T, StateSize>(
-            [&](const StateVector& sx, T st)
-            {
-                return system_.Derivative(sx, st);
-            },
-            x, t, hSuggested, absTol_, relTol_, hMin_, hMax_, fsalValid_, lastStage_);
+            [this](const StateVector& sx, T st) { return system_.Derivative(sx, st); },
+            x, t, hSuggested,
+            detail::DpConfig<T>{ absTol_, relTol_, hMin_, hMax_ },
+            fsalValid_, lastStage_);
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
