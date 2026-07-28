@@ -21,7 +21,7 @@ Refer to the documentation to quickly integrate and utilize the library's signal
 | [Controllers](doc/controllers/README.md)                           | Bang-Bang/Hysteresis, PID, LQR, MPC, Saturation, Rate Limiter, Slew-Limited Saturation, Feedforward/2-DOF, Gain-Scheduled Controller, Lead-Lag Compensator, Luenberger Observer |
 | [Dynamics](doc/dynamics/README.md)                                 | Euler-Lagrange, Newton-Euler, Recursive Newton-Euler, ABA            |
 | [Estimators](doc/estimators/README.md)                             | Linear Regression, Polynomial Fitting, Yule-Walker (offline), Recursive Least Squares, LMS / NLMS Adaptive Filter (online) |
-| [Filters](doc/filters/README.md)                                   | Kalman, Extended Kalman, Unscented Kalman, Alpha-Beta/Alpha-Beta-Gamma, FIR, IIR, Exponential Moving Average, Moving Average, Complementary, Median Filter, CIC (Cascaded Integrator-Comb), Notch/Comb Filter, Savitzky-Golay Filter |
+| [Filters](doc/filters/README.md)                                   | Kalman, Extended Kalman, Unscented Kalman, Alpha-Beta/Alpha-Beta-Gamma, FIR, IIR, Exponential Moving Average, Moving Average, Complementary, Median Filter, CIC (Cascaded Integrator-Comb), Notch/Comb Filter, Savitzky-Golay Filter, Biquad/Second-Order-Section Cascade |
 | [Kinematics](doc/kinematics/README.md)                             | Forward Kinematics                                                   |
 | [Neural Network](doc/neural_network/README.md)                     | Layers, activations, losses, model                                   |
 | [Optimization](doc/optimization/README.md)                         | Gradient Descent                                                     |
