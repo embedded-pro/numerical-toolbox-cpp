@@ -29,7 +29,6 @@ Difficulty legend:
 |----|------------------------------------------------------|---------------------------|------------|
 | 15 | Biquad / Second-Order-Section cascade                | `filters/passive`         | ★★★☆☆      |
 | 20 | Integral / servo state feedback (LQI)                | `controllers`             | ★★★☆☆      |
-| 24 | Runge-Kutta ODE integrators (RK4 + Dormand-Prince)   | `solvers`                 | ★★★☆☆      |
 | 27 | QR decomposition (Householder / Givens)              | `solvers`                 | ★★★★☆      |
 | 28 | LU decomposition with partial pivoting               | `solvers`                 | ★★★★☆      |
 | 29 | Matrix exponential (scaling & squaring + Padé)       | `math`                    | ★★★★☆      |
@@ -171,12 +170,6 @@ Difficulty legend:
 - **Embedded value:** Trig and Cartesian↔polar on FPU-less MCUs; naturally fixed-point, deterministic cycle count.
 - **Algorithm / paper:** J. Volder, "The CORDIC Trigonometric Computing Technique," *IRE Trans. Electronic Computers*, EC-8(3), 1959; R. Andraka survey, 1998.
 - **Reuses:** `math::QNumber`; complements `TrigonometricFunctions`.
-
-### 24. Runge-Kutta ODE integrators (RK4 + Dormand-Prince)
-- **What:** Fixed-step RK4 and adaptive embedded RK45 (Dormand-Prince) integrators for `ẋ = f(x,u,t)`.
-- **Embedded value:** On-device simulation of the continuous `dynamics/` models, prediction steps, and hardware-in-the-loop testing.
-- **Algorithm / paper:** J. R. Dormand, P. J. Prince, "A family of embedded Runge-Kutta formulae," *J. Comput. Appl. Math.*, 6(1), 1980; Hairer, Nørsett, Wanner, *Solving ODEs I*.
-- **Reuses:** `math::Vector`, `dynamics/` right-hand sides.
 
 ### 25. Real-input FFT (RFFT)
 - **What:** FFT specialized for real signals using the complex-pack (N/2-point) trick.
