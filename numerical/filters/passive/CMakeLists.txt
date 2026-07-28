@@ -11,6 +11,7 @@ target_link_libraries(numerical.filters.passive ${NUMERICAL_VISIBILITY}
 )
 
 target_sources(numerical.filters.passive PRIVATE
+    BiquadCascade.hpp
     CicFilter.hpp
     ExponentialMovingAverage.hpp
     Fir.hpp
@@ -22,6 +23,7 @@ target_sources(numerical.filters.passive PRIVATE
 )
 
 numerical_add_coverage_sources(numerical.filters.passive
+    BiquadCascade.cpp
     CicFilter.cpp
     ExponentialMovingAverage.cpp
     Fir.cpp

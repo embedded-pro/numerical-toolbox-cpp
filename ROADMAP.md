@@ -27,7 +27,6 @@ Difficulty legend:
 
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
-| 15 | Biquad / Second-Order-Section cascade                | `filters/passive`         | ★★★☆☆      |
 | 27 | QR decomposition (Householder / Givens)              | `solvers`                 | ★★★★☆      |
 | 28 | LU decomposition with partial pivoting               | `solvers`                 | ★★★★☆      |
 | 29 | Matrix exponential (scaling & squaring + Padé)       | `math`                    | ★★★★☆      |
@@ -121,12 +120,6 @@ Difficulty legend:
 ---
 
 ## Tier 3 — Moderate ★★★☆☆
-
-### 15. Biquad / Second-Order-Section cascade
-- **What:** High-order IIR realized as a cascade of second-order sections (Direct Form I / Transposed Direct Form II).
-- **Embedded value:** **Highest-value passive-filter gap.** Direct-form high-order IIR is numerically fragile in `Q15`/`Q31`; SOS cascade is the standard robust realization. A float biquad already lives only in the [IIR simulator](simulator/filters/IirFilter/application/IirFilterSimulator.hpp); [Iir.md](doc/filters/passive/Iir.md) explicitly lists SOS as future work.
-- **Algorithm / paper:** Oppenheim & Schafer, *DTSP*, Ch. 6 (cascade/parallel structures); R. Bristow-Johnson, "Cookbook formulae for audio EQ biquad filter coefficients."
-- **Reuses:** [Iir.hpp](numerical/filters/passive/Iir.hpp), `math::RecursiveBuffer`.
 
 ### 16. Notch / comb filter
 - **What:** Narrow-band rejection (notch biquad) and periodic comb rejection.
