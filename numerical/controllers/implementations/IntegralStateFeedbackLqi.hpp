@@ -87,11 +87,11 @@ namespace controllers
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t OutputSize>
     OPTIMIZE_FOR_SPEED
-    typename IntegralStateFeedbackLqi<T, StateSize, InputSize, OutputSize>::InputVector
-    IntegralStateFeedbackLqi<T, StateSize, InputSize, OutputSize>::ComputeControl(
-        const StateVector& x,
-        const OutputVector& reference,
-        const OutputVector& measured)
+        typename IntegralStateFeedbackLqi<T, StateSize, InputSize, OutputSize>::InputVector
+        IntegralStateFeedbackLqi<T, StateSize, InputSize, OutputSize>::ComputeControl(
+            const StateVector& x,
+            const OutputVector& reference,
+            const OutputVector& measured)
     {
         auto error = reference - measured;
         integral = integral + error * sampleTime;

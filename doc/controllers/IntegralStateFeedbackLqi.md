@@ -51,10 +51,10 @@ At equilibrium $r - y = 0$, so $x_{i}$ stops changing, and the control law holds
 
 ## Complexity Analysis
 
-| Case   | Time                         | Space                        | Notes                              |
-|--------|------------------------------|------------------------------|------------------------------------|
-| Design | $O((n+p)^3)$                 | $O((n+p)^2)$                 | DARE iteration on augmented system |
-| Update | $O(m(n+p))$                  | $O(p)$                       | Two matrix-vector products         |
+| Case   | Time         | Space        | Notes                              |
+|--------|--------------|--------------|------------------------------------|
+| Design | $O((n+p)^3)$ | $O((n+p)^2)$ | DARE iteration on augmented system |
+| Update | $O(m(n+p))$  | $O(p)$       | Two matrix-vector products         |
 
 Design is a one-time offline computation. The per-sample update cost is dominated by the two
 gain-state products and the integral accumulation.
