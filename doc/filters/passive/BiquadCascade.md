@@ -63,11 +63,11 @@ arbitrary biquad — and requires no intermediate storage beyond $z_1$ and $z_2$
 
 ## Complexity Analysis
 
-| Case       | Time          | Space         | Notes                                          |
-|------------|---------------|---------------|------------------------------------------------|
-| Per sample | $O(S)$        | $O(S)$        | $S$ = number of sections; 5 mults + 4 adds each |
-| Design     | $O(1)$        | $O(1)$        | Closed-form RBJ formulas; no iteration         |
-| Reset      | $O(S)$        | —             | Zero two state words per section               |
+| Case       | Time   | Space  | Notes                                           |
+|------------|--------|--------|-------------------------------------------------|
+| Per sample | $O(S)$ | $O(S)$ | $S$ = number of sections; 5 mults + 4 adds each |
+| Design     | $O(1)$ | $O(1)$ | Closed-form RBJ formulas; no iteration          |
+| Reset      | $O(S)$ | —      | Zero two state words per section                |
 
 ## Step-by-Step Walkthrough
 

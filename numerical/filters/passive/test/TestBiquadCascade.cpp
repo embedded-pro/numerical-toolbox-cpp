@@ -111,6 +111,6 @@ TEST_F(TestBiquadCascade, reset_clears_state)
 
     EXPECT_NEAR(filter.Filter(1.0f),
         filters::passive::Biquad<float>::LowPass(fc, fs, Q).b0 *
-        filters::passive::Biquad<float>::LowPass(fc, fs, Q).b0,
+            filters::passive::Biquad<float>::LowPass(fc, fs, Q).b0,
         1e-5f);
 }
