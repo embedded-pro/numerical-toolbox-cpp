@@ -33,5 +33,5 @@ S. L. Marple, "Computing the Discrete-Time Analytic Signal via FFT," *IEEE Trans
 47(9), 2600–2603, 1999.
 
 ## See also
-`RealFft` / `FastFourierTransform` (FFT back-end), `ConvolutionCorrelation` (FIR realisation),
+`RealFastFourierTransform` / `FastFourierTransform` (FFT back-end), `ConvolutionCorrelation` (FIR realisation),
 `SignalDetectors` (cheap non-coherent envelope).

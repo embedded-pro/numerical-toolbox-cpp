@@ -16,7 +16,7 @@
 
 namespace analysis
 {
-    template<typename QNumberType, std::size_t SegmentSize, typename Fft, typename TwindleFactor, std::size_t Overlap>
+    template<typename QNumberType, std::size_t SegmentSize, typename Fft, typename TwiddleFactor, std::size_t Overlap>
     class PowerSpectralDensity
     {
         static_assert(math::is_qnumber_v<QNumberType> ||
@@ -33,71 +33,88 @@ namespace analysis
             "Only values supported by overlap are: 0%, 25%, 50% and 75%.");
 
     public:
-        explicit PowerSpectralDensity(windowing::Window<QNumberType>& window, QNumberType samplingTimeInSeconds)
-            : window(window)
-            , samplingTimeInSeconds(samplingTimeInSeconds)
-            , frequencyResolution(QNumberType(samplingTimeInSeconds * segmentSizeInverted))
-        {}
-
         using VectorReal = typename FastFourierTransform<QNumberType>::VectorReal;
         using VectorComplex = typename FastFourierTransform<QNumberType>::VectorComplex;
 
-        OPTIMIZE_FOR_SPEED VectorReal& Calculate(const VectorReal& input)
-        {
-            really_assert(input.size() >= SegmentSize);
+        explicit PowerSpectralDensity(windowing::Window<QNumberType>& window, QNumberType samplingTimeInSeconds);
 
-            ResetOutput();
-
-            for (std::size_t i = 0, segmentCount = 0; i + SegmentSize <= input.size(); i += step, ++segmentCount)
-            {
-                ResetSegment();
-
-                for (std::size_t j = 0; j < SegmentSize; ++j)
-                    segment[j] = (QNumberType(input[i + j] * window(j, SegmentSize)));
-
-                auto& spectrum = fft.Forward(segment);
-
-                for (std::size_t k = 0; k <= SegmentSize / 2; ++k)
-                    y[k] += QNumberType(math::ToFloat(MagnitudeSquared(spectrum[k])) / static_cast<float>(SegmentSize));
-            }
-
-            for (std::size_t i = 0; i < y.size(); ++i)
-                y[i] *= frequencyResolution;
-
-            return y;
-        }
+        OPTIMIZE_FOR_SPEED VectorReal& Calculate(const VectorReal& input);
 
     private:
-        QNumberType MagnitudeSquared(const math::Complex<QNumberType>& data) const
-        {
-            return data.Real() * data.Real() + data.Imaginary() * data.Imaginary();
-        }
-
-        void ResetOutput()
-        {
-            y.clear();
-            y.resize(SegmentSize / 2 + 1);
-        }
-
-        void ResetSegment()
-        {
-            segment.clear();
-            segment.resize(SegmentSize);
-        }
+        QNumberType MagnitudeSquared(const math::Complex<QNumberType>& data) const;
+        void ResetOutput();
+        void ResetSegment();
 
     private:
         static constexpr QNumberType segmentSizeInverted = QNumberType(1.0f / static_cast<float>(SegmentSize));
         static constexpr std::size_t overlapSize = (SegmentSize * Overlap) / 100;
         static constexpr std::size_t step = SegmentSize - overlapSize;
         QNumberType frequencyResolution;
-        QNumberType scale;
         windowing::Window<QNumberType>& window;
         QNumberType samplingTimeInSeconds;
-        TwindleFactor twindleFacors;
-        Fft fft{ twindleFacors };
+        TwiddleFactor twiddleFactors;
+        Fft fft{ twiddleFactors };
         typename infra::BoundedVector<QNumberType>::template WithMaxSize<SegmentSize> segment;
         typename FastFourierTransform<QNumberType>::VectorReal::template WithMaxSize<SegmentSize / 2 + 1> y;
     };
+
+    /// Implementation ///
+
+    template<typename QNumberType, std::size_t SegmentSize, typename Fft, typename TwiddleFactor, std::size_t Overlap>
+    PowerSpectralDensity<QNumberType, SegmentSize, Fft, TwiddleFactor, Overlap>::PowerSpectralDensity(
+        windowing::Window<QNumberType>& window, QNumberType samplingTimeInSeconds)
+        : window(window)
+        , samplingTimeInSeconds(samplingTimeInSeconds)
+        , frequencyResolution(QNumberType(samplingTimeInSeconds * segmentSizeInverted))
+    {}
+
+    template<typename QNumberType, std::size_t SegmentSize, typename Fft, typename TwiddleFactor, std::size_t Overlap>
+    OPTIMIZE_FOR_SPEED typename PowerSpectralDensity<QNumberType, SegmentSize, Fft, TwiddleFactor, Overlap>::VectorReal&
+    PowerSpectralDensity<QNumberType, SegmentSize, Fft, TwiddleFactor, Overlap>::Calculate(const VectorReal& input)
+    {
+        really_assert(input.size() >= SegmentSize);
+
+        ResetOutput();
+
+        for (std::size_t i = 0; i + SegmentSize <= input.size(); i += step)
+        {
+            ResetSegment();
+
+            for (std::size_t j = 0; j < SegmentSize; ++j)
+                segment[j] = QNumberType(input[i + j] * window(j, SegmentSize));
+
+            auto& spectrum = fft.Forward(segment);
+
+            for (std::size_t k = 0; k <= SegmentSize / 2; ++k)
+                y[k] += QNumberType(math::ToFloat(MagnitudeSquared(spectrum[k])) / static_cast<float>(SegmentSize));
+        }
+
+        for (std::size_t i = 0; i < y.size(); ++i)
+            y[i] *= frequencyResolution;
+
+        return y;
+    }
+
+    template<typename QNumberType, std::size_t SegmentSize, typename Fft, typename TwiddleFactor, std::size_t Overlap>
+    QNumberType PowerSpectralDensity<QNumberType, SegmentSize, Fft, TwiddleFactor, Overlap>::MagnitudeSquared(
+        const math::Complex<QNumberType>& data) const
+    {
+        return data.Real() * data.Real() + data.Imaginary() * data.Imaginary();
+    }
+
+    template<typename QNumberType, std::size_t SegmentSize, typename Fft, typename TwiddleFactor, std::size_t Overlap>
+    void PowerSpectralDensity<QNumberType, SegmentSize, Fft, TwiddleFactor, Overlap>::ResetOutput()
+    {
+        y.clear();
+        y.resize(SegmentSize / 2 + 1);
+    }
+
+    template<typename QNumberType, std::size_t SegmentSize, typename Fft, typename TwiddleFactor, std::size_t Overlap>
+    void PowerSpectralDensity<QNumberType, SegmentSize, Fft, TwiddleFactor, Overlap>::ResetSegment()
+    {
+        segment.clear();
+        segment.resize(SegmentSize);
+    }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class PowerSpectralDensity<float, 512, test::FftStub<float, 512>, test::TwiddleFactorsStub<float, 256>, 50>;

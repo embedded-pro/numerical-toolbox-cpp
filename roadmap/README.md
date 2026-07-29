@@ -96,7 +96,7 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 `FeedbackLinearization` (40) · `BacksteppingControl` (41) · `ModelReferenceAdaptiveControl` (47)
 
 ### `analysis`
-`SignalDetectors` (5) · `ConvolutionCorrelation` (11) · `GoertzelAlgorithm` (13) · `RealFft` (25) · `HilbertTransform` (37) · `DiscreteWaveletTransform` (38)
+`SignalDetectors` (5) · `ConvolutionCorrelation` (11) · `GoertzelAlgorithm` (13) · `RealFastFourierTransform` (25) · `HilbertTransform` (37) · `DiscreteWaveletTransform` (38)
 
 ### `estimators/offline`
 `PolynomialFitting` (12) · `TotalLeastSquares` (44) · `DynamicParameterIdentification` (M22)

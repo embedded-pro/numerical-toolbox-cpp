@@ -6,8 +6,10 @@
 
 #include "infra/util/BoundedVector.hpp"
 #include "numerical/analysis/FastFourierTransform.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/ComplexNumber.hpp"
 #include <cmath>
+#include <numbers>
 
 namespace analysis
 {
@@ -15,7 +17,7 @@ namespace analysis
     class DiscreteConsineTransform
     {
         static_assert((Length & (Length - 1)) == 0, "DiscreteConsineTransform size must be a power of 2");
-        static_assert(math::is_qnumber<QNumberType>::value || std::is_floating_point<QNumberType>::value,
+        static_assert(math::is_qnumber<QNumberType>::value || std::is_floating_point_v<QNumberType>,
             "DiscreteConsineTransform can only be instantiated with math::QNumber types or floating point.");
 
     public:
@@ -30,7 +32,6 @@ namespace analysis
         FastFourierTransform<QNumberType>& fft;
         typename infra::BoundedVector<QNumberType>::template WithMaxSize<Length> output;
         typename VectorComplex::template WithMaxSize<Length> complexBuffer;
-        static constexpr float PI = 3.14159265358979323846f;
     };
 
     // Implementation //
@@ -54,7 +55,7 @@ namespace analysis
 
         for (std::size_t k = 1; k < Length; ++k)
         {
-            float angle = -k * PI / (2.0f * Length);
+            float angle = -static_cast<float>(k) * std::numbers::pi_v<float> / (2.0f * Length);
             float scale = 2.0f / std::sqrt(static_cast<float>(Length));
 
             float real = math::ToFloat(fftResult[k].Real());
@@ -73,7 +74,7 @@ namespace analysis
 
         for (std::size_t k = 1; k < Length; ++k)
         {
-            float angle = k * PI / (2.0f * Length);
+            float angle = static_cast<float>(k) * std::numbers::pi_v<float> / (2.0f * static_cast<float>(Length));
             float scale = std::sqrt(static_cast<float>(Length)) / 2.0f;
 
             float value = math::ToFloat(input[k]) * scale;
@@ -82,4 +83,10 @@ namespace analysis
 
         return fft.Inverse(complexBuffer);
     }
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class DiscreteConsineTransform<float, 8>;
+    extern template class DiscreteConsineTransform<math::Q15, 8>;
+    extern template class DiscreteConsineTransform<math::Q31, 8>;
+#endif
 }

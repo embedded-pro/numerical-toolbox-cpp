@@ -1,5 +1,5 @@
 #include "numerical/analysis/FastFourierTransformRadix2Impl.hpp"
-#include "numerical/analysis/RealFft.hpp"
+#include "numerical/analysis/RealFastFourierTransform.hpp"
 #include "numerical/math/Tolerance.hpp"
 #include "gmock/gmock.h"
 #include <array>
@@ -29,19 +29,41 @@ namespace
         std::array<math::Complex<float>, 4> factors{};
     };
 
-    class TestRealFft : public ::testing::Test
+    class TwiddleFactors16 : public analysis::TwiddleFactors<float, 8>
+    {
+    public:
+        TwiddleFactors16()
+        {
+            for (std::size_t k{ 0 }; k < 8; ++k)
+            {
+                float angle{ -2.0f * std::numbers::pi_v<float> * static_cast<float>(k) / 16.0f };
+                factors[k] = math::Complex<float>{ std::cos(angle), std::sin(angle) };
+            }
+        }
+
+        math::Complex<float>& operator[](std::size_t n) override
+        {
+            return factors[n];
+        }
+
+    private:
+        std::array<math::Complex<float>, 8> factors{};
+    };
+
+    class TestRealFastFourierTransform : public ::testing::Test
     {
     public:
         static constexpr std::size_t N{ 16 };
 
         TwiddleFactors8 twiddleFactors{};
+        TwiddleFactors16 realTwiddleFactors{};
         analysis::FastFourierTransformRadix2Impl<float, N / 2> engine{ twiddleFactors };
-        analysis::RealFft<float, N> rfft{ engine };
+        analysis::RealFastFourierTransform<float, N> rfft{ engine, realTwiddleFactors };
         typename infra::BoundedVector<float>::template WithMaxSize<N> input{};
     };
 }
 
-TEST_F(TestRealFft, dc_input_has_only_dc_bin)
+TEST_F(TestRealFastFourierTransform, dc_input_has_only_dc_bin)
 {
     input.resize(N, 1.0f);
 
@@ -55,7 +77,7 @@ TEST_F(TestRealFft, dc_input_has_only_dc_bin)
     }
 }
 
-TEST_F(TestRealFft, single_real_sinusoid_hits_one_bin)
+TEST_F(TestRealFastFourierTransform, single_real_sinusoid_hits_one_bin)
 {
     input.resize(N);
     for (std::size_t n{ 0 }; n < N; ++n)
@@ -73,7 +95,7 @@ TEST_F(TestRealFft, single_real_sinusoid_hits_one_bin)
     }
 }
 
-TEST_F(TestRealFft, matches_reference_complex_fft)
+TEST_F(TestRealFastFourierTransform, matches_reference_complex_fft)
 {
     static constexpr std::array<float, N> signal{ 0.1f, 0.3f, -0.2f, 0.5f, 0.4f, -0.1f, 0.0f, 0.2f,
         -0.3f, 0.6f, 0.1f, -0.4f, 0.2f, 0.0f, -0.1f, 0.3f };
@@ -98,7 +120,7 @@ TEST_F(TestRealFft, matches_reference_complex_fft)
     }
 }
 
-TEST_F(TestRealFft, nyquist_and_dc_are_real)
+TEST_F(TestRealFastFourierTransform, nyquist_and_dc_are_real)
 {
     input.resize(N);
     for (std::size_t n{ 0 }; n < N; ++n)
@@ -110,7 +132,7 @@ TEST_F(TestRealFft, nyquist_and_dc_are_real)
     EXPECT_NEAR(spectrum[N / 2].Imaginary(), 0.0f, math::Tolerance<float>());
 }
 
-TEST_F(TestRealFft, inverse_is_left_inverse)
+TEST_F(TestRealFastFourierTransform, inverse_is_left_inverse)
 {
     static constexpr std::array<float, N> signal{ 0.5f, -0.3f, 0.1f, 0.8f, -0.6f, 0.2f, 0.0f, -0.4f,
         0.7f, -0.1f, 0.3f, -0.5f, 0.4f, 0.1f, -0.2f, 0.6f };
@@ -125,7 +147,7 @@ TEST_F(TestRealFft, inverse_is_left_inverse)
         EXPECT_NEAR(recovered[n], signal[n], 1e-2f);
 }
 
-TEST_F(TestRealFft, linearity_holds)
+TEST_F(TestRealFastFourierTransform, linearity_holds)
 {
     static constexpr float a{ 2.0f };
     static constexpr float b{ 0.5f };
@@ -171,7 +193,7 @@ TEST_F(TestRealFft, linearity_holds)
     }
 }
 
-TEST_F(TestRealFft, impulse_has_flat_magnitude)
+TEST_F(TestRealFastFourierTransform, impulse_has_flat_magnitude)
 {
     input.resize(N, 0.0f);
     input[0] = 1.0f;
