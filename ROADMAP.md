@@ -50,7 +50,6 @@ Difficulty legend:
 | 47 | Model Reference Adaptive Control (MRAC)              | `nonlinear_control` (new) | ★★★★★      |
 | 48 | Decibel & magnitude-response helpers                 | `analysis`                | ★☆☆☆☆      |
 | 49 | Step / transient-response metrics                    | `math`                    | ★★☆☆☆      |
-| 50 | Matrix norms & condition number                      | `math`                    | ★★★☆☆      |
 | 51 | Spectral radius / discrete stability margin          | `math`                    | ★★★☆☆      |
 | 52 | Estimator consistency metrics (NEES / NIS)           | `estimators`              | ★★★☆☆      |
 
@@ -577,16 +576,6 @@ on bounded `math::Vector`/`math::Matrix` inputs; tests are `TEST_F` on `float`.
 - **Algorithm:** single forward pass over the sampled response against the reference/steady value;
   standard control-systems definitions.
 - **Reuses:** `math::Vector`, `math::Statistics` for the steady-state estimate.
-
-### 50. Matrix norms & condition number ★★★☆☆ — `math`
-- **What:** `FrobeniusNorm`, `OneNorm`, `InfinityNorm` on `Matrix`; `Vector` `Norm`/`Normalize`;
-  `ConditionNumber` estimate.
-- **Metric value:** M9 (conditioning) — quantifies ill-conditioning for `solvers/`, regression, and
-  Kalman covariance sanity; foundational gap ([`Matrix`](numerical/math/Matrix.hpp) currently exposes
-  only `Transpose`/`Trace`).
-- **Algorithm:** direct norm sums; condition number from norm ratio (apply the inverse via the
-  existing `GaussianElimination` rather than forming it explicitly, embedded-style).
-- **Reuses:** `math::Matrix`, `solvers::GaussianElimination`.
 
 ### 51. Spectral radius / discrete stability margin ★★★☆☆ — `math`
 - **What:** Dominant `|eigenvalue|` of a square (state/companion) matrix; `IsSchurStable` (all

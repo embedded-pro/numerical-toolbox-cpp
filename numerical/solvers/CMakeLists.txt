@@ -12,6 +12,7 @@ target_link_libraries(numerical.solver ${NUMERICAL_VISIBILITY}
 
 target_sources(numerical.solver PRIVATE
     CholeskyDecomposition.hpp
+    ConditionNumber.hpp
     DiscreteAlgebraicRiccatiEquation.hpp
     DormandPrince45.hpp
     DurandKerner.hpp
@@ -23,6 +24,7 @@ target_sources(numerical.solver PRIVATE
 )
 
 numerical_add_coverage_sources(numerical.solver
+    ConditionNumber.cpp
     DiscreteAlgebraicRiccatiEquation.cpp
     DurandKerner.cpp
     GaussianElimination.cpp
