@@ -22,6 +22,7 @@ target_sources(numerical.math PRIVATE
     RecursiveBuffer.hpp
     SingleInstructionMultipleData.hpp
     Statistics.hpp
+    StepResponseMetrics.hpp
     Toeplitz.hpp
     Tolerance.hpp
     TrigonometricFunctions.hpp

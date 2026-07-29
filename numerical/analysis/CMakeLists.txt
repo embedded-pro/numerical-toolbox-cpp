@@ -13,6 +13,7 @@ target_link_libraries(numerical.analysis ${NUMERICAL_VISIBILITY}
 
 target_sources(numerical.analysis PRIVATE
     ConvolutionCorrelation.hpp
+    Decibels.hpp
     DiscreteCosineTransform.hpp
     FastFourierTransform.hpp
     FastFourierTransformRadix2Impl.hpp
