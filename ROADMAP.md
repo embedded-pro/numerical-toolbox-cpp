@@ -48,7 +48,6 @@ Difficulty legend:
 | 45 | IIR filter design (Butterworth/Chebyshev + bilinear) | `filters/passive`         | ★★★★★      |
 | 46 | H∞ state-feedback control                            | `robust_control` (new)    | ★★★★★      |
 | 47 | Model Reference Adaptive Control (MRAC)              | `nonlinear_control` (new) | ★★★★★      |
-| 52 | Estimator consistency metrics (NEES / NIS)           | `estimators`              | ★★★☆☆      |
 
 Items 48–52 are the **evaluation & metrics primitives** — reusable quantities the per-family
 unit-test reference [`TESTING.md`](TESTING.md) depends on but which
@@ -566,7 +565,7 @@ on bounded `math::Vector`/`math::Matrix` inputs; tests are `TEST_F` on `float`.
   the existing `solvers::DurandKerner` for the full spectrum.
 - **Reuses:** `math::Matrix`, `solvers::DurandKerner`.
 
-### 52. Estimator consistency metrics (NEES / NIS) ★★★☆☆ — `estimators`
+### ~~52. Estimator consistency metrics (NEES / NIS) ★★★☆☆ — `estimators`~~ ✓ Done
 - **What:** Normalised Estimation Error Squared and Normalised Innovation Squared, with χ²
   confidence-gate helpers.
 - **Metric value:** M8 (statistical consistency) — the only rigorous correctness test for the Kalman
