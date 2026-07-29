@@ -39,11 +39,11 @@ A positive margin indicates Schur stability; $\delta = 0$ corresponds to margina
 
 ## Complexity Analysis
 
-| Case    | Time             | Space           | Notes                                         |
-|---------|------------------|-----------------|-----------------------------------------------|
-| Best    | $O(n^3)$         | $O(n^2)$        | Faddeev–LeVerrier dominates; two $n\times n$ temporaries on the stack |
-| Average | $O(n^3 + n \cdot I)$ | $O(n^2 + n)$ | $I$ Durand–Kerner iterations, typically $\ll 200$ |
-| Worst   | $O(n^3 + n \cdot I_{\max})$ | $O(n^2 + n)$ | Near-repeated roots slow DK convergence      |
+| Case    | Time                        | Space        | Notes                                                                 |
+|---------|-----------------------------|--------------|-----------------------------------------------------------------------|
+| Best    | $O(n^3)$                    | $O(n^2)$     | Faddeev–LeVerrier dominates; two $n\times n$ temporaries on the stack |
+| Average | $O(n^3 + n \cdot I)$        | $O(n^2 + n)$ | $I$ Durand–Kerner iterations, typically $\ll 200$                     |
+| Worst   | $O(n^3 + n \cdot I_{\max})$ | $O(n^2 + n)$ | Near-repeated roots slow DK convergence                               |
 
 The Faddeev–LeVerrier step executes $n$ matrix multiplications each costing $O(n^3)$, giving $O(n^4)$ total; for the small dimensions typical of embedded control matrices ($n \le 6$) this is negligible.
 
