@@ -17,5 +17,6 @@ target_sources(numerical.math_test PRIVATE
     TestQuaternion.cpp
     TestRecursiveBuffer.cpp
     TestStatistics.cpp
+    TestStepResponseMetrics.cpp
     TestToeplitz.cpp
 )
