@@ -20,6 +20,7 @@ target_sources(numerical.solver PRIVATE
     OdeSystem.hpp
     RungeKuttaIntegrators.hpp
     Solver.hpp
+    SpectralRadius.hpp
 )
 
 numerical_add_coverage_sources(numerical.solver
@@ -27,6 +28,7 @@ numerical_add_coverage_sources(numerical.solver
     DurandKerner.cpp
     GaussianElimination.cpp
     RungeKuttaIntegrators.cpp
+    SpectralRadius.cpp
 )
 
 add_subdirectory(test)

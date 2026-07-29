@@ -51,7 +51,6 @@ Difficulty legend:
 | 48 | Decibel & magnitude-response helpers                 | `analysis`                | ★☆☆☆☆      |
 | 49 | Step / transient-response metrics                    | `math`                    | ★★☆☆☆      |
 | 50 | Matrix norms & condition number                      | `math`                    | ★★★☆☆      |
-| 51 | Spectral radius / discrete stability margin          | `math`                    | ★★★☆☆      |
 | 52 | Estimator consistency metrics (NEES / NIS)           | `estimators`              | ★★★☆☆      |
 
 Items 48–52 are the **evaluation & metrics primitives** — reusable quantities the per-family
