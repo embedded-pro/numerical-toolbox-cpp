@@ -17,12 +17,13 @@ namespace analysis
         : public FastFourierTransform<QNumberType>
     {
         static_assert((Length & (Length - 1)) == 0, "FastFourierTransformRadix2Impl size must be a power of 2");
+        static_assert(math::is_qnumber<QNumberType>::value || std::is_floating_point<QNumberType>::value, "QNumberType must be a floating-point or Q-number type");
 
     public:
         using VectorComplex = typename FastFourierTransform<QNumberType>::VectorComplex;
         using VectorReal = typename FastFourierTransform<QNumberType>::VectorReal;
 
-        explicit FastFourierTransformRadix2Impl(TwiddleFactors<QNumberType, Length / 2>& twinddleFactors);
+        explicit FastFourierTransformRadix2Impl(TwiddleFactors<QNumberType, Length / 2>& twiddleFactors);
 
         VectorComplex& Forward(VectorReal& input) override;
         VectorReal& Inverse(VectorComplex& input) override;
@@ -37,14 +38,14 @@ namespace analysis
         const std::size_t log2_n = FastFourierTransform<QNumberType>::Log2(Length);
         const std::size_t radix = 2;
         const std::size_t radixBits = FastFourierTransform<QNumberType>::Log2(radix);
-        TwiddleFactors<QNumberType, Length / 2>& twinddleFactors;
+        TwiddleFactors<QNumberType, Length / 2>& twiddleFactors;
         typename infra::BoundedVector<math::Complex<QNumberType>>::template WithMaxSize<Length> frequencyDomain;
         typename infra::BoundedVector<QNumberType>::template WithMaxSize<Length> timeDomain;
     };
 
     template<typename QNumberType, std::size_t Length>
-    FastFourierTransformRadix2Impl<QNumberType, Length>::FastFourierTransformRadix2Impl(TwiddleFactors<QNumberType, Length / 2>& twinddleFactors)
-        : twinddleFactors(twinddleFactors)
+    FastFourierTransformRadix2Impl<QNumberType, Length>::FastFourierTransformRadix2Impl(TwiddleFactors<QNumberType, Length / 2>& twiddleFactors)
+        : twiddleFactors(twiddleFactors)
     {}
 
     template<typename QNumberType, std::size_t Length>
@@ -73,7 +74,7 @@ namespace analysis
                 {
                     math::Complex<QNumberType>& a = frequencyDomain[j];
                     math::Complex<QNumberType>& b = frequencyDomain[j + halfStep];
-                    math::Complex twiddle = twinddleFactors[k * stepFactor];
+                    math::Complex twiddle = twiddleFactors[k * stepFactor];
 
                     math::Complex temp = b * twiddle;
                     b = (a - temp);

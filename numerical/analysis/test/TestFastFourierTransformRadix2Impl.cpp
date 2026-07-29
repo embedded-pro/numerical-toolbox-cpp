@@ -46,6 +46,11 @@ namespace
         using VectorComplex = typename analysis::FastFourierTransform<T>::VectorComplex;
         using VectorReal = typename analysis::FastFourierTransform<T>::VectorReal;
 
+        void SetUp() override
+        {
+            fft.emplace(twiddleFactors);
+        }
+
         MockTwiddleFactors<T> twiddleFactors{};
         std::optional<analysis::FastFourierTransformRadix2Impl<T, Length>> fft;
         typename VectorReal::template WithMaxSize<Length> timeDomain;
@@ -58,7 +63,6 @@ namespace
 
 TYPED_TEST(TestFastFourierTransform, zero_input_produces_zero_output)
 {
-    this->fft.emplace(this->twiddleFactors);
     this->timeDomain.clear();
     this->timeDomain.resize(TestFastFourierTransform<TypeParam>::Length);
 
@@ -70,7 +74,6 @@ TYPED_TEST(TestFastFourierTransform, zero_input_produces_zero_output)
 
 TYPED_TEST(TestFastFourierTransform, dc_signal_appears_in_zero_frequency_bin)
 {
-    this->fft.emplace(this->twiddleFactors);
     this->timeDomain.clear();
     this->timeDomain.resize(TestFastFourierTransform<TypeParam>::Length);
     std::fill(this->timeDomain.begin(), this->timeDomain.end(), TypeParam(0.1f));
@@ -87,7 +90,6 @@ TYPED_TEST(TestFastFourierTransform, dc_signal_appears_in_zero_frequency_bin)
 
 TYPED_TEST(TestFastFourierTransform, forward_and_inverse_transform_recovers_original_signal)
 {
-    this->fft.emplace(this->twiddleFactors);
     constexpr std::array<float, TestFastFourierTransform<TypeParam>::Length> signal = {
         0.1f, 0.07f, 0.0f, -0.07f, -0.1f, -0.07f, 0.0f, 0.07f
     };
@@ -105,7 +107,6 @@ TYPED_TEST(TestFastFourierTransform, forward_and_inverse_transform_recovers_orig
 
 TYPED_TEST(TestFastFourierTransform, nyquist_frequency_detection)
 {
-    this->fft.emplace(this->twiddleFactors);
     this->timeDomain.clear();
 
     for (size_t i = 0; i < TestFastFourierTransform<TypeParam>::Length; ++i)
