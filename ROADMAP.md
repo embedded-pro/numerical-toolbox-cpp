@@ -48,8 +48,6 @@ Difficulty legend:
 | 45 | IIR filter design (Butterworth/Chebyshev + bilinear) | `filters/passive`         | ★★★★★      |
 | 46 | H∞ state-feedback control                            | `robust_control` (new)    | ★★★★★      |
 | 47 | Model Reference Adaptive Control (MRAC)              | `nonlinear_control` (new) | ★★★★★      |
-| 48 | Decibel & magnitude-response helpers                 | `analysis`                | ★☆☆☆☆      |
-| 49 | Step / transient-response metrics                    | `math`                    | ★★☆☆☆      |
 | 50 | Matrix norms & condition number                      | `math`                    | ★★★☆☆      |
 | 52 | Estimator consistency metrics (NEES / NIS)           | `estimators`              | ★★★☆☆      |
 
@@ -559,23 +557,6 @@ Today [`math/Statistics.hpp`](numerical/math/Statistics.hpp) already provides `M
 and [`control_analysis/FrequencyResponse`](numerical/control_analysis/FrequencyResponse.hpp) provides
 magnitude/phase. The items below are the missing pieces. All are **float-only**, no-heap, and operate
 on bounded `math::Vector`/`math::Matrix` inputs; tests are `TEST_F` on `float`.
-
-### 48. Decibel & magnitude-response helpers ★☆☆☆☆ — `analysis`
-- **What:** `ToDecibels(ratio)` / `FromDecibels`, plus convenience magnitude(-in-dB) and attenuation
-  helpers layered over `control_analysis::FrequencyResponse`.
-- **Metric value:** M2 (frequency response) — pass-band ripple / stop-band attenuation in dB, the
-  natural unit for filter and controller tests.
-- **Algorithm:** `20·log10(·)`; guard the zero/`-inf` case with a floor.
-- **Reuses:** `math::TrigonometricFunctions`/`std::log10`, existing `FrequencyResponse`.
-
-### 49. Step / transient-response metrics ★★☆☆☆ — `math`
-- **What:** From a bounded step-response `Vector`: `RiseTime` (10–90 %), `SettlingTime` (±band),
-  `PercentOvershoot`, `PeakTime`, `SteadyStateError`.
-- **Metric value:** M3 (time-response) — the core acceptance criteria for every controller
-  (`controllers/`), `LinearTimeInvariant`, and IIR filter.
-- **Algorithm:** single forward pass over the sampled response against the reference/steady value;
-  standard control-systems definitions.
-- **Reuses:** `math::Vector`, `math::Statistics` for the steady-state estimate.
 
 ### 50. Matrix norms & condition number ★★★☆☆ — `math`
 - **What:** `FrobeniusNorm`, `OneNorm`, `InfinityNorm` on `Matrix`; `Vector` `Norm`/`Normalize`;

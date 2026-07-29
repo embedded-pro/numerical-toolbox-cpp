@@ -10,6 +10,7 @@ target_link_libraries(numerical.analysis_test PUBLIC
 
 target_sources(numerical.analysis_test PRIVATE
     TestConvolutionCorrelation.cpp
+    TestDecibels.cpp
     TestDiscreteCosineTransform.cpp
     TestFastFourierTransformRadix2Impl.cpp
     TestGoertzelAlgorithm.cpp
