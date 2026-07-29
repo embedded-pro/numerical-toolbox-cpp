@@ -24,9 +24,9 @@ The norm of $A^{-1}$ is obtained without forming an explicit inverse as a first-
 
 ## Complexity Analysis
 
-| Operation       | Time     | Space    | Notes                                          |
-|-----------------|----------|----------|------------------------------------------------|
-| ConditionNumber | $O(N^3)$ | $O(N^2)$ | Dominated by the $N$-column solve of $AX = I$  |
+| Operation       | Time     | Space    | Notes                                         |
+|-----------------|----------|----------|-----------------------------------------------|
+| ConditionNumber | $O(N^3)$ | $O(N^2)$ | Dominated by the $N$-column solve of $AX = I$ |
 
 ## Step-by-Step Walkthrough
 
