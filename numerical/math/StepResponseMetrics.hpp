@@ -18,8 +18,8 @@ namespace math
     {
         static_assert(std::is_floating_point_v<T>, "RiseTime supports floating-point types only");
 
-        const T lo{ T{ 0.1 } * steady };
-        const T hi{ T{ 0.9 } * steady };
+        const T lo{ T{ 0.1f } * steady };
+        const T hi{ T{ 0.9f } * steady };
 
         std::size_t iLo{ 0 };
         bool foundLo{ false };
@@ -40,7 +40,7 @@ namespace math
     }
 
     template<typename T, std::size_t Size>
-    [[nodiscard]] OPTIMIZE_FOR_SPEED T SettlingTime(const Vector<T, Size>& response, T steady, T band = T{ 0.02 }, T dt = T{ 1 })
+    [[nodiscard]] OPTIMIZE_FOR_SPEED T SettlingTime(const Vector<T, Size>& response, T steady, T band = T{ 0.02f }, T dt = T{ 1 })
     {
         static_assert(std::is_floating_point_v<T>, "SettlingTime supports floating-point types only");
 
@@ -113,12 +113,4 @@ namespace math
         const T tailMean{ sum / static_cast<T>(TailSize) };
         return reference - tailMean;
     }
-
-#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
-    extern template float RiseTime<float, 64>(const Vector<float, 64>&, float, float);
-    extern template float SettlingTime<float, 64>(const Vector<float, 64>&, float, float, float);
-    extern template float PercentOvershoot<float, 64>(const Vector<float, 64>&, float);
-    extern template float PeakTime<float, 64>(const Vector<float, 64>&, float);
-    extern template float SteadyStateError<float, 64>(const Vector<float, 64>&, float);
-#endif
 }

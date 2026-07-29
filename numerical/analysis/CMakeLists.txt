@@ -25,7 +25,6 @@ target_sources(numerical.analysis PRIVATE
 
 numerical_add_coverage_sources(numerical.analysis
     ConvolutionCorrelation.cpp
-    Decibels.cpp
     FastFourierTransformRadix2Impl.cpp
     GoertzelAlgorithm.cpp
     PowerDensitySpectrum.cpp

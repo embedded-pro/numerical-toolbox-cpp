@@ -47,11 +47,4 @@ namespace analysis
         static_assert(std::is_floating_point_v<T>, "RippleDb supports floating-point types only");
         return ToDecibels(maxRatio) - ToDecibels(minRatio);
     }
-
-#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
-    extern template float ToDecibels<float>(float);
-    extern template float FromDecibels<float>(float);
-    extern template float AttenuationDb<float>(float, float);
-    extern template float RippleDb<float>(float, float);
-#endif
 }

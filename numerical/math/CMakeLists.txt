@@ -35,7 +35,6 @@ numerical_add_coverage_sources(numerical.math
     Matrix.cpp
     QNumber.cpp
     Quaternion.cpp
-    StepResponseMetrics.cpp
 )
 
 add_subdirectory(test)
