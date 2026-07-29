@@ -11,6 +11,7 @@ target_sources(numerical.math_test PRIVATE
     TestComplexNumber.cpp
     TestCordic.cpp
     TestLinearTimeInvariant.cpp
+    TestMatrixNorms.cpp
     TestQNumber.cpp
     TestMatrix.cpp
     TestQuaternion.cpp
