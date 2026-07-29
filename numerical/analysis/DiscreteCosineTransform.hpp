@@ -17,7 +17,7 @@ namespace analysis
     class DiscreteConsineTransform
     {
         static_assert((Length & (Length - 1)) == 0, "DiscreteConsineTransform size must be a power of 2");
-        static_assert(math::is_qnumber<QNumberType>::value || std::is_floating_point<QNumberType>::value,
+        static_assert(math::is_qnumber<QNumberType>::value || std::is_floating_point_v<QNumberType>,
             "DiscreteConsineTransform can only be instantiated with math::QNumber types or floating point.");
 
     public:
@@ -74,7 +74,7 @@ namespace analysis
 
         for (std::size_t k = 1; k < Length; ++k)
         {
-            float angle = k * std::numbers::pi_v<float> / (2.0f * Length);
+            float angle = static_cast<float>(k) * std::numbers::pi_v<float> / (2.0f * static_cast<float>(Length));
             float scale = std::sqrt(static_cast<float>(Length)) / 2.0f;
 
             float value = math::ToFloat(input[k]) * scale;

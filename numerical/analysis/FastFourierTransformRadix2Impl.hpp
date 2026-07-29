@@ -4,10 +4,9 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
-#include "numerical/math/CompilerOptimizations.hpp"
-
 #include "infra/util/BoundedVector.hpp"
 #include "numerical/analysis/FastFourierTransform.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/ComplexNumber.hpp"
 
 namespace analysis
@@ -17,7 +16,7 @@ namespace analysis
         : public FastFourierTransform<QNumberType>
     {
         static_assert((Length & (Length - 1)) == 0, "FastFourierTransformRadix2Impl size must be a power of 2");
-        static_assert(math::is_qnumber<QNumberType>::value || std::is_floating_point<QNumberType>::value, "QNumberType must be a floating-point or Q-number type");
+        static_assert(math::is_qnumber<QNumberType>::value || std::is_floating_point_v<QNumberType>, "QNumberType must be a floating-point or Q-number type");
 
     public:
         using VectorComplex = typename FastFourierTransform<QNumberType>::VectorComplex;
