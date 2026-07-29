@@ -17,6 +17,7 @@ target_sources(numerical.math PRIVATE
     HyperbolicFunctions.hpp
     LinearTimeInvariant.hpp
     Matrix.hpp
+    MatrixNorms.hpp
     QNumber.hpp
     Quaternion.hpp
     RecursiveBuffer.hpp

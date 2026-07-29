@@ -48,7 +48,6 @@ Difficulty legend:
 | 45 | IIR filter design (Butterworth/Chebyshev + bilinear) | `filters/passive`         | ★★★★★      |
 | 46 | H∞ state-feedback control                            | `robust_control` (new)    | ★★★★★      |
 | 47 | Model Reference Adaptive Control (MRAC)              | `nonlinear_control` (new) | ★★★★★      |
-| 50 | Matrix norms & condition number                      | `math`                    | ★★★☆☆      |
 | 51 | Spectral radius / discrete stability margin          | `math`                    | ★★★☆☆      |
 | 52 | Estimator consistency metrics (NEES / NIS)           | `estimators`              | ★★★☆☆      |
 
@@ -558,16 +557,6 @@ Today [`math/Statistics.hpp`](numerical/math/Statistics.hpp) already provides `M
 and [`control_analysis/FrequencyResponse`](numerical/control_analysis/FrequencyResponse.hpp) provides
 magnitude/phase. The items below are the missing pieces. All are **float-only**, no-heap, and operate
 on bounded `math::Vector`/`math::Matrix` inputs; tests are `TEST_F` on `float`.
-
-### 50. Matrix norms & condition number ★★★☆☆ — `math`
-- **What:** `FrobeniusNorm`, `OneNorm`, `InfinityNorm` on `Matrix`; `Vector` `Norm`/`Normalize`;
-  `ConditionNumber` estimate.
-- **Metric value:** M9 (conditioning) — quantifies ill-conditioning for `solvers/`, regression, and
-  Kalman covariance sanity; foundational gap ([`Matrix`](numerical/math/Matrix.hpp) currently exposes
-  only `Transpose`/`Trace`).
-- **Algorithm:** direct norm sums; condition number from norm ratio (apply the inverse via the
-  existing `GaussianElimination` rather than forming it explicitly, embedded-style).
-- **Reuses:** `math::Matrix`, `solvers::GaussianElimination`.
 
 ### 51. Spectral radius / discrete stability margin ★★★☆☆ — `math`
 - **What:** Dominant `|eigenvalue|` of a square (state/companion) matrix; `IsSchurStable` (all
