@@ -34,7 +34,6 @@ numerical_add_coverage_sources(numerical.math
     Cordic.cpp
     LinearTimeInvariant.cpp
     Matrix.cpp
-    MatrixNorms.cpp
     QNumber.cpp
     Quaternion.cpp
 )

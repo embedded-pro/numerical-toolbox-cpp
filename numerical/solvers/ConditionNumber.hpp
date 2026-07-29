@@ -48,8 +48,4 @@ namespace solvers
         auto invA = SolveSystem(a, math::SquareMatrix<T, N>::Identity());
         return normA * math::OneNorm(invA);
     }
-
-#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
-    extern template std::optional<float> ConditionNumber<float, 2>(const math::SquareMatrix<float, 2>&);
-#endif
 }

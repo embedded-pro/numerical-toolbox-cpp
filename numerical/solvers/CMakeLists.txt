@@ -24,7 +24,6 @@ target_sources(numerical.solver PRIVATE
 )
 
 numerical_add_coverage_sources(numerical.solver
-    ConditionNumber.cpp
     DiscreteAlgebraicRiccatiEquation.cpp
     DurandKerner.cpp
     GaussianElimination.cpp

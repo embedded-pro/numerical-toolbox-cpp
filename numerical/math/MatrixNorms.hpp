@@ -76,12 +76,4 @@ namespace math
             result.at(i, 0) = v.at(i, 0) / n;
         return result;
     }
-
-#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
-    extern template float FrobeniusNorm<float, 2, 2>(const Matrix<float, 2, 2>&);
-    extern template float OneNorm<float, 2, 2>(const Matrix<float, 2, 2>&);
-    extern template float InfinityNorm<float, 2, 2>(const Matrix<float, 2, 2>&);
-    extern template float VectorNorm<float, 2>(const Vector<float, 2>&);
-    extern template std::optional<Vector<float, 2>> Normalize<float, 2>(const Vector<float, 2>&);
-#endif
 }
