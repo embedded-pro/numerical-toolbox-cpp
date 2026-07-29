@@ -12,4 +12,5 @@ Numerical solvers for linear systems, polynomial roots, and matrix equations.
 | [Durand-Kerner](DurandKerner.md)                                           | Simultaneous iterative root-finder for polynomials                     |
 | [Discrete Algebraic Riccati Equation](DiscreteAlgebraicRiccatiEquation.md) | Iterative solver for the DARE arising in LQR and Kalman filter design  |
 | [Runge-Kutta ODE Integrators](RungeKuttaIntegrators.md)                    | Fixed-step RK4 and adaptive Dormand-Prince RK45 for ODE integration    |
+| [Spectral Radius](SpectralRadius.md)                                       | Dominant eigenvalue magnitude and discrete-time Schur stability margin |
 | [Condition Number](ConditionNumber.md)                                     | 1-norm condition number estimate via column-wise inverse solve         |

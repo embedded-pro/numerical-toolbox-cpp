@@ -48,7 +48,6 @@ Difficulty legend:
 | 45 | IIR filter design (Butterworth/Chebyshev + bilinear) | `filters/passive`         | ★★★★★      |
 | 46 | H∞ state-feedback control                            | `robust_control` (new)    | ★★★★★      |
 | 47 | Model Reference Adaptive Control (MRAC)              | `nonlinear_control` (new) | ★★★★★      |
-| 51 | Spectral radius / discrete stability margin          | `math`                    | ★★★☆☆      |
 | 52 | Estimator consistency metrics (NEES / NIS)           | `estimators`              | ★★★☆☆      |
 
 Items 48–52 are the **evaluation & metrics primitives** — reusable quantities the per-family
