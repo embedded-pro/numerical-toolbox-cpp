@@ -12,6 +12,7 @@ target_link_libraries(numerical.solver ${NUMERICAL_VISIBILITY}
 
 target_sources(numerical.solver PRIVATE
     CholeskyDecomposition.hpp
+    ConditionNumber.hpp
     DiscreteAlgebraicRiccatiEquation.hpp
     DormandPrince45.hpp
     DurandKerner.hpp
@@ -20,6 +21,7 @@ target_sources(numerical.solver PRIVATE
     OdeSystem.hpp
     RungeKuttaIntegrators.hpp
     Solver.hpp
+    SpectralRadius.hpp
 )
 
 numerical_add_coverage_sources(numerical.solver
@@ -27,6 +29,7 @@ numerical_add_coverage_sources(numerical.solver
     DurandKerner.cpp
     GaussianElimination.cpp
     RungeKuttaIntegrators.cpp
+    SpectralRadius.cpp
 )
 
 add_subdirectory(test)
