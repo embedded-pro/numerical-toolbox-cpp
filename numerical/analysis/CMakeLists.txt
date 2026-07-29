@@ -13,6 +13,7 @@ target_link_libraries(numerical.analysis ${NUMERICAL_VISIBILITY}
 
 target_sources(numerical.analysis PRIVATE
     ConvolutionCorrelation.hpp
+    Decibels.hpp
     DiscreteCosineTransform.hpp
     FastFourierTransform.hpp
     FastFourierTransformRadix2Impl.hpp
@@ -24,6 +25,7 @@ target_sources(numerical.analysis PRIVATE
 
 numerical_add_coverage_sources(numerical.analysis
     ConvolutionCorrelation.cpp
+    Decibels.cpp
     FastFourierTransformRadix2Impl.cpp
     GoertzelAlgorithm.cpp
     PowerDensitySpectrum.cpp

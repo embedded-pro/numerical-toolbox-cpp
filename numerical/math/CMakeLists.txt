@@ -22,6 +22,7 @@ target_sources(numerical.math PRIVATE
     RecursiveBuffer.hpp
     SingleInstructionMultipleData.hpp
     Statistics.hpp
+    StepResponseMetrics.hpp
     Toeplitz.hpp
     Tolerance.hpp
     TrigonometricFunctions.hpp
@@ -34,6 +35,7 @@ numerical_add_coverage_sources(numerical.math
     Matrix.cpp
     QNumber.cpp
     Quaternion.cpp
+    StepResponseMetrics.cpp
 )
 
 add_subdirectory(test)
