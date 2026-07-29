@@ -8,23 +8,21 @@
 #include "numerical/analysis/FastFourierTransform.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/ComplexNumber.hpp"
-#include <cmath>
-#include <numbers>
 
 namespace analysis
 {
     template<typename T, std::size_t N>
-    class RealFft
+    class RealFastFourierTransform
     {
-        static_assert(std::is_floating_point_v<T>, "RealFft supports floating-point types");
-        static_assert(N >= 4 && (N & (N - 1)) == 0, "RealFft length N must be an even power of two");
+        static_assert(std::is_floating_point_v<T>, "RealFastFourierTransform supports floating-point types");
+        static_assert(N >= 4 && (N & (N - 1)) == 0, "RealFastFourierTransform length N must be an even power of two");
 
     public:
         using Complex = math::Complex<T>;
         using VectorComplex = infra::BoundedVector<Complex>;
         using VectorReal = infra::BoundedVector<T>;
 
-        explicit RealFft(FastFourierTransform<T>& engine);
+        explicit RealFastFourierTransform(FastFourierTransform<T>& engine, TwiddleFactors<T, N / 2>& twiddleFactors);
 
         OPTIMIZE_FOR_SPEED VectorComplex& Forward(VectorReal& realInput);
         OPTIMIZE_FOR_SPEED VectorReal& Inverse(VectorComplex& halfSpectrum);
@@ -33,9 +31,9 @@ namespace analysis
         static constexpr std::size_t half{ N / 2 };
 
         FastFourierTransform<T>& engine;
+        TwiddleFactors<T, half>& twiddleFactors;
         typename VectorReal::template WithMaxSize<half> evenBuf;
         typename VectorReal::template WithMaxSize<half> oddBuf;
-        typename VectorComplex::template WithMaxSize<half> twiddles;
         typename VectorComplex::template WithMaxSize<half> eCopy;
         typename VectorComplex::template WithMaxSize<half + 1> spectrum;
         typename VectorReal::template WithMaxSize<N> timeDomain;
@@ -44,26 +42,19 @@ namespace analysis
     /// Implementation ///
 
     template<typename T, std::size_t N>
-    RealFft<T, N>::RealFft(FastFourierTransform<T>& engine)
+    RealFastFourierTransform<T, N>::RealFastFourierTransform(FastFourierTransform<T>& engine, TwiddleFactors<T, N / 2>& twiddleFactors)
         : engine{ engine }
+        , twiddleFactors{ twiddleFactors }
     {
         evenBuf.resize(half);
         oddBuf.resize(half);
-        twiddles.resize(half);
         eCopy.resize(half);
         spectrum.resize(half + 1);
         timeDomain.resize(N);
-
-        twiddles[0] = Complex{ T(1), T(0) };
-        for (std::size_t k{ 1 }; k < half; ++k)
-        {
-            T angle{ -T(2) * std::numbers::pi_v<T> * static_cast<T>(k) / static_cast<T>(N) };
-            twiddles[k] = Complex{ std::cos(angle), std::sin(angle) };
-        }
     }
 
     template<typename T, std::size_t N>
-    OPTIMIZE_FOR_SPEED typename RealFft<T, N>::VectorComplex& RealFft<T, N>::Forward(VectorReal& realInput)
+    OPTIMIZE_FOR_SPEED typename RealFastFourierTransform<T, N>::VectorComplex& RealFastFourierTransform<T, N>::Forward(VectorReal& realInput)
     {
         for (std::size_t n{ 0 }; n < half; ++n)
         {
@@ -82,7 +73,7 @@ namespace analysis
 
         for (std::size_t k{ 1 }; k < half; ++k)
         {
-            Complex twidO{ twiddles[k] * O[k] };
+            Complex twidO{ twiddleFactors[k] * O[k] };
             spectrum[k] = Complex{ eCopy[k].Real() + twidO.Real(), eCopy[k].Imaginary() + twidO.Imaginary() };
         }
 
@@ -90,7 +81,7 @@ namespace analysis
     }
 
     template<typename T, std::size_t N>
-    OPTIMIZE_FOR_SPEED typename RealFft<T, N>::VectorReal& RealFft<T, N>::Inverse(VectorComplex& halfSpectrum)
+    OPTIMIZE_FOR_SPEED typename RealFastFourierTransform<T, N>::VectorReal& RealFastFourierTransform<T, N>::Inverse(VectorComplex& halfSpectrum)
     {
         typename VectorComplex::template WithMaxSize<half> E;
         typename VectorComplex::template WithMaxSize<half> O;
@@ -106,7 +97,7 @@ namespace analysis
             Complex xNk{ halfSpectrum[half - k].Real(), -halfSpectrum[half - k].Imaginary() };
             Complex sum{ T(0.5) * (xk.Real() + xNk.Real()), T(0.5) * (xk.Imaginary() + xNk.Imaginary()) };
             Complex diff{ T(0.5) * (xk.Real() - xNk.Real()), T(0.5) * (xk.Imaginary() - xNk.Imaginary()) };
-            Complex twConj{ twiddles[k].Real(), -twiddles[k].Imaginary() };
+            Complex twConj{ twiddleFactors[k].Real(), -twiddleFactors[k].Imaginary() };
             E[k] = sum;
             O[k] = twConj * diff;
         }
@@ -129,6 +120,6 @@ namespace analysis
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
-    extern template class RealFft<float, 16>;
+    extern template class RealFastFourierTransform<float, 16>;
 #endif
 }

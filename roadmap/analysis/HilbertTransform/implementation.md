@@ -71,7 +71,7 @@ function InstantaneousFrequency(phaseNow, phasePrev, Ts):
   streams continuously but only approximates the ideal `−90°` shift across its passband.
 - Instantaneous **phase must be unwrapped** before differencing, else frequency spikes by `2π`.
 - FIR Hilbert taps are antisymmetric with every even tap zero — exploit that to halve the MACs.
-- Reuses `FastFourierTransform` / `RealFft` for the block back-end.
+- Reuses `FastFourierTransform` / `RealFastFourierTransform` for the block back-end.
 - Float-only: `static_assert(std::is_floating_point_v<T>)`; the generic `T` signature keeps a
   `Q15`/`Q31` specialisation cheap to add later.
 

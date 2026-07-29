@@ -31,5 +31,5 @@ Trans. Pattern Analysis and Machine Intelligence*, 11(7), 674–693, 1989; I. Da
 on Wavelets*, SIAM, 1992.
 
 ## See also
-`ConvolutionCorrelation` (the FIR filtering underneath), `FastFourierTransform` / `RealFft`
+`ConvolutionCorrelation` (the FIR filtering underneath), `FastFourierTransform` / `RealFastFourierTransform`
 (alternative time-frequency view), `math::RecursiveBuffer`.

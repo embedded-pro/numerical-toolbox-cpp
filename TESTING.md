@@ -72,7 +72,7 @@ Canonical rules still apply ([AGENTS.md](AGENTS.md), [testing.instructions.md](.
 ## Per-family detail
 
 ### 1. Signal transforms — `analysis/`
-`FastFourierTransformRadix2Impl`, `RealFft`, `DiscreteCosineTransform`, `GoertzelAlgorithm`,
+`FastFourierTransformRadix2Impl`, `RealFastFourierTransform`, `DiscreteCosineTransform`, `GoertzelAlgorithm`,
 `ConvolutionCorrelation`, `PowerDensitySpectrum`, `SignalDetectors`, `windowing/`.
 
 - **M1 accuracy** — known transform pairs: δ[n] → flat spectrum; single sinusoid → single bin at its
@@ -80,7 +80,7 @@ Canonical rules still apply ([AGENTS.md](AGENTS.md), [testing.instructions.md](.
 - **M7 Parseval / energy** — `Σ|x|² ≈ (1/N)·Σ|X|²`; assert residual near 0.
 - **M1 linearity** — `F(a·x + b·y) = a·F(x) + b·F(y)`.
 - **M1 round-trip** — `Inverse(Forward(x)) ≈ x`; assert reconstruction RMSE.
-- **M7 symmetry** — real input ⇒ conjugate-symmetric spectrum (RealFft): `X[N-k] = conj(X[k])`.
+- **M7 symmetry** — real input ⇒ conjugate-symmetric spectrum (RealFastFourierTransform): `X[N-k] = conj(X[k])`.
 - **Convolution** — matches the direct sum; `x * δ = x`; commutativity; output length.
 - **PSD** — non-negative; total power = signal variance; spectral peak at the tone's frequency.
 - **Goertzel** — single-bin magnitude equals the full-FFT bin.

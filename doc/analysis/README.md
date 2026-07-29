@@ -7,7 +7,7 @@ Signal analysis algorithms for frequency-domain decomposition and spectral estim
 | Algorithm                                               | Description                                                                                      |
 |---------------------------------------------------------|--------------------------------------------------------------------------------------------------|
 | [Fast Fourier Transform](FastFourierTransform.md)       | Efficient computation of the Discrete Fourier Transform using the Cooley-Tukey radix-2 algorithm |
-| [Real-Input FFT](RealFft.md)                            | Length-N real FFT via even/odd split into two N/2-point complex DFTs, halving compute and memory |
+| [Real-Input FFT](RealFastFourierTransform.md)                            | Length-N real FFT via even/odd split into two N/2-point complex DFTs, halving compute and memory |
 | [Power Spectral Density](PowerDensitySpectrum.md)       | Estimation of signal power distribution across frequencies using Welch's method                  |
 | [Discrete Cosine Transform](DiscreteCosineTransform.md) | Real-valued frequency decomposition via cosine basis functions, computed through FFT             |
 | [Signal Detectors](SignalDetectors.md)                  | Peak hold, zero-crossing counter, and RMS envelope detectors for real-time signal monitoring     |
