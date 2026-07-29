@@ -48,6 +48,7 @@ TEST_F(TestDare, solves_simple_system)
 - Test `float` only (single type) — no multi-type tests
 - **No redundant tests** — implement exactly the spec's enumerated cases; no overlapping/extra cases
 - Test numerical accuracy against known reference values (not just "doesn't crash")
+- Pick the properties to assert from [`TESTING.md`](../../TESTING.md) — the per-family metric reference (accuracy, frequency/transient response, stability, boundaries, convergence, statistical consistency, conditioning)
 - Test genuine edge cases (zero input, extreme values) without duplicating coverage
 - One behavior per test — keep tests focused
 - Use descriptive test names that explain the scenario

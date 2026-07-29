@@ -81,6 +81,18 @@ xhost +local:docker
 Planned algorithms and components are tracked in [ROADMAP.md](ROADMAP.md) — a prioritized backlog
 of DSP filters, controllers, estimators, and solvers ordered by implementation difficulty.
 
+## Testing
+
+Every algorithm is validated against the **mathematical invariants of its family** — not golden
+output. A low-pass filter must attenuate above cutoff, an ODE integrator must reproduce a known
+analytic solution to its order, a Kalman filter's covariance must stay positive-definite. Tests are
+`TEST_F` on `float`, no heap, one behaviour per test, asserted against independent reference values.
+
+The per-family metric strategy — which properties to assert for each algorithm type (accuracy,
+frequency/transient response, stability, boundaries, invariants, convergence, statistical
+consistency, conditioning) — is documented in **[TESTING.md](TESTING.md)**. Mechanics and framework
+rules live in [.github/instructions/testing.instructions.md](.github/instructions/testing.instructions.md).
+
 ## Contributing
 
 Contributions, issues, and feature requests are welcome. Please check the contributing guidelines before submitting pull requests.
