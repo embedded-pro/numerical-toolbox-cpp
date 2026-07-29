@@ -280,31 +280,6 @@
           "ignoreFailures": true
         }
       ]
-    },
-    {
-      "name": "PID Integration Tests",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/build/integration/integration-tests/Debug/numerical.integration_test",
-      "args": [
-        "--format",
-        "pretty",
-        "--",
-        "${workspaceFolder}/integration-tests/features"
-      ],
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}",
-      "environment": [],
-      "externalConsole": false,
-      "MIMode": "gdb",
-      "miDebuggerPath": "/usr/bin/gdb",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ]
     }
   ]
 }
