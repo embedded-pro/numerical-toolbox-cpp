@@ -35,9 +35,9 @@ namespace analysis
         T cosine;
         T sine;
         std::size_t blockSize;
-        T s1;
-        T s2;
-        std::size_t sampleCount;
+        T s1{ T{ 0 } };
+        T s2{ T{ 0 } };
+        std::size_t sampleCount{ 0 };
     };
 
     template<typename T>
@@ -46,9 +46,6 @@ namespace analysis
         , cosine{ std::cos(T{ 2 } * std::numbers::pi_v<T> * static_cast<T>(k) / static_cast<T>(blockLength)) }
         , sine{ std::sin(T{ 2 } * std::numbers::pi_v<T> * static_cast<T>(k) / static_cast<T>(blockLength)) }
         , blockSize{ blockLength }
-        , s1{ T{ 0 } }
-        , s2{ T{ 0 } }
-        , sampleCount{ 0 }
     {}
 
     template<typename T>
