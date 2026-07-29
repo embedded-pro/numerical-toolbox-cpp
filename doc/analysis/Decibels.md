@@ -43,12 +43,12 @@ Both are simple differences in decibel space, exploiting the logarithm identity 
 
 ## Complexity Analysis
 
-| Operation       | Time     | Space | Notes                              |
-|-----------------|----------|-------|------------------------------------|
-| `ToDecibels`    | O(1)     | O(1)  | One `log10` + one `max` + one `mul` |
-| `FromDecibels`  | O(1)     | O(1)  | One `pow`                          |
-| `AttenuationDb` | O(1)     | O(1)  | Two `ToDecibels` + one subtraction |
-| `RippleDb`      | O(1)     | O(1)  | Two `ToDecibels` + one subtraction |
+| Operation       | Time | Space | Notes                               |
+|-----------------|------|-------|-------------------------------------|
+| `ToDecibels`    | O(1) | O(1)  | One `log10` + one `max` + one `mul` |
+| `FromDecibels`  | O(1) | O(1)  | One `pow`                           |
+| `AttenuationDb` | O(1) | O(1)  | Two `ToDecibels` + one subtraction  |
+| `RippleDb`      | O(1) | O(1)  | Two `ToDecibels` + one subtraction  |
 
 No state, no buffers. All operations are pure functions.
 
