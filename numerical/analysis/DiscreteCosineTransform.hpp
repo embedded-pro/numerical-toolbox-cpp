@@ -55,7 +55,7 @@ namespace analysis
 
         for (std::size_t k = 1; k < Length; ++k)
         {
-            float angle = -k * std::numbers::pi_v<float> / (2.0f * Length);
+            float angle = -static_cast<float>(k) * std::numbers::pi_v<float> / (2.0f * Length);
             float scale = 2.0f / std::sqrt(static_cast<float>(Length));
 
             float real = math::ToFloat(fftResult[k].Real());
