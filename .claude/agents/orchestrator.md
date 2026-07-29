@@ -16,6 +16,7 @@ Triage requests and route to the right specialist via the Agent tool. Do NOT imp
    - **planner** — new algorithm, architectural change, multi-file work
    - **executor** — clear bug fix, small change, existing plan
    - **reviewer** — review existing or recent code
+   - **modernizer** — refactor/dedupe a pre-roadmap algorithm, reuse shared utilities, simplify tests
 
 ## Context to gather
 - Module: `analysis`, `windowing`, `control_analysis`, `controllers`, `dynamics`,

@@ -2,7 +2,7 @@
 description: "Triage development tasks in numerical-toolbox and route to planner, executor, or reviewer. Start here for any new feature, bug fix, or code review."
 tools: [read, search, web, agent]
 model: "Claude Sonnet 4.6"
-agents: [planner, executor, reviewer]
+agents: [planner, executor, reviewer, modernizer]
 handoffs:
   - label: "Plan Implementation"
     agent: planner
@@ -13,6 +13,9 @@ handoffs:
   - label: "Review Code"
     agent: reviewer
     prompt: "Review the code changes described above against numerical-toolbox project standards."
+  - label: "Modernize Legacy Algorithm"
+    agent: modernizer
+    prompt: "Refactor the pre-roadmap algorithm described above to reuse shared utilities and simplify tests, following numerical-toolbox conventions."
 ---
 
 Triage requests and route to the right specialist. Do NOT implement or plan yourself.
@@ -26,6 +29,7 @@ Triage requests and route to the right specialist. Do NOT implement or plan your
    - **planner** — new algorithm, architectural change, multi-file work
    - **executor** — clear bug fix, small change, existing plan
    - **reviewer** — review existing or recent code
+   - **modernizer** — refactor/dedupe a pre-roadmap algorithm, reuse shared utilities, simplify tests
 
 ## Context to gather
 - Module: `analysis`, `windowing`, `control_analysis`, `controllers`, `dynamics`,

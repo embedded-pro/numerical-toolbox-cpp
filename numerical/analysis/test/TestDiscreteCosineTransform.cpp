@@ -22,11 +22,32 @@ namespace
         using VectorReal = typename analysis::FastFourierTransform<T>::VectorReal;
         using VectorComplex = typename analysis::FastFourierTransform<T>::VectorComplex;
 
-        MockFft<T> mockFft;
+        ::testing::StrictMock<MockFft<T>> mockFft;
         std::optional<analysis::DiscreteConsineTransform<T, Length>> dct;
         typename VectorReal::template WithMaxSize<Length> input;
         typename VectorReal::template WithMaxSize<Length> output;
         typename VectorComplex::template WithMaxSize<Length> fftOutput;
+
+        void SetUp() override
+        {
+            dct.emplace(mockFft);
+            input.clear();
+            input.resize(Length);
+        }
+
+        typename VectorComplex::template WithMaxSize<Length>& EmptyForwardResult()
+        {
+            fftOutput.clear();
+            fftOutput.resize(fftOutput.max_size());
+            return fftOutput;
+        }
+
+        typename VectorReal::template WithMaxSize<Length>& EmptyInverseResult()
+        {
+            output.clear();
+            output.resize(output.max_size());
+            return output;
+        }
     };
 
     using TestedTypes = ::testing::Types<float, math::Q15, math::Q31>;
@@ -35,10 +56,6 @@ namespace
 
 TYPED_TEST(TestDiscreteConsineTransform, forward_transform_calls_fft_with_preprocessed_data)
 {
-    this->dct.emplace(this->mockFft);
-    this->input.clear();
-    this->input.resize(TestDiscreteConsineTransform<TypeParam>::Length);
-
     for (size_t i = 0; i < this->input.size(); ++i)
         this->input[i] = TypeParam(0.1f);
 
@@ -48,9 +65,7 @@ TYPED_TEST(TestDiscreteConsineTransform, forward_transform_calls_fft_with_prepro
                 for (size_t i = 0; i < input.size() / 2; ++i)
                     EXPECT_EQ(math::ToFloat(input[i]), math::ToFloat(this->input[2 * i]));
 
-                this->fftOutput.clear();
-                this->fftOutput.resize(this->fftOutput.max_size());
-                return this->fftOutput;
+                return this->EmptyForwardResult();
             }));
 
     this->dct->Forward(this->input);
@@ -58,10 +73,6 @@ TYPED_TEST(TestDiscreteConsineTransform, forward_transform_calls_fft_with_prepro
 
 TYPED_TEST(TestDiscreteConsineTransform, inverse_transform_calls_fft_with_preprocessed_data)
 {
-    this->dct.emplace(this->mockFft);
-    this->input.clear();
-    this->input.resize(TestDiscreteConsineTransform<TypeParam>::Length);
-
     for (size_t i = 0; i < this->input.size(); ++i)
         this->input[i] = TypeParam(0.1f);
 
@@ -70,9 +81,7 @@ TYPED_TEST(TestDiscreteConsineTransform, inverse_transform_calls_fft_with_prepro
             {
                 EXPECT_LE(std::abs(math::ToFloat(input[0].Real())), 1.0f);
 
-                this->output.clear();
-                this->output.resize(this->output.max_size());
-                return this->output;
+                return this->EmptyInverseResult();
             }));
 
     this->dct->Inverse(this->input);
@@ -80,17 +89,11 @@ TYPED_TEST(TestDiscreteConsineTransform, inverse_transform_calls_fft_with_prepro
 
 TYPED_TEST(TestDiscreteConsineTransform, input_size_matches_fft_size)
 {
-    this->dct.emplace(this->mockFft);
-    this->input.clear();
-    this->input.resize(TestDiscreteConsineTransform<TypeParam>::Length);
-
     EXPECT_CALL(this->mockFft, Forward(::testing::_))
         .WillOnce(::testing::Invoke([this](typename analysis::FastFourierTransform<TypeParam>::VectorReal& input) -> typename analysis::FastFourierTransform<TypeParam>::VectorComplex&
             {
                 EXPECT_EQ(input.size(), TestDiscreteConsineTransform<TypeParam>::Length);
-                this->fftOutput.clear();
-                this->fftOutput.resize(this->fftOutput.max_size());
-                return this->fftOutput;
+                return this->EmptyForwardResult();
             }));
 
     this->dct->Forward(this->input);
@@ -98,10 +101,6 @@ TYPED_TEST(TestDiscreteConsineTransform, input_size_matches_fft_size)
 
 TYPED_TEST(TestDiscreteConsineTransform, scaling_stays_within_fixed_point_range)
 {
-    this->dct.emplace(this->mockFft);
-    this->input.clear();
-    this->input.resize(TestDiscreteConsineTransform<TypeParam>::Length);
-
     std::fill(this->input.begin(), this->input.end(), TypeParam(0.9999f));
 
     EXPECT_CALL(this->mockFft, Forward(::testing::_))
@@ -110,9 +109,7 @@ TYPED_TEST(TestDiscreteConsineTransform, scaling_stays_within_fixed_point_range)
                 for (const auto& value : input)
                     EXPECT_LE(std::abs(math::ToFloat(value)), 1.0f);
 
-                this->fftOutput.clear();
-                this->fftOutput.resize(this->fftOutput.max_size());
-                return this->fftOutput;
+                return this->EmptyForwardResult();
             }));
 
     this->dct->Forward(this->input);

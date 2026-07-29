@@ -41,6 +41,8 @@ namespace analysis
         typename VectorReal::template WithMaxSize<N> timeDomain;
     };
 
+    /// Implementation ///
+
     template<typename T, std::size_t N>
     RealFft<T, N>::RealFft(FastFourierTransform<T>& engine)
         : engine{ engine }
