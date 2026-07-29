@@ -50,9 +50,9 @@ Difficulty legend:
 | 47 | Model Reference Adaptive Control (MRAC)              | `nonlinear_control` (new) | ★★★★★      |
 | 48 | Decibel & magnitude-response helpers                 | `analysis`                | ★☆☆☆☆      |
 | 49 | Step / transient-response metrics                    | `math`                    | ★★☆☆☆      |
-| 50 | Matrix norms & condition number                     | `math`                    | ★★★☆☆      |
-| 51 | Spectral radius / discrete stability margin         | `math`                    | ★★★☆☆      |
-| 52 | Estimator consistency metrics (NEES / NIS)          | `estimators`              | ★★★☆☆      |
+| 50 | Matrix norms & condition number                      | `math`                    | ★★★☆☆      |
+| 51 | Spectral radius / discrete stability margin          | `math`                    | ★★★☆☆      |
+| 52 | Estimator consistency metrics (NEES / NIS)           | `estimators`              | ★★★☆☆      |
 
 Items 48–52 are the **evaluation & metrics primitives** — reusable quantities the per-family
 unit-test reference [`TESTING.md`](TESTING.md) depends on but which

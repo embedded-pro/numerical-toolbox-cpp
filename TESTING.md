@@ -36,34 +36,34 @@ Canonical rules still apply ([AGENTS.md](AGENTS.md), [testing.instructions.md](.
 
 ## Metric types (the vocabulary)
 
-| # | Metric type | What it asserts | Typical assertion |
-|---|-------------|-----------------|-------------------|
-| M1 | **Numerical accuracy** | output matches a closed-form / reference value | `EXPECT_NEAR(out, ref, tol)`; ULP error for math funcs |
-| M2 | **Frequency response** | magnitude / phase / group delay vs analytic `H(e^{jω})` | error in dB at DC, cutoff, Nyquist; passband ripple; stopband floor |
-| M3 | **Time / transient response** | step & impulse behaviour | rise time, settling time, % overshoot, steady-state error |
-| M4 | **Stability** | poles/eigenvalues inside unit circle; BIBO; Riccati/Lyapunov | pole radius < 1; bounded long run; residual of Lyapunov/Riccati eq |
-| M5 | **Convergence** | iterative process reaches the answer | iterations-to-tolerance; monotonic objective/residual; contraction rate |
-| M6 | **Boundary / edge** | zero, saturation, extreme magnitude, min sizes | clamp limits; zero-in→zero-out; no NaN/Inf at extremes |
-| M7 | **Invariants & conservation** | energy/Parseval, norm, probability mass, orthogonality | Parseval residual; ‖q‖=1; Σsoftmax=1; energy drift bound |
-| M8 | **Statistical consistency** | estimator bias / error / covariance sanity | RMSE vs truth; NEES/NIS in χ² band; R²; unbiasedness |
-| M9 | **Conditioning / robustness** | behaviour under ill-conditioning & quantization | residual growth vs condition number; quantization-error bound |
+| #  | Metric type                   | What it asserts                                              | Typical assertion                                                       |
+|----|-------------------------------|--------------------------------------------------------------|-------------------------------------------------------------------------|
+| M1 | **Numerical accuracy**        | output matches a closed-form / reference value               | `EXPECT_NEAR(out, ref, tol)`; ULP error for math funcs                  |
+| M2 | **Frequency response**        | magnitude / phase / group delay vs analytic `H(e^{jω})`      | error in dB at DC, cutoff, Nyquist; passband ripple; stopband floor     |
+| M3 | **Time / transient response** | step & impulse behaviour                                     | rise time, settling time, % overshoot, steady-state error               |
+| M4 | **Stability**                 | poles/eigenvalues inside unit circle; BIBO; Riccati/Lyapunov | pole radius < 1; bounded long run; residual of Lyapunov/Riccati eq      |
+| M5 | **Convergence**               | iterative process reaches the answer                         | iterations-to-tolerance; monotonic objective/residual; contraction rate |
+| M6 | **Boundary / edge**           | zero, saturation, extreme magnitude, min sizes               | clamp limits; zero-in→zero-out; no NaN/Inf at extremes                  |
+| M7 | **Invariants & conservation** | energy/Parseval, norm, probability mass, orthogonality       | Parseval residual; ‖q‖=1; Σsoftmax=1; energy drift bound                |
+| M8 | **Statistical consistency**   | estimator bias / error / covariance sanity                   | RMSE vs truth; NEES/NIS in χ² band; R²; unbiasedness                    |
+| M9 | **Conditioning / robustness** | behaviour under ill-conditioning & quantization              | residual growth vs condition number; quantization-error bound           |
 
 ## Family → metric-type matrix
 
-| Family | M1 | M2 | M3 | M4 | M5 | M6 | M7 | M8 | M9 |
-|--------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
-| Signal transforms (analysis) | ● | ● | | | | ● | ● | | ● |
-| Passive filters | ● | ● | ● | ● | | ● | | | |
-| Stochastic/adaptive filters & online estimators | ● | | ● | ● | ● | ● | ● | ● | |
-| Controllers | ● | ○ | ● | ● | | ● | | | |
-| Control analysis | ● | ● | ● | ● | | ● | | | |
-| Offline estimators / regression | ● | | | | ● | ● | | ● | ● |
-| Optimization | ● | | | | ● | ● | | | |
-| Regularization | ● | | | | | ● | ● | | |
-| Solvers (linear / ODE / roots) | ● | | ○ | ● | ● | ● | ● | | ● |
-| Dynamics & kinematics | ● | | ● | | ● | ● | ● | | |
-| Neural network | ● | | | | ○ | ● | ● | | |
-| Math foundation | ● | | | | | ● | ● | | ● |
+| Family                                          | M1 | M2 | M3 | M4 | M5 | M6 | M7 | M8 | M9 |
+|-------------------------------------------------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| Signal transforms (analysis)                    | ●  | ●  |    |    |    | ●  | ●  |    | ●  |
+| Passive filters                                 | ●  | ●  | ●  | ●  |    | ●  |    |    |    |
+| Stochastic/adaptive filters & online estimators | ●  |    | ●  | ●  | ●  | ●  | ●  | ●  |    |
+| Controllers                                     | ●  | ○  | ●  | ●  |    | ●  |    |    |    |
+| Control analysis                                | ●  | ●  | ●  | ●  |    | ●  |    |    |    |
+| Offline estimators / regression                 | ●  |    |    |    | ●  | ●  |    | ●  | ●  |
+| Optimization                                    | ●  |    |    |    | ●  | ●  |    |    |    |
+| Regularization                                  | ●  |    |    |    |    | ●  | ●  |    |    |
+| Solvers (linear / ODE / roots)                  | ●  |    | ○  | ●  | ●  | ●  | ●  |    | ●  |
+| Dynamics & kinematics                           | ●  |    | ●  |    | ●  | ●  | ●  |    |    |
+| Neural network                                  | ●  |    |    |    | ○  | ●  | ●  |    |    |
+| Math foundation                                 | ●  |    |    |    |    | ●  | ●  |    | ●  |
 
 ● primary   ○ situational
 
