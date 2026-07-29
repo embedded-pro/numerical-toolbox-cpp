@@ -48,11 +48,11 @@ Chi-squared quantiles for degrees of freedom 1–10 at the 95% confidence level 
 
 ## Complexity Analysis
 
-| Case    | Time         | Space  | Notes                                            |
-|---------|--------------|--------|--------------------------------------------------|
-| Best    | $O(n^2)$     | $O(n^2)$ | Dominated by back-substitution in GE             |
-| Average | $O(n^3)$     | $O(n^2)$ | Gaussian elimination with partial pivoting       |
-| Worst   | $O(n^3)$     | $O(n^2)$ | All pivots require row swaps                     |
+| Case    | Time     | Space    | Notes                                      |
+|---------|----------|----------|--------------------------------------------|
+| Best    | $O(n^2)$ | $O(n^2)$ | Dominated by back-substitution in GE       |
+| Average | $O(n^3)$ | $O(n^2)$ | Gaussian elimination with partial pivoting |
+| Worst   | $O(n^3)$ | $O(n^2)$ | All pivots require row swaps               |
 
 All storage is stack-allocated; $n$ is bounded at compile time by `Dim`.
 
