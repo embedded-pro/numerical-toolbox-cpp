@@ -48,6 +48,16 @@ Difficulty legend:
 | 45 | IIR filter design (Butterworth/Chebyshev + bilinear) | `filters/passive`         | ★★★★★      |
 | 46 | H∞ state-feedback control                            | `robust_control` (new)    | ★★★★★      |
 | 47 | Model Reference Adaptive Control (MRAC)              | `nonlinear_control` (new) | ★★★★★      |
+| 48 | Decibel & magnitude-response helpers                 | `analysis`                | ★☆☆☆☆      |
+| 49 | Step / transient-response metrics                    | `math`                    | ★★☆☆☆      |
+| 50 | Matrix norms & condition number                      | `math`                    | ★★★☆☆      |
+| 51 | Spectral radius / discrete stability margin          | `math`                    | ★★★☆☆      |
+| 52 | Estimator consistency metrics (NEES / NIS)           | `estimators`              | ★★★☆☆      |
+
+Items 48–52 are the **evaluation & metrics primitives** — reusable quantities the per-family
+unit-test reference [`TESTING.md`](TESTING.md) depends on but which
+the library does not yet expose. Detailed below under
+[Evaluation & metrics primitives](#evaluation--metrics-primitives).
 
 ---
 
@@ -540,6 +550,66 @@ graph LR
     RED --> MOB[M24 mobile manip]
     RNEA --> TOPP[M27 TOPP]
 ```
+
+## Evaluation & metrics primitives
+
+Reusable quantities that quantify *how well* an algorithm behaves — the properties the per-family
+unit-test reference [`TESTING.md`](TESTING.md) asks tests to assert.
+Today [`math/Statistics.hpp`](numerical/math/Statistics.hpp) already provides `Mean`, `Variance`,
+`MeanSquaredError`, `RootMeanSquaredError`, `MeanAbsoluteError`, `RSquaredScore`, `AutoCorrelation`,
+and [`control_analysis/FrequencyResponse`](numerical/control_analysis/FrequencyResponse.hpp) provides
+magnitude/phase. The items below are the missing pieces. All are **float-only**, no-heap, and operate
+on bounded `math::Vector`/`math::Matrix` inputs; tests are `TEST_F` on `float`.
+
+### 48. Decibel & magnitude-response helpers ★☆☆☆☆ — `analysis`
+- **What:** `ToDecibels(ratio)` / `FromDecibels`, plus convenience magnitude(-in-dB) and attenuation
+  helpers layered over `control_analysis::FrequencyResponse`.
+- **Metric value:** M2 (frequency response) — pass-band ripple / stop-band attenuation in dB, the
+  natural unit for filter and controller tests.
+- **Algorithm:** `20·log10(·)`; guard the zero/`-inf` case with a floor.
+- **Reuses:** `math::TrigonometricFunctions`/`std::log10`, existing `FrequencyResponse`.
+
+### 49. Step / transient-response metrics ★★☆☆☆ — `math`
+- **What:** From a bounded step-response `Vector`: `RiseTime` (10–90 %), `SettlingTime` (±band),
+  `PercentOvershoot`, `PeakTime`, `SteadyStateError`.
+- **Metric value:** M3 (time-response) — the core acceptance criteria for every controller
+  (`controllers/`), `LinearTimeInvariant`, and IIR filter.
+- **Algorithm:** single forward pass over the sampled response against the reference/steady value;
+  standard control-systems definitions.
+- **Reuses:** `math::Vector`, `math::Statistics` for the steady-state estimate.
+
+### 50. Matrix norms & condition number ★★★☆☆ — `math`
+- **What:** `FrobeniusNorm`, `OneNorm`, `InfinityNorm` on `Matrix`; `Vector` `Norm`/`Normalize`;
+  `ConditionNumber` estimate.
+- **Metric value:** M9 (conditioning) — quantifies ill-conditioning for `solvers/`, regression, and
+  Kalman covariance sanity; foundational gap ([`Matrix`](numerical/math/Matrix.hpp) currently exposes
+  only `Transpose`/`Trace`).
+- **Algorithm:** direct norm sums; condition number from norm ratio (apply the inverse via the
+  existing `GaussianElimination` rather than forming it explicitly, embedded-style).
+- **Reuses:** `math::Matrix`, `solvers::GaussianElimination`.
+
+### 51. Spectral radius / discrete stability margin ★★★☆☆ — `math`
+- **What:** Dominant `|eigenvalue|` of a square (state/companion) matrix; `IsSchurStable` (all
+  `|λ| < 1`) and the stability margin `1 − ρ(A)`.
+- **Metric value:** M4 (stability) — the general test for discrete-time controllers, observers,
+  IIR/Biquad (via the companion matrix of the denominator), and closed-loop `A − BK`.
+- **Algorithm:** power iteration for the dominant eigenvalue, or characteristic-polynomial roots via
+  the existing `solvers::DurandKerner` for the full spectrum.
+- **Reuses:** `math::Matrix`, `solvers::DurandKerner`.
+
+### 52. Estimator consistency metrics (NEES / NIS) ★★★☆☆ — `estimators`
+- **What:** Normalised Estimation Error Squared and Normalised Innovation Squared, with χ²
+  confidence-gate helpers.
+- **Metric value:** M8 (statistical consistency) — the only rigorous correctness test for the Kalman
+  family (`filters/active/`: KF/EKF/UKF/smoother) beyond raw RMSE.
+- **Algorithm:** `εᵀ·P⁻¹·ε` against χ² bounds for the state/measurement dimension.
+- **Reuses:** `math::Matrix`, `solvers::GaussianElimination` (for `P⁻¹·ε`), existing
+  `estimators::EstimationMetrics`.
+
+> **Test-only helpers (not production components).** A ULP/relative-error comparator and a
+> finite-difference **gradient check** (for `neural_network/` and `optimization/`) are pure test
+> utilities — add them to the `numerical.math_test_helper` INTERFACE library
+> ([`numerical/math/test_doubles/`](numerical/math/test_doubles/)), not to `numerical/` production code.
 
 ## New modules to introduce
 
