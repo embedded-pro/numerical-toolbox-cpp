@@ -46,6 +46,16 @@
         "NUMERICAL_TOOLBOX_BUILD_SIMULATOR": true
       },
       "generator": "Ninja"
+    },
+    {
+      "name": "integration",
+      "displayName": "Configuration for Cucumber Integration Tests",
+      "inherits": "host",
+      "cacheVariables": {
+        "NUMERICAL_TOOLBOX_BUILD_INTEGRATION_TESTS": true,
+        "NUMERICAL_TOOLBOX_BUILD_TESTS": false,
+        "NUMERICAL_TOOLBOX_BUILD_SIMULATOR": false
+      }
     }
   ],
   "buildPresets": [
@@ -77,6 +87,11 @@
       "name": "coverage",
       "configuration": "Debug",
       "configurePreset": "coverage"
+    },
+    {
+      "name": "integration-Debug",
+      "configuration": "Debug",
+      "configurePreset": "integration"
     }
   ],
   "testPresets": [
@@ -106,6 +121,12 @@
     {
       "name": "host-single-Debug",
       "configurePreset": "host-single-Debug",
+      "configuration": "Debug",
+      "inherits": "defaults"
+    },
+    {
+      "name": "integration",
+      "configurePreset": "integration",
       "configuration": "Debug",
       "inherits": "defaults"
     }
