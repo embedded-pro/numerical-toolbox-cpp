@@ -3,6 +3,7 @@
 #include "infra/util/Function.hpp"
 #include "numerical/filters/active/KalmanFilterBase.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/MatrixOperations.hpp"
 
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC optimize("O3", "fast-math")
@@ -94,7 +95,7 @@ namespace filters
     {
         auto F = stateJacobianFn(this->state());
         this->state() = stateTransitionFn(this->state());
-        this->covariance() = F * this->covariance() * F.Transpose() + this->processNoise();
+        this->covariance() = math::CongruenceTransform(F, this->covariance()) + this->processNoise();
     }
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
@@ -103,7 +104,7 @@ namespace filters
     {
         auto F = stateJacobianWithControlFn(this->state(), u);
         this->state() = stateTransitionWithControlFn(this->state(), u);
-        this->covariance() = F * this->covariance() * F.Transpose() + this->processNoise();
+        this->covariance() = math::CongruenceTransform(F, this->covariance()) + this->processNoise();
     }
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>

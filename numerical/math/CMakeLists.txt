@@ -20,6 +20,7 @@ target_sources(numerical.math PRIVATE
     LinearTimeInvariant.hpp
     Matrix.hpp
     MatrixNorms.hpp
+    MatrixOperations.hpp
     QNumber.hpp
     Quaternion.hpp
     RecursiveBuffer.hpp

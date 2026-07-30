@@ -6,6 +6,7 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
+#include "numerical/math/MatrixNorms.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 #include <array>
 #include <cmath>
@@ -48,7 +49,6 @@ namespace estimators
 
     private:
         [[nodiscard]] static OPTIMIZE_FOR_SPEED std::optional<StateVector> Solve(const CovarianceMatrix& matrix, const StateVector& rhs);
-        [[nodiscard]] static OPTIMIZE_FOR_SPEED T DotProduct(const StateVector& a, const StateVector& b);
     };
 
     template<typename T, std::size_t Dim>
@@ -57,7 +57,7 @@ namespace estimators
         auto z = Solve(covariance, error);
         if (!z.has_value())
             return std::nullopt;
-        return DotProduct(error, z.value());
+        return math::DotProduct(error, z.value());
     }
 
     template<typename T, std::size_t Dim>
@@ -66,7 +66,7 @@ namespace estimators
         auto z = Solve(innovationCovariance, innovation);
         if (!z.has_value())
             return std::nullopt;
-        return DotProduct(innovation, z.value());
+        return math::DotProduct(innovation, z.value());
     }
 
     template<typename T, std::size_t Dim>
@@ -104,15 +104,6 @@ namespace estimators
 
         solvers::GaussianElimination<T, Dim> solver;
         return solver.Solve(matrix, rhs);
-    }
-
-    template<typename T, std::size_t Dim>
-    OPTIMIZE_FOR_SPEED T ConsistencyMetrics<T, Dim>::DotProduct(const StateVector& a, const StateVector& b)
-    {
-        T result{};
-        for (std::size_t i = 0; i < Dim; ++i)
-            result += a.at(i, 0) * b.at(i, 0);
-        return result;
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD

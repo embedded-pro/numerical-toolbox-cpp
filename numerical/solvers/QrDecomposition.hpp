@@ -32,10 +32,28 @@ namespace solvers
         void GivensUpdateRow(const math::Matrix<T, 1, Cols>& newRow);
 
     private:
+        static void ApplyReflector(math::Matrix<T, Rows, Cols>& block, const math::Vector<T, Rows>& v, T beta, std::size_t start);
+
         math::Matrix<T, Rows, Cols> qr{};
         math::Vector<T, Cols> betas{};
         bool factored{ false };
     };
+
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    OPTIMIZE_FOR_SPEED void QrDecomposition<T, Rows, Cols>::ApplyReflector(
+        math::Matrix<T, Rows, Cols>& block, const math::Vector<T, Rows>& v, T beta, std::size_t start)
+    {
+        for (std::size_t j = start; j < Cols; ++j)
+        {
+            T dot{ T{} };
+            for (std::size_t i = start; i < Rows; ++i)
+                dot += v.at(i, 0) * block.at(i, j);
+
+            T scale = beta * dot;
+            for (std::size_t i = start; i < Rows; ++i)
+                block.at(i, j) -= scale * v.at(i, 0);
+        }
+    }
 
     template<typename T, std::size_t Rows, std::size_t Cols>
     OPTIMIZE_FOR_SPEED bool QrDecomposition<T, Rows, Cols>::Decompose(const math::Matrix<T, Rows, Cols>& a)
@@ -46,6 +64,8 @@ namespace solvers
 
         math::Vector<T, Rows> colVec{};
         math::Vector<T, Rows> v{};
+
+        T maxPivot{ T{} };
 
         for (std::size_t k = 0; k < Cols; ++k)
         {
@@ -58,22 +78,17 @@ namespace solvers
 
             if (beta != T{})
             {
-                for (std::size_t j = k; j < Cols; ++j)
-                {
-                    T dot{ T{} };
-                    for (std::size_t i = k; i < Rows; ++i)
-                        dot += v.at(i, 0) * qr.at(i, j);
-
-                    T scale = beta * dot;
-                    for (std::size_t i = k; i < Rows; ++i)
-                        qr.at(i, j) -= scale * v.at(i, 0);
-                }
+                ApplyReflector(qr, v, beta, k);
 
                 for (std::size_t i = k + 1; i < Rows; ++i)
                     qr.at(i, k) = v.at(i, 0);
             }
 
-            if (std::abs(qr.at(k, k)) < T{ 1e-12f })
+            T pivot = std::abs(qr.at(k, k));
+            if (pivot > maxPivot)
+                maxPivot = pivot;
+
+            if (pivot <= maxPivot * T{ 1e-6f })
                 return false;
         }
 
@@ -101,16 +116,7 @@ namespace solvers
             for (std::size_t i = col + 1; i < Rows; ++i)
                 v.at(i, 0) = qr.at(i, col);
 
-            for (std::size_t j = col; j < Cols; ++j)
-            {
-                T dot{ T{} };
-                for (std::size_t i = col; i < Rows; ++i)
-                    dot += v.at(i, 0) * result.at(i, j);
-
-                T scale = beta * dot;
-                for (std::size_t i = col; i < Rows; ++i)
-                    result.at(i, j) -= scale * v.at(i, 0);
-            }
+            ApplyReflector(result, v, beta, col);
         }
 
         return result;

@@ -2,6 +2,7 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
+#include "numerical/math/MatrixOperations.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -135,7 +136,7 @@ namespace filters
         typename KalmanFilterBase<QNumberType, StateSize, MeasurementSize, ControlSize>::KalmanGain
         KalmanFilterBase<QNumberType, StateSize, MeasurementSize, ControlSize>::ComputeKalmanGain(const MeasurementMatrix& H) const
     {
-        auto S = H * covariance_ * H.Transpose() + measurementNoise_;
+        auto S = math::CongruenceTransform(H, covariance_) + measurementNoise_;
 
         // Solve S Kᵀ = H P instead of explicit K = P Hᵀ S⁻¹ (S is symmetric)
         auto KTranspose = solvers::SolveSystem<QNumberType, MeasurementSize, StateSize>(S, H * covariance_);
@@ -150,7 +151,7 @@ namespace filters
         state_ = state_ + K * innovation;
 
         auto IminusKH = StateMatrix::Identity() - K * H;
-        covariance_ = IminusKH * covariance_ * IminusKH.Transpose() + K * measurementNoise_ * K.Transpose();
+        covariance_ = math::CongruenceTransform(IminusKH, covariance_) + math::CongruenceTransform(K, measurementNoise_);
     }
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>

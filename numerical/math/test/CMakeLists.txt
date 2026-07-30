@@ -14,6 +14,7 @@ target_sources(numerical.math_test PRIVATE
     TestHouseholderTransform.cpp
     TestLinearTimeInvariant.cpp
     TestMatrixNorms.cpp
+    TestMatrixOperations.cpp
     TestQNumber.cpp
     TestMatrix.cpp
     TestQuaternion.cpp

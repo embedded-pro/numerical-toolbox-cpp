@@ -39,6 +39,20 @@ TEST_F(MatrixNormsTest, VectorNorm)
     EXPECT_NEAR(result, 5.0f, math::Tolerance<float>());
 }
 
+TEST_F(MatrixNormsTest, DotProduct)
+{
+    math::Vector<float, 2> w{ { 1.0f }, { 2.0f } };
+    float result = math::DotProduct(v, w);
+    EXPECT_NEAR(result, 11.0f, math::Tolerance<float>());
+}
+
+TEST_F(MatrixNormsTest, DotProductWithSelfEqualsNormSquared)
+{
+    float dot = math::DotProduct(v, v);
+    float norm = math::VectorNorm(v);
+    EXPECT_NEAR(dot, norm * norm, math::Tolerance<float>());
+}
+
 TEST_F(MatrixNormsTest, NormalizeUnit)
 {
     auto result = math::Normalize(v);

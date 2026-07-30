@@ -12,4 +12,5 @@ Core mathematical primitives for numerical computation.
 | [Householder Transform](HouseholderTransform.md)    | Householder reflector for a sub-column — orthogonal, backward-stable factorization primitive  |
 | [Givens Rotation](GivensRotation.md)                | Plane rotation zeroing one entry — streaming/sparse factorization primitive                   |
 | [Triangular Solve](TriangularSolve.md)              | Upper-triangular back-substitution shared by Gaussian elimination and QR                       |
+| [Matrix Operations](MatrixOperations.md)            | Structural matrix utilities — `Symmetrize` (closest symmetric matrix)                          |
 | [Step Response Metrics](StepResponseMetrics.md)     | Rise time, settling time, percent overshoot, peak time, and steady-state error from a bounded step-response vector |

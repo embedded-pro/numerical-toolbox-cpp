@@ -6,7 +6,7 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
-#include "numerical/solvers/GaussianElimination.hpp"
+#include "numerical/solvers/QrDecomposition.hpp"
 #include <type_traits>
 
 namespace estimators
@@ -43,11 +43,9 @@ namespace estimators
                 v.at(i, j) = v.at(i, j - 1) * x.at(i, 0);
         }
 
-        auto vt = v.Transpose();
-        auto normalMatrix = vt * v;
-        auto rhs = vt * y;
-
-        coefficients = solvers::SolveSystem<T, Degree + 1, 1>(normalMatrix, rhs);
+        solvers::QrDecomposition<T, Samples, Degree + 1> qr;
+        qr.Decompose(v);
+        coefficients = qr.SolveLeastSquares(y);
     }
 
     template<typename T, std::size_t Samples, std::size_t Degree>

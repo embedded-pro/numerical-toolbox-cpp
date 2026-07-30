@@ -7,6 +7,7 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/math/Matrix.hpp"
+#include "numerical/math/MatrixOperations.hpp"
 #include "numerical/solvers/CholeskyDecomposition.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 #include <array>
@@ -140,7 +141,7 @@ namespace filters
         for (std::size_t t = 0; t < numSteps; ++t)
         {
             const auto nu = observations[t] - H * predictedMeans_[t];
-            const auto S = H * predictedCovariances_[t] * H.Transpose() + R;
+            const auto S = math::CongruenceTransform(H, predictedCovariances_[t]) + R;
 
             // Kalman gain: K = P H^T S^{-1}  via SolveSystem(S, H*P)^T
             const auto K = solvers::SolveSystem<float, MeasurementSize, StateSize>(
@@ -152,7 +153,7 @@ namespace filters
             // Joseph-form covariance update for numerical PD-preservation
             const auto IminusKH = StateMatrix::Identity() - K * H;
             filteredCovariances_[t] =
-                IminusKH * predictedCovariances_[t] * IminusKH.Transpose() + K * R * K.Transpose();
+                math::CongruenceTransform(IminusKH, predictedCovariances_[t]) + math::CongruenceTransform(K, R);
 
             kalmanGains_[t] = K;
 
@@ -161,7 +162,7 @@ namespace filters
             if (t < numSteps - 1)
             {
                 predictedMeans_[t + 1] = F * filteredMeans_[t];
-                predictedCovariances_[t + 1] = F * filteredCovariances_[t] * F.Transpose() + Q;
+                predictedCovariances_[t + 1] = math::CongruenceTransform(F, filteredCovariances_[t]) + Q;
             }
         }
 
@@ -188,7 +189,7 @@ namespace filters
 
             const auto deltaP = output.smoothedCovariances[t + 1] - predictedCovariances_[t + 1];
             output.smoothedMeans[t] = filteredMeans_[t] + G_t * (output.smoothedMeans[t + 1] - predictedMeans_[t + 1]);
-            output.smoothedCovariances[t] = filteredCovariances_[t] + G_t * deltaP * G_t.Transpose();
+            output.smoothedCovariances[t] = filteredCovariances_[t] + math::CongruenceTransform(G_t, deltaP);
 
             // Lag-1 cross-covariance: P_{t+1, t | T}
             if (t == numSteps - 2)

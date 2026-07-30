@@ -8,7 +8,7 @@
 
 #include "numerical/estimators/Estimator.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
-#include "numerical/solvers/GaussianElimination.hpp"
+#include "numerical/solvers/QrDecomposition.hpp"
 
 namespace estimators
 {
@@ -40,17 +40,15 @@ namespace estimators
 
         for (size_t i = 0; i < Samples; ++i)
         {
-            X_design.at(i, 0) = T(0.9999f);
+            X_design.at(i, 0) = T{ 1 };
 
             for (size_t j = 0; j < Features; ++j)
                 X_design.at(i, j + 1) = X.at(i, j);
         }
 
-        auto X_transpose = X_design.Transpose();
-        auto XtX = X_transpose * X_design;
-        auto Xty = X_transpose * y;
-
-        coefficients = solvers::SolveSystem<T, Features + 1, 1>(XtX, Xty);
+        solvers::QrDecomposition<T, Samples, Features + 1> qr;
+        qr.Decompose(X_design);
+        coefficients = qr.SolveLeastSquares(y);
     }
 
     template<typename T, std::size_t Samples, std::size_t Features>

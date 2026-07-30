@@ -55,13 +55,20 @@ namespace math
     }
 
     template<typename T, std::size_t Size>
-    [[nodiscard]] OPTIMIZE_FOR_SPEED T VectorNorm(const Vector<T, Size>& v)
+    [[nodiscard]] OPTIMIZE_FOR_SPEED T DotProduct(const Vector<T, Size>& a, const Vector<T, Size>& b)
     {
         static_assert(std::is_floating_point_v<T>, "MatrixNorms supports floating-point types");
         T sum{};
         for (std::size_t i = 0; i < Size; ++i)
-            sum += v.at(i, 0) * v.at(i, 0);
-        return std::sqrt(sum);
+            sum += a.at(i, 0) * b.at(i, 0);
+        return sum;
+    }
+
+    template<typename T, std::size_t Size>
+    [[nodiscard]] OPTIMIZE_FOR_SPEED T VectorNorm(const Vector<T, Size>& v)
+    {
+        static_assert(std::is_floating_point_v<T>, "MatrixNorms supports floating-point types");
+        return std::sqrt(DotProduct(v, v));
     }
 
     template<typename T, std::size_t Size>
