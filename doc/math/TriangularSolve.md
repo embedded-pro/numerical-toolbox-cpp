@@ -14,9 +14,9 @@ Each unknown depends only on those already computed, so a single reverse sweep s
 
 ## Complexity Analysis
 
-| Operation             | Time     | Space  | Notes                          |
-|-----------------------|----------|--------|--------------------------------|
-| SolveUpperTriangular  | $O(n^2)$ | $O(n)$ | One reverse sweep, stack output |
+| Operation            | Time     | Space  | Notes                           |
+|----------------------|----------|--------|---------------------------------|
+| SolveUpperTriangular | $O(n^2)$ | $O(n)$ | One reverse sweep, stack output |
 
 ## Step-by-Step Walkthrough
 

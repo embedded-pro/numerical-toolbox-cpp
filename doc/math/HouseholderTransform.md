@@ -18,10 +18,10 @@ $H$ is symmetric and orthogonal ($H = H^\top = H^{-1}$), so applying it is backw
 
 ## Complexity Analysis
 
-| Operation          | Time   | Space  | Notes                                   |
-|--------------------|--------|--------|-----------------------------------------|
-| HouseholderVector  | $O(n)$ | $O(1)$ | Builds `v` (stored implicit unit pivot) |
-| Apply $H$ to a vector | $O(n)$ | $O(1)$ | `x - β·v·(vᵀx)` — never form `H`         |
+| Operation             | Time   | Space  | Notes                                   |
+|-----------------------|--------|--------|-----------------------------------------|
+| HouseholderVector     | $O(n)$ | $O(1)$ | Builds `v` (stored implicit unit pivot) |
+| Apply $H$ to a vector | $O(n)$ | $O(1)$ | `x - β·v·(vᵀx)` — never form `H`        |
 
 ## Step-by-Step Walkthrough
 
