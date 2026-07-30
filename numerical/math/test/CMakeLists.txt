@@ -13,6 +13,7 @@ target_sources(numerical.math_test PRIVATE
     TestGivensRotation.cpp
     TestHouseholderTransform.cpp
     TestLinearTimeInvariant.cpp
+    TestMatrixExponential.cpp
     TestMatrixNorms.cpp
     TestMatrixOperations.cpp
     TestQNumber.cpp

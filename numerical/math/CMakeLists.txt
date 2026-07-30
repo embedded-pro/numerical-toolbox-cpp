@@ -19,6 +19,7 @@ target_sources(numerical.math PRIVATE
     HyperbolicFunctions.hpp
     LinearTimeInvariant.hpp
     Matrix.hpp
+    MatrixExponential.hpp
     MatrixNorms.hpp
     MatrixOperations.hpp
     QNumber.hpp
@@ -38,6 +39,7 @@ numerical_add_coverage_sources(numerical.math
     Cordic.cpp
     LinearTimeInvariant.cpp
     Matrix.cpp
+    MatrixExponential.cpp
     QNumber.cpp
     Quaternion.cpp
 )
