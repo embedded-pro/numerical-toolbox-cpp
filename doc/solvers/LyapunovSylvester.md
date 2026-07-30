@@ -105,6 +105,35 @@ $X_{01} = -1$, $X_{11} = -1$.
 - **Cholesky factor updates:** propagate a Cholesky factor of $X$ for guaranteed positive-definiteness
   in square-root filtering (see `SquareRootKalmanFilter`).
 
-## See Also
+## Applications
 
-`GaussianElimination`, `QrDecomposition`, `DiscreteAlgebraicRiccatiEquation`, `SpectralRadius`.
+- **LQR / LQG design:** the continuous Lyapunov equation $AX + XA^\top + Q = 0$ yields the
+  closed-loop covariance, and the DARE solution can be cross-validated via its Lyapunov residual.
+- **Kalman filter (observability Gramian):** $AW + WA^\top + BB^\top = 0$ gives the
+  controllability Gramian used to evaluate reachability in balanced truncation.
+- **Pole-placement observers (Luenberger):** the Sylvester equation $AX - XF = LC$ arises when
+  placing observer poles while decoupling the error dynamics.
+- **H₂ norm computation:** $\|G\|_2^2 = \operatorname{tr}(B^\top X B)$ where $X$ satisfies the
+  observability Gramian Lyapunov equation.
+
+## Connections to Other Algorithms
+
+- **LU Decomposition:** the Kronecker-vectorisation approach converts any Sylvester equation into
+  a dense linear system solved by the `LuDecomposition` solver.
+- **QR Decomposition:** the Bartels–Stewart and Hammarling algorithms use QR / Schur
+  decomposition to reduce the problem to quasi-triangular form before back-substitution.
+- **DARE:** the discrete algebraic Riccati equation can be warm-started or verified using
+  one step of the discrete Lyapunov equation.
+- **Spectral Radius:** solvability of the continuous equation requires $\lambda_i(A) + \lambda_j(A) \neq 0$;
+  checking the spectral radius is a fast necessary condition.
+
+## References & Further Reading
+
+- Bartels, R. H. & Stewart, G. W. (1972). "Solution of the matrix equation AX + XB = C."
+  *Communications of the ACM*, 15(9), 820–826.
+- Golub, G. H., Nash, S. & Van Loan, C. (1979). "A Hessenberg-Schur method for the problem
+  AX + XB = C." *IEEE Transactions on Automatic Control*, 24(6), 909–913.
+- Horn, R. A. & Johnson, C. R. (1994). *Topics in Matrix Analysis*. Cambridge University Press.
+  (Chapter 4: Kronecker products and the vec operator.)
+- Hammarling, S. J. (1982). "Numerical solution of the stable, non-negative definite Lyapunov
+  equation." *IMA Journal of Numerical Analysis*, 2(3), 303–323.
