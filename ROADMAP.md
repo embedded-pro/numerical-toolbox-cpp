@@ -27,7 +27,6 @@ Difficulty legend:
 
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
-| 29 | Matrix exponential (scaling & squaring + Padé)       | `math`                    | ★★★★☆      |
 | 30 | Continuous → discrete conversion (`c2d`)             | `math`                    | ★★★★☆      |
 | 31 | Lyapunov / Sylvester equation solvers                | `solvers`                 | ★★★★☆      |
 | 32 | Transfer-function ↔ state-space conversion           | `control_analysis`        | ★★★★☆      |

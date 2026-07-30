@@ -14,3 +14,4 @@ Core mathematical primitives for numerical computation.
 | [Triangular Solve](TriangularSolve.md)              | Upper-triangular back-substitution shared by Gaussian elimination and QR                       |
 | [Matrix Operations](MatrixOperations.md)            | Structural matrix utilities — `Symmetrize` (closest symmetric matrix)                          |
 | [Step Response Metrics](StepResponseMetrics.md)     | Rise time, settling time, percent overshoot, peak time, and steady-state error from a bounded step-response vector |
+| [Matrix Exponential](MatrixExponential.md)          | Scaling-and-squaring with diagonal (6,6) Padé approximant — exact ODE solution operator and discretisation engine |
