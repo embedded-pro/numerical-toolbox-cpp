@@ -59,12 +59,12 @@ without forming $Q$ explicitly, then (2) back-substitute $R x = (Q^\top b)_{1:n}
 
 ## Complexity Analysis
 
-| Case    | Time                            | Space      | Notes                                               |
-|---------|---------------------------------|------------|-----------------------------------------------------|
-| Best    | $O(mn^2)$                       | $O(mn)$    | Householder on a well-conditioned dense $A$         |
-| Average | $O(2mn^2 - \tfrac{2}{3}n^3)$   | $O(mn)$    | Standard flop count from Golub & Van Loan           |
-| Worst   | same as average (no pivoting)   | $O(mn)$    | Rank-deficient case detected but not re-ordered     |
-| Update  | $O(n^2)$                        | $O(n^2)$   | Single Givens row update; no re-factor              |
+| Case    | Time                          | Space    | Notes                                           |
+|---------|-------------------------------|----------|-------------------------------------------------|
+| Best    | $O(mn^2)$                     | $O(mn)$  | Householder on a well-conditioned dense $A$     |
+| Average | $O(2mn^2 - \tfrac{2}{3}n^3)$  | $O(mn)$  | Standard flop count from Golub & Van Loan       |
+| Worst   | same as average (no pivoting) | $O(mn)$  | Rank-deficient case detected but not re-ordered |
+| Update  | $O(n^2)$                      | $O(n^2)$ | Single Givens row update; no re-factor          |
 
 All memory is stack-allocated via `std::array`; the factor is stored in-place over the input.
 
