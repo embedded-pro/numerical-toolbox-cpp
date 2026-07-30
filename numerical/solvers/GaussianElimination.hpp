@@ -8,6 +8,7 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/QNumber.hpp"
+#include "numerical/math/TriangularSolve.hpp"
 #include "numerical/solvers/Solver.hpp"
 #include <cmath>
 
@@ -29,7 +30,6 @@ namespace solvers
         std::size_t FindPivotRow(const InputMatrix& matrix, std::size_t col) const;
         void SwapRows(InputMatrix& matrix, SolutionVector& vector, std::size_t row1, std::size_t row2) const;
         void EliminateBelow(InputMatrix& matrix, SolutionVector& vector, std::size_t col) const;
-        SolutionVector BackSubstitute(const InputMatrix& matrix, const SolutionVector& vector) const;
     };
 
     template<typename T, std::size_t N, std::size_t Cols>
@@ -87,27 +87,6 @@ namespace solvers
     }
 
     template<typename T, std::size_t N>
-    typename GaussianElimination<T, N>::SolutionVector
-    GaussianElimination<T, N>::BackSubstitute(const InputMatrix& matrix, const SolutionVector& vector) const
-    {
-        SolutionVector x;
-
-        for (std::size_t i = N; i > 0; --i)
-        {
-            std::size_t row = i - 1;
-            T sum = vector.at(row, 0);
-
-            for (std::size_t j = row + 1; j < N; ++j)
-                sum = sum - matrix.at(row, j) * x.at(j, 0);
-
-            really_assert(std::abs(math::ToFloat(matrix.at(row, row))) > 0.0f);
-            x.at(row, 0) = sum / matrix.at(row, row);
-        }
-
-        return x;
-    }
-
-    template<typename T, std::size_t N>
     OPTIMIZE_FOR_SPEED
         typename GaussianElimination<T, N>::SolutionVector
         GaussianElimination<T, N>::Solve(const InputMatrix& a, const InputVector& b)
@@ -125,7 +104,7 @@ namespace solvers
             EliminateBelow(augA, augB, col);
         }
 
-        return BackSubstitute(augA, augB);
+        return math::SolveUpperTriangular(augA, augB);
     }
 
     template<typename T, std::size_t N, std::size_t Cols>

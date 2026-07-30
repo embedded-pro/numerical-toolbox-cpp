@@ -14,6 +14,8 @@ target_sources(numerical.math PRIVATE
     ComplexNumber.hpp
     Cordic.hpp
     Geometry3D.hpp
+    GivensRotation.hpp
+    HouseholderTransform.hpp
     HyperbolicFunctions.hpp
     LinearTimeInvariant.hpp
     Matrix.hpp
@@ -26,6 +28,7 @@ target_sources(numerical.math PRIVATE
     StepResponseMetrics.hpp
     Toeplitz.hpp
     Tolerance.hpp
+    TriangularSolve.hpp
     TrigonometricFunctions.hpp
 )
 

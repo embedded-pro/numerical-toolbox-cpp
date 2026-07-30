@@ -139,8 +139,18 @@ TYPED_TEST(MatrixTest, Identity)
 {
     auto identity = TestFixture::MatrixType::Identity();
 
-    auto expected = this->MakeMatrix(0.9999f, 0.0f, 0.0f, 0.9999f);
-    EXPECT_TRUE(AreMatricesNear(identity, expected));
+    float expectedDiag = std::is_same_v<TypeParam, float> ? 1.0f : 0.9999f;
+    for (size_t i = 0; i < 2; ++i)
+    {
+        for (size_t j = 0; j < 2; ++j)
+        {
+            float expected = (i == j) ? expectedDiag : 0.0f;
+            if constexpr (std::is_same_v<TypeParam, float>)
+                EXPECT_NEAR(identity.at(i, j), expected, 1e-4f);
+            else
+                EXPECT_NEAR(identity.at(i, j).ToFloat(), expected, 1e-4f);
+        }
+    }
 }
 
 TYPED_TEST(MatrixTest, RangeLimits)

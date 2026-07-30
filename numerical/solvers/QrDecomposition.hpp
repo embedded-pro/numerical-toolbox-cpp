@@ -5,7 +5,10 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/GivensRotation.hpp"
+#include "numerical/math/HouseholderTransform.hpp"
 #include "numerical/math/Matrix.hpp"
+#include "numerical/math/TriangularSolve.hpp"
 #include <cmath>
 #include <cstddef>
 #include <type_traits>
@@ -32,42 +35,7 @@ namespace solvers
         math::Matrix<T, Rows, Cols> qr{};
         math::Vector<T, Cols> betas{};
         bool factored{ false };
-
-        static void HouseholderVector(const math::Vector<T, Rows>& x, std::size_t start, math::Vector<T, Rows>& v, T& beta);
-        math::Vector<T, Cols> BackSubstitute(const math::Matrix<T, Cols, Cols>& r, const math::Vector<T, Cols>& c) const;
     };
-
-    template<typename T, std::size_t Rows, std::size_t Cols>
-    void QrDecomposition<T, Rows, Cols>::HouseholderVector(
-        const math::Vector<T, Rows>& x, std::size_t start, math::Vector<T, Rows>& v, T& beta)
-    {
-        T sigma{ T{} };
-        for (std::size_t i = start + 1; i < Rows; ++i)
-            sigma += x.at(i, 0) * x.at(i, 0);
-
-        for (std::size_t i = 0; i < Rows; ++i)
-            v.at(i, 0) = (i >= start) ? x.at(i, 0) : T{};
-
-        if (sigma < T{ 1e-30f })
-        {
-            beta = T{};
-            return;
-        }
-
-        T norm = std::sqrt(x.at(start, 0) * x.at(start, 0) + sigma);
-        T v0;
-        if (x.at(start, 0) <= T{})
-            v0 = x.at(start, 0) - norm;
-        else
-            v0 = -sigma / (x.at(start, 0) + norm);
-
-        beta = T{ 2 } * v0 * v0 / (sigma + v0 * v0);
-
-        T invV0 = T{ 1 } / v0;
-        v.at(start, 0) = T{ 1 };
-        for (std::size_t i = start + 1; i < Rows; ++i)
-            v.at(i, 0) = x.at(i, 0) * invV0;
-    }
 
     template<typename T, std::size_t Rows, std::size_t Cols>
     OPTIMIZE_FOR_SPEED bool QrDecomposition<T, Rows, Cols>::Decompose(const math::Matrix<T, Rows, Cols>& a)
@@ -85,7 +53,7 @@ namespace solvers
                 colVec.at(i, 0) = (i >= k) ? qr.at(i, k) : T{};
 
             T beta{};
-            HouseholderVector(colVec, k, v, beta);
+            math::HouseholderVector(colVec, k, v, beta);
             betas.at(k, 0) = beta;
 
             if (beta != T{})
@@ -184,24 +152,6 @@ namespace solvers
     }
 
     template<typename T, std::size_t Rows, std::size_t Cols>
-    math::Vector<T, Cols> QrDecomposition<T, Rows, Cols>::BackSubstitute(
-        const math::Matrix<T, Cols, Cols>& r, const math::Vector<T, Cols>& c) const
-    {
-        math::Vector<T, Cols> x{};
-
-        for (std::size_t i = Cols; i > 0; --i)
-        {
-            std::size_t row = i - 1;
-            T sum = c.at(row, 0);
-            for (std::size_t j = row + 1; j < Cols; ++j)
-                sum -= r.at(row, j) * x.at(j, 0);
-            x.at(row, 0) = sum / r.at(row, row);
-        }
-
-        return x;
-    }
-
-    template<typename T, std::size_t Rows, std::size_t Cols>
     OPTIMIZE_FOR_SPEED math::Vector<T, Cols>
     QrDecomposition<T, Rows, Cols>::SolveLeastSquares(const math::Vector<T, Rows>& b) const
     {
@@ -212,7 +162,7 @@ namespace solvers
         for (std::size_t i = 0; i < Cols; ++i)
             c1.at(i, 0) = c.at(i, 0);
 
-        return BackSubstitute(R(), c1);
+        return math::SolveUpperTriangular(R(), c1);
     }
 
     template<typename T, std::size_t Rows, std::size_t Cols>
@@ -222,23 +172,10 @@ namespace solvers
 
         for (std::size_t k = 0; k < Cols; ++k)
         {
-            T rkk = qr.at(k, k);
-            T xk = row.at(0, k);
-
-            T rr = std::sqrt(rkk * rkk + xk * xk);
-            if (rr < T{ 1e-30f })
-                continue;
-
-            T c = rkk / rr;
-            T s = xk / rr;
+            math::GivensRotation<T> g = math::ComputeGivens(qr.at(k, k), row.at(0, k));
 
             for (std::size_t j = k; j < Cols; ++j)
-            {
-                T rval = qr.at(k, j);
-                T xval = row.at(0, j);
-                qr.at(k, j) = c * rval + s * xval;
-                row.at(0, j) = -s * rval + c * xval;
-            }
+                math::ApplyGivens(g, qr.at(k, j), row.at(0, j));
         }
     }
 
