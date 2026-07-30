@@ -36,8 +36,8 @@ The 1-norm and infinity-norm are dual: $\|A\|_\infty = \|A^\top\|_1$.
 
 ## Complexity Analysis
 
-| Operation     | Time    | Space  | Notes                        |
-|---------------|---------|--------|------------------------------|
+| Operation     | Time    | Space  | Notes                                  |
+|---------------|---------|--------|----------------------------------------|
 | DotProduct    | $O(n)$  | $O(1)$ | Single pass; `VectorNorm` builds on it |
 | FrobeniusNorm | $O(mn)$ | $O(1)$ | Single pass, no allocation   |
 | OneNorm       | $O(mn)$ | $O(1)$ | Column-wise sum, running max |

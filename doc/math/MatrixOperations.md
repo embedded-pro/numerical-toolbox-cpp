@@ -21,10 +21,10 @@ If $M$ is symmetric, `CongruenceTransform` returns a symmetric result exactly (i
 
 ## Complexity Analysis
 
-| Operation          | Time     | Space    | Notes                                  |
-|--------------------|----------|----------|----------------------------------------|
-| Symmetrize         | $O(n^2)$ | $O(n^2)$ | One transpose, add, scale              |
-| CongruenceTransform| $O(n^2 m + n m^2)$ | $O(nm)$ | For $A \in \mathbb{R}^{n\times m}$, two matrix products |
+| Operation           | Time               | Space    | Notes                                                   |
+|---------------------|--------------------|----------|---------------------------------------------------------|
+| Symmetrize          | $O(n^2)$           | $O(n^2)$ | One transpose, add, scale                               |
+| CongruenceTransform | $O(n^2 m + n m^2)$ | $O(nm)$  | For $A \in \mathbb{R}^{n\times m}$, two matrix products |
 
 ## Step-by-Step Walkthrough
 
