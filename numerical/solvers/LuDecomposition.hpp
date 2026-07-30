@@ -27,7 +27,11 @@ namespace solvers
         math::Matrix<T, N, N> Inverse() const;
         T Determinant() const;
 
-        bool IsSingular() const { return singular; }
+        bool IsSingular() const
+        {
+            return singular;
+        }
+
         math::Matrix<T, N, N> L() const;
         math::Matrix<T, N, N> U() const;
         math::Matrix<T, N, N> P() const;
