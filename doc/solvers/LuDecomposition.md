@@ -71,12 +71,12 @@ substitution pairs — at a total cost of $O(n^3)$.
 
 ## Complexity Analysis
 
-| Operation    | Time                        | Space    | Notes                                         |
-|--------------|-----------------------------|----------|-----------------------------------------------|
-| `Decompose`  | $O\!\left(\tfrac{2}{3}n^3\right)$ | $O(n^2)$ | GEPP in-place; multipliers packed with $U$    |
-| `Solve`      | $O(n^2)$                    | $O(n)$   | Two triangular sweeps; reuses stored factors  |
-| `Determinant`| $O(n)$                      | $O(1)$   | One pass over $U$'s diagonal                  |
-| `Inverse`    | $O(n^3)$                    | $O(n^2)$ | $n$ column solves; avoid when `Solve` suffices |
+| Operation     | Time                              | Space    | Notes                                          |
+|---------------|-----------------------------------|----------|------------------------------------------------|
+| `Decompose`   | $O\!\left(\tfrac{2}{3}n^3\right)$ | $O(n^2)$ | GEPP in-place; multipliers packed with $U$     |
+| `Solve`       | $O(n^2)$                          | $O(n)$   | Two triangular sweeps; reuses stored factors   |
+| `Determinant` | $O(n)$                            | $O(1)$   | One pass over $U$'s diagonal                   |
+| `Inverse`     | $O(n^3)$                          | $O(n^2)$ | $n$ column solves; avoid when `Solve` suffices |
 
 All storage is stack-allocated; the packed LU matrix and pivot vector are bounded by $N$.
 
