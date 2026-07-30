@@ -3,6 +3,7 @@
 #include "numerical/filters/active/KalmanFilterBase.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
+#include "numerical/math/MatrixOperations.hpp"
 
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC optimize("O3", "fast-math")
@@ -108,7 +109,7 @@ namespace filters
     OPTIMIZE_FOR_SPEED void KalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::Predict()
     {
         this->state() = stateTransition * this->state();
-        this->covariance() = stateTransition * this->covariance() * stateTransition.Transpose() + this->processNoise();
+        this->covariance() = math::CongruenceTransform(stateTransition, this->covariance()) + this->processNoise();
     }
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
@@ -116,7 +117,7 @@ namespace filters
     requires(ControlSize > 0)
     {
         this->state() = stateTransition * this->state() + controlInputMatrix * u;
-        this->covariance() = stateTransition * this->covariance() * stateTransition.Transpose() + this->processNoise();
+        this->covariance() = math::CongruenceTransform(stateTransition, this->covariance()) + this->processNoise();
     }
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>

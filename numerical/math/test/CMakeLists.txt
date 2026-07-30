@@ -10,8 +10,11 @@ target_link_libraries(numerical.math_test PUBLIC
 target_sources(numerical.math_test PRIVATE
     TestComplexNumber.cpp
     TestCordic.cpp
+    TestGivensRotation.cpp
+    TestHouseholderTransform.cpp
     TestLinearTimeInvariant.cpp
     TestMatrixNorms.cpp
+    TestMatrixOperations.cpp
     TestQNumber.cpp
     TestMatrix.cpp
     TestQuaternion.cpp
@@ -19,4 +22,5 @@ target_sources(numerical.math_test PRIVATE
     TestStatistics.cpp
     TestStepResponseMetrics.cpp
     TestToeplitz.cpp
+    TestTriangularSolve.cpp
 )

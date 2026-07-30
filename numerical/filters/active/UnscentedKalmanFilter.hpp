@@ -3,6 +3,7 @@
 #include "infra/util/Function.hpp"
 #include "numerical/filters/active/KalmanFilterBase.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/MatrixOperations.hpp"
 #include "numerical/solvers/CholeskyDecomposition.hpp"
 #include <algorithm>
 #include <array>
@@ -254,7 +255,7 @@ namespace filters
 
         auto innovation = measurement - predictedMeasurement;
         this->state() = this->state() + K * innovation;
-        this->covariance() = this->covariance() - K * S * K.Transpose();
+        this->covariance() = this->covariance() - math::CongruenceTransform(K, S);
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD

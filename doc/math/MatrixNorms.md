@@ -8,13 +8,13 @@ Vector normalisation, closely related, produces the unit-length direction of a v
 
 ## Mathematical Theory
 
-### Vector Norm
+### Dot Product & Vector Norm
 
-For a vector $\mathbf{v} \in \mathbb{R}^n$, the Euclidean (L2) norm is
+For vectors $\mathbf{a}, \mathbf{b} \in \mathbb{R}^n$, the dot product is $\mathbf{a}\cdot\mathbf{b} = \sum_{i=1}^{n} a_i b_i$. The Euclidean (L2) norm is the square root of the self dot product:
 
-$$\|\mathbf{v}\|_2 = \sqrt{\sum_{i=1}^{n} v_i^2}$$
+$$\|\mathbf{v}\|_2 = \sqrt{\mathbf{v}\cdot\mathbf{v}} = \sqrt{\sum_{i=1}^{n} v_i^2}$$
 
-The unit vector $\hat{\mathbf{v}} = \mathbf{v} / \|\mathbf{v}\|_2$ satisfies $\|\hat{\mathbf{v}}\|_2 = 1$. Normalisation is undefined when $\|\mathbf{v}\|_2 = 0$ and must be guarded.
+`VectorNorm` is implemented in terms of `DotProduct`. The unit vector $\hat{\mathbf{v}} = \mathbf{v} / \|\mathbf{v}\|_2$ satisfies $\|\hat{\mathbf{v}}\|_2 = 1$. Normalisation is undefined when $\|\mathbf{v}\|_2 = 0$ and must be guarded.
 
 ### Matrix Norms
 
@@ -36,8 +36,9 @@ The 1-norm and infinity-norm are dual: $\|A\|_\infty = \|A^\top\|_1$.
 
 ## Complexity Analysis
 
-| Operation     | Time    | Space  | Notes                        |
-|---------------|---------|--------|------------------------------|
+| Operation     | Time    | Space  | Notes                                  |
+|---------------|---------|--------|----------------------------------------|
+| DotProduct    | $O(n)$  | $O(1)$ | Single pass; `VectorNorm` builds on it |
 | FrobeniusNorm | $O(mn)$ | $O(1)$ | Single pass, no allocation   |
 | OneNorm       | $O(mn)$ | $O(1)$ | Column-wise sum, running max |
 | InfinityNorm  | $O(mn)$ | $O(1)$ | Row-wise sum, running max    |

@@ -27,7 +27,6 @@ Difficulty legend:
 
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
-| 27 | QR decomposition (Householder / Givens)              | `solvers`                 | ★★★★☆      |
 | 28 | LU decomposition with partial pivoting               | `solvers`                 | ★★★★☆      |
 | 29 | Matrix exponential (scaling & squaring + Padé)       | `math`                    | ★★★★☆      |
 | 30 | Continuous → discrete conversion (`c2d`)             | `math`                    | ★★★★☆      |

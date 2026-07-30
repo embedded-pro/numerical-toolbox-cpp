@@ -7,6 +7,7 @@
 #include "numerical/filters/active/KalmanSmoother.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
+#include "numerical/math/MatrixOperations.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 #include <array>
 #include <cmath>
@@ -78,9 +79,6 @@ namespace estimators
             const StateMatrix& fullStateCov,
             const MeasurementCovariance& obsOuterSum,
             std::size_t numSteps) const;
-
-        template<std::size_t N>
-        static math::SquareMatrix<float, N> Symmetrize(const math::SquareMatrix<float, N>& M);
     };
 
     // Implementation //
@@ -191,7 +189,7 @@ namespace estimators
             laggedStateCov, transitionCrossCov.Transpose())
                                .Transpose();
         const float invTm1 = 1.0f / static_cast<float>(numSteps - 1);
-        auto Q_new = Symmetrize<StateSize>((currentStateCov - F_new * transitionCrossCov.Transpose()) * invTm1);
+        auto Q_new = math::Symmetrize((currentStateCov - F_new * transitionCrossCov.Transpose()) * invTm1);
         Q_new += StateMatrix::Identity() * 1e-6f;
         return { F_new, Q_new };
     }
@@ -210,17 +208,9 @@ namespace estimators
             fullStateCov, obsStateCrossCov.Transpose())
                                .Transpose();
         const float invT = 1.0f / static_cast<float>(numSteps);
-        auto R_new = Symmetrize<MeasurementSize>((obsOuterSum - H_new * obsStateCrossCov.Transpose()) * invT);
+        auto R_new = math::Symmetrize((obsOuterSum - H_new * obsStateCrossCov.Transpose()) * invT);
         R_new += MeasurementCovariance::Identity() * 1e-6f;
         return { H_new, R_new };
-    }
-
-    template<std::size_t StateSize, std::size_t MeasurementSize, std::size_t MaxSteps>
-    template<std::size_t N>
-    math::SquareMatrix<float, N>
-    ExpectationMaximization<StateSize, MeasurementSize, MaxSteps>::Symmetrize(const math::SquareMatrix<float, N>& M)
-    {
-        return (M + M.Transpose()) * 0.5f;
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD

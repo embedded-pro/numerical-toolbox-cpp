@@ -285,7 +285,12 @@ namespace math
 
         Matrix result;
         for (size_type i = 0; i < Rows; ++i)
-            result.at(i, i) = T(0.9999f);
+        {
+            if constexpr (std::is_floating_point_v<T>)
+                result.at(i, i) = T(1);
+            else
+                result.at(i, i) = T(0.9999f);
+        }
 
         return result;
     }
