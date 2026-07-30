@@ -48,7 +48,8 @@ namespace solvers
         pivotSign = 1;
         singular = false;
 
-        constexpr T eps{ T{ 1e-12f } };
+        constexpr T relativeEps{ T{ 1e-6f } };
+        T maxPivot{ T{} };
 
         for (std::size_t k = 0; k < N; ++k)
         {
@@ -64,7 +65,10 @@ namespace solvers
                 }
             }
 
-            if (maxVal < eps)
+            if (maxVal > maxPivot)
+                maxPivot = maxVal;
+
+            if (maxVal <= maxPivot * relativeEps)
             {
                 singular = true;
                 return false;

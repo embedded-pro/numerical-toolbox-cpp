@@ -99,9 +99,13 @@ sits on and above it.
 
 ## Pitfalls & Edge Cases
 
-- **Zero pivot after partial pivoting**: if the largest candidate in a column is below the
-  singularity threshold $\varepsilon$, the matrix is (numerically) rank-deficient. The
-  factorization aborts and returns `false`; the caller must not invoke `Solve` or `Inverse`.
+- **Zero pivot after partial pivoting**: if the largest candidate in a column falls at or
+  below a *relative* threshold ($\varepsilon_\text{rel}\,\max_k|A_{kk}|$, with
+  $\varepsilon_\text{rel} = 10^{-6}$ for `float`), the matrix is (numerically) rank-deficient.
+  The factorization aborts and returns `false`; the caller must not invoke `Solve` or `Inverse`.
+  A relative (rather than absolute) tolerance is essential: on a truly singular matrix the
+  trailing pivot is a rounding-error residual whose magnitude scales with the matrix entries
+  and varies across platforms/`fast-math` settings, so an absolute cutoff would miss it.
 - **Skipping pivoting**: without row swaps, a matrix with $A_{00} = 0$ would cause immediate
   division by zero; partial pivoting is mandatory for general matrices.
 - **Growth factor**: partial pivoting bounds the element growth factor at $2^{n-1}$; in
