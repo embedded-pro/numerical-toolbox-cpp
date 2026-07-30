@@ -58,12 +58,12 @@ controllability gramian $X = \sum_{k=0}^{\infty} A^k Q (A^\top)^k$.
 
 ## Complexity Analysis
 
-| Case                   | Time               | Space                       | Notes                                       |
-|------------------------|--------------------|-----------------------------|---------------------------------------------|
-| $N{=}M{=}2$            | $O(64)$ flops      | $O(NM)^2 = 16$ floats for K | 4×4 linear system                           |
-| $N{=}M{=}3$            | $O(729)$ flops     | 81 floats for K             | 9×9 linear system                           |
-| General $N{=}M$        | $O(N^6)$ flops     | $O(N^4)$ words              | Gaussian elimination on the $N^2 \times N^2$ Kronecker system |
-| Alternative (Bartels–Stewart) | $O(N^3)$  | $O(N^2)$                    | Requires Schur decomposition; preferred for $N \geq 6$ |
+| Case                          | Time           | Space                       | Notes                                                         |
+|-------------------------------|----------------|-----------------------------|---------------------------------------------------------------|
+| $N{=}M{=}2$                   | $O(64)$ flops  | $O(NM)^2 = 16$ floats for K | 4×4 linear system                                             |
+| $N{=}M{=}3$                   | $O(729)$ flops | 81 floats for K             | 9×9 linear system                                             |
+| General $N{=}M$               | $O(N^6)$ flops | $O(N^4)$ words              | Gaussian elimination on the $N^2 \times N^2$ Kronecker system |
+| Alternative (Bartels–Stewart) | $O(N^3)$       | $O(N^2)$                    | Requires Schur decomposition; preferred for $N \geq 6$        |
 
 For the embedded sizes ($N \leq 5$) targeted by this library the Kronecker approach is negligibly
 more expensive than Bartels–Stewart and avoids the full Schur machinery.
