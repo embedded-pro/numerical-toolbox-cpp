@@ -14,6 +14,7 @@ target_sources(numerical.solvers_test PRIVATE
     TestGaussianElimination.cpp
     TestLevinsonDurbin.cpp
     TestLuDecomposition.cpp
+    TestLyapunovSylvester.cpp
     TestQrDecomposition.cpp
     TestRungeKuttaIntegrators.cpp
     TestSpectralRadius.cpp
