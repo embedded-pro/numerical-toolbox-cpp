@@ -14,6 +14,23 @@
 namespace math
 {
     template<typename T, std::size_t N>
+    [[nodiscard]] OPTIMIZE_FOR_SPEED Vector<T, N> SolveUnitLowerTriangular(const Matrix<T, N, N>& l, const Vector<T, N>& c)
+    {
+        Vector<T, N> y{};
+
+        for (std::size_t i = 0; i < N; ++i)
+        {
+            T sum = c.at(i, 0);
+            for (std::size_t j = 0; j < i; ++j)
+                sum = sum - l.at(i, j) * y.at(j, 0);
+
+            y.at(i, 0) = sum;
+        }
+
+        return y;
+    }
+
+    template<typename T, std::size_t N>
     [[nodiscard]] OPTIMIZE_FOR_SPEED Vector<T, N> SolveUpperTriangular(const Matrix<T, N, N>& r, const Vector<T, N>& c)
     {
         Vector<T, N> x{};
