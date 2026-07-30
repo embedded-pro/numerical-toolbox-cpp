@@ -26,8 +26,13 @@ Refer to the documentation to quickly integrate and utilize the library's signal
 | [Neural Network](doc/neural_network/README.md)                     | Layers, activations, losses, model                                   |
 | [Optimization](doc/optimization/README.md)                         | Gradient Descent                                                     |
 | [Regularization](doc/regularization/README.md)                     | L1 (Lasso), L2 (Ridge)                                              |
+<<<<<<< Updated upstream
 | [Math](doc/math/README.md)                                         | CORDIC, Quaternion, MatrixNorms, Step Response Metrics, MatrixExponential                                                   |
 | [Solvers](doc/solvers/README.md)                                   | Gaussian Elimination, Levinson-Durbin, Durand-Kerner, Cholesky, DARE, Runge-Kutta ODE Integrators (RK4 + Dormand-Prince), Spectral Radius & Discrete Stability Margin, QR Decomposition (Householder / Givens), LU Decomposition with Partial Pivoting |
+=======
+| [Math](doc/math/README.md)                                         | CORDIC, Quaternion, MatrixNorms, Step Response Metrics, MatrixExponential                                |
+| [Solvers](doc/solvers/README.md)                                   | Gaussian Elimination, Levinson-Durbin, Durand-Kerner, Cholesky, DARE, Runge-Kutta ODE Integrators (RK4 + Dormand-Prince), Spectral Radius & Discrete Stability Margin, QR Decomposition (Householder / Givens), LU Decomposition with Partial Pivoting, Lyapunov / Sylvester Equation Solvers |
+>>>>>>> Stashed changes
 | [Performance Optimization](doc/performance-optimization/README.md) | Compiler optimizations, SIMD                                         |
 
 Each category page lists its algorithms with a brief description and links to the detailed documentation.
