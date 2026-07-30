@@ -55,18 +55,20 @@ namespace solvers
         const math::Matrix<T, N, M>& c)
     {
         math::Matrix<T, NM, NM> K{};
-        for (std::size_t i = 0; i < M; ++i)
-            for (std::size_t j = 0; j < M; ++j)
-                for (std::size_t k = 0; k < N; ++k)
-                    for (std::size_t l = 0; l < N; ++l)
-                    {
-                        T val{};
-                        if (i == j)
-                            val += a.at(k, l);
-                        if (k == l)
-                            val += b.at(j, i);
-                        K.at(i * N + k, j * N + l) = val;
-                    }
+        for (std::size_t row = 0; row < NM; ++row)
+            for (std::size_t col = 0; col < NM; ++col)
+            {
+                const std::size_t i = row / N;
+                const std::size_t k = row % N;
+                const std::size_t j = col / N;
+                const std::size_t l = col % N;
+                T val{};
+                if (i == j)
+                    val += a.at(k, l);
+                if (k == l)
+                    val += b.at(j, i);
+                K.at(row, col) = val;
+            }
 
         math::Matrix<T, NM, 1> vecC = Vec(c);
 
@@ -96,16 +98,18 @@ namespace solvers
         static_assert(N == M, "SolveDiscreteLyapunov requires square solver (N == M)");
 
         math::Matrix<T, NM, NM> K{};
-        for (std::size_t i = 0; i < N; ++i)
-            for (std::size_t k = 0; k < N; ++k)
-                for (std::size_t j = 0; j < N; ++j)
-                    for (std::size_t l = 0; l < N; ++l)
-                    {
-                        T val = a.at(i, j) * a.at(k, l);
-                        if (i == j && k == l)
-                            val -= T(1);
-                        K.at(i * N + k, j * N + l) = val;
-                    }
+        for (std::size_t row = 0; row < NM; ++row)
+            for (std::size_t col = 0; col < NM; ++col)
+            {
+                const std::size_t i = row / N;
+                const std::size_t k = row % N;
+                const std::size_t j = col / N;
+                const std::size_t l = col % N;
+                T val = a.at(i, j) * a.at(k, l);
+                if (i == j && k == l)
+                    val -= T(1);
+                K.at(row, col) = val;
+            }
 
         math::Matrix<T, NM, 1> rhs = Vec(q * T(-1));
 
