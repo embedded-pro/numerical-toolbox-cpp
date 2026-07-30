@@ -28,7 +28,6 @@ Difficulty legend:
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
 | 30 | Continuous → discrete conversion (`c2d`)             | `math`                    | ★★★★☆      |
-| 31 | Lyapunov / Sylvester equation solvers                | `solvers`                 | ★★★★☆      |
 | 32 | Transfer-function ↔ state-space conversion           | `control_analysis`        | ★★★★☆      |
 | 33 | Madgwick / Mahony AHRS                               | `filters/active`          | ★★★★☆      |
 | 34 | Sliding Mode Control (SMC)                           | `robust_control` (new)    | ★★★★☆      |

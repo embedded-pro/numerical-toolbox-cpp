@@ -19,6 +19,7 @@ target_sources(numerical.solver PRIVATE
     GaussianElimination.hpp
     LevinsonDurbin.hpp
     LuDecomposition.hpp
+    LyapunovSylvester.hpp
     OdeSystem.hpp
     QrDecomposition.hpp
     RungeKuttaIntegrators.hpp
@@ -31,6 +32,7 @@ numerical_add_coverage_sources(numerical.solver
     DurandKerner.cpp
     GaussianElimination.cpp
     LuDecomposition.cpp
+    LyapunovSylvester.cpp
     QrDecomposition.cpp
     RungeKuttaIntegrators.cpp
     SpectralRadius.cpp
