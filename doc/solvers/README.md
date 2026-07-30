@@ -14,3 +14,4 @@ Numerical solvers for linear systems, polynomial roots, and matrix equations.
 | [Runge-Kutta ODE Integrators](RungeKuttaIntegrators.md)                    | Fixed-step RK4 and adaptive Dormand-Prince RK45 for ODE integration    |
 | [Spectral Radius](SpectralRadius.md)                                       | Dominant eigenvalue magnitude and discrete-time Schur stability margin |
 | [Condition Number](ConditionNumber.md)                                     | 1-norm condition number estimate via column-wise inverse solve         |
+| [QR Decomposition](QrDecomposition.md)                                     | Householder factorization and Givens streaming row update for least-squares solves |
