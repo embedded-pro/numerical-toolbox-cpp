@@ -18,11 +18,11 @@ Applied across a pair of rows, it zeros the target entry while preserving Euclid
 
 ## Complexity Analysis
 
-| Operation      | Time   | Space  | Notes                                   |
-|----------------|--------|--------|-----------------------------------------|
-| ComputeGivens  | $O(1)$ | $O(1)$ | One `sqrt`, two divides                 |
-| ApplyGivens    | $O(1)$ | $O(1)$ | Rotates one scalar pair                 |
-| Rotate two rows| $O(n)$ | $O(1)$ | `ApplyGivens` across `n` columns        |
+| Operation       | Time   | Space  | Notes                            |
+|-----------------|--------|--------|----------------------------------|
+| ComputeGivens   | $O(1)$ | $O(1)$ | One `sqrt`, two divides          |
+| ApplyGivens     | $O(1)$ | $O(1)$ | Rotates one scalar pair          |
+| Rotate two rows | $O(n)$ | $O(1)$ | `ApplyGivens` across `n` columns |
 
 ## Step-by-Step Walkthrough
 

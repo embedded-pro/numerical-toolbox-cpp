@@ -1,5 +1,5 @@
-#include "numerical/math/TriangularSolve.hpp"
 #include "numerical/math/Tolerance.hpp"
+#include "numerical/math/TriangularSolve.hpp"
 #include <gtest/gtest.h>
 
 namespace
