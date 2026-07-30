@@ -44,14 +44,14 @@ The ratio $D_q^{-1} N_q$ is evaluated by solving the linear system $D_q X = N_q$
 
 ## Complexity Analysis
 
-| Phase                     | Time        | Space      | Notes                                              |
-|---------------------------|-------------|------------|----------------------------------------------------|
-| Infinity-norm             | $O(n^2)$    | $O(1)$     | Determines scaling exponent $s$                    |
-| Matrix powers $A^2, A^4, A^6$ | $3\,O(n^3)$ | $3 n^2$    | Even/odd split; three multiplications total        |
-| Polynomial evaluation     | $O(n^3)$    | $2 n^2$    | Horner-style accumulation of $U$ and $V$           |
-| LU solve ($D_q X = N_q$) | $O(n^3)$    | $n^2$      | One factorisation, $n$ substitution passes         |
-| Squaring ($s$ steps)      | $s\,O(n^3)$ | $n^2$      | At most $\lceil \log_2 \|A\|_\infty \rceil$ steps |
-| **Total**                 | $O((6+s)n^3)$ | $O(n^2)$ | Stack-only; no heap                                |
+| Phase                         | Time          | Space    | Notes                                             |
+|-------------------------------|---------------|----------|---------------------------------------------------|
+| Infinity-norm                 | $O(n^2)$      | $O(1)$   | Determines scaling exponent $s$                   |
+| Matrix powers $A^2, A^4, A^6$ | $3\,O(n^3)$   | $3 n^2$  | Even/odd split; three multiplications total       |
+| Polynomial evaluation         | $O(n^3)$      | $2 n^2$  | Horner-style accumulation of $U$ and $V$          |
+| LU solve ($D_q X = N_q$)      | $O(n^3)$      | $n^2$    | One factorisation, $n$ substitution passes        |
+| Squaring ($s$ steps)          | $s\,O(n^3)$   | $n^2$    | At most $\lceil \log_2 \|A\|_\infty \rceil$ steps |
+| **Total**                     | $O((6+s)n^3)$ | $O(n^2)$ | Stack-only; no heap                               |
 
 ## Step-by-Step Walkthrough
 
