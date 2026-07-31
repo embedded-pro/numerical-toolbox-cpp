@@ -9,4 +9,5 @@ Control system analysis tools for characterizing dynamic systems and feedback lo
 | [Frequency Response](FrequencyResponse.md) | Magnitude and phase response of digital filters across the frequency spectrum |
 | [Root Locus](RootLocus.md)                 | Closed-loop pole trajectory analysis as a function of loop gain               |
 | [Controllability/Observability](ControllabilityObservability.md) | Structural reachability and detectability analysis with Gramians             |
+| [Continuous-to-Discrete](ContinuousToDiscrete.md) | Convert continuous (A,B,C,D) state-space to discrete via ZOH (Van Loan), Tustin/bilinear, and forward/backward Euler |
 | [Transfer Function ↔ State Space](TransferFunctionStateSpace.md) | Conversion between transfer-function polynomials and canonical state-space forms |
