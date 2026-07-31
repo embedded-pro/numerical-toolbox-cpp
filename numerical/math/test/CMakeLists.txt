@@ -8,6 +8,7 @@ target_link_libraries(numerical.math_test PUBLIC
 )
 
 target_sources(numerical.math_test PRIVATE
+    TestContinuousToDiscrete.cpp
     TestComplexNumber.cpp
     TestCordic.cpp
     TestGivensRotation.cpp

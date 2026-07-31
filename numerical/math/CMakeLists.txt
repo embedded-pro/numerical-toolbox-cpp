@@ -12,12 +12,14 @@ target_link_libraries(numerical.math ${NUMERICAL_VISIBILITY}
 target_sources(numerical.math PRIVATE
     AdvancedFunctions.hpp
     ComplexNumber.hpp
+    ContinuousToDiscrete.hpp
     Cordic.hpp
     Geometry3D.hpp
     GivensRotation.hpp
     HouseholderTransform.hpp
     HyperbolicFunctions.hpp
     LinearTimeInvariant.hpp
+    LuFactorization.hpp
     Matrix.hpp
     MatrixExponential.hpp
     MatrixNorms.hpp
@@ -36,8 +38,10 @@ target_sources(numerical.math PRIVATE
 
 numerical_add_coverage_sources(numerical.math
     ComplexNumber.cpp
+    ContinuousToDiscrete.cpp
     Cordic.cpp
     LinearTimeInvariant.cpp
+    LuFactorization.cpp
     Matrix.cpp
     MatrixExponential.cpp
     QNumber.cpp

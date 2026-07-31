@@ -198,12 +198,6 @@ the library does not yet expose. Detailed below under
 - **Algorithm / paper:** C. Moler, C. Van Loan, "Nineteen Dubious Ways to Compute the Exponential of a Matrix, Twenty-Five Years Later," *SIAM Review*, 45(1), 2003; N. Higham, scaling-and-squaring, 2005.
 - **Reuses:** `math::Matrix`; **unblocks items 30, 31, 26.**
 
-### 30. Continuous → discrete conversion (`c2d`)  *(float-first)*
-- **What:** Convert continuous `(A,B,C,D)` to discrete via ZOH (augmented-matrix exponential), Tustin/bilinear, and forward/backward Euler.
-- **Embedded value:** Design plants/controllers in continuous time, then deploy discretely into the existing `LinearTimeInvariant` model.
-- **Algorithm / paper:** C. Van Loan, "Computing Integrals Involving the Matrix Exponential," *IEEE Trans. AC*, 23(3), 1978; Franklin, Powell, Workman, *Digital Control of Dynamic Systems*.
-- **Reuses:** Item 29, [LinearTimeInvariant.hpp](numerical/math/LinearTimeInvariant.hpp).
-
 ### 31. Lyapunov / Sylvester equation solvers  *(float-first)*
 - **What:** Solve `AX + XB = C` (Sylvester) and discrete/continuous Lyapunov equations.
 - **Embedded value:** Stability certificates, controllability/observability Gramians, robust-control synthesis.
