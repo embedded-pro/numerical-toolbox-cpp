@@ -7,15 +7,18 @@ target_include_directories(numerical.robust_control ${NUMERICAL_VISIBILITY}
 
 target_link_libraries(numerical.robust_control ${NUMERICAL_VISIBILITY}
     numerical.math
+    numerical.filters.passive
     numerical.solver
     infra.util
 )
 
 target_sources(numerical.robust_control PRIVATE
+    DisturbanceObserver.hpp
     SlidingModeControl.hpp
 )
 
 numerical_add_coverage_sources(numerical.robust_control
+    DisturbanceObserver.cpp
     SlidingModeControl.cpp
 )
 
