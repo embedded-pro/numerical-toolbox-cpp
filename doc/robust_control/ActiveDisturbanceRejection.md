@@ -55,11 +55,11 @@ Substituting into the plant equation and using $\hat{f} \approx f$ gives the clo
 
 ## Complexity Analysis
 
-| Case    | Time       | Space      | Notes                                    |
-|---------|-----------|-----------|------------------------------------------|
-| Best    | $O(n)$    | $O(n)$    | Linear sweep over $n+1$ ESO states       |
-| Average | $O(n)$    | $O(n)$    | Same; gains precomputed at construction  |
-| Worst   | $O(n)$    | $O(n)$    | No branching in the hot path             |
+| Case    | Time   | Space  | Notes                                   |
+|---------|--------|--------|-----------------------------------------|
+| Best    | $O(n)$ | $O(n)$ | Linear sweep over $n+1$ ESO states      |
+| Average | $O(n)$ | $O(n)$ | Same; gains precomputed at construction |
+| Worst   | $O(n)$ | $O(n)$ | No branching in the hot path            |
 
 Gains are computed once at construction from closed-form binomial formulas in $O(n)$ time. The `Compute` hot path is a pair of $O(n)$ loops with no dynamic allocation.
 
