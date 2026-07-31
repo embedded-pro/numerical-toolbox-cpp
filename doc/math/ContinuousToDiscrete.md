@@ -78,12 +78,12 @@ relative to the true system.
 
 ## Complexity Analysis
 
-| Method         | Time         | Space                   | Notes                                     |
-|----------------|--------------|-------------------------|-------------------------------------------|
+| Method         | Time         | Space                   | Notes                                       |
+|----------------|--------------|-------------------------|---------------------------------------------|
 | ZOH            | $O((n+m)^3)$ | $(n+m)^2$ augmented mat | One matrix exponential via scaling/squaring |
-| Tustin         | $O(n^3)$     | $O(n^2)$                | One $n \times n$ LU factorisation          |
-| Forward Euler  | $O(n^2)$     | $O(n^2)$                | Pure matrix multiply + add                 |
-| Backward Euler | $O(n^3)$     | $O(n^2)$                | One $n \times n$ LU factorisation          |
+| Tustin         | $O(n^3)$     | $O(n^2)$                | One $n \times n$ LU factorisation           |
+| Forward Euler  | $O(n^2)$     | $O(n^2)$                | Pure matrix multiply + add                  |
+| Backward Euler | $O(n^3)$     | $O(n^2)$                | One $n \times n$ LU factorisation           |
 
 All working memory is allocated on the stack; no heap is used.
 

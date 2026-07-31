@@ -4,8 +4,8 @@
 #endif
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
-#include "numerical/math/Matrix.hpp"
 #include "numerical/math/LuFactorization.hpp"
+#include "numerical/math/Matrix.hpp"
 #include "numerical/math/MatrixExponential.hpp"
 #include <cstddef>
 #include <type_traits>
