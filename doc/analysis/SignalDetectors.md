@@ -18,7 +18,7 @@ When $d = 1$ the peak is infinite-hold; when $d < 1$ it releases exponentially t
 
 A zero crossing occurs at sample $n$ when the sign of $x_n$ differs from the sign of $x_{n-1}$ and $|x_n|$ exceeds a hysteresis threshold $h \geq 0$:
 
-$$\text{crossed}_n = \bigl(\operatorname{sgn}(x_n) \neq \operatorname{sgn}(x_{n-1})\bigr) \land \bigl(|x_n| > h\bigr)$$
+$$\text{crossed}_n = \bigl(\mathrm{sgn}(x_n) \neq \mathrm{sgn}(x_{n-1})\bigr) \land \bigl(|x_n| > h\bigr)$$
 
 The instantaneous fundamental frequency of a periodic signal can be estimated from the cumulative count $C$ over a window of $N$ samples at sampling period $T_s$:
 

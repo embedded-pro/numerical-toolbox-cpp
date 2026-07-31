@@ -14,8 +14,8 @@ $$p(\lambda) = \det(\lambda I - A) = \lambda^n + c_{n-1}\lambda^{n-1} + \cdots +
 
 The Faddeev–LeVerrier recurrence computes the coefficients $c_k$ without determinant expansion. Define auxiliary matrices $M_k$ by
 
-$$M_1 = A, \quad c_{n-1} = -\operatorname{tr}(M_1),$$
-$$M_k = A\bigl(M_{k-1} + c_{n-k+1}I\bigr), \quad c_{n-k} = -\frac{1}{k}\operatorname{tr}(M_k), \quad k = 2, \ldots, n.$$
+$$M_1 = A, \quad c_{n-1} = -\mathrm{tr}(M_1),$$
+$$M_k = A\bigl(M_{k-1} + c_{n-k+1}I\bigr), \quad c_{n-k} = -\frac{1}{k}\mathrm{tr}(M_k), \quad k = 2, \ldots, n.$$
 
 This recurrence requires only matrix-matrix multiplication, scalar multiplication of a matrix by the identity, and the trace, making it suitable for static (stack-allocated) computation without a heap.
 
@@ -51,8 +51,8 @@ The Faddeev–LeVerrier step executes $n$ matrix multiplications each costing $O
 
 Consider $A = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}$ (90° rotation, $\rho = 1$).
 
-1. **k = 1**: $M_1 = A \cdot 0 + I \cdot c_0$. With $c_0 = 1$: $M_1 = I$. Then $c_1 = -\tfrac{1}{1}\operatorname{tr}(A \cdot M_1) = -\operatorname{tr}(A) = 0$.
-2. **k = 2**: $M_2 = A(M_1 + c_1 I) = A \cdot I = A$. Then $c_2 = -\tfrac{1}{2}\operatorname{tr}(A \cdot A) = -\tfrac{1}{2}\operatorname{tr}(-I) = 1$.
+1. **k = 1**: $M_1 = A \cdot 0 + I \cdot c_0$. With $c_0 = 1$: $M_1 = I$. Then $c_1 = -\tfrac{1}{1}\mathrm{tr}(A \cdot M_1) = -\mathrm{tr}(A) = 0$.
+2. **k = 2**: $M_2 = A(M_1 + c_1 I) = A \cdot I = A$. Then $c_2 = -\tfrac{1}{2}\mathrm{tr}(A \cdot A) = -\tfrac{1}{2}\mathrm{tr}(-I) = 1$.
 
 Characteristic polynomial: $\lambda^2 + 0\lambda + 1 = \lambda^2 + 1$. Roots: $\pm i$, magnitudes both 1. $\rho = 1$.
 

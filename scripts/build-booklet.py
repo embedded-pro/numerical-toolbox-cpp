@@ -45,6 +45,7 @@ SKIP_DIRS = {".backup"}
 
 REFERENCES_HEADING = "References & Further Reading"
 OUTPUT_STEM = "NumericalToolbox"
+MATHJAX_CDN = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
 
 LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 H1_RE = re.compile(r"^#\s+(.+?)\s*$", re.MULTILINE)
@@ -287,7 +288,7 @@ def render_html(book_md: pathlib.Path) -> int:
     shutil.copyfile(BOOKLET_ASSETS / "book.css", BUILD_DIR / "book.css")
     cmd = pandoc_common(book_md) + [
         "--standalone",
-        "--mathjax",
+        f"--mathjax={MATHJAX_CDN}",
         "--css=book.css",
         "-o",
         str(out),

@@ -70,9 +70,9 @@ $$R(q) = \begin{pmatrix}
 
 Converting from unit quaternion to roll $\phi$, pitch $\theta$, yaw $\psi$:
 
-$$\phi = \operatorname{atan2}(2(wx+yz),\; 1-2(x^2+y^2))$$
+$$\phi = \mathrm{atan2}(2(wx+yz),\; 1-2(x^2+y^2))$$
 $$\theta = \arcsin(2(wy-zx))$$
-$$\psi = \operatorname{atan2}(2(wz+xy),\; 1-2(y^2+z^2))$$
+$$\psi = \mathrm{atan2}(2(wz+xy),\; 1-2(y^2+z^2))$$
 
 At $\theta = \pm 90°$ the $\phi$ and $\psi$ axes align (gimbal lock); the formula still
 returns a bounded value but the decomposition is no longer unique.
@@ -81,7 +81,7 @@ returns a bounded value but the decomposition is no longer unique.
 
 Spherical Linear Interpolation between unit quaternions $q_0$ and $q_1$ at fraction $t \in [0,1]$:
 
-$$\operatorname{Slerp}(q_0, q_1, t) = \frac{\sin((1-t)\Omega)}{\sin\Omega}\,q_0 + \frac{\sin(t\Omega)}{\sin\Omega}\,q_1,$$
+$$\mathrm{Slerp}(q_0, q_1, t) = \frac{\sin((1-t)\Omega)}{\sin\Omega}\,q_0 + \frac{\sin(t\Omega)}{\sin\Omega}\,q_1,$$
 
 where $\cos\Omega = q_0 \cdot q_1$. When $\Omega \approx 0$ (nearly parallel quaternions)
 the formula degenerates; a normalized linear interpolation (nlerp) is substituted.

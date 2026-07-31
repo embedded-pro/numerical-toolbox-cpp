@@ -24,13 +24,13 @@ $i, j$.
 
 ### Kronecker Vectorisation
 
-Stacking $X$ column-by-column into $\operatorname{vec}(X) \in \mathbb{R}^{NM}$ and applying
-the identities $\operatorname{vec}(AXI) = (I_M \otimes A)\operatorname{vec}(X)$ and
-$\operatorname{vec}(IXB) = (B^\top \otimes I_N)\operatorname{vec}(X)$ converts the matrix
+Stacking $X$ column-by-column into $\mathrm{vec}(X) \in \mathbb{R}^{NM}$ and applying
+the identities $\mathrm{vec}(AXI) = (I_M \otimes A)\mathrm{vec}(X)$ and
+$\mathrm{vec}(IXB) = (B^\top \otimes I_N)\mathrm{vec}(X)$ converts the matrix
 equation into the standard linear system
 
 $$\underbrace{(I_M \otimes A + B^\top \otimes I_N)}_{K \in \mathbb{R}^{NM \times NM}}
-\operatorname{vec}(X) = \operatorname{vec}(C).$$
+\mathrm{vec}(X) = \mathrm{vec}(C).$$
 
 The $(iN+k, jN+l)$ entry of $K$ is $\delta_{ij} A_{kl} + B_{ji} \delta_{kl}$.  The system
 is solved by Gaussian elimination with partial pivoting; a near-zero pivot signals the
@@ -51,7 +51,7 @@ The discrete counterpart
 
 $$AXA^\top - X = -Q$$
 
-is solved by the Kronecker system $(A \otimes A - I_{N^2})\operatorname{vec}(X) = -\operatorname{vec}(Q)$,
+is solved by the Kronecker system $(A \otimes A - I_{N^2})\mathrm{vec}(X) = -\mathrm{vec}(Q)$,
 with the $(iN+k, jN+l)$ entry of $A \otimes A - I$ equal to $A_{ij}A_{kl} - \delta_{ij}\delta_{kl}$.
 When $A$ is Schur-stable ($\rho(A) < 1$) and $Q \succeq 0$, the unique solution equals the
 controllability gramian $X = \sum_{k=0}^{\infty} A^k Q (A^\top)^k$.
@@ -79,7 +79,7 @@ $C = I_2$.
 
 $$K = \begin{pmatrix}-2&1&0&0\\0&-1&0&0\\2&0&-2&1\\0&2&0&-1\end{pmatrix}.$$
 
-**Build $\operatorname{vec}(C) = (1, 0, 0, 1)^\top$.**
+**Build $\mathrm{vec}(C) = (1, 0, 0, 1)^\top$.**
 
 **Gaussian elimination** with partial pivoting produces $X_{00} = -0.5$, $X_{10} = 0$,
 $X_{01} = -1$, $X_{11} = -1$.
@@ -113,7 +113,7 @@ $X_{01} = -1$, $X_{11} = -1$.
   controllability Gramian used to evaluate reachability in balanced truncation.
 - **Pole-placement observers (Luenberger):** the Sylvester equation $AX - XF = LC$ arises when
   placing observer poles while decoupling the error dynamics.
-- **H₂ norm computation:** $\|G\|_2^2 = \operatorname{tr}(B^\top X B)$ where $X$ satisfies the
+- **H₂ norm computation:** $\|G\|_2^2 = \mathrm{tr}(B^\top X B)$ where $X$ satisfies the
   observability Gramian Lyapunov equation.
 
 ## Connections to Other Algorithms

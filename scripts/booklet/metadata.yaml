@@ -1,7 +1,9 @@
 ---
 title: "Numerical Toolbox"
 subtitle: "A Field Guide to Embedded DSP, Control, and Estimation Algorithms"
-author: "Numerical Toolbox Contributors"
+author:
+  - "Gabriel Francisco dos Santos"
+  - "gabriel.fra.santos@gmail.com"
 lang: en
 documentclass: book
 classoption:
@@ -9,6 +11,9 @@ classoption:
 geometry:
   - margin=1in
 fontsize: 11pt
+monofont: "DejaVu Sans Mono"
+monofontoptions:
+  - "Scale=0.85"
 linkcolor: RoyalBlue
 urlcolor: RoyalBlue
 toccolor: black

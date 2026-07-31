@@ -24,7 +24,7 @@ $$\frac{\partial \mathcal{L}}{\partial \hat{y}_i} = \frac{2}{m}(\hat{y}_i - y_i)
 
 $$\mathcal{L}_{\text{MAE}} = \frac{1}{m} \sum_{i=1}^{m} |\hat{y}_i - y_i|$$
 
-$$\frac{\partial \mathcal{L}}{\partial \hat{y}_i} = \frac{1}{m} \operatorname{sign}(\hat{y}_i - y_i)$$
+$$\frac{\partial \mathcal{L}}{\partial \hat{y}_i} = \frac{1}{m} \mathrm{sign}(\hat{y}_i - y_i)$$
 
 - Linear penalty → robust to outliers.
 - Non-differentiable at $\hat{y}_i = y_i$ (use sub-gradient in practice).
