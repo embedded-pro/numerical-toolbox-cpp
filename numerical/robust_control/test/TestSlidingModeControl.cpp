@@ -166,3 +166,29 @@ TEST_F(TestSlidingModeControl, control_sign_opposes_surface)
 
     EXPECT_LT(sDot, 0.0f);
 }
+
+TEST_F(TestSlidingModeControl, reference_tracking_acts_on_error)
+{
+    math::Vector<float, 2> x{ { 1.2f }, { 0.3f } };
+    math::Vector<float, 2> reference{ { 0.4f }, { -0.1f } };
+    math::Vector<float, 2> error{ { x.at(0, 0) - reference.at(0, 0) }, { x.at(1, 0) - reference.at(1, 0) } };
+
+    auto uRef = smc.ComputeControl(x, reference);
+    auto uErr = smc.ComputeControl(error);
+
+    EXPECT_NEAR(uRef.at(0, 0), uErr.at(0, 0), math::Tolerance<float>());
+}
+
+TEST_F(TestSlidingModeControl, set_boundary_layer_matches_constructed_phi)
+{
+    math::Vector<float, 2> x{ { 0.02f }, { -0.015f } };
+    const float phi2{ 0.20f };
+
+    robust_control::SlidingModeControl<float, 2, 1> reference{ plant, S, K, phi2 };
+    smc.SetBoundaryLayer(phi2);
+
+    auto uSet = smc.ComputeControl(x);
+    auto uRef = reference.ComputeControl(x);
+
+    EXPECT_NEAR(uSet.at(0, 0), uRef.at(0, 0), math::Tolerance<float>());
+}
