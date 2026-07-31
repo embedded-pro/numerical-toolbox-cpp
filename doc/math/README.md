@@ -15,4 +15,3 @@ Core mathematical primitives for numerical computation.
 | [Matrix Operations](MatrixOperations.md)            | Structural matrix utilities — `Symmetrize` (closest symmetric matrix)                          |
 | [Step Response Metrics](StepResponseMetrics.md)     | Rise time, settling time, percent overshoot, peak time, and steady-state error from a bounded step-response vector |
 | [Matrix Exponential](MatrixExponential.md)          | Scaling-and-squaring with diagonal (6,6) Padé approximant — exact ODE solution operator and discretisation engine |
-| [Continuous-to-Discrete](ContinuousToDiscrete.md)  | Convert continuous (A,B,C,D) state-space to discrete via ZOH (Van Loan), Tustin/bilinear, and forward/backward Euler |

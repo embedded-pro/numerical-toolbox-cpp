@@ -4,13 +4,13 @@
 #endif
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
-#include "numerical/math/LuFactorization.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/MatrixExponential.hpp"
+#include "numerical/solvers/LuDecomposition.hpp"
 #include <cstddef>
 #include <type_traits>
 
-namespace math
+namespace control_analysis
 {
     enum class DiscretizationMethod
     {
@@ -26,16 +26,16 @@ namespace math
         static_assert(std::is_floating_point_v<T>, "ContinuousToDiscrete supports floating-point types");
 
     public:
-        using SystemType = LinearTimeInvariant<T, StateSize, InputSize, OutputSize>;
+        using SystemType = math::LinearTimeInvariant<T, StateSize, InputSize, OutputSize>;
 
         ContinuousToDiscrete() = default;
 
         OPTIMIZE_FOR_SPEED SystemType Convert(const SystemType& sys, T ts, DiscretizationMethod method);
 
     private:
-        MatrixExponential<T, StateSize + InputSize> expm{};
+        [[no_unique_address]] math::MatrixExponential<T, StateSize + InputSize> expm{};
 
-        static SquareMatrix<T, StateSize> Invert(const SquareMatrix<T, StateSize>& a);
+        static math::SquareMatrix<T, StateSize> Invert(const math::SquareMatrix<T, StateSize>& a);
 
         SystemType Zoh(const SystemType& sys, T ts);
         SystemType Bilinear(const SystemType& sys, T ts);
@@ -44,10 +44,10 @@ namespace math
     };
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t OutputSize>
-    SquareMatrix<T, StateSize>
-    ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::Invert(const SquareMatrix<T, StateSize>& a)
+    math::SquareMatrix<T, StateSize>
+    ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::Invert(const math::SquareMatrix<T, StateSize>& a)
     {
-        LuFactorization<T, StateSize> lu{};
+        solvers::LuDecomposition<T, StateSize> lu{};
         lu.Decompose(a);
         return lu.Inverse();
     }
@@ -74,7 +74,7 @@ namespace math
     typename ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::SystemType
     ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::Zoh(const SystemType& sys, T ts)
     {
-        SquareMatrix<T, StateSize + InputSize> augmented{};
+        math::SquareMatrix<T, StateSize + InputSize> augmented{};
 
         for (std::size_t i = 0; i < StateSize; ++i)
             for (std::size_t j = 0; j < StateSize; ++j)
@@ -105,7 +105,7 @@ namespace math
     ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::Bilinear(const SystemType& sys, T ts)
     {
         const T alpha{ T{ 2 } / ts };
-        const auto identity = SquareMatrix<T, StateSize>::Identity();
+        const auto identity = math::SquareMatrix<T, StateSize>::Identity();
         const auto alphaI = identity * alpha;
         const auto lhs = alphaI - sys.A;
         const auto P = Invert(lhs);
@@ -128,7 +128,7 @@ namespace math
     ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::ForwardEuler(const SystemType& sys, T ts)
     {
         SystemType result{};
-        const auto identity = SquareMatrix<T, StateSize>::Identity();
+        const auto identity = math::SquareMatrix<T, StateSize>::Identity();
         result.A = identity + sys.A * ts;
         result.B = sys.B * ts;
         result.C = sys.C;
@@ -140,7 +140,7 @@ namespace math
     typename ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::SystemType
     ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::Backward(const SystemType& sys, T ts)
     {
-        const auto identity = SquareMatrix<T, StateSize>::Identity();
+        const auto identity = math::SquareMatrix<T, StateSize>::Identity();
         const auto lhs = identity - sys.A * ts;
         const auto P = Invert(lhs);
         const auto PB = P * sys.B;
