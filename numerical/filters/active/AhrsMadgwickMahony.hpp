@@ -34,7 +34,7 @@ namespace filters
         void Reset();
 
     private:
-        math::Quaternion<T> q;
+        math::Quaternion<T> q{ math::Quaternion<T>::Identity() };
         T Ts;
         T beta;
         T Kp;
@@ -44,14 +44,13 @@ namespace filters
         static math::Vector3<T> GravityFromQuaternion(const math::Quaternion<T>& quat);
         static math::Vector3<T> NorthFromQuaternion(const math::Quaternion<T>& quat, T bx, T bz);
 
-        static math::Quaternion<T> ObjectiveGravity(const math::Quaternion<T>& quat, const math::Vector3<T>& a);
         static math::Quaternion<T> GradientGravity(const math::Quaternion<T>& quat, const math::Vector3<T>& a);
-        static math::Quaternion<T> ObjectiveMag(const math::Quaternion<T>& quat, const math::Vector3<T>& m, T bx, T bz);
         static math::Quaternion<T> GradientMag(const math::Quaternion<T>& quat, const math::Vector3<T>& m, T bx, T bz);
 
         static T SafeInvSqrt(T x);
         static math::Vector3<T> NormalizeVec(const math::Vector3<T>& v, T norm);
 
+        void IntegrateGyro(const math::Vector3<T>& gyro);
         void MahonyStep(const math::Vector3<T>& gyro, const math::Vector3<T>& e);
         void MadgwickStep(const math::Vector3<T>& gyro, const math::Quaternion<T>& grad);
     };
@@ -60,8 +59,7 @@ namespace filters
 
     template<typename T, AhrsMode M>
     AhrsFilter<T, M>::AhrsFilter(T gain, T samplePeriod)
-        : q{ math::Quaternion<T>::Identity() }
-        , Ts{ samplePeriod }
+        : Ts{ samplePeriod }
         , beta{ (M == AhrsMode::Madgwick) ? gain : T{} }
         , Kp{ (M == AhrsMode::Mahony) ? gain : T{} }
         , Ki{ (M == AhrsMode::Mahony) ? T(0.01) : T{} }
@@ -109,18 +107,6 @@ namespace filters
     }
 
     template<typename T, AhrsMode M>
-    math::Quaternion<T> AhrsFilter<T, M>::ObjectiveGravity(const math::Quaternion<T>& quat, const math::Vector3<T>& a)
-    {
-        math::Vector3<T> g{ GravityFromQuaternion(quat) };
-        return math::Quaternion<T>{
-            T{},
-            g.at(0, 0) - a.at(0, 0),
-            g.at(1, 0) - a.at(1, 0),
-            g.at(2, 0) - a.at(2, 0)
-        };
-    }
-
-    template<typename T, AhrsMode M>
     math::Quaternion<T> AhrsFilter<T, M>::GradientGravity(const math::Quaternion<T>& quat, const math::Vector3<T>& a)
     {
         T qw{ quat.w };
@@ -145,18 +131,6 @@ namespace filters
     }
 
     template<typename T, AhrsMode M>
-    math::Quaternion<T> AhrsFilter<T, M>::ObjectiveMag(const math::Quaternion<T>& quat, const math::Vector3<T>& m, T bx, T bz)
-    {
-        math::Vector3<T> b{ NorthFromQuaternion(quat, bx, bz) };
-        return math::Quaternion<T>{
-            T{},
-            b.at(0, 0) - m.at(0, 0),
-            b.at(1, 0) - m.at(1, 0),
-            b.at(2, 0) - m.at(2, 0)
-        };
-    }
-
-    template<typename T, AhrsMode M>
     math::Quaternion<T> AhrsFilter<T, M>::GradientMag(const math::Quaternion<T>& quat, const math::Vector3<T>& m, T bx, T bz)
     {
         T qw{ quat.w };
@@ -178,6 +152,18 @@ namespace filters
 
         T invNorm{ SafeInvSqrt(gw * gw + gx * gx + gy * gy + gz * gz) };
         return math::Quaternion<T>{ gw * invNorm, gx * invNorm, gy * invNorm, gz * invNorm };
+    }
+
+    template<typename T, AhrsMode M>
+    void AhrsFilter<T, M>::IntegrateGyro(const math::Vector3<T>& gyro)
+    {
+        math::Quaternion<T> qGyro{ T{}, gyro.at(0, 0), gyro.at(1, 0), gyro.at(2, 0) };
+        math::Quaternion<T> qDot{ q * qGyro };
+        q.w += T(0.5) * qDot.w * Ts;
+        q.x += T(0.5) * qDot.x * Ts;
+        q.y += T(0.5) * qDot.y * Ts;
+        q.z += T(0.5) * qDot.z * Ts;
+        q.Normalize();
     }
 
     template<typename T, AhrsMode M>
@@ -214,13 +200,7 @@ namespace filters
         T aNorm{ math::VectorNorm(accel) };
         if (aNorm < std::numeric_limits<T>::epsilon())
         {
-            math::Quaternion<T> qGyro{ T{}, gyro.at(0, 0), gyro.at(1, 0), gyro.at(2, 0) };
-            math::Quaternion<T> qDot{ q * qGyro };
-            q.w += T(0.5) * qDot.w * Ts;
-            q.x += T(0.5) * qDot.x * Ts;
-            q.y += T(0.5) * qDot.y * Ts;
-            q.z += T(0.5) * qDot.z * Ts;
-            q.Normalize();
+            IntegrateGyro(gyro);
             return;
         }
 
@@ -245,13 +225,7 @@ namespace filters
         T aNorm{ math::VectorNorm(accel) };
         if (aNorm < std::numeric_limits<T>::epsilon())
         {
-            math::Quaternion<T> qGyro{ T{}, gyro.at(0, 0), gyro.at(1, 0), gyro.at(2, 0) };
-            math::Quaternion<T> qDot{ q * qGyro };
-            q.w += T(0.5) * qDot.w * Ts;
-            q.x += T(0.5) * qDot.x * Ts;
-            q.y += T(0.5) * qDot.y * Ts;
-            q.z += T(0.5) * qDot.z * Ts;
-            q.Normalize();
+            IntegrateGyro(gyro);
             return;
         }
 

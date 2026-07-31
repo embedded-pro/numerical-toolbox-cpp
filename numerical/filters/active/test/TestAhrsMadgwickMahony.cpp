@@ -108,6 +108,51 @@ TEST_F(TestAhrsFilter, marg_constrains_yaw)
     EXPECT_NEAR(euler.at(2, 0), 0.0f, 1e-1f);
 }
 
+TEST_F(TestAhrsFilter, mahony_marg_constrains_yaw)
+{
+    math::Vector3<float> gyro{ { 0.0f }, { 0.0f }, { 0.0f } };
+    math::Vector3<float> accel{ { 0.0f }, { 0.0f }, { g } };
+    math::Vector3<float> mag{ { 1.0f }, { 0.0f }, { 0.0f } };
+
+    for (int i = 0; i < 3000; ++i)
+        mahony.UpdateMarg(gyro, accel, mag);
+
+    math::Vector3<float> euler{ mahony.Euler() };
+    EXPECT_NEAR(euler.at(2, 0), 0.0f, 1e-1f);
+}
+
+TEST_F(TestAhrsFilter, marg_zero_mag_falls_back_to_imu)
+{
+    constexpr float rollDeg{ 30.0f };
+    constexpr float rollRad{ rollDeg * std::numbers::pi_v<float> / 180.0f };
+
+    float cr{ std::cos(rollRad) };
+    float sr{ std::sin(rollRad) };
+    math::Vector3<float> gyro{ { 0.0f }, { 0.0f }, { 0.0f } };
+    math::Vector3<float> accel{ { 0.0f }, { g * sr }, { g * cr } };
+    math::Vector3<float> mag{ { 0.0f }, { 0.0f }, { 0.0f } };
+
+    for (int i = 0; i < 3000; ++i)
+        madgwick.UpdateMarg(gyro, accel, mag);
+
+    math::Vector3<float> euler{ madgwick.Euler() };
+    EXPECT_NEAR(euler.at(0, 0) * 180.0f / std::numbers::pi_v<float>, rollDeg, 1.0f);
+}
+
+TEST_F(TestAhrsFilter, marg_zero_accel_skips_correction)
+{
+    math::Vector3<float> gyro{ { 0.0f }, { 0.0f }, { 1.0f } };
+    math::Vector3<float> accel{ { 0.0f }, { 0.0f }, { 0.0f } };
+    math::Vector3<float> mag{ { 1.0f }, { 0.0f }, { 0.0f } };
+
+    for (int i = 0; i < 100; ++i)
+        madgwick.UpdateMarg(gyro, accel, mag);
+
+    math::Quaternion<float> orient{ madgwick.Orientation() };
+    EXPECT_NEAR(orient.Norm(), 1.0f, 1e-4f);
+    EXPECT_FALSE(std::isnan(orient.w));
+}
+
 TEST_F(TestAhrsFilter, mahony_estimates_gyro_bias)
 {
     constexpr float biasMag{ 0.05f };
