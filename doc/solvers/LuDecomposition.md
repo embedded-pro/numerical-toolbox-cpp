@@ -60,7 +60,7 @@ quantities), and `IsSingular()` reports whether the last `Decompose` aborted.
 The determinant of $A$ equals the product of $U$'s diagonal entries multiplied by the
 sign of $P$:
 
-$$\det(A) = \operatorname{sign}(P) \prod_{k=0}^{n-1} U_{kk}.$$
+$$\det(A) = \mathrm{sign}(P) \prod_{k=0}^{n-1} U_{kk}.$$
 
 The sign flips each time rows are swapped; it starts at $+1$ and is multiplied by $-1$ per swap.
 

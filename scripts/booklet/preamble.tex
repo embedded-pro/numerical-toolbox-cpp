@@ -1,0 +1,54 @@
+% LaTeX header shared by the PDF booklet (passed to pandoc via -H).
+\usepackage{fancyhdr}
+\usepackage{emptypage}
+\usepackage{amssymb}
+\usepackage[dvipsnames]{xcolor}
+
+% Latin Modern (the body font) lacks a handful of Unicode symbols that appear in
+% prose and inline code. Map them to math-mode equivalents so they always render.
+\usepackage{newunicodechar}
+\newunicodechar{↔}{\ensuremath{\leftrightarrow}}
+\newunicodechar{⇒}{\ensuremath{\Rightarrow}}
+\newunicodechar{≈}{\ensuremath{\approx}}
+\newunicodechar{✓}{\ensuremath{\checkmark}}
+\newunicodechar{∈}{\ensuremath{\in}}
+\newunicodechar{∇}{\ensuremath{\nabla}}
+\newunicodechar{⋯}{\ensuremath{\cdots}}
+\newunicodechar{ℝ}{\ensuremath{\mathbb{R}}}
+\newunicodechar{ℒ}{\ensuremath{\mathcal{L}}}
+\newunicodechar{ᵀ}{\ensuremath{^{\mathsf{T}}}}
+\newunicodechar{β}{\ensuremath{\beta}}
+\newunicodechar{θ}{\ensuremath{\theta}}
+\newunicodechar{η}{\ensuremath{\eta}}
+\newunicodechar{λ}{\ensuremath{\lambda}}
+\newunicodechar{ε}{\ensuremath{\varepsilon}}
+\newunicodechar{₀}{\textsubscript{0}}
+\newunicodechar{₁}{\textsubscript{1}}
+\newunicodechar{₂}{\textsubscript{2}}
+\newunicodechar{ⁿ}{\textsuperscript{n}}
+\newunicodechar{ᵐ}{\textsuperscript{m}}
+
+% Running headers: chapter on the left, section on the right.
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyhead[L]{\nouppercase{\leftmark}}
+\fancyhead[R]{\thepage}
+
+% Give each chapter a generous opening.
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{RoyalBlue}}
+  {\chaptertitlename\ \thechapter}{20pt}{\Huge}
+
+% Cover page: title, subtitle, build metadata.
+\usepackage{titling}
+\pretitle{\begin{center}\vspace*{4cm}\Huge\bfseries\color{RoyalBlue}}
+\posttitle{\par\end{center}\vskip 1em}
+\preauthor{\begin{center}\large}
+\postauthor{\par\end{center}}
+% Author is a two-line list (name, email); stack them instead of the default
+% tabular-based \and separator, which clashes with titling's centered block.
+\renewcommand{\and}{\\[0.4em]}
+\predate{\begin{center}\large}
+\postdate{\par\end{center}\vfill}

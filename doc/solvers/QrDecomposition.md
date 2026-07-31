@@ -27,8 +27,8 @@ A Householder reflector is a symmetric, orthogonal matrix of the form
 
 $$H = I - \beta v v^\top, \quad \beta = \frac{2}{\|v\|^2},$$
 
-chosen so that $H x = \sigma e_1$ for a target vector $x$, where $\sigma = -\operatorname{sign}(x_1)\|x\|$.
-The sign convention $\sigma = -\operatorname{sign}(x_1)\|x\|$ avoids catastrophic cancellation
+chosen so that $H x = \sigma e_1$ for a target vector $x$, where $\sigma = -\mathrm{sign}(x_1)\|x\|$.
+The sign convention $\sigma = -\mathrm{sign}(x_1)\|x\|$ avoids catastrophic cancellation
 when computing $v_1 = x_1 - \sigma$.
 
 Applying $k$ successive reflectors $H_k, \ldots, H_1$ to $A$ triangularizes it:
@@ -83,7 +83,7 @@ The upper-triangular $R$ then has diagonal magnitudes $\{14, 175\}$ for this sub
 
 ## Pitfalls & Edge Cases
 
-- **Sign convention**: always use $\sigma = -\operatorname{sign}(x_1)\|x\|$ to prevent the
+- **Sign convention**: always use $\sigma = -\mathrm{sign}(x_1)\|x\|$ to prevent the
   subtraction $x_1 - \sigma$ from cancelling when $x_1 > 0$.
 - **Rank deficiency**: a near-zero diagonal entry in $R$ signals a dependent column; the
   factorization stops and returns false rather than dividing by zero.

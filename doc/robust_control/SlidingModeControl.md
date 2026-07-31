@@ -34,17 +34,17 @@ This exists if and only if $S B$ is nonsingular, which is the relative-degree-on
 
 The **switching term** adds a robust push toward the surface:
 
-$$u_{sw} = (S B)^{-1} K \operatorname{sat}(s/\phi)$$
+$$u_{sw} = (S B)^{-1} K \mathrm{sat}(s/\phi)$$
 
 where $K \in \mathbb{R}^{m}$ is the per-channel switching gain and $\phi > 0$ is the **boundary-layer thickness**. The saturation function
 
-$$\operatorname{sat}(\sigma) = \begin{cases} \sigma & |\sigma| \le 1 \\ \operatorname{sign}(\sigma) & |\sigma| > 1 \end{cases}$$
+$$\mathrm{sat}(\sigma) = \begin{cases} \sigma & |\sigma| \le 1 \\ \mathrm{sign}(\sigma) & |\sigma| > 1 \end{cases}$$
 
-replaces the discontinuous $\operatorname{sign}(s)$ of ideal SMC with a continuous ramp inside $|s| \le \phi$, eliminating infinite-bandwidth chattering while maintaining the reaching property.
+replaces the discontinuous $\mathrm{sign}(s)$ of ideal SMC with a continuous ramp inside $|s| \le \phi$, eliminating infinite-bandwidth chattering while maintaining the reaching property.
 
 ### Total Control Law
 
-$$u = u_{eq} - u_{sw} = -(S B)^{-1}\bigl[S A x + K\,\operatorname{sat}(s/\phi)\bigr]$$
+$$u = u_{eq} - u_{sw} = -(S B)^{-1}\bigl[S A x + K\,\mathrm{sat}(s/\phi)\bigr]$$
 
 ### Reaching Condition
 
@@ -73,7 +73,7 @@ $$A = \begin{bmatrix}0 & 1\\0 & 0\end{bmatrix}, \quad B = \begin{bmatrix}0\\1\en
 with surface $S = [1\; 1]$, gain $K = 2$, boundary layer $\phi = 0.05$.
 
 1. **Precompute** $SB = 1$, so $(SB)^{-1} = 1$.
-2. **At state** $x = [1, 0]^\top$: $s = 1 > \phi$, $\operatorname{sat}(s/\phi) = 1$.
+2. **At state** $x = [1, 0]^\top$: $s = 1 > \phi$, $\mathrm{sat}(s/\phi) = 1$.
 3. **Equivalent control**: $u_{eq} = -(SA)x = -[0\;1][1\;0]^\top = 0$.
 4. **Switching term**: $u_{sw} = 1 \cdot 2 \cdot 1 = 2$.
 5. **Total**: $u = 0 - 2 = -2$. The large negative input decelerates the state toward the surface.

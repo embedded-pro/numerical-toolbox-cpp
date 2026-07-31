@@ -10,7 +10,7 @@ For a vector $x$, the Householder reflector is the orthogonal matrix
 
 $$H = I - \beta\, v v^\top$$
 
-chosen so that $Hx$ is zero below the pivot. With $\sigma = \sum_{i>\text{start}} x_i^2$ and $\|x\| = \sqrt{x_{\text{start}}^2 + \sigma}$, the reflector maps $x_{\text{start}} \mapsto \mp\|x\|$. The pivot sign is chosen as $-\operatorname{sign}(x_{\text{start}})\|x\|$ to avoid cancellation:
+chosen so that $Hx$ is zero below the pivot. With $\sigma = \sum_{i>\text{start}} x_i^2$ and $\|x\| = \sqrt{x_{\text{start}}^2 + \sigma}$, the reflector maps $x_{\text{start}} \mapsto \mp\|x\|$. The pivot sign is chosen as $-\mathrm{sign}(x_{\text{start}})\|x\|$ to avoid cancellation:
 
 $$v_{\text{start}} = 1, \quad v_i = x_i / v_0, \quad \beta = \frac{2 v_0^2}{\sigma + v_0^2}$$
 

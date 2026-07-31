@@ -22,7 +22,7 @@ The $n \times nm$ controllability matrix is
 
 $$\mathcal{C} = \begin{bmatrix} B & AB & A^2 B & \cdots & A^{n-1}B \end{bmatrix}$$
 
-The pair $(A, B)$ is controllable if and only if $\operatorname{rank}(\mathcal{C}) = n$.
+The pair $(A, B)$ is controllable if and only if $\mathrm{rank}(\mathcal{C}) = n$.
 
 ### Observability Matrix
 
@@ -30,7 +30,7 @@ The $np \times n$ observability matrix is
 
 $$\mathcal{O} = \begin{bmatrix} C \\ CA \\ CA^2 \\ \vdots \\ CA^{n-1} \end{bmatrix}$$
 
-The pair $(A, C)$ is observable if and only if $\operatorname{rank}(\mathcal{O}) = n$.
+The pair $(A, C)$ is observable if and only if $\mathrm{rank}(\mathcal{O}) = n$.
 
 ### Duality
 
@@ -83,7 +83,7 @@ $\mathcal{O} = \begin{bmatrix}1 & 0 \\ 0 & 1\end{bmatrix}$, rank $= 2$. Observab
 ## Variants & Generalizations
 
 - **Continuous-time Gramians**: satisfy $AW + WA^\top + BB^\top = 0$ and require a different solver (e.g., Bartels-Stewart or Hammarling).
-- **PBH test**: The eigenvector-based Popov-Belevitch-Hautus test checks $\operatorname{rank}[A - \lambda I \;|\; B] = n$ for each eigenvalue $\lambda$, revealing which modes are uncontrollable.
+- **PBH test**: The eigenvector-based Popov-Belevitch-Hautus test checks $\mathrm{rank}[A - \lambda I \;|\; B] = n$ for each eigenvalue $\lambda$, revealing which modes are uncontrollable.
 - **Balanced realization**: Simultaneously diagonalizes $W_c$ and $W_o$ via similarity transformation; the resulting Hankel singular values rank-order modes by joint excitability and observability.
 - **Stochastic observability**: Extends to systems driven by process noise; replaced by reachability Gramians.
 

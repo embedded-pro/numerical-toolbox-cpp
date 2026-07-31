@@ -38,7 +38,7 @@ $$H(s) = C\,(sI - A)^{-1} B + D = \frac{C\,\text{adj}(sI - A)\,B + D\,\det(sI - 
 
 The Faddeev–Le Verrier algorithm computes the characteristic polynomial $\det(sI - A) = s^n + c_1 s^{n-1} + \cdots + c_n$ and the adjugate action $\text{adj}(sI - A)B$ in a single recursion of $n$ steps:
 
-$$M_0 = I, \quad c_k = -\frac{1}{k}\operatorname{tr}(A M_{k-1}), \quad M_k = A M_{k-1} + c_k I$$
+$$M_0 = I, \quad c_k = -\frac{1}{k}\mathrm{tr}(A M_{k-1}), \quad M_k = A M_{k-1} + c_k I$$
 
 The numerator coefficient for degree $n - k$ is $C M_k B$.
 
@@ -70,8 +70,8 @@ $$A_\text{ocf} = \begin{bmatrix} 0 & -2 \\ 1 & -3 \end{bmatrix}, \quad B_\text{o
 
 **Round-trip verification via Le Verrier ($n = 2$):**
 
-- $M_0 = I$; $c_1 = -\tfrac{1}{1}\operatorname{tr}(AM_0) = -\operatorname{tr}(A) = 3$; $M_1 = A + 3I = \begin{bmatrix}3 & 1 \\ -2 & 0\end{bmatrix}$.
-- $c_2 = -\tfrac{1}{2}\operatorname{tr}(AM_1) = -\tfrac{1}{2}\operatorname{tr}\!\begin{bmatrix}-2 & 0 \\ -6 & -2\end{bmatrix} = 2$.
+- $M_0 = I$; $c_1 = -\tfrac{1}{1}\mathrm{tr}(AM_0) = -\mathrm{tr}(A) = 3$; $M_1 = A + 3I = \begin{bmatrix}3 & 1 \\ -2 & 0\end{bmatrix}$.
+- $c_2 = -\tfrac{1}{2}\mathrm{tr}(AM_1) = -\tfrac{1}{2}\mathrm{tr}\!\begin{bmatrix}-2 & 0 \\ -6 & -2\end{bmatrix} = 2$.
 - Numerator coefficients: $CM_1B = [2,1]\begin{bmatrix}1\\0\end{bmatrix} = 2$; $CM_2B = CM_0B = 0$.
 
 Result: $H(s) = \dfrac{s + 2}{s^2 + 3s + 2}$. Identical to the original.

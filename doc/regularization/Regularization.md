@@ -26,7 +26,7 @@ The factor $(1 - \eta\lambda)$ shrinks weights toward zero each step — hence t
 
 $$\Omega_{L1}(\theta) = \sum_{i=1}^{P} |\theta_i| = \|\theta\|_1$$
 
-$$\frac{\partial \Omega_{L1}}{\partial \theta_i} = \operatorname{sign}(\theta_i)$$
+$$\frac{\partial \Omega_{L1}}{\partial \theta_i} = \mathrm{sign}(\theta_i)$$
 
 **Effect:** L1 drives small weights exactly to zero, producing a **sparse** model. This is useful for feature selection — irrelevant connections are pruned automatically.
 
@@ -84,7 +84,7 @@ Regularization adds negligible computational cost — one pass over the paramete
 
 - **$\lambda$ too large.** The model underfits — weights are driven so close to zero that the network cannot represent the function. Cross-validate $\lambda$.
 - **$\lambda$ too small.** Negligible effect; overfitting persists.
-- **L1 non-differentiability.** At $\theta_i = 0$, the L1 gradient is undefined. Use sub-gradient $\operatorname{sign}(0) = 0$ or proximal operators for exact handling.
+- **L1 non-differentiability.** At $\theta_i = 0$, the L1 gradient is undefined. Use sub-gradient $\mathrm{sign}(0) = 0$ or proximal operators for exact handling.
 - **Regularizing biases.** Conventionally, bias parameters are excluded from regularization because they do not contribute to model complexity. This library regularizes all parameters in the flat vector — be aware of this if bias control matters.
 - **Fixed-point precision.** The regularization term can be much smaller than the main loss when $\lambda$ is small. In low-precision fixed-point, it may round to zero. Scale $\lambda$ or use a wider accumulator.
 

@@ -28,9 +28,9 @@ $$X[k] = s[N-1] - s[N-2]\,e^{-j2\pi k/N}$$
 
 Separating real and imaginary parts:
 
-$$\operatorname{Re}\{X[k]\} = s[N-1] - s[N-2]\cos\!\left(\tfrac{2\pi k}{N}\right)$$
+$$\mathrm{Re}\{X[k]\} = s[N-1] - s[N-2]\cos\!\left(\tfrac{2\pi k}{N}\right)$$
 
-$$\operatorname{Im}\{X[k]\} = s[N-2]\sin\!\left(\tfrac{2\pi k}{N}\right)$$
+$$\mathrm{Im}\{X[k]\} = s[N-2]\sin\!\left(\tfrac{2\pi k}{N}\right)$$
 
 The magnitude can be obtained without the final trigonometric products using the identity:
 
@@ -42,7 +42,7 @@ so $|X[k]| = \sqrt{s[N-1]^2 + s[N-2]^2 - c\,s[N-1]\,s[N-2]}$, saving two multipl
 
 A physical frequency $f_t$ sampled at $f_s$ maps to bin:
 
-$$k = \operatorname{round}\!\left(\frac{f_t}{f_s}\,N\right)$$
+$$k = \mathrm{round}\!\left(\frac{f_t}{f_s}\,N\right)$$
 
 Frequency resolution is $\Delta f = f_s / N$.
 
@@ -70,9 +70,9 @@ $c = 2\cos(\pi/2) = 0$
 
 $\cos(2\pi/4) = 0$, $\sin(2\pi/4) = 1$
 
-$\operatorname{Re}\{X[1]\} = 1 - (-1)\cdot 0 = 1$
+$\mathrm{Re}\{X[1]\} = 1 - (-1)\cdot 0 = 1$
 
-$\operatorname{Im}\{X[1]\} = (-1)\cdot 1 = -1$
+$\mathrm{Im}\{X[1]\} = (-1)\cdot 1 = -1$
 
 Direct DFT check: $X[1] = 1 - j$.  Matches.
 

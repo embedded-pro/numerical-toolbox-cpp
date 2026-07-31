@@ -14,8 +14,10 @@ from its `roadmap/<domain>/<Name>/` spec into the codebase, following both exact
 2. Produce, per `roadmap/DEPLOYMENT.md`: the `.hpp`, coverage `.cpp`, `test/Test*.cpp`,
    `doc/<domain>/<Name>.md`, and the CMake edits.
 3. Build and test; fix until green (scope to the target/test where possible).
-4. Remove the algorithm's row from `ROADMAP.md` and add it to the matching category row
-   in `README.md`'s Documentation table.
+4. Remove the algorithm's row from `ROADMAP.md`; add it to the matching category row in
+   `README.md`'s Documentation table **and** to the algorithms table in `doc/<domain>/README.md`
+   (the booklet's ordering source). The booklet regenerates from `doc/` + these README tables in
+   CI — no manual booklet edit.
 5. Report file paths + test result. Nothing else.
 
 ## Hard rules
