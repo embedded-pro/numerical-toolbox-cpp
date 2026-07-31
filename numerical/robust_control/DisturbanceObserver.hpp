@@ -46,6 +46,7 @@ namespace robust_control
 
     private:
         static std::array<T, InputSize> ComputeDcGainInverses(const PlantType& plant);
+        static std::array<filters::passive::BiquadCascade<T, 1>, InputSize> MakeQFilters(const QCoeffs& q);
 
         PlantType nominalPlant;
         std::array<T, InputSize> dcGainInv;
@@ -102,29 +103,20 @@ namespace robust_control
         const QCoeffs& q)
         : nominalPlant{ nominalPlant }
         , dcGainInv{ ComputeDcGainInverses(nominalPlant) }
-        , qInvFilters{ [&]()
-            {
-                std::array<filters::passive::BiquadCascade<T, 1>, InputSize> arr{
-                    [&]<std::size_t... Is>(std::index_sequence<Is...>)
-                        -> std::array<filters::passive::BiquadCascade<T, 1>, InputSize>
-                    {
-                        return { ((void)Is, filters::passive::BiquadCascade<T, 1>{ { q } })... };
-                    }(std::make_index_sequence<InputSize>{})
-                };
-                return arr;
-            }() }
-        , qFilters{ [&]()
-            {
-                std::array<filters::passive::BiquadCascade<T, 1>, InputSize> arr{
-                    [&]<std::size_t... Is>(std::index_sequence<Is...>)
-                        -> std::array<filters::passive::BiquadCascade<T, 1>, InputSize>
-                    {
-                        return { ((void)Is, filters::passive::BiquadCascade<T, 1>{ { q } })... };
-                    }(std::make_index_sequence<InputSize>{})
-                };
-                return arr;
-            }() }
+        , qInvFilters{ MakeQFilters(q) }
+        , qFilters{ MakeQFilters(q) }
     {}
+
+    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t OutputSize>
+    std::array<filters::passive::BiquadCascade<T, 1>, InputSize>
+    DisturbanceObserver<T, StateSize, InputSize, OutputSize>::MakeQFilters(const QCoeffs& q)
+    {
+        return [&]<std::size_t... Is>(std::index_sequence<Is...>)
+            -> std::array<filters::passive::BiquadCascade<T, 1>, InputSize>
+        {
+            return { ((void)Is, filters::passive::BiquadCascade<T, 1>{ { q } })... };
+        }(std::make_index_sequence<InputSize>{});
+    }
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t OutputSize>
     OPTIMIZE_FOR_SPEED typename DisturbanceObserver<T, StateSize, InputSize, OutputSize>::InputVector
