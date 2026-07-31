@@ -10,8 +10,8 @@
 #include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/math/Matrix.hpp"
 #include <array>
-#include <cstddef>
 #include <cmath>
+#include <cstddef>
 #include <type_traits>
 
 namespace robust_control

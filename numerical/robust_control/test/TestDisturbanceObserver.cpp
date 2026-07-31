@@ -110,7 +110,7 @@ TEST_F(TestDisturbanceObserver, transparent_outside_q_bandwidth)
     for (int k{ 0 }; k < kSteps; ++k)
     {
         const float d{ kHighFreqDistAmp *
-            std::sin(2.0f * std::numbers::pi_v<float> * kHighFreqHz * static_cast<float>(k) / kSampleRateHz) };
+                       std::sin(2.0f * std::numbers::pi_v<float> * kHighFreqHz * static_cast<float>(k) / kSampleRateHz) };
         y = nominal.Output(x, u);
         u = dob.Compute(c, y);
         math::Vector<float, 1> uActual{};

@@ -59,11 +59,11 @@ where $\Delta_m = (P - P_n)/P_n$ is the relative model uncertainty. Widening $Q$
 
 ## Complexity Analysis
 
-| Operation   | Time                      | Space              | Notes                                          |
-|-------------|---------------------------|--------------------|------------------------------------------------|
-| Construct   | $O(N \cdot S^2)$          | $O(S^2 + N)$       | DC gain simulation, $S$ = StateSize, $N$ = 512 |
-| Compute     | $O(N_{\rm in})$           | $O(1)$ extra       | Per-channel biquad filter pair                 |
-| Reset       | $O(N_{\rm in})$           | $O(1)$ extra       | Clears filter states                           |
+| Operation | Time             | Space        | Notes                                          |
+|-----------|------------------|--------------|------------------------------------------------|
+| Construct | $O(N \cdot S^2)$ | $O(S^2 + N)$ | DC gain simulation, $S$ = StateSize, $N$ = 512 |
+| Compute   | $O(N_{\rm in})$  | $O(1)$ extra | Per-channel biquad filter pair                 |
+| Reset     | $O(N_{\rm in})$  | $O(1)$ extra | Clears filter states                           |
 
 All storage is fixed-size; no heap allocation occurs at any point in the lifecycle.
 
