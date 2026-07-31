@@ -66,11 +66,11 @@ Both algorithms renormalize $q$ after every integration step to enforce the unit
 
 ## Complexity Analysis
 
-| Case      | Time  | Space  | Notes                                                         |
-|-----------|-------|--------|---------------------------------------------------------------|
-| UpdateImu | O(1)  | O(1)   | Fixed multiply-add count; one inverse-sqrt normalization      |
-| UpdateMarg| O(1)  | O(1)   | Two objective/gradient evaluations; same asymptotic cost      |
-| Memory    | —     | 7 T    | 4 quaternion + 3 integral bias floats; no buffers or heap     |
+| Case       | Time | Space | Notes                                                     |
+|------------|------|-------|-----------------------------------------------------------|
+| UpdateImu  | O(1) | O(1)  | Fixed multiply-add count; one inverse-sqrt normalization  |
+| UpdateMarg | O(1) | O(1)  | Two objective/gradient evaluations; same asymptotic cost  |
+| Memory     | —    | 7 T   | 4 quaternion + 3 integral bias floats; no buffers or heap |
 
 The fixed cost makes both algorithms suitable for any loop rate the MCU can sustain, from 100 Hz audio-rate IMUs to 8 kHz flight-controller IMUs.
 
@@ -106,14 +106,14 @@ Over time without correction this drift accumulates; with the gradient term driv
 
 ## Variants & Generalizations
 
-| Variant                              | Key Difference                                                                                       |
-|--------------------------------------|------------------------------------------------------------------------------------------------------|
-| **6-DOF (IMU-only)**                | Accelerometer alone; roll and pitch converge, yaw is unobservable                                    |
-| **9-DOF (MARG)**                    | Adds magnetometer; all three angles converge given a non-disturbed field                              |
-| **Extended Kalman AHRS**            | Treats noise covariances explicitly; heavier but allows systematic tuning via $Q$/$R$ matrices       |
-| **Multiplicative EKF (MEKF)**       | Kalman update on the error quaternion to preserve unit-norm; best-in-class accuracy, high cost       |
-| **Gradient-descent with adaptive β**| Adjusts $\beta$ based on the magnitude of the gradient, reducing transient overshoot at startup      |
-| **Second-order Runge-Kutta integration** | Reduces integration error at low update rates at the cost of one extra function evaluation     |
+| Variant                                  | Key Difference                                                                                  |
+|------------------------------------------|-------------------------------------------------------------------------------------------------|
+| **6-DOF (IMU-only)**                     | Accelerometer alone; roll and pitch converge, yaw is unobservable                               |
+| **9-DOF (MARG)**                         | Adds magnetometer; all three angles converge given a non-disturbed field                        |
+| **Extended Kalman AHRS**                 | Treats noise covariances explicitly; heavier but allows systematic tuning via $Q$/$R$ matrices  |
+| **Multiplicative EKF (MEKF)**            | Kalman update on the error quaternion to preserve unit-norm; best-in-class accuracy, high cost  |
+| **Gradient-descent with adaptive β**     | Adjusts $\beta$ based on the magnitude of the gradient, reducing transient overshoot at startup |
+| **Second-order Runge-Kutta integration** | Reduces integration error at low update rates at the cost of one extra function evaluation      |
 
 ## Applications
 
@@ -126,11 +126,11 @@ Over time without correction this drift accumulates; with the gradient term driv
 
 ## Connections to Other Algorithms
 
-| Algorithm                                                        | Relationship                                                                              |
-|------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
-| [Complementary Filter](../ComplementaryFilter.md)               | The scalar 1-D ancestor; Madgwick/Mahony extend the idea to quaternion SO(3)             |
-| [Extended Kalman Filter](../active/ExtendedKalmanFilter.md)     | The probabilistic alternative; heavier but allows noise covariance estimation             |
-| [Quaternion](../../math/Quaternion.md)                           | The state representation shared by all three-axis attitude estimators                    |
+| Algorithm                                                   | Relationship                                                                  |
+|-------------------------------------------------------------|-------------------------------------------------------------------------------|
+| [Complementary Filter](../ComplementaryFilter.md)           | The scalar 1-D ancestor; Madgwick/Mahony extend the idea to quaternion SO(3)  |
+| [Extended Kalman Filter](../active/ExtendedKalmanFilter.md) | The probabilistic alternative; heavier but allows noise covariance estimation |
+| [Quaternion](../../math/Quaternion.md)                      | The state representation shared by all three-axis attitude estimators         |
 
 ## References & Further Reading
 
