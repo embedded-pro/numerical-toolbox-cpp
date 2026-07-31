@@ -29,7 +29,6 @@ Difficulty legend:
 |----|------------------------------------------------------|---------------------------|------------|
 | 30 | Continuous → discrete conversion (`c2d`)             | `math`                    | ★★★★☆      |
 | 32 | Transfer-function ↔ state-space conversion           | `control_analysis`        | ★★★★☆      |
-| 33 | Madgwick / Mahony AHRS                               | `filters/active`          | ★★★★☆      |
 | 34 | Sliding Mode Control (SMC)                           | `robust_control` (new)    | ★★★★☆      |
 | 35 | Disturbance Observer (DOB)                           | `robust_control` (new)    | ★★★★☆      |
 | 36 | Active Disturbance Rejection Control (ADRC + ESO)    | `robust_control` (new)    | ★★★★☆      |
