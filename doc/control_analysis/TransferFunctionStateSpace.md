@@ -44,11 +44,11 @@ The numerator coefficient for degree $n - k$ is $C M_k B$.
 
 ## Complexity Analysis
 
-| Operation                  | Time       | Space     | Notes                                   |
-|----------------------------|------------|-----------|-----------------------------------------|
-| `ToControllableCanonical`  | $O(n)$     | $O(n^2)$  | Direct coefficient placement            |
-| `ToObservableCanonical`    | $O(n^2)$   | $O(n^2)$  | One transpose after CCF                 |
-| `ToTransferFunction`       | $O(n^4)$   | $O(n^2)$  | $n$ steps, each $O(n^3)$ matrix-matrix  |
+| Operation                 | Time     | Space    | Notes                                  |
+|---------------------------|----------|----------|----------------------------------------|
+| `ToControllableCanonical` | $O(n)$   | $O(n^2)$ | Direct coefficient placement           |
+| `ToObservableCanonical`   | $O(n^2)$ | $O(n^2)$ | One transpose after CCF                |
+| `ToTransferFunction`      | $O(n^4)$ | $O(n^2)$ | $n$ steps, each $O(n^3)$ matrix-matrix |
 
 Memory is $O(n^2)$ for $A$ and $O(n)$ for coefficient arrays; all allocations are `std::array` on the stack.
 
