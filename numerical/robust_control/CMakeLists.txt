@@ -12,10 +12,12 @@ target_link_libraries(numerical.robust_control ${NUMERICAL_VISIBILITY}
 )
 
 target_sources(numerical.robust_control PRIVATE
+    ActiveDisturbanceRejection.hpp
     SlidingModeControl.hpp
 )
 
 numerical_add_coverage_sources(numerical.robust_control
+    ActiveDisturbanceRejection.cpp
     SlidingModeControl.cpp
 )
 
