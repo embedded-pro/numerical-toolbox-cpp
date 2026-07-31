@@ -56,11 +56,11 @@ On the surface $s = 0$, the state evolves according to the $(n-m)$-dimensional r
 
 ## Complexity Analysis
 
-| Operation | Time | Space | Notes |
-|-----------|------|-------|-------|
-| Construction | $O(m^3 + n m)$ | $O(nm + m^2)$ | $(SB)^{-1}$ inversion once |
-| ComputeControl | $O(n^2 + m^2)$ | $O(1)$ extra | $S A x$ dominates for large $n$ |
-| Surface | $O(nm)$ | $O(1)$ extra | monitoring only |
+| Operation      | Time           | Space         | Notes                           |
+|----------------|----------------|---------------|---------------------------------|
+| Construction   | $O(m^3 + n m)$ | $O(nm + m^2)$ | $(SB)^{-1}$ inversion once      |
+| ComputeControl | $O(n^2 + m^2)$ | $O(1)$ extra  | $S A x$ dominates for large $n$ |
+| Surface        | $O(nm)$        | $O(1)$ extra  | monitoring only                 |
 
 All data is stored in fixed-size arrays; no heap allocation at any point.
 
