@@ -9,7 +9,9 @@ target_link_libraries(numerical.control_analysis_test PUBLIC
 )
 
 target_sources(numerical.control_analysis_test PRIVATE
+    TestContinuousToDiscrete.cpp
     TestControllabilityObservability.cpp
     TestFrequencyResponse.cpp
     TestRootLocus.cpp
+    TestTransferFunctionStateSpace.cpp
 )

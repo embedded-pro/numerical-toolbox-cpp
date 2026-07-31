@@ -12,15 +12,19 @@ target_link_libraries(numerical.control_analysis ${NUMERICAL_VISIBILITY}
 )
 
 target_sources(numerical.control_analysis PRIVATE
+    ContinuousToDiscrete.hpp
     ControllabilityObservability.hpp
     FrequencyResponse.hpp
     RootLocus.hpp
+    TransferFunctionStateSpace.hpp
 )
 
 numerical_add_coverage_sources(numerical.control_analysis
+    ContinuousToDiscrete.cpp
     ControllabilityObservability.cpp
     FrequencyResponse.cpp
     RootLocus.cpp
+    TransferFunctionStateSpace.cpp
 )
 
 add_subdirectory(test)

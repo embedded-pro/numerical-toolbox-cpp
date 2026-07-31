@@ -17,7 +17,7 @@ Refer to the documentation to quickly integrate and utilize the library's signal
 | Category                                                           | Description                                                          |
 |--------------------------------------------------------------------|----------------------------------------------------------------------|
 | [Analysis](doc/analysis/README.md)                                 | FFT, Real-Input FFT (RFFT), Power Spectral Density, DCT, Window Functions, Signal Detectors, Convolution & Correlation, Goertzel Algorithm, Decibels |
-| [Control Analysis](doc/control_analysis/README.md)                 | Frequency Response, Root Locus, Controllability/Observability Matrices & Gramians |
+| [Control Analysis](doc/control_analysis/README.md)                 | Frequency Response, Root Locus, Controllability/Observability Matrices & Gramians, Continuous-to-Discrete, Transfer Function ↔ State Space |
 | [Controllers](doc/controllers/README.md)                           | Bang-Bang/Hysteresis, PID, LQR, LQI (Integral/Servo State Feedback), MPC, Saturation, Rate Limiter, Slew-Limited Saturation, Feedforward/2-DOF, Gain-Scheduled Controller, Lead-Lag Compensator, Luenberger Observer |
 | [Dynamics](doc/dynamics/README.md)                                 | Euler-Lagrange, Newton-Euler, Recursive Newton-Euler, ABA            |
 | [Estimators](doc/estimators/README.md)                             | Linear Regression, Polynomial Fitting, Yule-Walker (offline), Recursive Least Squares, LMS / NLMS Adaptive Filter (online), Consistency Metrics / NEES / NIS |
@@ -26,7 +26,7 @@ Refer to the documentation to quickly integrate and utilize the library's signal
 | [Neural Network](doc/neural_network/README.md)                     | Layers, activations, losses, model                                   |
 | [Optimization](doc/optimization/README.md)                         | Gradient Descent                                                     |
 | [Regularization](doc/regularization/README.md)                     | L1 (Lasso), L2 (Ridge)                                              |
-| [Math](doc/math/README.md)                                         | CORDIC, Quaternion, MatrixNorms, Step Response Metrics, MatrixExponential                                                   |
+| [Math](doc/math/README.md)                                         | CORDIC, Quaternion, MatrixNorms, Step Response Metrics, MatrixExponential                             |
 | [Solvers](doc/solvers/README.md)                                   | Gaussian Elimination, Levinson-Durbin, Durand-Kerner, Cholesky, DARE, Runge-Kutta ODE Integrators (RK4 + Dormand-Prince), Spectral Radius & Discrete Stability Margin, QR Decomposition (Householder / Givens), LU Decomposition with Partial Pivoting |
 | [Performance Optimization](doc/performance-optimization/README.md) | Compiler optimizations, SIMD                                         |
 

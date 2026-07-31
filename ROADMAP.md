@@ -28,7 +28,6 @@ Difficulty legend:
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
 | 30 | Continuous → discrete conversion (`c2d`)             | `math`                    | ★★★★☆      |
-| 32 | Transfer-function ↔ state-space conversion           | `control_analysis`        | ★★★★☆      |
 | 34 | Sliding Mode Control (SMC)                           | `robust_control` (new)    | ★★★★☆      |
 | 35 | Disturbance Observer (DOB)                           | `robust_control` (new)    | ★★★★☆      |
 | 36 | Active Disturbance Rejection Control (ADRC + ESO)    | `robust_control` (new)    | ★★★★☆      |
@@ -197,23 +196,11 @@ the library does not yet expose. Detailed below under
 - **Algorithm / paper:** C. Moler, C. Van Loan, "Nineteen Dubious Ways to Compute the Exponential of a Matrix, Twenty-Five Years Later," *SIAM Review*, 45(1), 2003; N. Higham, scaling-and-squaring, 2005.
 - **Reuses:** `math::Matrix`; **unblocks items 30, 31, 26.**
 
-### 30. Continuous → discrete conversion (`c2d`)  *(float-first)*
-- **What:** Convert continuous `(A,B,C,D)` to discrete via ZOH (augmented-matrix exponential), Tustin/bilinear, and forward/backward Euler.
-- **Embedded value:** Design plants/controllers in continuous time, then deploy discretely into the existing `LinearTimeInvariant` model.
-- **Algorithm / paper:** C. Van Loan, "Computing Integrals Involving the Matrix Exponential," *IEEE Trans. AC*, 23(3), 1978; Franklin, Powell, Workman, *Digital Control of Dynamic Systems*.
-- **Reuses:** Item 29, [LinearTimeInvariant.hpp](numerical/math/LinearTimeInvariant.hpp).
-
 ### 31. Lyapunov / Sylvester equation solvers  *(float-first)*
 - **What:** Solve `AX + XB = C` (Sylvester) and discrete/continuous Lyapunov equations.
 - **Embedded value:** Stability certificates, controllability/observability Gramians, robust-control synthesis.
 - **Algorithm / paper:** R. Bartels, G. Stewart, "Solution of the Matrix Equation AX + XB = C," *Comm. ACM*, 15(9), 1972.
 - **Reuses:** `math::Matrix`, item 27 (Schur/QR building blocks).
-
-### 32. Transfer-function ↔ state-space conversion  *(float-first)*
-- **What:** Convert between transfer-function coefficients and controllable/observable canonical state-space forms.
-- **Embedded value:** Bridges classical (frequency-domain) and modern (state-space) design tools within the library.
-- **Algorithm / paper:** T. Kailath, *Linear Systems* (1980), canonical realizations.
-- **Reuses:** `math::LinearTimeInvariant`, `control_analysis`, `math::Matrix`.
 
 ### 33. Madgwick / Mahony AHRS  *(float-first)*
 - **What:** Quaternion-based orientation filter fusing gyro + accel (+ mag): Madgwick's gradient-descent correction or Mahony's passive complementary filter on SO(3).
