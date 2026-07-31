@@ -16,6 +16,7 @@ target_sources(numerical.control_analysis PRIVATE
     ControllabilityObservability.hpp
     FrequencyResponse.hpp
     RootLocus.hpp
+    TransferFunctionStateSpace.hpp
 )
 
 numerical_add_coverage_sources(numerical.control_analysis
@@ -23,6 +24,7 @@ numerical_add_coverage_sources(numerical.control_analysis
     ControllabilityObservability.cpp
     FrequencyResponse.cpp
     RootLocus.cpp
+    TransferFunctionStateSpace.cpp
 )
 
 add_subdirectory(test)

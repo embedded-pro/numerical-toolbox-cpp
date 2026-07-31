@@ -28,7 +28,6 @@ Difficulty legend:
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
 | 30 | Continuous → discrete conversion (`c2d`)             | `math`                    | ★★★★☆      |
-| 32 | Transfer-function ↔ state-space conversion           | `control_analysis`        | ★★★★☆      |
 | 33 | Madgwick / Mahony AHRS                               | `filters/active`          | ★★★★☆      |
 | 34 | Sliding Mode Control (SMC)                           | `robust_control` (new)    | ★★★★☆      |
 | 35 | Disturbance Observer (DOB)                           | `robust_control` (new)    | ★★★★☆      |
@@ -203,12 +202,6 @@ the library does not yet expose. Detailed below under
 - **Embedded value:** Stability certificates, controllability/observability Gramians, robust-control synthesis.
 - **Algorithm / paper:** R. Bartels, G. Stewart, "Solution of the Matrix Equation AX + XB = C," *Comm. ACM*, 15(9), 1972.
 - **Reuses:** `math::Matrix`, item 27 (Schur/QR building blocks).
-
-### 32. Transfer-function ↔ state-space conversion  *(float-first)*
-- **What:** Convert between transfer-function coefficients and controllable/observable canonical state-space forms.
-- **Embedded value:** Bridges classical (frequency-domain) and modern (state-space) design tools within the library.
-- **Algorithm / paper:** T. Kailath, *Linear Systems* (1980), canonical realizations.
-- **Reuses:** `math::LinearTimeInvariant`, `control_analysis`, `math::Matrix`.
 
 ### 33. Madgwick / Mahony AHRS  *(float-first)*
 - **What:** Quaternion-based orientation filter fusing gyro + accel (+ mag): Madgwick's gradient-descent correction or Mahony's passive complementary filter on SO(3).
