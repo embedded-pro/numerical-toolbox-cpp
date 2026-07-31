@@ -12,4 +12,5 @@ target_sources(numerical.control_analysis_test PRIVATE
     TestControllabilityObservability.cpp
     TestFrequencyResponse.cpp
     TestRootLocus.cpp
+    TestTransferFunctionStateSpace.cpp
 )
