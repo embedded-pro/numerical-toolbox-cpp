@@ -27,7 +27,6 @@ Difficulty legend:
 
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
-| 30 | Continuous → discrete conversion (`c2d`)             | `math`                    | ★★★★☆      |
 | 33 | Madgwick / Mahony AHRS                               | `filters/active`          | ★★★★☆      |
 | 34 | Sliding Mode Control (SMC)                           | `robust_control` (new)    | ★★★★☆      |
 | 35 | Disturbance Observer (DOB)                           | `robust_control` (new)    | ★★★★☆      |
@@ -209,11 +208,6 @@ the library does not yet expose. Detailed below under
 - **Algorithm / paper:** S. Madgwick, "An efficient orientation filter for inertial and inertial/magnetic sensor arrays," 2010; R. Mahony, T. Hamel, J.-M. Pflimlin, "Nonlinear Complementary Filters on the Special Orthogonal Group," *IEEE Trans. AC*, 53(5), 2008.
 - **Reuses:** **Item 18 (Quaternion)**, `math::Geometry3D`.
 
-### 34. Sliding Mode Control (SMC)  *(float-first)*
-- **What:** Variable-structure controller driving the state onto a sliding surface, with a boundary layer to tame chattering.
-- **Embedded value:** Robust to matched disturbances and parameter uncertainty — popular in motor drives and power electronics.
-- **Algorithm / paper:** V. Utkin, "Variable Structure Systems with Sliding Modes," *IEEE Trans. AC*, 22(2), 1977; Slotine & Li, *Applied Nonlinear Control* (1991).
-- **Reuses:** `math::LinearTimeInvariant`, item 3 (saturation), new `robust_control/` module.
 
 ### 35. Disturbance Observer (DOB)  *(float-first)*
 - **What:** Estimates and cancels lumped disturbance/model mismatch using the plant inverse and a Q-filter.
