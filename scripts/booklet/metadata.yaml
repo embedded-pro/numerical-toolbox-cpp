@@ -1,0 +1,17 @@
+---
+title: "Numerical Toolbox"
+subtitle: "A Field Guide to Embedded DSP, Control, and Estimation Algorithms"
+author: "Numerical Toolbox Contributors"
+lang: en
+documentclass: book
+classoption:
+  - oneside
+geometry:
+  - margin=1in
+fontsize: 11pt
+linkcolor: RoyalBlue
+urlcolor: RoyalBlue
+toccolor: black
+toc-title: "Summary"
+colorlinks: true
+...

@@ -585,7 +585,9 @@ Every new component should follow the established repository conventions:
 - [ ] No heap, no recursion, bounded containers (`infra::BoundedVector`, `std::array`)
 - [ ] `static_assert` on supported types and dimensions
 - [ ] Typed tests (`TYPED_TEST`) for multi-type components; `TEST_F` for single-type; `StrictMock` only
-- [ ] Design-first `doc/<domain>/<Name>.md` following `doc/TEMPLATE.md`
+- [ ] Design-first `doc/<domain>/<Name>.md` following `doc/TEMPLATE.md`; add its row to
+      `doc/<domain>/README.md` and `README.md`'s Documentation table (the booklet regenerates from
+      these tables in CI — no manual booklet edit)
 - [ ] Explicit template instantiation `.cpp` guarded by `NUMERICAL_TOOLBOX_COVERAGE_BUILD` + `numerical_add_coverage_sources`
 - [ ] `CMakeLists.txt` via `numerical_add_header_library()` / `${NUMERICAL_VISIBILITY}`
 - [ ] Simulator + `.vscode/launch.json` entry where a visual demo adds value

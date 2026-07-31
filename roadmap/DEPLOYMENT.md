@@ -27,6 +27,9 @@ Read the spec's three files first (`implementation.md`, `tests.md`, `explanation
      `test/` subdir, register it in the parent `CMakeLists.txt`, and add a `doc/<module>/` folder.
 
 5. **Doc** `doc/<domain>/<Name>.md` per `doc/TEMPLATE.md` (design-first; no code/class names/usage).
+   Add its row to `doc/<domain>/README.md` and to `README.md`'s Documentation table — these README
+   tables are the booklet's ordering source, so the booklet (`scripts/build-booklet.py`) regenerates
+   automatically in CI; never edit the booklet by hand.
 
 6. **Build & test**, fix until green:
    `cmake --preset host && cmake --build --preset host && ctest --preset host`

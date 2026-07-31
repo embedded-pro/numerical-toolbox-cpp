@@ -1,0 +1,26 @@
+% LaTeX header shared by the PDF booklet (passed to pandoc via -H).
+\usepackage{fancyhdr}
+\usepackage{emptypage}
+\usepackage[dvipsnames]{xcolor}
+
+% Running headers: chapter on the left, section on the right.
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyhead[L]{\nouppercase{\leftmark}}
+\fancyhead[R]{\thepage}
+
+% Give each chapter a generous opening.
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{RoyalBlue}}
+  {\chaptertitlename\ \thechapter}{20pt}{\Huge}
+
+% Cover page: title, subtitle, build metadata.
+\usepackage{titling}
+\pretitle{\begin{center}\vspace*{4cm}\Huge\bfseries\color{RoyalBlue}}
+\posttitle{\par\end{center}\vskip 1em}
+\preauthor{\begin{center}\large}
+\postauthor{\par\end{center}}
+\predate{\begin{center}\large}
+\postdate{\par\end{center}\vfill}

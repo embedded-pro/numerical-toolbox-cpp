@@ -32,6 +32,19 @@ Refer to the documentation to quickly integrate and utilize the library's signal
 
 Each category page lists its algorithms with a brief description and links to the detailed documentation.
 
+### Booklet
+
+The entire documentation set is also published as a single book — read it online as a
+[GitHub Pages site](https://embedded-pro.github.io/embedded-dsp-control/) or download the latest
+PDF from the [Releases page](../../releases/latest). Both are generated automatically from `doc/`
+(cover, Summary/table of contents, one chapter per category, consolidated references, back cover).
+
+Build it locally with [Pandoc](https://pandoc.org) + XeLaTeX installed:
+
+```bash
+python scripts/build-booklet.py --format all   # writes build/booklet/{NumericalToolbox.pdf,index.html}
+```
+
 ## Simulator
 
 The `simulator/` directory contains interactive Qt-based GUI applications for visualizing and experimenting with the library's algorithms. These are desktop tools intended for development and exploration, separate from the core embedded-targeted library.
