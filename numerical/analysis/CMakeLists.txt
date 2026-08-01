@@ -15,6 +15,7 @@ target_sources(numerical.analysis PRIVATE
     ConvolutionCorrelation.hpp
     Decibels.hpp
     DiscreteCosineTransform.hpp
+    DiscreteWaveletTransform.hpp
     FastFourierTransform.hpp
     FastFourierTransformRadix2Impl.hpp
     GoertzelAlgorithm.hpp
@@ -27,6 +28,7 @@ target_sources(numerical.analysis PRIVATE
 numerical_add_coverage_sources(numerical.analysis
     ConvolutionCorrelation.cpp
     DiscreteCosineTransform.cpp
+    DiscreteWaveletTransform.cpp
     FastFourierTransformRadix2Impl.cpp
     GoertzelAlgorithm.cpp
     HilbertTransform.cpp

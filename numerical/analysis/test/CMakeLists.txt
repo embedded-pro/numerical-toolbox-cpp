@@ -12,6 +12,7 @@ target_sources(numerical.analysis_test PRIVATE
     TestConvolutionCorrelation.cpp
     TestDecibels.cpp
     TestDiscreteCosineTransform.cpp
+    TestDiscreteWaveletTransform.cpp
     TestFastFourierTransformRadix2Impl.cpp
     TestGoertzelAlgorithm.cpp
     TestHilbertTransform.cpp

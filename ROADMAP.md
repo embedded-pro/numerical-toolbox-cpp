@@ -27,7 +27,6 @@ Difficulty legend:
 
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
-| 38 | Discrete Wavelet Transform (Haar / Daubechies)       | `analysis`                | ★★★★☆      |
 | 39 | Square-root / Information Kalman filter              | `filters/active`          | ★★★★☆      |
 | 40 | Feedback linearization                               | `nonlinear_control` (new) | ★★★★☆      |
 | 41 | Backstepping controller                              | `nonlinear_control` (new) | ★★★★☆      |
