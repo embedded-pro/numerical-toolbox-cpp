@@ -30,6 +30,21 @@ namespace math
     }
 
     template<typename T>
+    [[nodiscard]] OPTIMIZE_FOR_SPEED GivensRotation<T> ComputeJacobiRotation(T app, T aqq, T apq)
+    {
+        static_assert(std::is_floating_point_v<T>, "ComputeJacobiRotation supports floating-point types only");
+
+        if (apq == T{})
+            return { T{ 1 }, T{} };
+
+        T theta = (aqq - app) / (T{ 2 } * apq);
+        T t = ((theta >= T{}) ? T{ 1 } : T{ -1 }) / (std::abs(theta) + std::sqrt(theta * theta + T{ 1 }));
+        T c = T{ 1 } / std::sqrt(t * t + T{ 1 });
+
+        return { c, t * c };
+    }
+
+    template<typename T>
     OPTIMIZE_FOR_SPEED void ApplyGivens(const GivensRotation<T>& g, T& x, T& y)
     {
         T newX = g.c * x + g.s * y;
