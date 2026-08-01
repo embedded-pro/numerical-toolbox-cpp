@@ -82,26 +82,6 @@
       ]
     },
     {
-      "name": "Robot Arm Simulator",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/build/host/simulator/dynamics/RobotArm/Debug/numerical.simulator.dynamics.robot_arm",
-      "args": [],
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}",
-      "environment": [],
-      "externalConsole": false,
-      "MIMode": "gdb",
-      "miDebuggerPath": "/usr/bin/gdb",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ]
-    },
-    {
       "name": "Kalman Filter Simulator",
       "type": "cppdbg",
       "request": "launch",

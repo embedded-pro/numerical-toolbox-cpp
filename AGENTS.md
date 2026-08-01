@@ -4,7 +4,7 @@ Single source of truth for **Claude and Copilot**. `CLAUDE.md` and
 `.github/copilot-instructions.md` point here. Code-file specifics load on demand from
 `.github/instructions/`. Deployment recipe: `roadmap/DEPLOYMENT.md`.
 
-Numerical algorithms library (DSP, control, filters, estimators, kinematics/dynamics) for
+Numerical algorithms library (DSP, control, filters, estimators, solvers) for
 resource-constrained embedded systems. Real-time, deterministic, no heap.
 
 ## Numeric policy — FLOAT-ONLY (current)
@@ -49,9 +49,9 @@ resource-constrained embedded systems. Real-time, deterministic, no heap.
 
 ## Namespaces
 
-`analysis`, `windowing`, `control_analysis`, `controllers`, `dynamics`, `estimators`,
+`analysis`, `windowing`, `control_analysis`, `controllers`, `estimators`,
 `filters` (active Kalman family — **not** `filters::active`), `filters::passive`, `math`,
-`neural_network`, `optimization`, `regularization`, `solvers`, and new: `trajectory`,
+`neural_network`, `optimization`, `regularization`, `solvers`, and new:
 `robust_control`, `nonlinear_control`.
 
 ## Testing
