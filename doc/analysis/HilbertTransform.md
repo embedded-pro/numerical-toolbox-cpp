@@ -27,8 +27,8 @@ Its one-sided spectrum satisfies $Z(f) = 0$ for $f < 0$, $Z(0) = X(0)$, and $Z(f
 ### Instantaneous Attributes
 
 | Quantity | Formula |
-|----------|---------|
-| Amplitude (envelope) | $A(t) = |z(t)| = \sqrt{x^2 + \mathcal{H}^2\{x\}}$ |
+| ---------- | --------- |
+| Amplitude (envelope) | $A(t) = | z(t) | = \sqrt{x^2 + \mathcal{H}^2\{x\}}$ |
 | Phase | $\phi(t) = \arg z(t) = \operatorname{atan2}(\mathcal{H}\{x\}, x)$ |
 | Frequency | $f_i(t) = \frac{1}{2\pi}\frac{d\phi}{dt}$ (phase unwrapped before differencing) |
 
@@ -50,11 +50,11 @@ $$h[k] = \frac{2}{\pi k} w[k], \quad k \text{ odd}; \quad h[k] = 0, \quad k \tex
 
 ## Complexity Analysis
 
-| Method | Time per call | Space | Notes |
-|--------|--------------|-------|-------|
-| FFT (block) | $O(N \log N)$ | $2N$ complex words | Exact, latency $N$ |
-| FIR (streaming) | $O(P)$ per sample | $P$ words state | Approx., latency $(P-1)/2$ |
-| Feature extraction | $O(1)$ | None | atan2, sqrt, subtract |
+| Method             | Time per call     | Space              | Notes                      |
+|--------------------|-------------------|--------------------|----------------------------|
+| FFT (block)        | $O(N \log N)$     | $2N$ complex words | Exact, latency $N$         |
+| FIR (streaming)    | $O(P)$ per sample | $P$ words state    | Approx., latency $(P-1)/2$ |
+| Feature extraction | $O(1)$            | None               | atan2, sqrt, subtract      |
 
 $P$ = number of FIR taps.
 
