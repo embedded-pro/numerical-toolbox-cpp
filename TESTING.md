@@ -61,7 +61,6 @@ Canonical rules still apply ([AGENTS.md](AGENTS.md), [testing.instructions.md](.
 | Optimization                                    | ●  |    |    |    | ●  | ●  |    |    |    |
 | Regularization                                  | ●  |    |    |    |    | ●  | ●  |    |    |
 | Solvers (linear / ODE / roots)                  | ●  |    | ○  | ●  | ●  | ●  | ●  |    | ●  |
-| Dynamics & kinematics                           | ●  |    | ●  |    | ●  | ●  | ●  |    |    |
 | Neural network                                  | ●  |    |    |    | ○  | ●  | ●  |    |    |
 | Math foundation                                 | ●  |    |    |    |    | ●  | ●  |    | ●  |
 
@@ -194,18 +193,7 @@ Canonical rules still apply ([AGENTS.md](AGENTS.md), [testing.instructions.md](.
   within the requested tolerance.
 - **M7 conservation** — energy drift bounded for a conservative system over many steps.
 
-### 10. Dynamics & kinematics — `dynamics/`, `kinematics/`
-`ForwardKinematics`, `InverseKinematics`, `NewtonEulerSolver`, `RecursiveNewtonEuler`,
-`EulerLagrangeSolver`, `ArticulatedBodyAlgorithm`.
-
-- **M1 forward kinematics** — end-effector pose matches known geometry for canonical joint angles.
-- **M5 inverse kinematics round-trip** — `FK(IK(pose)) ≈ pose`; converges within iteration budget;
-  handles reachable vs unreachable targets (M6).
-- **M1 cross-method consistency** — `RecursiveNewtonEuler` and `EulerLagrange` produce the same joint
-  torques for the same state; both match the analytic torque of a simple pendulum / 2-link arm.
-- **M7 energy** — conservation in free (unforced) motion; passivity of the mass matrix (SPD).
-
-### 11. Neural network — `neural_network/`
+### 10. Neural network — `neural_network/`
 `activation/*`, `layer/Dense`, `losses/*`, `model/Model`.
 
 - **M1 activation values** — reference points: `sigmoid(0)=0.5`, `tanh(0)=0`, `relu(−x)=0`,
@@ -216,7 +204,7 @@ Canonical rules still apply ([AGENTS.md](AGENTS.md), [testing.instructions.md](.
 - **M1 dense layer** — `output = W·x + b`; back-prop gradient check.
 - **Model (M6)** — forward pass is deterministic and equals the manual layer composition.
 
-### 12. Math foundation — `math/`
+### 11. Math foundation — `math/`
 `Matrix`, `ComplexNumber`, `Quaternion`, `Cordic`, `TrigonometricFunctions`, `HyperbolicFunctions`,
 `AdvancedFunctions`, `Statistics`, `LinearTimeInvariant`, `Toeplitz`, `QNumber`.
 

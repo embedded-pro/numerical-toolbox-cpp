@@ -112,15 +112,3 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 
 ### `solvers`
 `RungeKuttaIntegrators` (24) · `QrDecomposition` (27) · `LuDecomposition` (28) · `LyapunovSylvester` (31) · `JacobiEigenSolver` (42) · `SingularValueDecomposition` (43)
-
-### `trajectory`
-`PolynomialTrajectory` (M2) · `TrapezoidalProfile` (M3) · `SCurveProfile` (M9) · `CartesianSlerpInterpolation` (M10) · `TimeOptimalPathParameterization` (M27)
-
-### `controllers/manipulator`
-`PdGravityCompensation` (M5) · `ComputedTorqueControl` (M12) · `ImpedanceControl` (M17) · `OperationalSpaceControl` (M18) · `HybridPositionForceControl` (M19) · `SlotineLiAdaptiveControl` (M20) · `CableTensionDistribution` (M25)
-
-### `kinematics`
-`DenavitHartenberg` (M7) · `SpatialJacobian` (M8) · `ManipulabilityIndex` (M11) · `PoseInverseKinematics` (M13) · `RedundancyResolution` (M14) · `ProductOfExponentials` (M15) · `AnalyticalIkPieper` (M21) · `ParallelManipulatorKinematics` (M23) · `MobileManipulatorKinematics` (M24) · `ContinuumKinematics` (M26)
-
-### `dynamics`
-`GenericJointLink` (M1) · `FrictionCompensation` (M4)
