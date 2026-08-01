@@ -16,7 +16,7 @@ Refer to the documentation to quickly integrate and utilize the library's signal
 
 | Category                                                           | Description                                                          |
 |--------------------------------------------------------------------|----------------------------------------------------------------------|
-| [Analysis](doc/analysis/README.md)                                 | FFT, Real-Input FFT (RFFT), Power Spectral Density, DCT, Discrete Wavelet Transform (Haar/Daubechies), Window Functions, Signal Detectors, Convolution & Correlation, Goertzel Algorithm, Decibels |
+| [Analysis](doc/analysis/README.md)                                 | FFT, Real-Input FFT (RFFT), Power Spectral Density, DCT, Discrete Wavelet Transform (Haar/Daubechies), Window Functions, Signal Detectors, Convolution & Correlation, Goertzel Algorithm, Decibels, Hilbert Transform / Analytic Signal |
 | [Control Analysis](doc/control_analysis/README.md)                 | Frequency Response, Root Locus, Controllability/Observability Matrices & Gramians, Continuous-to-Discrete, Transfer Function ↔ State Space |
 | [Controllers](doc/controllers/README.md)                           | Bang-Bang/Hysteresis, PID, LQR, LQI (Integral/Servo State Feedback), MPC, Saturation, Rate Limiter, Slew-Limited Saturation, Feedforward/2-DOF, Gain-Scheduled Controller, Lead-Lag Compensator, Luenberger Observer |
 | [Dynamics](doc/dynamics/README.md)                                 | Euler-Lagrange, Newton-Euler, Recursive Newton-Euler, ABA            |
@@ -28,7 +28,7 @@ Refer to the documentation to quickly integrate and utilize the library's signal
 | [Regularization](doc/regularization/README.md)                     | L1 (Lasso), L2 (Ridge)                                              |
 | [Math](doc/math/README.md)                                         | CORDIC, Quaternion, MatrixNorms, Step Response Metrics, MatrixExponential                             |
 | [Solvers](doc/solvers/README.md)                                   | Gaussian Elimination, Levinson-Durbin, Durand-Kerner, Cholesky, DARE, Runge-Kutta ODE Integrators (RK4 + Dormand-Prince), Spectral Radius & Discrete Stability Margin, QR Decomposition (Householder / Givens), LU Decomposition with Partial Pivoting |
-| [Robust Control](doc/robust_control/README.md)                     | Sliding Mode Control (SMC), Disturbance Observer (DOB)               |
+| [Robust Control](doc/robust_control/README.md)                     | Active Disturbance Rejection Control (ADRC + ESO), Sliding Mode Control (SMC), Disturbance Observer (DOB) |
 | [Performance Optimization](doc/performance-optimization/README.md) | Compiler optimizations, SIMD                                         |
 
 Each category page lists its algorithms with a brief description and links to the detailed documentation.

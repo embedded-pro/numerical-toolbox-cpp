@@ -14,6 +14,7 @@ Signal analysis algorithms for frequency-domain decomposition and spectral estim
 | [Decibels](Decibels.md)                                 | `ToDecibels` / `FromDecibels` conversion helpers with zero-floor guard, plus attenuation and ripple utilities |
 | [Goertzel Algorithm](GoertzelAlgorithm.md)              | Single-bin DFT via a second-order recurrence for O(N) tone detection with O(1) memory                         |
 | [Discrete Wavelet Transform](DiscreteWaveletTransform.md) | Multilevel Haar / Daubechies filter bank for O(N) time-frequency decomposition with perfect reconstruction   |
+| [Hilbert Transform](HilbertTransform.md)                | Analytic signal and instantaneous amplitude/phase/frequency via FFT one-sided spectrum or FIR approximation   |
 
 ## Sub-domains
 

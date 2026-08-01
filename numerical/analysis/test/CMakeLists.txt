@@ -15,6 +15,7 @@ target_sources(numerical.analysis_test PRIVATE
     TestDiscreteWaveletTransform.cpp
     TestFastFourierTransformRadix2Impl.cpp
     TestGoertzelAlgorithm.cpp
+    TestHilbertTransform.cpp
     TestPowerDensitySpectrum.cpp
     TestRealFastFourierTransform.cpp
     TestSignalDetectors.cpp
