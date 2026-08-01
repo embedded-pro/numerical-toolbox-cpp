@@ -288,6 +288,52 @@ TEST_F(TestSquareRootKalmanFilter, steady_state_gain_converges)
     EXPECT_GT(traceConverged, 0.0f);
 }
 
+TEST_F(TestSquareRootKalmanFilter, control_input_matches_conventional_kalman)
+{
+    using SrkfCtrl = filters::SquareRootKalmanFilter<float, 2, 1, 1>;
+    using KfCtrl = filters::KalmanFilter<float, 2, 1, 1>;
+    using CtrlMat = math::Matrix<float, 2, 1>;
+    using CtrlVec = math::Vector<float, 1>;
+
+    CtrlMat B{ { 0.5f * dt * dt }, { dt } };
+
+    SrkfCtrl srkf{ MakeX0(), S0 };
+    srkf.SetStateTransition(MakeF());
+    srkf.SetMeasurementMatrix(MakeH());
+    srkf.SetProcessNoiseFactor(solvers::CholeskyDecomposition<float, 2>(MakeQ()));
+    srkf.SetMeasurementNoiseFactor(solvers::CholeskyDecomposition<float, 1>(MakeR()));
+    srkf.SetControlInputMatrix(B);
+
+    KfCtrl reference2{ MakeX0(), MakeP0() };
+    reference2.SetStateTransition(MakeF());
+    reference2.SetMeasurementMatrix(MakeH());
+    reference2.SetProcessNoise(MakeQ());
+    reference2.SetMeasurementNoise(MakeR());
+    reference2.SetControlInputMatrix(B);
+
+    CtrlVec u{ { 1.0f } };
+    float pos = 0.0f;
+    float vel = 0.0f;
+
+    for (int step = 0; step < 10; ++step)
+    {
+        vel += dt;
+        pos += vel * dt;
+        MeasVec z{ { pos } };
+
+        srkf.Predict(u);
+        srkf.Update(z);
+
+        reference2.Predict(u);
+        reference2.Update(z);
+    }
+
+    auto sx = srkf.GetState();
+    auto rx = reference2.GetState();
+    EXPECT_NEAR(sx.at(0, 0), rx.at(0, 0), 5e-3f);
+    EXPECT_NEAR(sx.at(1, 0), rx.at(1, 0), 5e-3f);
+}
+
 TEST_F(TestSquareRootKalmanFilter, reset_and_getters)
 {
     auto x = filter.GetState();
