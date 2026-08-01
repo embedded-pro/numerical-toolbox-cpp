@@ -24,12 +24,9 @@ Difficulty legend:
 
 ## Master list (by priority)
 
-
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
-| 39 | Square-root / Information Kalman filter              | `filters/active`          | ★★★★☆      |
 | 41 | Backstepping controller                              | `nonlinear_control` (new) | ★★★★☆      |
-| 42 | Symmetric eigenvalue solver (Jacobi)                 | `solvers`                 | ★★★★★      |
 | 43 | Singular Value Decomposition (Golub-Kahan)           | `solvers`                 | ★★★★★      |
 | 44 | Total Least Squares                                  | `estimators/offline`      | ★★★★★      |
 | 45 | IIR filter design (Butterworth/Chebyshev + bilinear) | `filters/passive`         | ★★★★★      |
