@@ -54,10 +54,10 @@ Each $\alpha_i$ depends on $x$, the gains, and the reference; its time derivativ
 
 ## Complexity Analysis
 
-| Operation      | Time       | Space       | Notes                                  |
-|----------------|------------|-------------|----------------------------------------|
-| Construction   | $O(n)$     | $O(n)$      | Gain validation only                   |
-| ComputeControl | $O(n)$     | $O(n)$      | Single forward sweep; one divide per stage |
+| Operation      | Time   | Space  | Notes                                      |
+|----------------|--------|--------|--------------------------------------------|
+| Construction   | $O(n)$ | $O(n)$ | Gain validation only                       |
+| ComputeControl | $O(n)$ | $O(n)$ | Single forward sweep; one divide per stage |
 
 All storage is in fixed-size arrays on the stack. No heap allocation, no recursion.
 
