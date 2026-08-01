@@ -8,5 +8,6 @@ target_link_libraries(numerical.nonlinear_control_test PUBLIC
 )
 
 target_sources(numerical.nonlinear_control_test PRIVATE
+    TestBacksteppingControl.cpp
     TestFeedbackLinearization.cpp
 )
