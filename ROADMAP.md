@@ -27,7 +27,6 @@ Difficulty legend:
 
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
-| 36 | Active Disturbance Rejection Control (ADRC + ESO)    | `robust_control` (new)    | ★★★★☆      |
 | 37 | Hilbert transform / analytic signal / envelope       | `analysis`                | ★★★★☆      |
 | 38 | Discrete Wavelet Transform (Haar / Daubechies)       | `analysis`                | ★★★★☆      |
 | 39 | Square-root / Information Kalman filter              | `filters/active`          | ★★★★☆      |
