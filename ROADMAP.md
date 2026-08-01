@@ -29,7 +29,6 @@ Difficulty legend:
 |----|------------------------------------------------------|---------------------------|------------|
 | 39 | Square-root / Information Kalman filter              | `filters/active`          | ★★★★☆      |
 | 40 | Feedback linearization                               | `nonlinear_control` (new) | ★★★★☆      |
-| 41 | Backstepping controller                              | `nonlinear_control` (new) | ★★★★☆      |
 | 42 | Symmetric eigenvalue solver (Jacobi)                 | `solvers`                 | ★★★★★      |
 | 43 | Singular Value Decomposition (Golub-Kahan)           | `solvers`                 | ★★★★★      |
 | 44 | Total Least Squares                                  | `estimators/offline`      | ★★★★★      |
@@ -232,12 +231,6 @@ the library does not yet expose. Detailed below under
 - **Embedded value:** One linear gain set works across the whole operating envelope of any structurally-known nonlinear plant (robot arms, quadrotors, electromechanical drives) — no gain scheduling, no lookup tables.
 - **Algorithm / paper:** A. Isidori, *Nonlinear Control Systems* (1995); Slotine & Li, *Applied Nonlinear Control*.
 - **Reuses:** an injected control-affine plant model, `math::Matrix`, new `nonlinear_control/` module. (The manipulator computed-torque instance lives in robotics-toolbox-cpp.)
-
-### 41. Backstepping controller  *(float-first)*
-- **What:** Recursive Lyapunov-based design for strict-feedback systems, stabilizing one integrator stage at a time.
-- **Embedded value:** Systematic, provably-stable control for cascaded nonlinear plants (electromechanical, flight).
-- **Algorithm / paper:** M. Krstić, I. Kanellakopoulos, P. Kokotović, *Nonlinear and Adaptive Control Design* (1995).
-- **Reuses:** `math::Matrix`, new `nonlinear_control/` module.
 
 ---
 
