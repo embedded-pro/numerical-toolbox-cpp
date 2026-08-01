@@ -50,11 +50,11 @@ Accumulating the rotations $V \leftarrow V\,G$ starting from $V = I$ yields the 
 
 ## Complexity Analysis
 
-| Case    | Time        | Space    | Notes                                                          |
-|---------|-------------|----------|----------------------------------------------------------------|
-| Best    | $O(n^3)$    | $O(n^2)$ | Already near-diagonal; one sweep to confirm convergence        |
-| Average | $O(n^3)$    | $O(n^2)$ | Typically 6–10 sweeps; each sweep costs $O(n^3)$               |
-| Worst   | $O(S n^3)$  | $O(n^2)$ | $S$ sweeps capped by a fixed maximum; each rotation is $O(n)$   |
+| Case    | Time       | Space    | Notes                                                         |
+|---------|------------|----------|---------------------------------------------------------------|
+| Best    | $O(n^3)$   | $O(n^2)$ | Already near-diagonal; one sweep to confirm convergence       |
+| Average | $O(n^3)$   | $O(n^2)$ | Typically 6–10 sweeps; each sweep costs $O(n^3)$              |
+| Worst   | $O(S n^3)$ | $O(n^2)$ | $S$ sweeps capped by a fixed maximum; each rotation is $O(n)$ |
 
 **Why $O(n^3)$ per sweep:** a sweep performs $n(n-1)/2 = O(n^2)$ rotations, and each rotation updates two rows and two columns at $O(n)$ cost. Space is a single $n\times n$ working copy plus the $n\times n$ eigenvector accumulator — both stack/static, no dynamic allocation.
 
@@ -91,12 +91,12 @@ and $a'_{pq} = 0$. The matrix is now diagonal.
 
 ## Variants & Generalizations
 
-| Variant                        | Key Difference                                                                                   |
-|--------------------------------|--------------------------------------------------------------------------------------------------|
-| **Classical Jacobi**           | Zeroes the *largest* off-diagonal entry each step; fewer rotations but an $O(n^2)$ search each time |
-| **Threshold Jacobi**           | Skips pivots below a per-sweep threshold, cheaper early sweeps on sparse-ish matrices             |
-| **One-sided Jacobi**           | Applies rotations to a factor only; the basis of Jacobi SVD for tall matrices                     |
-| **QR / tridiagonal method**    | Reduces to tridiagonal form then iterates — faster asymptotically but less accurate on tiny eigenvalues |
+| Variant                     | Key Difference                                                                                          |
+|-----------------------------|---------------------------------------------------------------------------------------------------------|
+| **Classical Jacobi**        | Zeroes the *largest* off-diagonal entry each step; fewer rotations but an $O(n^2)$ search each time     |
+| **Threshold Jacobi**        | Skips pivots below a per-sweep threshold, cheaper early sweeps on sparse-ish matrices                   |
+| **One-sided Jacobi**        | Applies rotations to a factor only; the basis of Jacobi SVD for tall matrices                           |
+| **QR / tridiagonal method** | Reduces to tridiagonal form then iterates — faster asymptotically but less accurate on tiny eigenvalues |
 
 ## Applications
 
