@@ -17,6 +17,7 @@ target_sources(numerical.nonlinear_control PRIVATE
 
 numerical_add_coverage_sources(numerical.nonlinear_control
     BacksteppingControl.cpp
+    FeedbackLinearization.cpp
 )
 
 add_subdirectory(test)
