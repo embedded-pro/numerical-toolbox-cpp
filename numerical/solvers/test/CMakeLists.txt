@@ -12,6 +12,7 @@ target_sources(numerical.solvers_test PRIVATE
     TestDiscreteAlgebraicRiccatiEquation.cpp
     TestDurandKerner.cpp
     TestGaussianElimination.cpp
+    TestJacobiEigenSolver.cpp
     TestLevinsonDurbin.cpp
     TestLuDecomposition.cpp
     TestLyapunovSylvester.cpp

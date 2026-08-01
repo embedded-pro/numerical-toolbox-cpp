@@ -28,7 +28,6 @@ Difficulty legend:
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
 | 39 | Square-root / Information Kalman filter              | `filters/active`          | ★★★★☆      |
-| 40 | Feedback linearization                               | `nonlinear_control` (new) | ★★★★☆      |
 | 41 | Backstepping controller                              | `nonlinear_control` (new) | ★★★★☆      |
 | 42 | Symmetric eigenvalue solver (Jacobi)                 | `solvers`                 | ★★★★★      |
 | 43 | Singular Value Decomposition (Golub-Kahan)           | `solvers`                 | ★★★★★      |
@@ -237,7 +236,7 @@ the library does not yet expose. Detailed below under
 
 ## Tier 5 — Hard / research-grade ★★★★★
 
-### 42. Symmetric eigenvalue solver (Jacobi)  *(float-first)*
+### ~~42. Symmetric eigenvalue solver (Jacobi)~~  *(float-first)* ✓ Done
 - **What:** Cyclic Jacobi rotations for the eigenvalues/vectors of a symmetric matrix.
 - **Embedded value:** PCA/feature extraction, modal analysis, covariance conditioning, Gramian analysis.
 - **Algorithm / paper:** Golub & Van Loan, *Matrix Computations*, Ch. 8 (symmetric eigenproblem / cyclic Jacobi).

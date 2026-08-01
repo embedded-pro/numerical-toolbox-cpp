@@ -41,3 +41,24 @@ TEST_F(GivensRotationTest, DegenerateInputIsIdentity)
     EXPECT_NEAR(g.c, 1.0f, math::Tolerance<float>());
     EXPECT_NEAR(g.s, 0.0f, math::Tolerance<float>());
 }
+
+TEST_F(GivensRotationTest, JacobiRotationAnnihilatesSymmetricOffDiagonal)
+{
+    float app = 4.0f;
+    float aqq = 1.0f;
+    float apq = 2.0f;
+
+    auto g = math::ComputeJacobiRotation(app, aqq, apq);
+    float offDiagonal = (g.c * g.c - g.s * g.s) * apq + g.c * g.s * (app - aqq);
+
+    EXPECT_NEAR(offDiagonal, 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(g.c * g.c + g.s * g.s, 1.0f, math::Tolerance<float>());
+}
+
+TEST_F(GivensRotationTest, JacobiRotationZeroOffDiagonalIsIdentity)
+{
+    auto g = math::ComputeJacobiRotation(3.0f, 5.0f, 0.0f);
+
+    EXPECT_NEAR(g.c, 1.0f, math::Tolerance<float>());
+    EXPECT_NEAR(g.s, 0.0f, math::Tolerance<float>());
+}
