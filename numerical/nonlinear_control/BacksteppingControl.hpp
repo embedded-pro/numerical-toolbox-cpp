@@ -62,7 +62,6 @@ namespace nonlinear_control
         const std::array<T, Order>& gains)
         : model{ model }
         , gains{ gains }
-        , z{}
     {
         for (std::size_t i = 0; i < Order; ++i)
             really_assert(gains[i] > T{ 0 });

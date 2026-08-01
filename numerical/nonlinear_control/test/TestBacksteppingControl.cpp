@@ -330,6 +330,22 @@ TEST_F(TestBacksteppingRealPlantOrder1, tracks_constant_reference)
     EXPECT_NEAR(x, ref.value, 1.0e-2f);
 }
 
+TEST_F(TestBacksteppingRealPlantOrder2, reset_restores_initial_response)
+{
+    std::array<float, 2> x{ { 0.4f, -0.2f } };
+    nonlinear_control::BacksteppingControl<float, 2>::Reference ref{ 0.0f, 0.0f };
+
+    const float first = controller.ComputeControl(x, ref);
+
+    std::array<float, 2> drift{ { 1.0f, 0.6f } };
+    controller.ComputeControl(drift, ref);
+    controller.Reset();
+
+    const float afterReset = controller.ComputeControl(x, ref);
+
+    EXPECT_NEAR(afterReset, first, math::Tolerance<float>());
+}
+
 TEST_F(TestBacksteppingRealPlantOrder2, stabilizes_double_integrator)
 {
     std::array<float, 2> x{ { 1.0f, -0.5f } };
