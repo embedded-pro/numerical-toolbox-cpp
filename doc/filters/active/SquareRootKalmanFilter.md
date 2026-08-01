@@ -71,10 +71,10 @@ requires only $O(n^2)$ temporary storage — no heap allocation.
 
 ## Complexity Analysis
 
-| Case    | Time           | Space   | Notes                                      |
-|---------|----------------|---------|--------------------------------------------|
-| Predict | $O(n^3)$       | $O(n^2)$| Dominated by $F S$ multiply and QR         |
-| Update  | $O((n+m) n^2)$ | $O(n^2)$| QR on $(m+n) \times (m+n)$ pre-array       |
+| Case    | Time           | Space    | Notes                                |
+|---------|----------------|----------|--------------------------------------|
+| Predict | $O(n^3)$       | $O(n^2)$ | Dominated by $F S$ multiply and QR   |
+| Update  | $O((n+m) n^2)$ | $O(n^2)$ | QR on $(m+n) \times (m+n)$ pre-array |
 
 where $n =$ `StateSize`, $m =$ `MeasurementSize`. All arrays are fixed-size; no heap is used.
 
