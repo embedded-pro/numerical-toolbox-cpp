@@ -79,10 +79,10 @@ better energy compaction for smooth signals.
 
 ## Complexity Analysis
 
-| Case    | Time      | Space     | Notes                                           |
-|---------|-----------|-----------|-------------------------------------------------|
-| Forward | $O(N)$    | $O(N)$    | Geometric series: $N + N/2 + \cdots \leq 2N$  |
-| Inverse | $O(N)$    | $O(N)$    | Identical pass through synthesis bank           |
+| Case    | Time   | Space  | Notes                                        |
+|---------|--------|--------|----------------------------------------------|
+| Forward | $O(N)$ | $O(N)$ | Geometric series: $N + N/2 + \cdots \leq 2N$ |
+| Inverse | $O(N)$ | $O(N)$ | Identical pass through synthesis bank        |
 
 Memory is one length-$N$ coefficient buffer, two length-$N/2$ working arrays, and the static
 filter table of size $P$ — no heap allocation.
@@ -94,9 +94,9 @@ Input: $x = [1, 2, 3, 4]$, Haar wavelet, $L = 1$.
 **Stage 1 (analysis):**
 
 | $i$ | $2i$ | $2i+1$ | $c_A[i] = (x[2i]+x[2i+1])/\sqrt{2}$ | $c_D[i] = (x[2i]-x[2i+1])/\sqrt{2}$ |
-|-----|------|--------|--------------------------------------|--------------------------------------|
-| 0   | 0    | 1      | $(1+2)/\sqrt{2} \approx 2.121$        | $(1-2)/\sqrt{2} \approx -0.707$       |
-| 1   | 2    | 3      | $(3+4)/\sqrt{2} \approx 4.950$        | $(3-4)/\sqrt{2} \approx -0.707$       |
+|-----|------|--------|-------------------------------------|-------------------------------------|
+| 0   | 0    | 1      | $(1+2)/\sqrt{2} \approx 2.121$      | $(1-2)/\sqrt{2} \approx -0.707$     |
+| 1   | 2    | 3      | $(3+4)/\sqrt{2} \approx 4.950$      | $(3-4)/\sqrt{2} \approx -0.707$     |
 
 **Coefficient buffer** (layout detail | approx):
 
