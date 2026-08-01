@@ -27,7 +27,6 @@ Difficulty legend:
 
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
-| 35 | Disturbance Observer (DOB)                           | `robust_control` (new)    | ★★★★☆      |
 | 37 | Hilbert transform / analytic signal / envelope       | `analysis`                | ★★★★☆      |
 | 38 | Discrete Wavelet Transform (Haar / Daubechies)       | `analysis`                | ★★★★☆      |
 | 39 | Square-root / Information Kalman filter              | `filters/active`          | ★★★★☆      |
@@ -205,12 +204,6 @@ the library does not yet expose. Detailed below under
 - **Algorithm / paper:** S. Madgwick, "An efficient orientation filter for inertial and inertial/magnetic sensor arrays," 2010; R. Mahony, T. Hamel, J.-M. Pflimlin, "Nonlinear Complementary Filters on the Special Orthogonal Group," *IEEE Trans. AC*, 53(5), 2008.
 - **Reuses:** **Item 18 (Quaternion)**, `math::Geometry3D`.
 
-
-### 35. Disturbance Observer (DOB)  *(float-first)*
-- **What:** Estimates and cancels lumped disturbance/model mismatch using the plant inverse and a Q-filter.
-- **Embedded value:** Bolt-on robustness for existing loops — strong disturbance rejection without redesigning the nominal controller.
-- **Algorithm / paper:** W.-H. Chen, J. Yang, L. Guo, S. Li, "Disturbance-Observer-Based Control and Related Methods—An Overview," *IEEE Trans. Ind. Electron.*, 63(2), 2016.
-- **Reuses:** Item 15 (Q-filter), item 19 (observer), `math::LinearTimeInvariant`.
 
 ### 36. Active Disturbance Rejection Control (ADRC + ESO)  *(float-first)*
 - **What:** Extended State Observer estimates total disturbance as an augmented state; a feedback law cancels it in real time.

@@ -9,5 +9,6 @@ target_link_libraries(numerical.robust_control_test PUBLIC
 
 target_sources(numerical.robust_control_test PRIVATE
     TestActiveDisturbanceRejection.cpp
+    TestDisturbanceObserver.cpp
     TestSlidingModeControl.cpp
 )
