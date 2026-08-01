@@ -228,16 +228,16 @@ the library does not yet expose. Detailed below under
 - **Reuses:** [KalmanFilterBase.hpp](numerical/filters/active/KalmanFilterBase.hpp), [Cholesky](numerical/solvers/CholeskyDecomposition.hpp), item 27.
 
 ### 40. Feedback linearization  *(float-first)*
-- **What:** Cancel known nonlinear dynamics via a coordinate transform + inner control law so an outer linear controller can be applied.
-- **Embedded value:** Exact control of robot manipulators and other structurally-known nonlinear plants.
+- **What:** Cancel a control-affine system's known nonlinear dynamics via a coordinate transform + inner control law, leaving an equivalent linear system that an outer loop (PD/LQR) can drive.
+- **Embedded value:** One linear gain set works across the whole operating envelope of any structurally-known nonlinear plant (robot arms, quadrotors, electromechanical drives) — no gain scheduling, no lookup tables.
 - **Algorithm / paper:** A. Isidori, *Nonlinear Control Systems* (1995); Slotine & Li, *Applied Nonlinear Control*.
-- **Reuses:** `dynamics/` models, `math::Matrix`, new `nonlinear_control/` module.
+- **Reuses:** an injected control-affine plant model, `math::Matrix`, new `nonlinear_control/` module. (The manipulator computed-torque instance lives in robotics-toolbox-cpp.)
 
 ### 41. Backstepping controller  *(float-first)*
 - **What:** Recursive Lyapunov-based design for strict-feedback systems, stabilizing one integrator stage at a time.
 - **Embedded value:** Systematic, provably-stable control for cascaded nonlinear plants (electromechanical, flight).
 - **Algorithm / paper:** M. Krstić, I. Kanellakopoulos, P. Kokotović, *Nonlinear and Adaptive Control Design* (1995).
-- **Reuses:** `dynamics/`, `math::Matrix`, new `nonlinear_control/` module.
+- **Reuses:** `math::Matrix`, new `nonlinear_control/` module.
 
 ---
 

@@ -22,7 +22,7 @@ Read the spec's three files first (`implementation.md`, `tests.md`, `explanation
 4. **CMake**
    - Add `.hpp` to `target_sources(...)`, `.cpp` to `numerical_add_coverage_sources(...)`,
      `Test<Name>.cpp` to the `_test` target's `target_sources`.
-   - New module (`trajectory`, `robust_control`, `nonlinear_control`, `controllers/manipulator`):
+   - New module (`robust_control`, `nonlinear_control`):
      create `numerical/<module>/CMakeLists.txt` via `numerical_add_header_library(...)`, add a
      `test/` subdir, register it in the parent `CMakeLists.txt`, and add a `doc/<module>/` folder.
 
