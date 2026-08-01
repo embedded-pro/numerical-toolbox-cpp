@@ -1,6 +1,3 @@
-// Copyright (c) 2024 Numerical Toolbox Contributors
-// SPDX-License-Identifier: MIT
-
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/Tolerance.hpp"
 #include "numerical/nonlinear_control/FeedbackLinearization.hpp"
