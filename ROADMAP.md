@@ -27,7 +27,6 @@ Difficulty legend:
 
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
-| 39 | Square-root / Information Kalman filter              | `filters/active`          | ★★★★☆      |
 | 40 | Feedback linearization                               | `nonlinear_control` (new) | ★★★★☆      |
 | 41 | Backstepping controller                              | `nonlinear_control` (new) | ★★★★☆      |
 | 42 | Symmetric eigenvalue solver (Jacobi)                 | `solvers`                 | ★★★★★      |
