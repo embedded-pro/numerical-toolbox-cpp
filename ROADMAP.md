@@ -28,7 +28,6 @@ Difficulty legend:
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
 | 40 | Feedback linearization                               | `nonlinear_control` (new) | ★★★★☆      |
-| 41 | Backstepping controller                              | `nonlinear_control` (new) | ★★★★☆      |
 | 42 | Symmetric eigenvalue solver (Jacobi)                 | `solvers`                 | ★★★★★      |
 | 43 | Singular Value Decomposition (Golub-Kahan)           | `solvers`                 | ★★★★★      |
 | 44 | Total Least Squares                                  | `estimators/offline`      | ★★★★★      |
@@ -225,12 +224,6 @@ the library does not yet expose. Detailed below under
 - **Embedded value:** Guaranteed positive-definite covariance and better conditioning — critical for reduced-precision hardware and multi-sensor fusion.
 - **Algorithm / paper:** P. Kaminski, A. Bryson, S. Schmidt, "Discrete Square Root Filtering: A Survey of Current Techniques," *IEEE Trans. AC*, 16(6), 1971.
 - **Reuses:** [KalmanFilterBase.hpp](numerical/filters/active/KalmanFilterBase.hpp), [Cholesky](numerical/solvers/CholeskyDecomposition.hpp), item 27.
-
-### 41. Backstepping controller  *(float-first)*
-- **What:** Recursive Lyapunov-based design for strict-feedback systems, stabilizing one integrator stage at a time.
-- **Embedded value:** Systematic, provably-stable control for cascaded nonlinear plants (electromechanical, flight).
-- **Algorithm / paper:** M. Krstić, I. Kanellakopoulos, P. Kokotović, *Nonlinear and Adaptive Control Design* (1995).
-- **Reuses:** `math::Matrix`, new `nonlinear_control/` module.
 
 ---
 
