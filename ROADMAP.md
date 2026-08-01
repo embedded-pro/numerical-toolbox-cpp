@@ -226,12 +226,6 @@ the library does not yet expose. Detailed below under
 - **Algorithm / paper:** P. Kaminski, A. Bryson, S. Schmidt, "Discrete Square Root Filtering: A Survey of Current Techniques," *IEEE Trans. AC*, 16(6), 1971.
 - **Reuses:** [KalmanFilterBase.hpp](numerical/filters/active/KalmanFilterBase.hpp), [Cholesky](numerical/solvers/CholeskyDecomposition.hpp), item 27.
 
-### 40. Feedback linearization  *(float-first)*
-- **What:** Cancel a control-affine system's known nonlinear dynamics via a coordinate transform + inner control law, leaving an equivalent linear system that an outer loop (PD/LQR) can drive.
-- **Embedded value:** One linear gain set works across the whole operating envelope of any structurally-known nonlinear plant (robot arms, quadrotors, electromechanical drives) — no gain scheduling, no lookup tables.
-- **Algorithm / paper:** A. Isidori, *Nonlinear Control Systems* (1995); Slotine & Li, *Applied Nonlinear Control*.
-- **Reuses:** an injected control-affine plant model, `math::Matrix`, new `nonlinear_control/` module. (The manipulator computed-torque instance lives in robotics-toolbox-cpp.)
-
 ---
 
 ## Tier 5 — Hard / research-grade ★★★★★
