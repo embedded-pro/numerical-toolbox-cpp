@@ -18,6 +18,7 @@ target_sources(numerical.analysis PRIVATE
     FastFourierTransform.hpp
     FastFourierTransformRadix2Impl.hpp
     GoertzelAlgorithm.hpp
+    HilbertTransform.hpp
     PowerDensitySpectrum.hpp
     RealFastFourierTransform.hpp
     SignalDetectors.hpp
@@ -28,6 +29,7 @@ numerical_add_coverage_sources(numerical.analysis
     DiscreteCosineTransform.cpp
     FastFourierTransformRadix2Impl.cpp
     GoertzelAlgorithm.cpp
+    HilbertTransform.cpp
     PowerDensitySpectrum.cpp
     RealFastFourierTransform.cpp
     SignalDetectors.cpp
