@@ -44,8 +44,15 @@ namespace
             q = q + qDot * dt;
         }
 
-        [[nodiscard]] StateVector Position() const { return q; }
-        [[nodiscard]] StateVector Velocity() const { return qDot; }
+        [[nodiscard]] StateVector Position() const
+        {
+            return q;
+        }
+
+        [[nodiscard]] StateVector Velocity() const
+        {
+            return qDot;
+        }
 
     private:
         static DecouplingMatrix InertiaMatrix(const StateVector& q)
@@ -65,7 +72,8 @@ namespace
             const T det{ m.at(0, 0) * m.at(1, 1) - m.at(0, 1) * m.at(1, 0) };
             return StateVector{
                 { (m.at(1, 1) * b.at(0, 0) - m.at(0, 1) * b.at(1, 0)) / det },
-                { (m.at(0, 0) * b.at(1, 0) - m.at(1, 0) * b.at(0, 0)) / det } };
+                { (m.at(0, 0) * b.at(1, 0) - m.at(1, 0) * b.at(0, 0)) / det }
+            };
         }
 
         StateVector q{ { T{} }, { T{} } };

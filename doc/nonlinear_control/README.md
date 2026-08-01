@@ -4,6 +4,6 @@ Algorithms for nonlinear control design: controllers that exploit a known plant 
 
 ## Algorithms
 
-| Algorithm                                           | Description                                                                                                                                                   |
-|-----------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [Feedback Linearization](FeedbackLinearization.md)  | Cancels a control-affine plant's known nonlinear dynamics via an inner control law, leaving decoupled integrator chains that a simple outer PD/LQR loop drives |
+| Algorithm                                          | Description                                                                                                                                                    |
+|----------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [Feedback Linearization](FeedbackLinearization.md) | Cancels a control-affine plant's known nonlinear dynamics via an inner control law, leaving decoupled integrator chains that a simple outer PD/LQR loop drives |

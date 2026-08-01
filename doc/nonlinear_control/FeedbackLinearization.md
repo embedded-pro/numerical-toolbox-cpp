@@ -48,11 +48,11 @@ No matrix inversion appears on the hot path: the law multiplies by $B(x)$, not b
 
 ## Complexity Analysis
 
-| Operation      | Time          | Space         | Notes                                   |
-|----------------|---------------|---------------|-----------------------------------------|
-| Construction   | $O(m^2)$      | $O(m^2)$      | Copy two gain matrices                  |
-| ComputeInput   | $O(m^2)$      | $O(m)$ extra  | Two matrix-vector products dominate     |
-| Model query    | $O(m^2)$–$O(nm^2)$ | $O(m^2)$ | Implementation-defined; injected model  |
+| Operation    | Time               | Space        | Notes                                  |
+|--------------|--------------------|--------------|----------------------------------------|
+| Construction | $O(m^2)$           | $O(m^2)$     | Copy two gain matrices                 |
+| ComputeInput | $O(m^2)$           | $O(m)$ extra | Two matrix-vector products dominate    |
+| Model query  | $O(m^2)$–$O(nm^2)$ | $O(m^2)$     | Implementation-defined; injected model |
 
 All storage is in fixed-size stack arrays; the law itself performs no heap allocation.
 
