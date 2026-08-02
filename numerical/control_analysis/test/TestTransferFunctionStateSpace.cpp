@@ -1,4 +1,5 @@
 #include "numerical/control_analysis/TransferFunctionStateSpace.hpp"
+#include "numerical/math/Tolerance.hpp"
 #include <gtest/gtest.h>
 
 namespace
@@ -136,4 +137,32 @@ TEST_F(TestTransferFunctionStateSpace, both_forms_share_impulse_response)
         xOcf = ocf.Step(xOcf, u);
         u.at(0, 0) = 0.0f;
     }
+}
+
+TEST_F(TestTransferFunctionStateSpace, round_trip_via_observable_canonical_is_identity)
+{
+    auto tf2{ TFSS::ToTransferFunction(TFSS::ToObservableCanonical(tf)) };
+
+    EXPECT_NEAR(tf2.numerator[0], 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(tf2.numerator[1], 1.0f, math::Tolerance<float>());
+    EXPECT_NEAR(tf2.numerator[2], 2.0f, math::Tolerance<float>());
+    EXPECT_NEAR(tf2.denominator[0], 1.0f, math::Tolerance<float>());
+    EXPECT_NEAR(tf2.denominator[1], 3.0f, math::Tolerance<float>());
+    EXPECT_NEAR(tf2.denominator[2], 2.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestTransferFunctionStateSpace, non_monic_round_trip_recovers_monic_tf)
+{
+    TF2 nonMonic{};
+    nonMonic.denominator = { 2.0f, 6.0f, 4.0f };
+    nonMonic.numerator = { 0.0f, 2.0f, 4.0f };
+
+    auto tf2{ TFSS::ToTransferFunction(TFSS::ToControllableCanonical(nonMonic)) };
+
+    EXPECT_NEAR(tf2.numerator[0], 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(tf2.numerator[1], 1.0f, math::Tolerance<float>());
+    EXPECT_NEAR(tf2.numerator[2], 2.0f, math::Tolerance<float>());
+    EXPECT_NEAR(tf2.denominator[0], 1.0f, math::Tolerance<float>());
+    EXPECT_NEAR(tf2.denominator[1], 3.0f, math::Tolerance<float>());
+    EXPECT_NEAR(tf2.denominator[2], 2.0f, math::Tolerance<float>());
 }
