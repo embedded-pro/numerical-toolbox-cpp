@@ -4,5 +4,6 @@ namespace solvers
 {
     template class DiscreteAlgebraicRiccatiEquation<float, 1, 1>;
     template class DiscreteAlgebraicRiccatiEquation<float, 2, 1>;
+    template class DiscreteAlgebraicRiccatiEquation<float, 2, 2>;
     template class DiscreteAlgebraicRiccatiEquation<float, 4, 1>;
 }
