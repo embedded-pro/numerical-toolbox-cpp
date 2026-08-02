@@ -17,4 +17,5 @@ Numerical solvers for linear systems, polynomial roots, and matrix equations.
 | [QR Decomposition](QrDecomposition.md)                                     | Householder factorization and Givens streaming row update for least-squares solves |
 | [LU Decomposition](LuDecomposition.md)                                     | PA = LU factorization with partial pivoting for general dense linear systems       |
 | [Lyapunov / Sylvester Solvers](LyapunovSylvester.md)                       | Sylvester AX+XB=C and continuous/discrete Lyapunov solvers via Kronecker vectorisation |
-| [Singular Value Decomposition](SingularValueDecomposition.md)               | Golub-Kahan bidiagonalization and implicit-shift QR for SVD, pseudo-inverse, rank, and condition number |
+| [Singular Value Decomposition](SingularValueDecomposition.md)              | Golub-Kahan bidiagonalization and implicit-shift QR for SVD, pseudo-inverse, rank, and condition number |
+| [Jacobi Eigenvalue Solver](JacobiEigenSolver.md)                           | Cyclic Jacobi rotations for the full symmetric eigenvalue/eigenvector problem          |

@@ -35,15 +35,22 @@ namespace solvers
         const math::Matrix<T, Cols, Cols>& V() const;
 
     private:
-        static void ApplyLeftReflector(math::Matrix<T, Rows, Cols>& b,
-            const math::Vector<T, Rows>& v, T beta, std::size_t col);
-        static void ApplyRightReflector(math::Matrix<T, Rows, Cols>& b,
-            const math::Vector<T, Cols>& v, T beta, std::size_t startCol);
-        static void AccumulateLeft(math::Matrix<T, Rows, Cols>& u,
-            const math::Vector<T, Rows>& v, T beta, std::size_t start);
-        static void AccumulateRight(math::Matrix<T, Cols, Cols>& vMat,
-            const math::Vector<T, Cols>& v, T beta, std::size_t start);
+        using LeftVectors = std::array<math::Vector<T, Rows>, Cols>;
+        using RightVectors = std::array<math::Vector<T, Cols>, Cols>;
+        using Betas = std::array<T, Cols>;
+
+        void Bidiagonalize(math::Matrix<T, Rows, Cols>& bidiag,
+            LeftVectors& leftVecs, Betas& leftBeta, RightVectors& rightVecs, Betas& rightBeta);
+        void ExtractBidiagonal(const math::Matrix<T, Rows, Cols>& bidiag);
+        void AccumulateU(const LeftVectors& leftVecs, const Betas& leftBeta);
+        void AccumulateV(const RightVectors& rightVecs, const Betas& rightBeta);
+        void DiagonalizeGolubKahan();
+        bool NextBlock(std::size_t& p, std::size_t& q);
+        T WilkinsonShift(std::size_t q) const;
         void QrSweep(std::size_t p, std::size_t q);
+        void MakeSingularValuesPositive();
+        void SortDescending();
+        void SwapColumns(std::size_t i, std::size_t j);
 
         math::Matrix<T, Rows, Cols> uMat{};
         math::Vector<T, Cols> sigma{};
@@ -52,82 +59,12 @@ namespace solvers
     };
 
     template<typename T, std::size_t Rows, std::size_t Cols>
-    void SingularValueDecomposition<T, Rows, Cols>::ApplyLeftReflector(
-        math::Matrix<T, Rows, Cols>& b,
-        const math::Vector<T, Rows>& v, T beta, std::size_t col)
+    void SingularValueDecomposition<T, Rows, Cols>::Bidiagonalize(
+        math::Matrix<T, Rows, Cols>& bidiag,
+        LeftVectors& leftVecs, Betas& leftBeta, RightVectors& rightVecs, Betas& rightBeta)
     {
-        for (std::size_t j = col; j < Cols; ++j)
-        {
-            T dot{ T{} };
-            for (std::size_t i = col; i < Rows; ++i)
-                dot += v.at(i, 0) * b.at(i, j);
-            T scale = beta * dot;
-            for (std::size_t i = col; i < Rows; ++i)
-                b.at(i, j) -= scale * v.at(i, 0);
-        }
-    }
-
-    template<typename T, std::size_t Rows, std::size_t Cols>
-    void SingularValueDecomposition<T, Rows, Cols>::ApplyRightReflector(
-        math::Matrix<T, Rows, Cols>& b,
-        const math::Vector<T, Cols>& v, T beta, std::size_t startCol)
-    {
-        for (std::size_t i = 0; i < Rows; ++i)
-        {
-            T dot{ T{} };
-            for (std::size_t j = startCol; j < Cols; ++j)
-                dot += b.at(i, j) * v.at(j, 0);
-            T scale = beta * dot;
-            for (std::size_t j = startCol; j < Cols; ++j)
-                b.at(i, j) -= scale * v.at(j, 0);
-        }
-    }
-
-    template<typename T, std::size_t Rows, std::size_t Cols>
-    void SingularValueDecomposition<T, Rows, Cols>::AccumulateLeft(
-        math::Matrix<T, Rows, Cols>& u,
-        const math::Vector<T, Rows>& v, T beta, std::size_t start)
-    {
-        for (std::size_t j = 0; j < Cols; ++j)
-        {
-            T dot{ T{} };
-            for (std::size_t i = start; i < Rows; ++i)
-                dot += v.at(i, 0) * u.at(i, j);
-            T scale = beta * dot;
-            for (std::size_t i = start; i < Rows; ++i)
-                u.at(i, j) -= scale * v.at(i, 0);
-        }
-    }
-
-    template<typename T, std::size_t Rows, std::size_t Cols>
-    void SingularValueDecomposition<T, Rows, Cols>::AccumulateRight(
-        math::Matrix<T, Cols, Cols>& vMatrix,
-        const math::Vector<T, Cols>& v, T beta, std::size_t start)
-    {
-        for (std::size_t i = 0; i < Cols; ++i)
-        {
-            T dot{ T{} };
-            for (std::size_t j = start; j < Cols; ++j)
-                dot += vMatrix.at(i, j) * v.at(j, 0);
-            T scale = beta * dot;
-            for (std::size_t j = start; j < Cols; ++j)
-                vMatrix.at(i, j) -= scale * v.at(j, 0);
-        }
-    }
-
-    template<typename T, std::size_t Rows, std::size_t Cols>
-    OPTIMIZE_FOR_SPEED bool SingularValueDecomposition<T, Rows, Cols>::Decompose(
-        const math::Matrix<T, Rows, Cols>& a)
-    {
-        math::Matrix<T, Rows, Cols> bidiag = a;
-
         math::Vector<T, Rows> lvec{};
         math::Vector<T, Cols> rvec{};
-
-        std::array<math::Vector<T, Rows>, Cols> leftVecs{};
-        std::array<math::Vector<T, Cols>, Cols> rightVecs{};
-        std::array<T, Cols> leftBeta{};
-        std::array<T, Cols> rightBeta{};
 
         for (std::size_t k = 0; k < Cols; ++k)
         {
@@ -140,7 +77,7 @@ namespace solvers
             leftVecs[k] = lvec;
 
             if (lbeta != T{})
-                ApplyLeftReflector(bidiag, lvec, lbeta, k);
+                math::ApplyReflectorLeft(bidiag, lvec, lbeta, k, k);
 
             if (k + 1 < Cols)
             {
@@ -153,20 +90,30 @@ namespace solvers
                 rightVecs[k] = rvec;
 
                 if (rbeta != T{})
-                    ApplyRightReflector(bidiag, rvec, rbeta, k + 1);
+                    math::ApplyReflectorRight(bidiag, rvec, rbeta, 0, k + 1);
             }
             else
             {
                 rightBeta[k] = T{};
             }
         }
+    }
 
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    void SingularValueDecomposition<T, Rows, Cols>::ExtractBidiagonal(
+        const math::Matrix<T, Rows, Cols>& bidiag)
+    {
         for (std::size_t i = 0; i < Cols; ++i)
+        {
             sigma.at(i, 0) = bidiag.at(i, i);
-
-        for (std::size_t i = 0; i < Cols; ++i)
             superdiag.at(i, 0) = (i + 1 < Cols) ? bidiag.at(i, i + 1) : T{};
+        }
+    }
 
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    void SingularValueDecomposition<T, Rows, Cols>::AccumulateU(
+        const LeftVectors& leftVecs, const Betas& leftBeta)
+    {
         for (std::size_t i = 0; i < Rows; ++i)
             for (std::size_t j = 0; j < Cols; ++j)
                 uMat.at(i, j) = (i == j) ? T{ 1 } : T{};
@@ -175,106 +122,103 @@ namespace solvers
         {
             std::size_t col = k - 1;
             T lbeta = leftBeta[col];
-            if (lbeta == T{})
-                continue;
-
-            AccumulateLeft(uMat, leftVecs[col], lbeta, col);
+            if (lbeta != T{})
+                math::ApplyReflectorLeft(uMat, leftVecs[col], lbeta, col, 0);
         }
+    }
 
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    void SingularValueDecomposition<T, Rows, Cols>::AccumulateV(
+        const RightVectors& rightVecs, const Betas& rightBeta)
+    {
         for (std::size_t i = 0; i < Cols; ++i)
             for (std::size_t j = 0; j < Cols; ++j)
                 vMat.at(i, j) = (i == j) ? T{ 1 } : T{};
 
         for (std::size_t row = 0; row + 1 < Cols; ++row)
         {
-            std::size_t k = row + 1;
             T rbeta = rightBeta[row];
-            if (rbeta == T{})
-                continue;
-
-            AccumulateRight(vMat, rightVecs[row], rbeta, k);
+            if (rbeta != T{})
+                math::ApplyReflectorRight(vMat, rightVecs[row], rbeta, 0, row + 1);
         }
+    }
 
-        constexpr std::size_t maxIter = 30 * Cols * Cols;
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    OPTIMIZE_FOR_SPEED bool SingularValueDecomposition<T, Rows, Cols>::Decompose(
+        const math::Matrix<T, Rows, Cols>& a)
+    {
+        math::Matrix<T, Rows, Cols> bidiag = a;
 
-        for (std::size_t iter = 0; iter < maxIter; ++iter)
-        {
-            for (std::size_t i = 0; i < Cols - 1; ++i)
-            {
-                T thresh = T{ 1e-6f } * (std::abs(sigma.at(i, 0)) + std::abs(sigma.at(i + 1, 0)));
-                if (std::abs(superdiag.at(i, 0)) <= thresh)
-                    superdiag.at(i, 0) = T{};
-            }
+        LeftVectors leftVecs{};
+        RightVectors rightVecs{};
+        Betas leftBeta{};
+        Betas rightBeta{};
 
-            std::size_t right = Cols - 1;
-            while (right > 0)
-            {
-                T thresh = T{ 1e-6f } * (std::abs(sigma.at(right - 1, 0)) + std::abs(sigma.at(right, 0)));
-                if (std::abs(superdiag.at(right - 1, 0)) > thresh)
-                    break;
-                superdiag.at(right - 1, 0) = T{};
-                --right;
-            }
-
-            if (right == 0)
-                break;
-
-            std::size_t left = right - 1;
-            while (left > 0)
-            {
-                T thresh = T{ 1e-6f } * (std::abs(sigma.at(left - 1, 0)) + std::abs(sigma.at(left, 0)));
-                if (std::abs(superdiag.at(left - 1, 0)) <= thresh)
-                    break;
-                --left;
-            }
-
-            QrSweep(left, right - 1);
-        }
-
-        for (std::size_t i = 0; i < Cols; ++i)
-        {
-            if (sigma.at(i, 0) < T{})
-            {
-                sigma.at(i, 0) = -sigma.at(i, 0);
-                for (std::size_t k = 0; k < Rows; ++k)
-                    uMat.at(k, i) = -uMat.at(k, i);
-            }
-        }
-
-        for (std::size_t i = 0; i < Cols - 1; ++i)
-        {
-            std::size_t maxIdx = i;
-            for (std::size_t j = i + 1; j < Cols; ++j)
-                if (sigma.at(j, 0) > sigma.at(maxIdx, 0))
-                    maxIdx = j;
-
-            if (maxIdx != i)
-            {
-                T tmp = sigma.at(i, 0);
-                sigma.at(i, 0) = sigma.at(maxIdx, 0);
-                sigma.at(maxIdx, 0) = tmp;
-
-                for (std::size_t k = 0; k < Rows; ++k)
-                {
-                    T tu = uMat.at(k, i);
-                    uMat.at(k, i) = uMat.at(k, maxIdx);
-                    uMat.at(k, maxIdx) = tu;
-                }
-                for (std::size_t k = 0; k < Cols; ++k)
-                {
-                    T tv = vMat.at(k, i);
-                    vMat.at(k, i) = vMat.at(k, maxIdx);
-                    vMat.at(k, maxIdx) = tv;
-                }
-            }
-        }
+        Bidiagonalize(bidiag, leftVecs, leftBeta, rightVecs, rightBeta);
+        ExtractBidiagonal(bidiag);
+        AccumulateU(leftVecs, leftBeta);
+        AccumulateV(rightVecs, rightBeta);
+        DiagonalizeGolubKahan();
+        MakeSingularValuesPositive();
+        SortDescending();
 
         return true;
     }
 
     template<typename T, std::size_t Rows, std::size_t Cols>
-    OPTIMIZE_FOR_SPEED void SingularValueDecomposition<T, Rows, Cols>::QrSweep(
-        std::size_t p, std::size_t q)
+    bool SingularValueDecomposition<T, Rows, Cols>::NextBlock(std::size_t& p, std::size_t& q)
+    {
+        for (std::size_t i = 0; i < Cols - 1; ++i)
+        {
+            T thresh = T{ 1e-6f } * (std::abs(sigma.at(i, 0)) + std::abs(sigma.at(i + 1, 0)));
+            if (std::abs(superdiag.at(i, 0)) <= thresh)
+                superdiag.at(i, 0) = T{};
+        }
+
+        std::size_t right = Cols - 1;
+        while (right > 0)
+        {
+            T thresh = T{ 1e-6f } * (std::abs(sigma.at(right - 1, 0)) + std::abs(sigma.at(right, 0)));
+            if (std::abs(superdiag.at(right - 1, 0)) > thresh)
+                break;
+            superdiag.at(right - 1, 0) = T{};
+            --right;
+        }
+
+        if (right == 0)
+            return false;
+
+        std::size_t left = right - 1;
+        while (left > 0)
+        {
+            T thresh = T{ 1e-6f } * (std::abs(sigma.at(left - 1, 0)) + std::abs(sigma.at(left, 0)));
+            if (std::abs(superdiag.at(left - 1, 0)) <= thresh)
+                break;
+            --left;
+        }
+
+        p = left;
+        q = right - 1;
+        return true;
+    }
+
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    OPTIMIZE_FOR_SPEED void SingularValueDecomposition<T, Rows, Cols>::DiagonalizeGolubKahan()
+    {
+        constexpr std::size_t maxIter = 30 * Cols * Cols;
+
+        std::size_t p{};
+        std::size_t q{};
+        for (std::size_t iter = 0; iter < maxIter; ++iter)
+        {
+            if (!NextBlock(p, q))
+                return;
+            QrSweep(p, q);
+        }
+    }
+
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    T SingularValueDecomposition<T, Rows, Cols>::WilkinsonShift(std::size_t q) const
     {
         T dq = sigma.at(q, 0);
         T eq = superdiag.at(q, 0);
@@ -284,7 +228,14 @@ namespace solvers
         T t12 = dq * eq;
         T t22 = eq * eq + dqp1 * dqp1;
         T half = (t11 - t22) / T{ 2 };
-        T mu = t22 - t12 * t12 / (half + std::copysign(std::sqrt(half * half + t12 * t12), half));
+        return t22 - t12 * t12 / (half + std::copysign(std::sqrt(half * half + t12 * t12), half));
+    }
+
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    OPTIMIZE_FOR_SPEED void SingularValueDecomposition<T, Rows, Cols>::QrSweep(
+        std::size_t p, std::size_t q)
+    {
+        T mu = WilkinsonShift(q);
 
         T f = sigma.at(p, 0) * sigma.at(p, 0) - mu;
         T g = sigma.at(p, 0) * superdiag.at(p, 0);
@@ -329,6 +280,56 @@ namespace solvers
         }
 
         superdiag.at(q, 0) = f;
+    }
+
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    void SingularValueDecomposition<T, Rows, Cols>::MakeSingularValuesPositive()
+    {
+        for (std::size_t i = 0; i < Cols; ++i)
+        {
+            if (sigma.at(i, 0) < T{})
+            {
+                sigma.at(i, 0) = -sigma.at(i, 0);
+                for (std::size_t k = 0; k < Rows; ++k)
+                    uMat.at(k, i) = -uMat.at(k, i);
+            }
+        }
+    }
+
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    void SingularValueDecomposition<T, Rows, Cols>::SwapColumns(std::size_t i, std::size_t j)
+    {
+        T tmp = sigma.at(i, 0);
+        sigma.at(i, 0) = sigma.at(j, 0);
+        sigma.at(j, 0) = tmp;
+
+        for (std::size_t k = 0; k < Rows; ++k)
+        {
+            T tu = uMat.at(k, i);
+            uMat.at(k, i) = uMat.at(k, j);
+            uMat.at(k, j) = tu;
+        }
+        for (std::size_t k = 0; k < Cols; ++k)
+        {
+            T tv = vMat.at(k, i);
+            vMat.at(k, i) = vMat.at(k, j);
+            vMat.at(k, j) = tv;
+        }
+    }
+
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    void SingularValueDecomposition<T, Rows, Cols>::SortDescending()
+    {
+        for (std::size_t i = 0; i + 1 < Cols; ++i)
+        {
+            std::size_t maxIdx = i;
+            for (std::size_t j = i + 1; j < Cols; ++j)
+                if (sigma.at(j, 0) > sigma.at(maxIdx, 0))
+                    maxIdx = j;
+
+            if (maxIdx != i)
+                SwapColumns(i, maxIdx);
+        }
     }
 
     template<typename T, std::size_t Rows, std::size_t Cols>

@@ -22,6 +22,17 @@ namespace math
         return std::sqrt(sum);
     }
 
+    template<typename T, std::size_t N>
+    [[nodiscard]] OPTIMIZE_FOR_SPEED T OffDiagonalFrobeniusNorm(const Matrix<T, N, N>& a)
+    {
+        static_assert(std::is_floating_point_v<T>, "MatrixNorms supports floating-point types");
+        T sum{};
+        for (std::size_t i = 0; i < N; ++i)
+            for (std::size_t j = i + 1; j < N; ++j)
+                sum += a.at(i, j) * a.at(i, j) + a.at(j, i) * a.at(j, i);
+        return std::sqrt(sum);
+    }
+
     template<typename T, std::size_t Rows, std::size_t Cols>
     [[nodiscard]] OPTIMIZE_FOR_SPEED T OneNorm(const Matrix<T, Rows, Cols>& a)
     {

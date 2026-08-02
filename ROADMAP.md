@@ -24,12 +24,8 @@ Difficulty legend:
 
 ## Master list (by priority)
 
-
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
-| 40 | Feedback linearization                               | `nonlinear_control` (new) | ★★★★☆      |
-| 41 | Backstepping controller                              | `nonlinear_control` (new) | ★★★★☆      |
-| 42 | Symmetric eigenvalue solver (Jacobi)                 | `solvers`                 | ★★★★★      |
 | 44 | Total Least Squares                                  | `estimators/offline`      | ★★★★★      |
 | 45 | IIR filter design (Butterworth/Chebyshev + bilinear) | `filters/passive`         | ★★★★★      |
 | 46 | H∞ state-feedback control                            | `robust_control` (new)    | ★★★★★      |
@@ -225,17 +221,11 @@ the library does not yet expose. Detailed below under
 - **Algorithm / paper:** P. Kaminski, A. Bryson, S. Schmidt, "Discrete Square Root Filtering: A Survey of Current Techniques," *IEEE Trans. AC*, 16(6), 1971.
 - **Reuses:** [KalmanFilterBase.hpp](numerical/filters/active/KalmanFilterBase.hpp), [Cholesky](numerical/solvers/CholeskyDecomposition.hpp), item 27.
 
-### 41. Backstepping controller  *(float-first)*
-- **What:** Recursive Lyapunov-based design for strict-feedback systems, stabilizing one integrator stage at a time.
-- **Embedded value:** Systematic, provably-stable control for cascaded nonlinear plants (electromechanical, flight).
-- **Algorithm / paper:** M. Krstić, I. Kanellakopoulos, P. Kokotović, *Nonlinear and Adaptive Control Design* (1995).
-- **Reuses:** `math::Matrix`, new `nonlinear_control/` module.
-
 ---
 
 ## Tier 5 — Hard / research-grade ★★★★★
 
-### 42. Symmetric eigenvalue solver (Jacobi)  *(float-first)*
+### ~~42. Symmetric eigenvalue solver (Jacobi)~~  *(float-first)* ✓ Done
 - **What:** Cyclic Jacobi rotations for the eigenvalues/vectors of a symmetric matrix.
 - **Embedded value:** PCA/feature extraction, modal analysis, covariance conditioning, Gramian analysis.
 - **Algorithm / paper:** Golub & Van Loan, *Matrix Computations*, Ch. 8 (symmetric eigenproblem / cyclic Jacobi).

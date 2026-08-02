@@ -44,4 +44,40 @@ namespace math
         for (std::size_t i = start + 1; i < N; ++i)
             v.at(i, 0) = x.at(i, 0) * invV0;
     }
+
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    OPTIMIZE_FOR_SPEED void ApplyReflectorLeft(Matrix<T, Rows, Cols>& a, const Vector<T, Rows>& v, T beta,
+        std::size_t rowStart, std::size_t colStart)
+    {
+        static_assert(std::is_floating_point_v<T>, "ApplyReflectorLeft supports floating-point types only");
+
+        for (std::size_t j = colStart; j < Cols; ++j)
+        {
+            T dot{ T{} };
+            for (std::size_t i = rowStart; i < Rows; ++i)
+                dot += v.at(i, 0) * a.at(i, j);
+
+            T scale = beta * dot;
+            for (std::size_t i = rowStart; i < Rows; ++i)
+                a.at(i, j) -= scale * v.at(i, 0);
+        }
+    }
+
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    OPTIMIZE_FOR_SPEED void ApplyReflectorRight(Matrix<T, Rows, Cols>& a, const Vector<T, Cols>& v, T beta,
+        std::size_t rowStart, std::size_t colStart)
+    {
+        static_assert(std::is_floating_point_v<T>, "ApplyReflectorRight supports floating-point types only");
+
+        for (std::size_t i = rowStart; i < Rows; ++i)
+        {
+            T dot{ T{} };
+            for (std::size_t j = colStart; j < Cols; ++j)
+                dot += a.at(i, j) * v.at(j, 0);
+
+            T scale = beta * dot;
+            for (std::size_t j = colStart; j < Cols; ++j)
+                a.at(i, j) -= scale * v.at(j, 0);
+        }
+    }
 }

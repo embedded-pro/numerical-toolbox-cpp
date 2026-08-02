@@ -21,6 +21,18 @@ TEST_F(MatrixNormsTest, FrobeniusNorm)
     EXPECT_NEAR(result, 3.87298f, math::Tolerance<float>());
 }
 
+TEST_F(MatrixNormsTest, OffDiagonalFrobeniusNorm)
+{
+    math::Matrix<float, 3, 3> m{
+        { 5.0f, 3.0f, 0.0f },
+        { -3.0f, 7.0f, 4.0f },
+        { 0.0f, -4.0f, 9.0f }
+    };
+
+    float result = math::OffDiagonalFrobeniusNorm(m);
+    EXPECT_NEAR(result, 7.0710678f, math::Tolerance<float>());
+}
+
 TEST_F(MatrixNormsTest, OneNorm)
 {
     float result = math::OneNorm(a);

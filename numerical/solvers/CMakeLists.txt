@@ -17,6 +17,7 @@ target_sources(numerical.solver PRIVATE
     DormandPrince45.hpp
     DurandKerner.hpp
     GaussianElimination.hpp
+    JacobiEigenSolver.hpp
     LevinsonDurbin.hpp
     LuDecomposition.hpp
     LyapunovSylvester.hpp
@@ -32,6 +33,7 @@ numerical_add_coverage_sources(numerical.solver
     DiscreteAlgebraicRiccatiEquation.cpp
     DurandKerner.cpp
     GaussianElimination.cpp
+    JacobiEigenSolver.cpp
     LuDecomposition.cpp
     LyapunovSylvester.cpp
     QrDecomposition.cpp

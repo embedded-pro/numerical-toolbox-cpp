@@ -11,10 +11,12 @@ target_link_libraries(numerical.nonlinear_control ${NUMERICAL_VISIBILITY}
 )
 
 target_sources(numerical.nonlinear_control PRIVATE
+    BacksteppingControl.hpp
     FeedbackLinearization.hpp
 )
 
 numerical_add_coverage_sources(numerical.nonlinear_control
+    BacksteppingControl.cpp
     FeedbackLinearization.cpp
 )
 
