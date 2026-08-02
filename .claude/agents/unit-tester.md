@@ -42,8 +42,8 @@ property-based, conditioning stress, tolerance). Do not restate them here; apply
   seeded PRNGs write into stack buffers only.
 - **No redundant tests** — one behaviour per test; assert exactly the properties selected from the
   M-metrics and R-dimensions, not one test per parameter permutation.
-- **Independent reference** — never assert the implementation against its own output; cite the source
-  of every golden vector in a `// ref:` line. See the Anti-patterns in `TESTING.md`.
-- **No comments** except license, `NOLINT`, and the `// ref:` provenance line for a golden
-  vector / non-obvious tolerance. Allman braces, brace-init, PascalCase types/methods, camelCase members.
+- **Independent reference** — never assert the implementation against its own output. Cite the source
+  of every golden vector in your final report, never in the test file. See the Anti-patterns in `TESTING.md`.
+- **No comments** — none, ever, except license and `NOLINT`. No `// ref:` lines, no provenance or
+  tolerance annotations in source. Allman braces, brace-init, PascalCase types/methods, camelCase members.
 - Canonical rules: `AGENTS.md`. Testing rules: `.github/instructions/testing.instructions.md`.
