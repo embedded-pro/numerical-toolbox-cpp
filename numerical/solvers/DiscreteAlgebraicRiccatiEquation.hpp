@@ -87,6 +87,7 @@ namespace solvers
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class DiscreteAlgebraicRiccatiEquation<float, 1, 1>;
     extern template class DiscreteAlgebraicRiccatiEquation<float, 2, 1>;
+    extern template class DiscreteAlgebraicRiccatiEquation<float, 2, 2>;
     extern template class DiscreteAlgebraicRiccatiEquation<float, 4, 1>;
 #endif
 }
