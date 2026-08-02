@@ -77,10 +77,10 @@ section padded as a biquad with $b_2 = a_2 = 0$.
 
 ## Complexity Analysis
 
-| Case    | Time          | Space          | Notes                                |
-|---------|---------------|----------------|--------------------------------------|
-| Design  | $O(N)$        | $O(N)$ static  | One-off; no per-sample cost          |
-| Filter  | $O(N/2)$      | $O(N/2)$ state | Delegated to BiquadCascade           |
+| Case   | Time     | Space          | Notes                       |
+|--------|----------|----------------|-----------------------------|
+| Design | $O(N)$   | $O(N)$ static  | One-off; no per-sample cost |
+| Filter | $O(N/2)$ | $O(N/2)$ state | Delegated to BiquadCascade  |
 
 All arrays are bounded by the compile-time `MaxOrder` template parameter; no heap is used.
 
