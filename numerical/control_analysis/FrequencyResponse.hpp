@@ -8,6 +8,7 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 #include <cmath>
 #include <complex>
+#include <limits>
 #include <numbers>
 #include <span>
 #include <tuple>
@@ -72,9 +73,10 @@ namespace control_analysis
                 denominator.real(static_cast<T>(1));
 
             auto h = numerator / denominator;
+            auto magnitude = std::max(std::abs(h), std::numeric_limits<T>::min());
 
             frequencies.emplace_back(f);
-            response.emplace_back(static_cast<T>(20) * std::log10(std::abs(h)));
+            response.emplace_back(static_cast<T>(20) * std::log10(magnitude));
             phase.emplace_back(std::arg(h) * static_cast<T>(180) / static_cast<T>(std::numbers::pi));
         }
 
