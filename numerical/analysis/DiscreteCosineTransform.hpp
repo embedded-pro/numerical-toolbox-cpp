@@ -31,6 +31,7 @@ namespace analysis
     private:
         FastFourierTransform<QNumberType>& fft;
         typename infra::BoundedVector<QNumberType>::template WithMaxSize<Length> output;
+        typename infra::BoundedVector<QNumberType>::template WithMaxSize<Length> reordered;
         typename VectorComplex::template WithMaxSize<Length> complexBuffer;
     };
 
@@ -41,6 +42,7 @@ namespace analysis
         : fft(fft)
     {
         output.resize(Length);
+        reordered.resize(Length);
         complexBuffer.resize(Length);
     }
 
@@ -49,7 +51,13 @@ namespace analysis
         typename DiscreteConsineTransform<QNumberType, Length>::VectorReal&
         DiscreteConsineTransform<QNumberType, Length>::Forward(VectorReal& input)
     {
-        auto& fftResult = fft.Forward(input);
+        for (std::size_t n = 0; n < Length / 2; ++n)
+        {
+            reordered[n] = input[2 * n];
+            reordered[Length - 1 - n] = input[2 * n + 1];
+        }
+
+        auto& fftResult = fft.Forward(reordered);
 
         output[0] = QNumberType(math::ToFloat(fftResult[0].Real()) / std::sqrt(static_cast<float>(Length)));
 
@@ -70,18 +78,31 @@ namespace analysis
     template<typename QNumberType, std::size_t Length>
     typename DiscreteConsineTransform<QNumberType, Length>::VectorReal& DiscreteConsineTransform<QNumberType, Length>::Inverse(VectorReal& input)
     {
-        complexBuffer[0] = math::Complex<QNumberType>{ QNumberType(math::ToFloat(input[0]) * std::sqrt(static_cast<float>(Length))), QNumberType(0.0f) };
+        float sqrtN = std::sqrt(static_cast<float>(Length));
+
+        complexBuffer[0] = math::Complex<QNumberType>{ QNumberType(math::ToFloat(input[0]) * sqrtN), QNumberType(0.0f) };
 
         for (std::size_t k = 1; k < Length; ++k)
         {
-            float angle = static_cast<float>(k) * std::numbers::pi_v<float> / (2.0f * static_cast<float>(Length));
-            float scale = std::sqrt(static_cast<float>(Length)) / 2.0f;
+            float real = math::ToFloat(input[k]) * sqrtN / 2.0f;
+            float imag = -math::ToFloat(input[Length - k]) * sqrtN / 2.0f;
 
-            float value = math::ToFloat(input[k]) * scale;
-            complexBuffer[k] = math::Complex<QNumberType>{ QNumberType(value * std::cos(angle)), QNumberType(value * std::sin(angle)) };
+            float angle = static_cast<float>(k) * std::numbers::pi_v<float> / (2.0f * static_cast<float>(Length));
+            float cosine = std::cos(angle);
+            float sine = std::sin(angle);
+
+            complexBuffer[k] = math::Complex<QNumberType>{ QNumberType(real * cosine - imag * sine), QNumberType(real * sine + imag * cosine) };
         }
 
-        return fft.Inverse(complexBuffer);
+        auto& timeDomain = fft.Inverse(complexBuffer);
+
+        for (std::size_t n = 0; n < Length / 2; ++n)
+        {
+            output[2 * n] = timeDomain[n];
+            output[2 * n + 1] = timeDomain[Length - 1 - n];
+        }
+
+        return output;
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
