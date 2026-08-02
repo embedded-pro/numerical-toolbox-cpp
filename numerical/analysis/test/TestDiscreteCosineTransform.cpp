@@ -34,8 +34,8 @@ namespace
     class MockFft : public analysis::FastFourierTransform<float>
     {
     public:
-        MOCK_METHOD(VectorComplex&, Forward, (VectorReal& input), (override));
-        MOCK_METHOD(VectorReal&, Inverse, (VectorComplex& input), (override));
+        MOCK_METHOD(VectorComplex&, Forward, (VectorReal & input), (override));
+        MOCK_METHOD(VectorReal&, Inverse, (VectorComplex & input), (override));
     };
 
     class TestDiscreteCosineTransform : public ::testing::Test
