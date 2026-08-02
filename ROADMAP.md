@@ -26,7 +26,6 @@ Difficulty legend:
 
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
-| 43 | Singular Value Decomposition (Golub-Kahan)           | `solvers`                 | ★★★★★      |
 | 44 | Total Least Squares                                  | `estimators/offline`      | ★★★★★      |
 | 45 | IIR filter design (Butterworth/Chebyshev + bilinear) | `filters/passive`         | ★★★★★      |
 | 46 | H∞ state-feedback control                            | `robust_control` (new)    | ★★★★★      |

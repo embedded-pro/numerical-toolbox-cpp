@@ -18,5 +18,6 @@ target_sources(numerical.solvers_test PRIVATE
     TestLyapunovSylvester.cpp
     TestQrDecomposition.cpp
     TestRungeKuttaIntegrators.cpp
+    TestSingularValueDecomposition.cpp
     TestSpectralRadius.cpp
 )

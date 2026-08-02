@@ -24,6 +24,7 @@ target_sources(numerical.solver PRIVATE
     OdeSystem.hpp
     QrDecomposition.hpp
     RungeKuttaIntegrators.hpp
+    SingularValueDecomposition.hpp
     Solver.hpp
     SpectralRadius.hpp
 )
@@ -37,6 +38,7 @@ numerical_add_coverage_sources(numerical.solver
     LyapunovSylvester.cpp
     QrDecomposition.cpp
     RungeKuttaIntegrators.cpp
+    SingularValueDecomposition.cpp
     SpectralRadius.cpp
 )
 
