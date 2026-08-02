@@ -4,6 +4,7 @@
 #include "gtest/gtest.h"
 #include <array>
 #include <cmath>
+#include <numbers>
 
 namespace
 {
@@ -59,6 +60,45 @@ namespace
 
     using TestedTypes = ::testing::Types<float, math::Q15, math::Q31>;
     TYPED_TEST_SUITE(TestFastFourierTransform, TestedTypes);
+
+    class RealTwiddleFactors8 : public analysis::TwiddleFactors<float, 4>
+    {
+    public:
+        RealTwiddleFactors8()
+        {
+            for (std::size_t k{ 0 }; k < 4; ++k)
+            {
+                float angle{ -2.0f * std::numbers::pi_v<float> * static_cast<float>(k) / 8.0f };
+                factors[k] = math::Complex<float>{ std::cos(angle), std::sin(angle) };
+            }
+        }
+
+        math::Complex<float>& operator[](std::size_t n) override
+        {
+            return factors[n];
+        }
+
+    private:
+        std::array<math::Complex<float>, 4> factors{};
+    };
+
+    class TestFastFourierTransformFloat : public ::testing::Test
+    {
+    public:
+        static constexpr std::size_t Length = 8;
+        using VectorComplex = analysis::FastFourierTransform<float>::VectorComplex;
+        using VectorReal = analysis::FastFourierTransform<float>::VectorReal;
+
+        void SetUp() override
+        {
+            fft.emplace(twiddleFactors);
+        }
+
+        RealTwiddleFactors8 twiddleFactors{};
+        std::optional<analysis::FastFourierTransformRadix2Impl<float, Length>> fft;
+        typename VectorReal::template WithMaxSize<Length> timeDomain;
+        typename VectorComplex::template WithMaxSize<Length> frequencyDomain;
+    };
 }
 
 TYPED_TEST(TestFastFourierTransform, zero_input_produces_zero_output)
@@ -117,4 +157,141 @@ TYPED_TEST(TestFastFourierTransform, nyquist_frequency_detection)
     EXPECT_NEAR(math::ToFloat(CalculateMagnitude(result[TestFastFourierTransform<TypeParam>::Length / 2])),
         static_cast<float>(TestFastFourierTransform<TypeParam>::Length) * 0.1f,
         math::Tolerance<TypeParam>());
+}
+
+TEST_F(TestFastFourierTransformFloat, sinusoid_bin1_magnitude_and_phase_match_dft)
+{
+    constexpr std::size_t k{ 1 };
+    timeDomain.resize(Length);
+    for (std::size_t n{ 0 }; n < Length; ++n)
+        timeDomain[n] = std::cos(2.0f * std::numbers::pi_v<float> * static_cast<float>(k) * static_cast<float>(n) / static_cast<float>(Length));
+
+    auto& result = fft->Forward(timeDomain);
+
+    float refReal{ 0.0f };
+    float refImag{ 0.0f };
+    for (std::size_t n{ 0 }; n < Length; ++n)
+    {
+        float angle{ -2.0f * std::numbers::pi_v<float> * static_cast<float>(k) * static_cast<float>(n) / static_cast<float>(Length) };
+        refReal += timeDomain[n] * std::cos(angle);
+        refImag += timeDomain[n] * std::sin(angle);
+    }
+
+    EXPECT_NEAR(result[k].Real(), refReal, 1e-3f);
+    EXPECT_NEAR(result[k].Imaginary(), refImag, 1e-3f);
+}
+
+TEST_F(TestFastFourierTransformFloat, impulse_produces_flat_magnitude_spectrum)
+{
+    timeDomain.resize(Length, 0.0f);
+    timeDomain[0] = 1.0f;
+
+    auto& result = fft->Forward(timeDomain);
+
+    for (std::size_t k{ 0 }; k < Length; ++k)
+    {
+        float mag{ std::sqrt(result[k].Real() * result[k].Real() + result[k].Imaginary() * result[k].Imaginary()) };
+        EXPECT_NEAR(mag, 1.0f, 1e-3f);
+    }
+}
+
+TEST_F(TestFastFourierTransformFloat, parseval_energy_preserved)
+{
+    constexpr std::array<float, 8> signal{ 0.2f, -0.4f, 0.6f, 0.1f, -0.3f, 0.5f, -0.1f, 0.8f };
+    timeDomain.resize(Length);
+    for (std::size_t n{ 0 }; n < Length; ++n)
+        timeDomain[n] = signal[n];
+
+    float timePower{ 0.0f };
+    for (float s : signal)
+        timePower += s * s;
+
+    auto& result = fft->Forward(timeDomain);
+
+    float freqPower{ 0.0f };
+    for (std::size_t k{ 0 }; k < Length; ++k)
+        freqPower += result[k].Real() * result[k].Real() + result[k].Imaginary() * result[k].Imaginary();
+    freqPower /= static_cast<float>(Length);
+
+    EXPECT_NEAR(freqPower, timePower, 1e-3f);
+}
+
+TEST_F(TestFastFourierTransformFloat, linearity_forward_transform)
+{
+    constexpr float a{ 3.0f };
+    constexpr float b{ -2.0f };
+    constexpr std::array<float, 8> x1{ 1.0f, 0.5f, -0.5f, -1.0f, -0.5f, 0.5f, 1.0f, 0.5f };
+    constexpr std::array<float, 8> x2{ 0.3f, -0.1f, 0.4f, -0.2f, 0.5f, -0.3f, 0.1f, -0.4f };
+
+    typename VectorReal::template WithMaxSize<Length> in1{};
+    typename VectorReal::template WithMaxSize<Length> in2{};
+    typename VectorReal::template WithMaxSize<Length> inCombined{};
+    in1.resize(Length);
+    in2.resize(Length);
+    inCombined.resize(Length);
+
+    for (std::size_t n{ 0 }; n < Length; ++n)
+    {
+        in1[n] = x1[n];
+        in2[n] = x2[n];
+        inCombined[n] = a * x1[n] + b * x2[n];
+    }
+
+    auto& s1{ fft->Forward(in1) };
+    typename VectorComplex::template WithMaxSize<Length> s1Copy{};
+    s1Copy.resize(Length);
+    for (std::size_t k{ 0 }; k < Length; ++k)
+        s1Copy[k] = s1[k];
+
+    auto& s2{ fft->Forward(in2) };
+    typename VectorComplex::template WithMaxSize<Length> s2Copy{};
+    s2Copy.resize(Length);
+    for (std::size_t k{ 0 }; k < Length; ++k)
+        s2Copy[k] = s2[k];
+
+    auto& sCombined{ fft->Forward(inCombined) };
+
+    for (std::size_t k{ 0 }; k < Length; ++k)
+    {
+        EXPECT_NEAR(sCombined[k].Real(), a * s1Copy[k].Real() + b * s2Copy[k].Real(), 1e-3f);
+        EXPECT_NEAR(sCombined[k].Imaginary(), a * s1Copy[k].Imaginary() + b * s2Copy[k].Imaginary(), 1e-3f);
+    }
+}
+
+TEST_F(TestFastFourierTransformFloat, inverse_of_known_spectrum_recovers_time_domain)
+{
+    constexpr std::array<float, 8> expected{ 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+
+    frequencyDomain.resize(Length);
+    for (std::size_t k{ 0 }; k < Length; ++k)
+        frequencyDomain[k] = math::Complex<float>{ 1.0f, 0.0f };
+
+    auto& result = fft->Inverse(frequencyDomain);
+
+    for (std::size_t n{ 0 }; n < Length; ++n)
+        EXPECT_NEAR(result[n], expected[n], 1e-3f);
+}
+
+TEST_F(TestFastFourierTransformFloat, all_bins_match_direct_dft)
+{
+    constexpr std::array<float, 8> signal{ 0.1f, 0.3f, -0.2f, 0.5f, 0.4f, -0.1f, 0.0f, 0.2f };
+    timeDomain.resize(Length);
+    for (std::size_t n{ 0 }; n < Length; ++n)
+        timeDomain[n] = signal[n];
+
+    auto& result = fft->Forward(timeDomain);
+
+    for (std::size_t k{ 0 }; k < Length; ++k)
+    {
+        float refReal{ 0.0f };
+        float refImag{ 0.0f };
+        for (std::size_t n{ 0 }; n < Length; ++n)
+        {
+            float angle{ -2.0f * std::numbers::pi_v<float> * static_cast<float>(k) * static_cast<float>(n) / static_cast<float>(Length) };
+            refReal += signal[n] * std::cos(angle);
+            refImag += signal[n] * std::sin(angle);
+        }
+        EXPECT_NEAR(result[k].Real(), refReal, 1e-3f);
+        EXPECT_NEAR(result[k].Imaginary(), refImag, 1e-3f);
+    }
 }
