@@ -81,12 +81,30 @@ Fit $b = 2a$ from four clean points $a = (1,2,3,4)$, $b = (2,4,6,8)$.
 - **OLS counterparts** — [Linear Regression](LinearRegression.md) and
   [Polynomial Fitting](PolynomialFitting.md) solve the noise-free-regressor case.
 
-## Reference
+## Applications
 
-G. H. Golub, C. F. Van Loan, "An Analysis of the Total Least Squares Problem,"
-*SIAM J. Numer. Anal.*, 17(6), 1980.
+- **Sensor calibration** — fitting one measured quantity against another (two drifting sensors,
+  current vs. torque, strain vs. force) where *both* channels carry noise.
+- **System identification** — parameter estimation when the regressors themselves are measured,
+  removing the OLS bias that would corrupt an identified plant model.
+- **Line/plane fitting** — geometric fitting that minimizes perpendicular distance, e.g. estimating
+  a boundary or feature direction from noisy point clouds.
+- **Model reduction** — the smallest-singular-direction analysis flags near-degenerate fits and
+  quantifies the orthogonal residual.
 
-## See Also
+## Connections to Other Algorithms
 
-- [`SingularValueDecomposition`](../solvers/SingularValueDecomposition.md) — the numerical engine.
-- [Linear Regression](LinearRegression.md), [Polynomial Fitting](PolynomialFitting.md) — OLS fits.
+- [`SingularValueDecomposition`](../solvers/SingularValueDecomposition.md) — the numerical engine;
+  TLS is the SVD of `[A | b]` read from the smallest-singular-value end.
+- [Linear Regression](LinearRegression.md) / [Polynomial Fitting](PolynomialFitting.md) — the
+  ordinary least-squares counterparts (exact regressors, vertical residuals).
+- Symmetric eigenvalue / [Jacobi eigen solver](../solvers/JacobiEigenSolver.md) — TLS on the
+  augmented normal matrix `[A | b]ᵀ[A | b]` reduces to its smallest-eigenvalue eigenvector.
+
+## References & Further Reading
+
+- G. H. Golub, C. F. Van Loan, "An Analysis of the Total Least Squares Problem,"
+  *SIAM J. Numer. Anal.*, 17(6), 1980.
+- S. Van Huffel, J. Vandewalle, *The Total Least Squares Problem: Computational Aspects and
+  Analysis*, SIAM, 1991.
+- G. H. Golub, C. F. Van Loan, *Matrix Computations*, 4th ed., Ch. 6 (least squares) & Ch. 8 (SVD).
