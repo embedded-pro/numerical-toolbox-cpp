@@ -76,10 +76,10 @@ bisection on $[\gamma_{\min}, \gamma_{\max}]$ converges to $\gamma^*$ at a linea
 
 ## Complexity Analysis
 
-| Phase        | Time Complexity                              | Space | Notes |
-|--------------|----------------------------------------------|-------|-------|
-| Synthesize   | $O(\log((\gamma_{\max}-\gamma_{\min})/\epsilon) \cdot n^3)$ | $O(n^2)$ | Dominated by iterative DARE solves |
-| ComputeControl | $O(n_u \cdot n)$                           | $O(1)$ | Single matrix-vector multiply |
+| Phase          | Time Complexity                                             | Space    | Notes                              |
+|----------------|-------------------------------------------------------------|----------|------------------------------------|
+| Synthesize     | $O(\log((\gamma_{\max}-\gamma_{\min})/\epsilon) \cdot n^3)$ | $O(n^2)$ | Dominated by iterative DARE solves |
+| ComputeControl | $O(n_u \cdot n)$                                            | $O(1)$   | Single matrix-vector multiply      |
 
 ## Step-by-Step Walkthrough
 
