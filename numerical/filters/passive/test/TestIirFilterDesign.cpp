@@ -127,6 +127,57 @@ TEST_F(TestIirFilterDesign, highpass_blocks_dc)
     EXPECT_LT(dcMag, 0.05f);
 }
 
+TEST_F(TestIirFilterDesign, butterworth_lp_odd_order_dc_gain_unity)
+{
+    constexpr float fs{ 1000.0f };
+    const std::size_t n{ designer.Design(filters::passive::Prototype::Butterworth, filters::passive::Kind::LowPass, 3, 100.0f, fs) };
+    ASSERT_EQ(n, 2u);
+
+    const float dcMag{ MeasureMagnitude(designer, 0.5f, fs, n) };
+    EXPECT_NEAR(dcMag, 1.0f, 5e-2f);
+}
+
+TEST_F(TestIirFilterDesign, bandpass_passes_center_over_edges)
+{
+    constexpr float fs{ 1000.0f };
+    constexpr float fc{ 100.0f };
+    const std::size_t n{ designer.Design(filters::passive::Prototype::Butterworth, filters::passive::Kind::BandPass, 2, fc, fs) };
+    ASSERT_GT(n, 0u);
+
+    const float centerMag{ MeasureMagnitude(designer, fc, fs, n) };
+    const float dcMag{ MeasureMagnitude(designer, 0.5f, fs, n) };
+    const float highMag{ MeasureMagnitude(designer, 450.0f, fs, n) };
+
+    EXPECT_GT(centerMag, dcMag);
+    EXPECT_GT(centerMag, highMag);
+}
+
+TEST_F(TestIirFilterDesign, bandstop_attenuates_center)
+{
+    constexpr float fs{ 1000.0f };
+    constexpr float fc{ 100.0f };
+    const std::size_t n{ designer.Design(filters::passive::Prototype::Butterworth, filters::passive::Kind::BandStop, 2, fc, fs) };
+    ASSERT_GT(n, 0u);
+
+    const float notchMag{ MeasureMagnitude(designer, fc, fs, n) };
+    const float passMag{ MeasureMagnitude(designer, 0.5f, fs, n) };
+
+    EXPECT_LT(notchMag, passMag);
+}
+
+TEST_F(TestIirFilterDesign, section_out_of_range_is_zeroed)
+{
+    const std::size_t n{ designer.Design(filters::passive::Prototype::Butterworth, filters::passive::Kind::LowPass, 2, 100.0f, 1000.0f) };
+    ASSERT_EQ(n, 1u);
+
+    const auto c{ designer.Section(n) };
+    EXPECT_EQ(c.b0, 0.0f);
+    EXPECT_EQ(c.b1, 0.0f);
+    EXPECT_EQ(c.b2, 0.0f);
+    EXPECT_EQ(c.a1, 0.0f);
+    EXPECT_EQ(c.a2, 0.0f);
+}
+
 TEST_F(TestIirFilterDesign, design_is_stable)
 {
     constexpr float fs{ 1000.0f };
