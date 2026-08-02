@@ -66,6 +66,70 @@ Canonical rules still apply ([AGENTS.md](AGENTS.md), [testing.instructions.md](.
 
 ● primary   ○ situational
 
+## Robustness dimensions (R1–R6) — layer these over the M-metrics
+
+The M-metrics say *which mathematical property* to assert. These say *how hard to push* and *where
+correct implementations still break*. Every algorithm gets R1–R3; add R4–R6 where the family warrants.
+
+### R1 — Reference provenance (every accuracy assertion)
+Rank references, best first: (1) **closed form / analytic**; (2) **cited golden vector** — values
+computed offline by an authoritative tool (SciPy/Octave/MATLAB/NumPy) or a textbook worked example,
+embedded as `constexpr` stack data with a one-line `// ref:` citation (tool+version/function or
+book+page); (3) **cross-method** — a distinct method already in the tree. Never assert an
+implementation against its own prior output.
+
+**Canonical reference systems / "plants":**
+- **Controllers / control analysis** — mass-spring-damper, DC-motor, double integrator, inverted
+  pendulum / cart-pole; Åström & Murray *Feedback Systems* and Franklin/Powell *Feedback Control*
+  worked examples. Assert step metrics, closed-loop poles, LQR/LQG gains vs the Riccati solution.
+- **Solvers (linear/eigen/conditioning)** — Hilbert (ill-conditioning), Wilkinson (known
+  eigenvalues), Pascal/Toeplitz, Moler; SPD systems from Golub & Van Loan *Matrix Computations*.
+- **Solvers (ODE)** — analytic IVPs: `y'=-λy`, harmonic oscillator, Van der Pol, Lotka–Volterra;
+  assert order-of-accuracy slope (`h^p`) and energy drift for conservative systems.
+- **Transforms / filters** — known pairs (δ, sinusoid, DC); Butterworth/Chebyshev vs `scipy.signal`.
+- **Estimators / regression** — simulated known linear-Gaussian systems, AR processes with known
+  coefficients, data on a known line/polynomial. Assert RMSE vs truth, NEES/NIS in χ² band, R².
+- **Neural network** — hand-computed forward/backward passes; finite-difference gradient checks.
+
+### R2 — Unhappy flow (no exceptions here — errors are `std::optional`/status enums)
+Force **every** failure return and assert the *failure* value, not just success: non-SPD Cholesky,
+singular/rank-deficient solve, non-convergence at `maxIterations`, rank-deficient
+controllability/observability, dimension/domain violations. Add degenerate inputs (zero/constant
+signal, repeated roots, λ=0 and λ→∞), extreme magnitudes (assert no NaN/Inf leak, documented
+saturation/anti-windup). Test *defined* precondition behaviour (clamp/pass-through/reset); do **not**
+write death tests for `assert`-guarded UB.
+
+### R3 — Determinism & reproducibility (stateful/iterative algorithms)
+Same input twice ⇒ identical output (`EXPECT_FLOAT_EQ`). `Reset()`/re-`Enable` restores exact initial
+state (post-reset run == fresh instance). Sync vs async and chunked vs single-shot variants agree.
+Two interleaved instances don't interfere.
+
+### R4 — Property-based / metamorphic (invariant-rich families)
+Assert a property over a **bounded, stack-allocated, deterministically seeded** (`std::mt19937`, fixed
+seed) sweep — linearity, scaling/homogeneity, round-trip `Inverse(Forward(x))≈x`, shift/permutation
+symmetry, monotonicity. One `TEST_F` per property looping the sweep (not one test per parameter).
+
+### R5 — Conditioning & robustness stress (M9 families)
+Drive progressively **ill-conditioned** inputs (Hilbert, near-collinear regressors, near-repeated
+poles) and assert documented degradation or clean failure — never a silent wrong answer. Perturb by
+~ULP and check sensitivity stays within the conditioning bound. Run long horizons and assert bounded
+state / SPD covariance (no drift to NaN/Inf).
+
+### R6 — Tolerance discipline
+Default to `math::Tolerance<float>()`; justify any hand-picked tolerance with a `// ref:`/note tied to
+the error budget (accumulation length, condition number, iterations). Relative error for large
+magnitudes, absolute near zero, ULP for elementary math. Assert convergence *rate/order*, not only the
+final value.
+
+### Per-algorithm checklist
+- [ ] Every family M-metric has a test with an independent reference (R1).
+- [ ] Every `std::optional`/status return has both a success and a failure test (R2).
+- [ ] Degenerate + extreme inputs assert no NaN/Inf and the documented contract (R2).
+- [ ] Determinism + `Reset()`/idempotence covered for stateful algorithms (R3).
+- [ ] ≥1 invariant property-checked over a seeded bounded sweep where applicable (R4).
+- [ ] Ill-conditioning / long-horizon stress covered for M9 families (R5).
+- [ ] Coverage ≥ 90 %; any uncovered branch is a missing R2 test or is justified.
+
 ---
 
 ## Per-family detail
