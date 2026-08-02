@@ -27,7 +27,6 @@ Difficulty legend:
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
 | 45 | IIR filter design (Butterworth/Chebyshev + bilinear) | `filters/passive`         | ★★★★★      |
-| 46 | H∞ state-feedback control                            | `robust_control` (new)    | ★★★★★      |
 | 47 | Model Reference Adaptive Control (MRAC)              | `nonlinear_control` (new) | ★★★★★      |
 
 Items 48–52 are the **evaluation & metrics primitives** — reusable quantities the per-family
@@ -248,7 +247,7 @@ the library does not yet expose. Detailed below under
 - **Algorithm / paper:** T. W. Parks, C. S. Burrus, *Digital Filter Design* (1987); bilinear transform — Oppenheim & Schafer, *DTSP*.
 - **Reuses:** Item 15 (biquad target), `math::ComplexNumber`, item 23 (root placement).
 
-### 46. H∞ state-feedback control  *(float-first)*
+### ~~46. H∞ state-feedback control~~  *(float-first)* ✓ Done
 - **What:** Robust optimal control minimizing the worst-case disturbance-to-error gain via a Riccati/LMI solution.
 - **Embedded value:** Guaranteed performance under bounded model uncertainty for safety-critical loops.
 - **Algorithm / paper:** J. Doyle, K. Glover, P. Khargonekar, B. Francis, "State-Space Solutions to Standard H₂ and H∞ Control Problems," *IEEE Trans. AC*, 34(8), 1989.
