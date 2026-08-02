@@ -30,7 +30,6 @@ Difficulty legend:
 | 40 | Feedback linearization                               | `nonlinear_control` (new) | ★★★★☆      |
 | 41 | Backstepping controller                              | `nonlinear_control` (new) | ★★★★☆      |
 | 42 | Symmetric eigenvalue solver (Jacobi)                 | `solvers`                 | ★★★★★      |
-| 43 | Singular Value Decomposition (Golub-Kahan)           | `solvers`                 | ★★★★★      |
 | 44 | Total Least Squares                                  | `estimators/offline`      | ★★★★★      |
 | 45 | IIR filter design (Butterworth/Chebyshev + bilinear) | `filters/passive`         | ★★★★★      |
 | 46 | H∞ state-feedback control                            | `robust_control` (new)    | ★★★★★      |
