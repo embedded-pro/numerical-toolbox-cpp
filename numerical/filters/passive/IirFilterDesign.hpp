@@ -141,7 +141,7 @@ namespace filters::passive
         std::array<bool, 32>& used, ComplexT p) noexcept
     {
         std::size_t conjIdx{ numA };
-        T bestDist{ T{ 1e30 } };
+        T bestDist{ static_cast<T>(1e30) };
         for (std::size_t j{ 0 }; j < numA; ++j)
         {
             if (!used[j])
@@ -166,7 +166,7 @@ namespace filters::passive
         const ComplexT p{ az[idx] };
         used[idx] = true;
 
-        if (std::abs(p.Imaginary()) > T{ 1e-6 })
+        if (std::abs(p.Imaginary()) > static_cast<T>(1e-6))
         {
             MarkConjugate(az, numA, used, p);
             a1 = -T{ 2 } * p.Real();
@@ -220,13 +220,13 @@ namespace filters::passive
         used[bi] = true;
         ++bi;
 
-        if (std::abs(z1.Imaginary()) > T{ 1e-6 } && bi < numB && !used[bi])
+        if (std::abs(z1.Imaginary()) > static_cast<T>(1e-6) && bi < numB && !used[bi])
         {
             used[bi] = true;
             ++bi;
             PairComplexZero(z1, b1, b2);
         }
-        else if (std::abs(z1.Imaginary()) <= T{ 1e-6 })
+        else if (std::abs(z1.Imaginary()) <= static_cast<T>(1e-6))
         {
             PairRealZeros(bz, numB, used, bi, z1, b1, b2);
         }
@@ -256,7 +256,7 @@ namespace filters::passive
 
             const T sectionGain{ (count == 0) ? gain : T{ 1 } };
 
-            if (std::abs(a2) < T{ 1e-10 })
+            if (std::abs(a2) < static_cast<T>(1e-10))
                 out[count] = { sectionGain * b0, sectionGain * b1, T{ 0 }, a1, T{ 0 } };
             else
                 out[count] = { sectionGain * b0, sectionGain * b1, sectionGain * b2, a1, a2 };
