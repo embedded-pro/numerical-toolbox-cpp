@@ -34,6 +34,14 @@ namespace math
             return Complex(newReal, newImag);
         }
 
+        friend Complex operator/(const Complex& lhs, const Complex& rhs)
+        {
+            QNumberType denom = rhs.real * rhs.real + rhs.imag * rhs.imag;
+            QNumberType newReal = (lhs.real * rhs.real + lhs.imag * rhs.imag) / denom;
+            QNumberType newImag = (lhs.imag * rhs.real - lhs.real * rhs.imag) / denom;
+            return Complex(newReal, newImag);
+        }
+
         Complex& operator+=(const Complex& other);
         Complex& operator-=(const Complex& other);
         Complex& operator*=(const Complex& other);

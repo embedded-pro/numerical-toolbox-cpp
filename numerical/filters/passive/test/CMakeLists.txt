@@ -15,6 +15,7 @@ target_sources(numerical.filters.passive_test PRIVATE
     TestExponentialMovingAverage.cpp
     TestFir.cpp
     TestIir.cpp
+    TestIirFilterDesign.cpp
     TestMedianFilter.cpp
     TestMovingAverage.cpp
     TestNotchCombFilter.cpp
