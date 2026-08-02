@@ -50,12 +50,12 @@ input perturbations by a factor of $\kappa$ in the least-squares solution.
 
 ## Complexity Analysis
 
-| Phase              | Time                                | Space      | Notes                                           |
-|--------------------|-------------------------------------|------------|-------------------------------------------------|
-| Bidiagonalization  | $O(mn^2 - n^3/3)$                   | $O(mn)$    | Two-sided Householder reflectors                |
-| QR sweeps          | $O(n^2)$ per iteration, $O(n)$ total iterations | $O(n^2)$ | Golub-Reinsch implicit-shift; converges fast |
-| Pseudo-inverse     | $O(n^2 m)$                          | $O(nm)$    | Matrix triple product $V \Sigma^+ U^\top$       |
-| Total              | $O(mn^2 + n^3)$                     | $O(mn)$    | Dominated by bidiagonalization                  |
+| Phase             | Time                                            | Space    | Notes                                        |
+|-------------------|-------------------------------------------------|----------|----------------------------------------------|
+| Bidiagonalization | $O(mn^2 - n^3/3)$                               | $O(mn)$  | Two-sided Householder reflectors             |
+| QR sweeps         | $O(n^2)$ per iteration, $O(n)$ total iterations | $O(n^2)$ | Golub-Reinsch implicit-shift; converges fast |
+| Pseudo-inverse    | $O(n^2 m)$                                      | $O(nm)$  | Matrix triple product $V \Sigma^+ U^\top$    |
+| Total             | $O(mn^2 + n^3)$                                 | $O(mn)$  | Dominated by bidiagonalization               |
 
 All storage is stack-allocated; no heap is used. The bidiagonal form is stored implicitly in
 the working copy of $A$ alongside the Householder reflector scalars.
