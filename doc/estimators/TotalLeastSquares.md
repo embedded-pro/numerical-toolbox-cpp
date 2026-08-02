@@ -47,11 +47,11 @@ all-zero regressor column) and no finite coefficient vector satisfies the fit �
 
 ## Complexity Analysis
 
-| Case    | Time                | Space            | Notes                                             |
-|---------|---------------------|------------------|---------------------------------------------------|
-| Best    | $O(m\,n^2)$         | $O(m\,n)$        | Golub–Kahan bidiagonalization dominates           |
-| Average | $O(m\,n^2)$         | $O(m\,n)$        | Implicit-QR sweeps converge in $O(n)$ per value   |
-| Worst   | $O(m\,n^2)$         | $O(m\,n)$        | Bounded iteration cap in the SVD engine           |
+| Case    | Time        | Space     | Notes                                           |
+|---------|-------------|-----------|-------------------------------------------------|
+| Best    | $O(m\,n^2)$ | $O(m\,n)$ | Golub–Kahan bidiagonalization dominates         |
+| Average | $O(m\,n^2)$ | $O(m\,n)$ | Implicit-QR sweeps converge in $O(n)$ per value |
+| Worst   | $O(m\,n^2)$ | $O(m\,n)$ | Bounded iteration cap in the SVD engine         |
 
 All storage is stack-allocated (`std::array`-backed `math::Matrix`); no heap, no recursion.
 
