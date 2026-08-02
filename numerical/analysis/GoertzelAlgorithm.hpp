@@ -73,8 +73,9 @@ namespace analysis
     template<typename T>
     math::Complex<T> GoertzelAlgorithm<T>::Result() const
     {
-        T real{ s1 - s2 * cosine };
-        T imag{ s2 * sine };
+        T sExtra{ coeff * s1 - s2 };
+        T real{ sExtra - s1 * cosine };
+        T imag{ s1 * sine };
         return math::Complex<T>{ real, imag };
     }
 
