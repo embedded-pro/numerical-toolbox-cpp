@@ -6,78 +6,78 @@
 
 #include "infra/util/BoundedVector.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
-#include "numerical/math/QNumber.hpp"
 #include <cmath>
 #include <complex>
+#include <limits>
+#include <numbers>
 #include <span>
 #include <tuple>
 
 namespace control_analysis
 {
-    template<typename QNumberType, std::size_t NumberOfPoints>
+    template<typename T, std::size_t NumberOfPoints>
     class FrequencyResponse
     {
-        static_assert(math::is_qnumber_v<QNumberType> ||
-                          std::is_floating_point_v<QNumberType>,
-            "FrequencyResponse can only be instantiated with math::QNumber types.");
+        static_assert(std::is_floating_point_v<T>, "FrequencyResponse supports floating-point types");
 
     public:
-        using Vector = infra::BoundedVector<float>::WithMaxSize<NumberOfPoints>;
+        using Vector = typename infra::BoundedVector<T>::template WithMaxSize<NumberOfPoints>;
 
-        FrequencyResponse(std::span<QNumberType> b, std::span<QNumberType> a, float sampleFrequency);
+        FrequencyResponse(std::span<T> b, std::span<T> a, T sampleFrequency);
         std::tuple<Vector, Vector, Vector> Calculate();
 
     private:
         Vector frequencies;
         Vector response;
         Vector phase;
-        std::span<QNumberType> a;
-        std::span<QNumberType> b;
-        float sampleFrequency;
+        std::span<T> a;
+        std::span<T> b;
+        T sampleFrequency;
     };
 
     ////    Implementation    ////
 
-    template<typename QNumberType, std::size_t NumberOfPoints>
-    FrequencyResponse<QNumberType, NumberOfPoints>::FrequencyResponse(std::span<QNumberType> b, std::span<QNumberType> a, float sampleFrequency)
+    template<typename T, std::size_t NumberOfPoints>
+    FrequencyResponse<T, NumberOfPoints>::FrequencyResponse(std::span<T> b, std::span<T> a, T sampleFrequency)
         : b(b)
         , a(a)
         , sampleFrequency(sampleFrequency)
     {
     }
 
-    template<typename QNumberType, std::size_t NumberOfPoints>
+    template<typename T, std::size_t NumberOfPoints>
     OPTIMIZE_FOR_SPEED
-        std::tuple<typename FrequencyResponse<QNumberType, NumberOfPoints>::Vector, typename FrequencyResponse<QNumberType, NumberOfPoints>::Vector, typename FrequencyResponse<QNumberType, NumberOfPoints>::Vector>
-        FrequencyResponse<QNumberType, NumberOfPoints>::Calculate()
+        std::tuple<typename FrequencyResponse<T, NumberOfPoints>::Vector, typename FrequencyResponse<T, NumberOfPoints>::Vector, typename FrequencyResponse<T, NumberOfPoints>::Vector>
+        FrequencyResponse<T, NumberOfPoints>::Calculate()
     {
-        const auto maxSize = static_cast<double>(response.max_size());
-        const auto fstart = static_cast<float>(sampleFrequency / maxSize);
-        const auto fend = sampleFrequency / 2.0f;
-        const auto multiplier = static_cast<float>(std::pow(fend / fstart, 1.0 / (maxSize - 1.0)));
+        const auto maxSize = static_cast<T>(response.max_size());
+        const auto fstart = sampleFrequency / maxSize;
+        const auto fend = sampleFrequency / static_cast<T>(2);
+        const auto multiplier = static_cast<T>(std::pow(static_cast<double>(fend / fstart), 1.0 / (static_cast<double>(maxSize) - 1.0)));
 
         for (std::size_t n = 0; n < response.max_size(); ++n)
         {
-            auto f = fstart * std::pow(multiplier, static_cast<float>(n));
-            auto omega = 2.0f * static_cast<float>(math::pi) * f / sampleFrequency;
+            auto f = fstart * static_cast<T>(std::pow(static_cast<double>(multiplier), static_cast<double>(n)));
+            auto omega = static_cast<T>(2) * static_cast<T>(std::numbers::pi) * f / sampleFrequency;
 
-            std::complex<float> numerator(0.0f, 0.0f);
-            std::complex<float> denominator(0.0f, 0.0f);
+            std::complex<T> numerator(static_cast<T>(0), static_cast<T>(0));
+            std::complex<T> denominator(static_cast<T>(0), static_cast<T>(0));
 
             for (std::size_t i = 0; i < b.size(); ++i)
-                numerator += math::ToFloat(b[i]) * std::polar(1.0f, -omega * static_cast<float>(i));
+                numerator += b[i] * std::polar(static_cast<T>(1), -omega * static_cast<T>(i));
 
             for (std::size_t i = 0; i < a.size(); ++i)
-                denominator += math::ToFloat(a[i]) * std::polar(1.0f, -omega * static_cast<float>(i));
+                denominator += a[i] * std::polar(static_cast<T>(1), -omega * static_cast<T>(i));
 
-            if (denominator == 0.0f)
-                denominator.real(1.0f);
+            if (denominator == static_cast<T>(0))
+                denominator.real(static_cast<T>(1));
 
             auto h = numerator / denominator;
+            auto magnitude = std::max(std::abs(h), std::numeric_limits<T>::min());
 
             frequencies.emplace_back(f);
-            response.emplace_back(20.0f * std::log10(std::abs(h)));
-            phase.emplace_back(std::arg(h) * 180.0f / static_cast<float>(math::pi));
+            response.emplace_back(static_cast<T>(20) * std::log10(magnitude));
+            phase.emplace_back(std::arg(h) * static_cast<T>(180) / static_cast<T>(std::numbers::pi));
         }
 
         return std::make_tuple(frequencies, response, phase);

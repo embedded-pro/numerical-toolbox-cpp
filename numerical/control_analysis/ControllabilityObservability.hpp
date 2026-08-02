@@ -185,12 +185,15 @@ namespace control_analysis
     {
         constexpr std::size_t maxIter{ 200 };
         constexpr T convTol{ T(1e-6) };
+        constexpr T divergenceBound{ T(1e18) };
         SquareMatrix X{ Q };
         SquareMatrix At{ A.Transpose() };
 
         for (std::size_t iter = 0; iter < maxIter; ++iter)
         {
             SquareMatrix Xnext{ A * X * At + Q };
+            if (MaxAbsValue(Xnext) > divergenceBound)
+                return SquareMatrix{};
             if (MaxAbsDiff(Xnext, X) < convTol)
                 return Xnext;
             X = Xnext;
