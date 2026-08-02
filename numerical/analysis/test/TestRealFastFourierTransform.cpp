@@ -69,29 +69,33 @@ TEST_F(TestRealFastFourierTransform, dc_input_has_only_dc_bin)
 
     auto& spectrum{ rfft.Forward(input) };
 
-    EXPECT_NEAR(spectrum[0].Real(), static_cast<float>(N), 1e-2f);
+    EXPECT_NEAR(spectrum[0].Real(), static_cast<float>(N), math::Tolerance<float>());
+    EXPECT_NEAR(spectrum[0].Imaginary(), 0.0f, math::Tolerance<float>());
     for (std::size_t k{ 1 }; k <= N / 2; ++k)
     {
         float mag{ std::sqrt(spectrum[k].Real() * spectrum[k].Real() + spectrum[k].Imaginary() * spectrum[k].Imaginary()) };
-        EXPECT_NEAR(mag, 0.0f, 1e-2f);
+        EXPECT_NEAR(mag, 0.0f, math::Tolerance<float>());
     }
 }
 
-TEST_F(TestRealFastFourierTransform, single_real_sinusoid_hits_one_bin)
+TEST_F(TestRealFastFourierTransform, sinusoid_bin_magnitude_exact)
 {
+    static constexpr std::size_t k0{ 3 };
     input.resize(N);
     for (std::size_t n{ 0 }; n < N; ++n)
-        input[n] = std::cos(2.0f * std::numbers::pi_v<float> * 3.0f * static_cast<float>(n) / static_cast<float>(N));
+        input[n] = std::cos(2.0f * std::numbers::pi_v<float> * static_cast<float>(k0) * static_cast<float>(n) / static_cast<float>(N));
 
     auto& spectrum{ rfft.Forward(input) };
 
-    float mag3{ std::sqrt(spectrum[3].Real() * spectrum[3].Real() + spectrum[3].Imaginary() * spectrum[3].Imaginary()) };
+    float mag{ std::sqrt(spectrum[k0].Real() * spectrum[k0].Real() + spectrum[k0].Imaginary() * spectrum[k0].Imaginary()) };
+    EXPECT_NEAR(mag, static_cast<float>(N) / 2.0f, 1e-2f);
+
     for (std::size_t k{ 0 }; k <= N / 2; ++k)
     {
-        if (k == 3)
+        if (k == k0)
             continue;
-        float mag{ std::sqrt(spectrum[k].Real() * spectrum[k].Real() + spectrum[k].Imaginary() * spectrum[k].Imaginary()) };
-        EXPECT_LT(mag, mag3);
+        float magOther{ std::sqrt(spectrum[k].Real() * spectrum[k].Real() + spectrum[k].Imaginary() * spectrum[k].Imaginary()) };
+        EXPECT_NEAR(magOther, 0.0f, 1e-2f);
     }
 }
 
@@ -120,11 +124,13 @@ TEST_F(TestRealFastFourierTransform, matches_reference_complex_fft)
     }
 }
 
-TEST_F(TestRealFastFourierTransform, nyquist_and_dc_are_real)
+TEST_F(TestRealFastFourierTransform, dc_and_nyquist_bins_are_real)
 {
+    static constexpr std::array<float, N> signal{ 0.1f, 0.3f, -0.2f, 0.5f, 0.4f, -0.1f, 0.0f, 0.2f,
+        -0.3f, 0.6f, 0.1f, -0.4f, 0.2f, 0.0f, -0.1f, 0.3f };
     input.resize(N);
     for (std::size_t n{ 0 }; n < N; ++n)
-        input[n] = std::cos(2.0f * std::numbers::pi_v<float> * static_cast<float>(n) / static_cast<float>(N));
+        input[n] = signal[n];
 
     auto& spectrum{ rfft.Forward(input) };
 
@@ -132,7 +138,82 @@ TEST_F(TestRealFastFourierTransform, nyquist_and_dc_are_real)
     EXPECT_NEAR(spectrum[N / 2].Imaginary(), 0.0f, math::Tolerance<float>());
 }
 
-TEST_F(TestRealFastFourierTransform, inverse_is_left_inverse)
+TEST_F(TestRealFastFourierTransform, hermitian_symmetry_all_bins)
+{
+    static constexpr std::array<float, N> signal{ 0.1f, 0.3f, -0.2f, 0.5f, 0.4f, -0.1f, 0.0f, 0.2f,
+        -0.3f, 0.6f, 0.1f, -0.4f, 0.2f, 0.0f, -0.1f, 0.3f };
+    input.resize(N);
+    for (std::size_t n{ 0 }; n < N; ++n)
+        input[n] = signal[n];
+
+    auto& spectrum{ rfft.Forward(input) };
+
+    for (std::size_t k{ 1 }; k < N / 2; ++k)
+    {
+        float refReal{ 0.0f };
+        float refImagNk{ 0.0f };
+        for (std::size_t n{ 0 }; n < N; ++n)
+        {
+            float angleNk{ -2.0f * std::numbers::pi_v<float> * static_cast<float>(N - k) * static_cast<float>(n) / static_cast<float>(N) };
+            refReal += signal[n] * std::cos(angleNk);
+            refImagNk += signal[n] * std::sin(angleNk);
+        }
+        EXPECT_NEAR(spectrum[k].Real(), refReal, 1e-2f);
+        EXPECT_NEAR(spectrum[k].Imaginary(), -refImagNk, 1e-2f);
+    }
+}
+
+TEST_F(TestRealFastFourierTransform, parseval_energy_conserved)
+{
+    static constexpr std::array<float, N> signal{ 0.5f, -0.3f, 0.1f, 0.8f, -0.6f, 0.2f, 0.0f, -0.4f,
+        0.7f, -0.1f, 0.3f, -0.5f, 0.4f, 0.1f, -0.2f, 0.6f };
+    input.resize(N);
+    for (std::size_t n{ 0 }; n < N; ++n)
+        input[n] = signal[n];
+
+    auto& spectrum{ rfft.Forward(input) };
+
+    float timeEnergy{ 0.0f };
+    for (std::size_t n{ 0 }; n < N; ++n)
+        timeEnergy += signal[n] * signal[n];
+
+    float spectralEnergy{ spectrum[0].Real() * spectrum[0].Real() + spectrum[0].Imaginary() * spectrum[0].Imaginary() };
+    for (std::size_t k{ 1 }; k < N / 2; ++k)
+        spectralEnergy += 2.0f * (spectrum[k].Real() * spectrum[k].Real() + spectrum[k].Imaginary() * spectrum[k].Imaginary());
+    spectralEnergy += spectrum[N / 2].Real() * spectrum[N / 2].Real() + spectrum[N / 2].Imaginary() * spectrum[N / 2].Imaginary();
+    spectralEnergy /= static_cast<float>(N);
+
+    EXPECT_NEAR(spectralEnergy, timeEnergy, 1e-2f);
+}
+
+TEST_F(TestRealFastFourierTransform, impulse_has_flat_magnitude)
+{
+    input.resize(N, 0.0f);
+    input[0] = 1.0f;
+
+    auto& spectrum{ rfft.Forward(input) };
+
+    for (std::size_t k{ 0 }; k <= N / 2; ++k)
+    {
+        float mag{ std::sqrt(spectrum[k].Real() * spectrum[k].Real() + spectrum[k].Imaginary() * spectrum[k].Imaginary()) };
+        EXPECT_NEAR(mag, 1.0f, 1e-2f);
+    }
+}
+
+TEST_F(TestRealFastFourierTransform, zero_input_gives_zero_spectrum)
+{
+    input.resize(N, 0.0f);
+
+    auto& spectrum{ rfft.Forward(input) };
+
+    for (std::size_t k{ 0 }; k <= N / 2; ++k)
+    {
+        EXPECT_NEAR(spectrum[k].Real(), 0.0f, math::Tolerance<float>());
+        EXPECT_NEAR(spectrum[k].Imaginary(), 0.0f, math::Tolerance<float>());
+    }
+}
+
+TEST_F(TestRealFastFourierTransform, inverse_reconstructs_original_signal)
 {
     static constexpr std::array<float, N> signal{ 0.5f, -0.3f, 0.1f, 0.8f, -0.6f, 0.2f, 0.0f, -0.4f,
         0.7f, -0.1f, 0.3f, -0.5f, 0.4f, 0.1f, -0.2f, 0.6f };
@@ -193,16 +274,45 @@ TEST_F(TestRealFastFourierTransform, linearity_holds)
     }
 }
 
-TEST_F(TestRealFastFourierTransform, impulse_has_flat_magnitude)
+TEST_F(TestRealFastFourierTransform, determinism_same_input_same_output)
+{
+    static constexpr std::array<float, N> signal{ 0.1f, 0.3f, -0.2f, 0.5f, 0.4f, -0.1f, 0.0f, 0.2f,
+        -0.3f, 0.6f, 0.1f, -0.4f, 0.2f, 0.0f, -0.1f, 0.3f };
+
+    typename infra::BoundedVector<float>::template WithMaxSize<N> in1{};
+    typename infra::BoundedVector<float>::template WithMaxSize<N> in2{};
+    in1.resize(N);
+    in2.resize(N);
+    for (std::size_t n{ 0 }; n < N; ++n)
+    {
+        in1[n] = signal[n];
+        in2[n] = signal[n];
+    }
+
+    auto& s1{ rfft.Forward(in1) };
+    typename infra::BoundedVector<math::Complex<float>>::template WithMaxSize<N / 2 + 1> s1Copy{};
+    s1Copy.resize(N / 2 + 1);
+    for (std::size_t k{ 0 }; k <= N / 2; ++k)
+        s1Copy[k] = s1[k];
+
+    auto& s2{ rfft.Forward(in2) };
+
+    for (std::size_t k{ 0 }; k <= N / 2; ++k)
+    {
+        EXPECT_FLOAT_EQ(s2[k].Real(), s1Copy[k].Real());
+        EXPECT_FLOAT_EQ(s2[k].Imaginary(), s1Copy[k].Imaginary());
+    }
+}
+
+TEST_F(TestRealFastFourierTransform, inverse_of_impulse_spectrum_recovers_impulse)
 {
     input.resize(N, 0.0f);
     input[0] = 1.0f;
 
     auto& spectrum{ rfft.Forward(input) };
+    auto& recovered{ rfft.Inverse(spectrum) };
 
-    for (std::size_t k{ 0 }; k <= N / 2; ++k)
-    {
-        float mag{ std::sqrt(spectrum[k].Real() * spectrum[k].Real() + spectrum[k].Imaginary() * spectrum[k].Imaginary()) };
-        EXPECT_NEAR(mag, 1.0f, 1e-2f);
-    }
+    EXPECT_NEAR(recovered[0], 1.0f, 1e-2f);
+    for (std::size_t n{ 1 }; n < N; ++n)
+        EXPECT_NEAR(recovered[n], 0.0f, 1e-2f);
 }

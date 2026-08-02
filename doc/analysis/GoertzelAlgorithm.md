@@ -22,15 +22,15 @@ The DFT sum can be reorganised as the output of a single-pole IIR filter evaluat
 
 $$s[n] = x[n] + c\,s[n-1] - s[n-2], \quad s[-1] = s[-2] = 0$$
 
-After $N$ steps the DFT bin follows from the final two state values:
+After the $N$ input samples, one further step with $x[N] = 0$ gives $s[N] = c\,s[N-1] - s[N-2]$, and the DFT bin follows:
 
-$$X[k] = s[N-1] - s[N-2]\,e^{-j2\pi k/N}$$
+$$X[k] = s[N] - s[N-1]\,e^{-j2\pi k/N}$$
 
 Separating real and imaginary parts:
 
-$$\mathrm{Re}\{X[k]\} = s[N-1] - s[N-2]\cos\!\left(\tfrac{2\pi k}{N}\right)$$
+$$\mathrm{Re}\{X[k]\} = s[N] - s[N-1]\cos\!\left(\tfrac{2\pi k}{N}\right)$$
 
-$$\mathrm{Im}\{X[k]\} = s[N-2]\sin\!\left(\tfrac{2\pi k}{N}\right)$$
+$$\mathrm{Im}\{X[k]\} = s[N-1]\sin\!\left(\tfrac{2\pi k}{N}\right)$$
 
 The magnitude can be obtained without the final trigonometric products using the identity:
 
@@ -64,17 +64,19 @@ $c = 2\cos(\pi/2) = 0$
 | $n$ | $x[n]$ | $s[n] = x[n] + 0\cdot s[n-1] - s[n-2]$ |
 |-----|--------|----------------------------------------|
 | 0   | 1      | $1 + 0 - 0 = 1$                        |
-| 1   | 0      | $0 + 0 - 1 = -1$                       |
-| 2   | -1     | $-1 + 0 - 0 = -1$  (note: $s[-1]=0$)   |
-| 3   | 0      | $0 + 0 - (-1) = 1$                     |
+| 1   | 0      | $0 + 0 - 0 = 0$  (note: $s[-1]=0$)     |
+| 2   | -1     | $-1 + 0 - 1 = -2$                      |
+| 3   | 0      | $0 + 0 - 0 = 0$                        |
+
+Extra step: $s[4] = 0\cdot s[3] - s[2] = -(-2) = 2$.
 
 $\cos(2\pi/4) = 0$, $\sin(2\pi/4) = 1$
 
-$\mathrm{Re}\{X[1]\} = 1 - (-1)\cdot 0 = 1$
+$\mathrm{Re}\{X[1]\} = s[4] - s[3]\cdot 0 = 2$
 
-$\mathrm{Im}\{X[1]\} = (-1)\cdot 1 = -1$
+$\mathrm{Im}\{X[1]\} = s[3]\cdot 1 = 0$
 
-Direct DFT check: $X[1] = 1 - j$.  Matches.
+Direct DFT check: $X[1] = 1 - (-1) = 2$.  Matches.
 
 ## Pitfalls & Edge Cases
 
