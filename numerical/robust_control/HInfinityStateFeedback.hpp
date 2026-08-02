@@ -5,13 +5,10 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
-#include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/math/Matrix.hpp"
-#include "numerical/math/Tolerance.hpp"
 #include "numerical/solvers/DiscreteAlgebraicRiccatiEquation.hpp"
-#include "numerical/solvers/DurandKerner.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
-#include <array>
+#include "numerical/solvers/SpectralRadius.hpp"
 #include <cmath>
 #include <cstddef>
 #include <type_traits>
@@ -72,9 +69,17 @@ namespace robust_control
         using AugWeightMatrix = math::SquareMatrix<T, AugInputSize>;
         using AugGainMatrix = math::Matrix<T, AugInputSize, StateSize>;
 
+        struct Augmented
+        {
+            AugInputMatrix B{};
+            AugWeightMatrix Rtilde{};
+            RiccatiMatrix Q{};
+        };
+
+        Augmented BuildAugmented(T g) const;
+        AugGainMatrix FullGain(const Augmented& aug, const RiccatiMatrix& Xsol) const;
         bool RiccatiFeasible(T g) const;
         void SolveGameRiccati(T g);
-        bool IsSchurStable(const RiccatiMatrix& clA) const;
 
         Plant plant{};
         GainMatrix K{};
@@ -89,28 +94,40 @@ namespace robust_control
     {}
 
     template<typename T, std::size_t StateSize, std::size_t DisturbanceSize, std::size_t ControlSize, std::size_t ErrorSize>
+    typename HInfinityStateFeedback<T, StateSize, DisturbanceSize, ControlSize, ErrorSize>::Augmented
+    HInfinityStateFeedback<T, StateSize, DisturbanceSize, ControlSize, ErrorSize>::BuildAugmented(T g) const
+    {
+        Augmented aug{};
+        aug.B.SetBlock(plant.B2, 0, 0);
+        aug.B.SetBlock(plant.B1, 0, ControlSize);
+
+        auto controlWeight = math::SquareMatrix<T, ControlSize>::Identity();
+        auto disturbanceWeight = math::SquareMatrix<T, DisturbanceSize>::Identity();
+        disturbanceWeight *= -(g * g);
+        aug.Rtilde.SetBlock(controlWeight, 0, 0);
+        aug.Rtilde.SetBlock(disturbanceWeight, ControlSize, ControlSize);
+
+        aug.Q = plant.C1.Transpose() * plant.C1;
+        return aug;
+    }
+
+    template<typename T, std::size_t StateSize, std::size_t DisturbanceSize, std::size_t ControlSize, std::size_t ErrorSize>
+    typename HInfinityStateFeedback<T, StateSize, DisturbanceSize, ControlSize, ErrorSize>::AugGainMatrix
+    HInfinityStateFeedback<T, StateSize, DisturbanceSize, ControlSize, ErrorSize>::FullGain(
+        const Augmented& aug, const RiccatiMatrix& Xsol) const
+    {
+        auto BtX = aug.B.Transpose() * Xsol;
+        auto S = aug.Rtilde + BtX * aug.B;
+        return solvers::SolveSystem<T, AugInputSize, StateSize>(S, BtX * plant.A);
+    }
+
+    template<typename T, std::size_t StateSize, std::size_t DisturbanceSize, std::size_t ControlSize, std::size_t ErrorSize>
     bool HInfinityStateFeedback<T, StateSize, DisturbanceSize, ControlSize, ErrorSize>::RiccatiFeasible(T g) const
     {
-        AugInputMatrix B{};
-        for (std::size_t r = 0; r < StateSize; ++r)
-        {
-            for (std::size_t c = 0; c < ControlSize; ++c)
-                B.at(r, c) = plant.B2.at(r, c);
-            for (std::size_t c = 0; c < DisturbanceSize; ++c)
-                B.at(r, ControlSize + c) = plant.B1.at(r, c);
-        }
-
-        AugWeightMatrix Rtilde{};
-        for (std::size_t i = 0; i < ControlSize; ++i)
-            Rtilde.at(i, i) = T{ 1 };
-        const T negGammaSq = -(g * g);
-        for (std::size_t i = 0; i < DisturbanceSize; ++i)
-            Rtilde.at(ControlSize + i, ControlSize + i) = negGammaSq;
-
-        auto Q = plant.C1.Transpose() * plant.C1;
+        const Augmented aug = BuildAugmented(g);
 
         solvers::DiscreteAlgebraicRiccatiEquation<T, StateSize, AugInputSize> dare{};
-        auto Xcandidate = dare.Solve(plant.A, B, Q, Rtilde);
+        auto Xcandidate = dare.Solve(plant.A, aug.B, aug.Q, aug.Rtilde);
 
         for (std::size_t i = 0; i < StateSize; ++i)
             if (Xcandidate.at(i, i) < T{ 0 })
@@ -119,23 +136,16 @@ namespace robust_control
         auto distBlock = plant.B1.Transpose() * (Xcandidate * plant.B1);
         const T gammaSq = g * g;
         for (std::size_t i = 0; i < DisturbanceSize; ++i)
-        {
             if (distBlock.at(i, i) >= gammaSq)
                 return false;
-        }
 
-        auto BtX = B.Transpose() * Xcandidate;
-        auto S = Rtilde + BtX * B;
         auto AtX = plant.A.Transpose() * Xcandidate;
-        auto Xresid = AtX * plant.A - AtX * B * solvers::SolveSystem<T, AugInputSize, StateSize>(S, BtX * plant.A) + Q;
+        auto Xresid = AtX * plant.A - AtX * aug.B * FullGain(aug, Xcandidate) + aug.Q;
 
         for (std::size_t i = 0; i < StateSize; ++i)
             for (std::size_t j = 0; j < StateSize; ++j)
-            {
-                const T diff = std::abs(Xresid.at(i, j) - Xcandidate.at(i, j));
-                if (diff > T{ 1 })
+                if (std::abs(Xresid.at(i, j) - Xcandidate.at(i, j)) > T{ 1 })
                     return false;
-            }
 
         return true;
     }
@@ -143,70 +153,12 @@ namespace robust_control
     template<typename T, std::size_t StateSize, std::size_t DisturbanceSize, std::size_t ControlSize, std::size_t ErrorSize>
     void HInfinityStateFeedback<T, StateSize, DisturbanceSize, ControlSize, ErrorSize>::SolveGameRiccati(T g)
     {
-        AugInputMatrix B{};
-        for (std::size_t r = 0; r < StateSize; ++r)
-        {
-            for (std::size_t c = 0; c < ControlSize; ++c)
-                B.at(r, c) = plant.B2.at(r, c);
-            for (std::size_t c = 0; c < DisturbanceSize; ++c)
-                B.at(r, ControlSize + c) = plant.B1.at(r, c);
-        }
-
-        AugWeightMatrix Rtilde{};
-        for (std::size_t i = 0; i < ControlSize; ++i)
-            Rtilde.at(i, i) = T{ 1 };
-        for (std::size_t i = 0; i < DisturbanceSize; ++i)
-            Rtilde.at(ControlSize + i, ControlSize + i) = -(g * g);
-
-        auto Q = plant.C1.Transpose() * plant.C1;
+        const Augmented aug = BuildAugmented(g);
 
         solvers::DiscreteAlgebraicRiccatiEquation<T, StateSize, AugInputSize> dare{};
-        X = dare.Solve(plant.A, B, Q, Rtilde);
+        X = dare.Solve(plant.A, aug.B, aug.Q, aug.Rtilde);
 
-        auto BtX = B.Transpose() * X;
-        auto S = Rtilde + BtX * B;
-        auto BtXA = BtX * plant.A;
-        auto Kfull = solvers::SolveSystem<T, AugInputSize, StateSize>(S, BtXA);
-
-        for (std::size_t r = 0; r < ControlSize; ++r)
-            for (std::size_t c = 0; c < StateSize; ++c)
-                K.at(r, c) = Kfull.at(r, c);
-    }
-
-    template<typename T, std::size_t StateSize, std::size_t DisturbanceSize, std::size_t ControlSize, std::size_t ErrorSize>
-    bool HInfinityStateFeedback<T, StateSize, DisturbanceSize, ControlSize, ErrorSize>::IsSchurStable(
-        const RiccatiMatrix& clA) const
-    {
-        std::array<T, StateSize + 1> charPoly{};
-        charPoly[0] = T{ 1 };
-
-        math::SquareMatrix<T, StateSize> M{ clA };
-        math::SquareMatrix<T, StateSize> prev{};
-
-        for (std::size_t k = 1; k <= StateSize; ++k)
-        {
-            T trace{};
-            for (std::size_t i = 0; i < StateSize; ++i)
-                trace += M.at(i, i);
-            charPoly[k] = -trace / static_cast<T>(k);
-
-            prev = M;
-            if (k < StateSize)
-            {
-                for (std::size_t i = 0; i < StateSize; ++i)
-                    prev.at(i, i) += charPoly[k];
-                M = clA * prev;
-            }
-        }
-
-        solvers::DurandKerner<T, StateSize> dk{};
-        auto roots = dk.Solve(std::span<const T>{ charPoly.data(), StateSize + 1 });
-
-        for (const auto& root : roots)
-            if (std::abs(root) >= T{ 1 })
-                return false;
-
-        return true;
+        K = FullGain(aug, X).template GetBlock<ControlSize, StateSize>(0, 0);
     }
 
     template<typename T, std::size_t StateSize, std::size_t DisturbanceSize, std::size_t ControlSize, std::size_t ErrorSize>
@@ -235,8 +187,8 @@ namespace robust_control
         gamma = gHi;
         SolveGameRiccati(gamma);
 
-        auto clA = plant.A - plant.B2 * K;
-        return IsSchurStable(clA);
+        auto closedLoop = plant.A - plant.B2 * K;
+        return solvers::SpectralRadius<T, StateSize>{}.IsSchurStable(closedLoop);
     }
 
     template<typename T, std::size_t StateSize, std::size_t DisturbanceSize, std::size_t ControlSize, std::size_t ErrorSize>

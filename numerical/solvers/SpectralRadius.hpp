@@ -93,6 +93,7 @@ namespace solvers
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class SpectralRadius<float, 2>;
     extern template class SpectralRadius<float, 3>;
 #endif
 }
