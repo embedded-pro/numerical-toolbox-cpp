@@ -16,6 +16,7 @@ target_sources(numerical.estimators.offline PRIVATE
     ExpectationMaximization.hpp
     LinearRegression.hpp
     PolynomialFitting.hpp
+    TotalLeastSquares.hpp
     YuleWalker.hpp
 )
 
@@ -23,6 +24,7 @@ numerical_add_coverage_sources(numerical.estimators.offline
     ExpectationMaximization.cpp
     LinearRegression.cpp
     PolynomialFitting.cpp
+    TotalLeastSquares.cpp
     YuleWalker.cpp
 )
 

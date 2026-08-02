@@ -235,7 +235,9 @@ namespace solvers
     OPTIMIZE_FOR_SPEED void SingularValueDecomposition<T, Rows, Cols>::QrSweep(
         std::size_t p, std::size_t q)
     {
-        T mu = WilkinsonShift(q);
+        T mu = (std::abs(sigma.at(q + 1, 0)) <= T{ 1e-6f } * std::abs(sigma.at(q, 0)))
+                   ? T{}
+                   : WilkinsonShift(q);
 
         T f = sigma.at(p, 0) * sigma.at(p, 0) - mu;
         T g = sigma.at(p, 0) * superdiag.at(p, 0);

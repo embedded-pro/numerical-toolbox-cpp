@@ -11,5 +11,6 @@ target_sources(numerical.estimators.offline_test PRIVATE
     TestExpectationMaximization.cpp
     TestLinearRegression.cpp
     TestPolynomialFitting.cpp
+    TestTotalLeastSquares.cpp
     TestYuleWalker.cpp
 )
