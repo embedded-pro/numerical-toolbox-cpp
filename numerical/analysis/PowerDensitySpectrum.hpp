@@ -46,10 +46,8 @@ namespace analysis
         void ResetSegment();
 
     private:
-        static constexpr QNumberType segmentSizeInverted = QNumberType(1.0f / static_cast<float>(SegmentSize));
         static constexpr std::size_t overlapSize = (SegmentSize * Overlap) / 100;
         static constexpr std::size_t step = SegmentSize - overlapSize;
-        QNumberType frequencyResolution;
         windowing::Window<QNumberType>& window;
         QNumberType samplingTimeInSeconds;
         TwiddleFactor twiddleFactors;
@@ -65,7 +63,6 @@ namespace analysis
         windowing::Window<QNumberType>& window, QNumberType samplingTimeInSeconds)
         : window(window)
         , samplingTimeInSeconds(samplingTimeInSeconds)
-        , frequencyResolution(QNumberType(samplingTimeInSeconds * segmentSizeInverted))
     {}
 
     template<typename QNumberType, std::size_t SegmentSize, typename Fft, typename TwiddleFactor, std::size_t Overlap>
@@ -75,6 +72,8 @@ namespace analysis
         really_assert(input.size() >= SegmentSize);
 
         ResetOutput();
+
+        std::size_t segmentCount = 0;
 
         for (std::size_t i = 0; i + SegmentSize <= input.size(); i += step)
         {
@@ -87,10 +86,15 @@ namespace analysis
 
             for (std::size_t k = 0; k <= SegmentSize / 2; ++k)
                 y[k] += QNumberType(math::ToFloat(MagnitudeSquared(spectrum[k])) / static_cast<float>(SegmentSize));
+
+            ++segmentCount;
         }
 
+        float normalization = math::ToFloat(samplingTimeInSeconds) /
+                              (math::ToFloat(window.Power(SegmentSize)) * static_cast<float>(segmentCount));
+
         for (std::size_t i = 0; i < y.size(); ++i)
-            y[i] *= frequencyResolution;
+            y[i] = QNumberType(math::ToFloat(y[i]) * normalization);
 
         return y;
     }
@@ -118,5 +122,6 @@ namespace analysis
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class PowerSpectralDensity<float, 512, test::FftStub<float, 512>, test::TwiddleFactorsStub<float, 256>, 50>;
+    extern template class PowerSpectralDensity<float, 512, test::FftStub<float, 512>, test::TwiddleFactorsStub<float, 256>, 0>;
 #endif
 }
