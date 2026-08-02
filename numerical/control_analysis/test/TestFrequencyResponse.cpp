@@ -2,9 +2,9 @@
 #include "numerical/math/Tolerance.hpp"
 #include <array>
 #include <cmath>
+#include <gtest/gtest.h>
 #include <numbers>
 #include <tuple>
-#include <gtest/gtest.h>
 
 namespace
 {
