@@ -70,10 +70,10 @@ The same structure extends to the multi-input multi-output case using outer prod
 
 ## Complexity Analysis
 
-| Operation      | Time                           | Space                                     | Notes                                   |
-|----------------|--------------------------------|-------------------------------------------|-----------------------------------------|
-| ComputeControl | $O(n^2 + nm)$                  | $O(1)$ working registers                  | Reference model step + two outer products + two matrix-vector products |
-| Memory         | $O(n^2 + nm)$ static           | Parameter matrices and reference state    | All fixed-size; no heap allocation      |
+| Operation      | Time                 | Space                                  | Notes                                                                  |
+|----------------|----------------------|----------------------------------------|------------------------------------------------------------------------|
+| ComputeControl | $O(n^2 + nm)$        | $O(1)$ working registers               | Reference model step + two outer products + two matrix-vector products |
+| Memory         | $O(n^2 + nm)$ static | Parameter matrices and reference state | All fixed-size; no heap allocation                                     |
 
 Here $n$ = StateSize and $m$ = InputSize. The dominant cost is the outer product update of the parameter matrices at each step.
 

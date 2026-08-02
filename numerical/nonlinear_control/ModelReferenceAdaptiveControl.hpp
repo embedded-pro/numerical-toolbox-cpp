@@ -41,9 +41,20 @@ namespace nonlinear_control
 
         void Reset();
 
-        [[nodiscard]] const StateVector& GetReferenceState() const { return xm; }
-        [[nodiscard]] const FeedbackMatrix& GetThetaX() const { return thetaX; }
-        [[nodiscard]] const FeedforwardMatrix& GetThetaR() const { return thetaR; }
+        [[nodiscard]] const StateVector& GetReferenceState() const
+        {
+            return xm;
+        }
+
+        [[nodiscard]] const FeedbackMatrix& GetThetaX() const
+        {
+            return thetaX;
+        }
+
+        [[nodiscard]] const FeedforwardMatrix& GetThetaR() const
+        {
+            return thetaR;
+        }
 
     private:
         const ReferenceModel& reference;
