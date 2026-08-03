@@ -22,8 +22,8 @@ TYPED_TEST(TestDurandKerner, finds_roots_of_linear_polynomial)
     auto roots = this->solver.Solve(coefficients);
 
     ASSERT_EQ(roots.size(), 1u);
-    EXPECT_NEAR(roots[0].real(), -2.0, 1e-4);
-    EXPECT_NEAR(roots[0].imag(), 0.0, 1e-4);
+    EXPECT_NEAR(roots[0].Real(), -2.0, 1e-4);
+    EXPECT_NEAR(roots[0].Imaginary(), 0.0, 1e-4);
 }
 
 TYPED_TEST(TestDurandKerner, finds_real_roots_of_quadratic)
@@ -33,10 +33,10 @@ TYPED_TEST(TestDurandKerner, finds_real_roots_of_quadratic)
     auto roots = this->solver.Solve(coefficients);
 
     ASSERT_EQ(roots.size(), 2u);
-    EXPECT_NEAR(roots[0].real(), 1.0, 1e-4);
-    EXPECT_NEAR(roots[0].imag(), 0.0, 1e-4);
-    EXPECT_NEAR(roots[1].real(), 2.0, 1e-4);
-    EXPECT_NEAR(roots[1].imag(), 0.0, 1e-4);
+    EXPECT_NEAR(roots[0].Real(), 1.0, 1e-4);
+    EXPECT_NEAR(roots[0].Imaginary(), 0.0, 1e-4);
+    EXPECT_NEAR(roots[1].Real(), 2.0, 1e-4);
+    EXPECT_NEAR(roots[1].Imaginary(), 0.0, 1e-4);
 }
 
 TYPED_TEST(TestDurandKerner, finds_complex_roots_of_quadratic)
@@ -46,10 +46,10 @@ TYPED_TEST(TestDurandKerner, finds_complex_roots_of_quadratic)
     auto roots = this->solver.Solve(coefficients);
 
     ASSERT_EQ(roots.size(), 2u);
-    EXPECT_NEAR(roots[0].real(), 0.0, 1e-4);
-    EXPECT_NEAR(std::abs(roots[0].imag()), 1.0, 1e-4);
-    EXPECT_NEAR(roots[1].real(), 0.0, 1e-4);
-    EXPECT_NEAR(std::abs(roots[1].imag()), 1.0, 1e-4);
+    EXPECT_NEAR(roots[0].Real(), 0.0, 1e-4);
+    EXPECT_NEAR(std::abs(roots[0].Imaginary()), 1.0, 1e-4);
+    EXPECT_NEAR(roots[1].Real(), 0.0, 1e-4);
+    EXPECT_NEAR(std::abs(roots[1].Imaginary()), 1.0, 1e-4);
 }
 
 TYPED_TEST(TestDurandKerner, finds_roots_of_cubic)
@@ -59,12 +59,12 @@ TYPED_TEST(TestDurandKerner, finds_roots_of_cubic)
     auto roots = this->solver.Solve(coefficients);
 
     ASSERT_EQ(roots.size(), 3u);
-    EXPECT_NEAR(roots[0].real(), 1.0, 1e-3);
-    EXPECT_NEAR(roots[0].imag(), 0.0, 1e-3);
-    EXPECT_NEAR(roots[1].real(), 2.0, 1e-3);
-    EXPECT_NEAR(roots[1].imag(), 0.0, 1e-3);
-    EXPECT_NEAR(roots[2].real(), 3.0, 1e-3);
-    EXPECT_NEAR(roots[2].imag(), 0.0, 1e-3);
+    EXPECT_NEAR(roots[0].Real(), 1.0, 1e-3);
+    EXPECT_NEAR(roots[0].Imaginary(), 0.0, 1e-3);
+    EXPECT_NEAR(roots[1].Real(), 2.0, 1e-3);
+    EXPECT_NEAR(roots[1].Imaginary(), 0.0, 1e-3);
+    EXPECT_NEAR(roots[2].Real(), 3.0, 1e-3);
+    EXPECT_NEAR(roots[2].Imaginary(), 0.0, 1e-3);
 }
 
 TYPED_TEST(TestDurandKerner, finds_roots_of_quartic)
@@ -74,10 +74,10 @@ TYPED_TEST(TestDurandKerner, finds_roots_of_quartic)
     auto roots = this->solver.Solve(coefficients);
 
     ASSERT_EQ(roots.size(), 4u);
-    EXPECT_NEAR(roots[0].real(), 1.0, 1e-2);
-    EXPECT_NEAR(roots[1].real(), 2.0, 1e-2);
-    EXPECT_NEAR(roots[2].real(), 3.0, 1e-2);
-    EXPECT_NEAR(roots[3].real(), 4.0, 1e-2);
+    EXPECT_NEAR(roots[0].Real(), 1.0, 1e-2);
+    EXPECT_NEAR(roots[1].Real(), 2.0, 1e-2);
+    EXPECT_NEAR(roots[2].Real(), 3.0, 1e-2);
+    EXPECT_NEAR(roots[3].Real(), 4.0, 1e-2);
 }
 
 TYPED_TEST(TestDurandKerner, finds_repeated_roots)
@@ -87,8 +87,8 @@ TYPED_TEST(TestDurandKerner, finds_repeated_roots)
     auto roots = this->solver.Solve(coefficients);
 
     ASSERT_EQ(roots.size(), 2u);
-    EXPECT_NEAR(roots[0].real(), 1.0, 1e-3);
-    EXPECT_NEAR(roots[1].real(), 1.0, 1e-3);
+    EXPECT_NEAR(roots[0].Real(), 1.0, 1e-3);
+    EXPECT_NEAR(roots[1].Real(), 1.0, 1e-3);
 }
 
 TYPED_TEST(TestDurandKerner, returns_empty_for_constant_polynomial)
@@ -109,7 +109,7 @@ TYPED_TEST(TestDurandKerner, finds_roots_of_second_order_system_polynomial)
     auto roots = this->solver.Solve(coefficients);
 
     ASSERT_EQ(roots.size(), 2u);
-    EXPECT_NEAR(roots[0].real(), double(-zeta * wn), 1e-3);
-    EXPECT_NEAR(roots[1].real(), double(-zeta * wn), 1e-3);
-    EXPECT_NEAR(std::abs(roots[0].imag()), double(wn * std::sqrt(TypeParam(1.0) - zeta * zeta)), 1e-3);
+    EXPECT_NEAR(roots[0].Real(), double(-zeta * wn), 1e-3);
+    EXPECT_NEAR(roots[1].Real(), double(-zeta * wn), 1e-3);
+    EXPECT_NEAR(std::abs(roots[0].Imaginary()), double(wn * std::sqrt(TypeParam(1.0) - zeta * zeta)), 1e-3);
 }

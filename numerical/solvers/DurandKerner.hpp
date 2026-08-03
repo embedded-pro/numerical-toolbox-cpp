@@ -6,10 +6,10 @@
 
 #include "infra/util/BoundedVector.hpp"
 #include "infra/util/ReallyAssert.hpp"
+#include "numerical/math/ComplexNumber.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include <algorithm>
 #include <cmath>
-#include <complex>
 #include <cstddef>
 #include <numbers>
 #include <span>
@@ -24,16 +24,16 @@ namespace solvers
             "DurandKerner only supports floating-point types");
 
     public:
-        using Roots = typename infra::BoundedVector<std::complex<T>>::template WithMaxSize<MaxOrder>;
+        using Roots = typename infra::BoundedVector<math::Complex<T>>::template WithMaxSize<MaxOrder>;
 
         Roots Solve(std::span<const T> coefficients,
             std::size_t maxIterations = 200, T tolerance = T(1e-6)) const;
 
     private:
-        static std::complex<T> EvaluatePolynomial(
-            std::span<const T> coefficients, std::complex<T> x);
+        static math::Complex<T> EvaluatePolynomial(
+            std::span<const T> coefficients, math::Complex<T> x);
 
-        static std::complex<T> ComputeDenominator(
+        static math::Complex<T> ComputeDenominator(
             const Roots& roots, std::size_t r, std::size_t order);
 
         static bool Iterate(Roots& roots, std::span<const T> coefficients,
@@ -43,26 +43,26 @@ namespace solvers
     ////    Implementation    ////
 
     template<typename T, std::size_t MaxOrder>
-    std::complex<T> DurandKerner<T, MaxOrder>::EvaluatePolynomial(
-        std::span<const T> coefficients, std::complex<T> x)
+    math::Complex<T> DurandKerner<T, MaxOrder>::EvaluatePolynomial(
+        std::span<const T> coefficients, math::Complex<T> x)
     {
-        std::complex<T> result(coefficients[0], T(0));
+        math::Complex<T> result(coefficients[0], T(0));
         for (std::size_t c = 1; c < coefficients.size(); ++c)
-            result = result * x + std::complex<T>(coefficients[c], T(0));
+            result = result * x + math::Complex<T>(coefficients[c], T(0));
         return result;
     }
 
     template<typename T, std::size_t MaxOrder>
-    std::complex<T> DurandKerner<T, MaxOrder>::ComputeDenominator(
+    math::Complex<T> DurandKerner<T, MaxOrder>::ComputeDenominator(
         const Roots& roots, std::size_t r, std::size_t order)
     {
-        std::complex<T> product(T(1), T(0));
+        math::Complex<T> product(T(1), T(0));
         for (std::size_t j = 0; j < order; ++j)
         {
             if (j == r)
                 continue;
             auto diff = roots[r] - roots[j];
-            if (std::abs(diff) > T(1e-15))
+            if (math::Abs(diff) > T(1e-15))
                 product *= diff;
         }
         return product;
@@ -81,7 +81,7 @@ namespace solvers
             auto correction = pVal / denominator;
             roots[r] -= correction;
 
-            if (std::abs(correction) > tolerance)
+            if (math::Abs(correction) > tolerance)
                 converged = false;
         }
 
@@ -130,11 +130,11 @@ namespace solvers
         }
 
         std::ranges::sort(roots,
-            [](const std::complex<T>& a, const std::complex<T>& b)
+            [](const math::Complex<T>& a, const math::Complex<T>& b)
             {
-                if (std::abs(a.real() - b.real()) > T(0.01))
-                    return a.real() < b.real();
-                return a.imag() < b.imag();
+                if (std::abs(a.Real() - b.Real()) > T(0.01))
+                    return a.Real() < b.Real();
+                return a.Imaginary() < b.Imaginary();
             });
 
         return roots;

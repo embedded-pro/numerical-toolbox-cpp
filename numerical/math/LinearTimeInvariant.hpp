@@ -6,17 +6,9 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
-#include "numerical/math/QNumber.hpp"
 
 namespace math
 {
-    // Discrete-time linear time-invariant state-space model:
-    //   x_{k+1} = A x_k + B u_k
-    //   y_k     = C x_k + D u_k
-    //
-    // Template args: <T, StateSize=n, InputSize=m, OutputSize=p>
-    // OutputSize defaults to StateSize. All matrices are zero-initialised by default;
-    // use the WithFullStateOutput factory to get C = I.
     template<typename T,
         std::size_t StateSize,
         std::size_t InputSize,
@@ -45,19 +37,16 @@ namespace math
         OutputMatrix C{};
         FeedthroughMatrix D{};
 
-        // x_{k+1} = A x_k + B u_k
         ALWAYS_INLINE_HOT StateVector Step(const StateVector& x, const InputVector& u) const
         {
             return A * x + B * u;
         }
 
-        // y_k = C x_k + D u_k
         ALWAYS_INLINE_HOT OutputVector Output(const StateVector& x, const InputVector& u) const
         {
             return C * x + D * u;
         }
 
-        // Factory: C = I (OutputSize must equal StateSize), D = 0
         static LinearTimeInvariant WithFullStateOutput(
             const StateMatrix& stateTransition, const InputMatrix& inputMatrix)
         requires(OutputSize == StateSize)
@@ -69,7 +58,6 @@ namespace math
             return lti;
         }
 
-        // Factory: autonomous system (B = 0, D = 0)
         static LinearTimeInvariant Autonomous(
             const StateMatrix& stateTransition, const OutputMatrix& outputMatrix)
         {

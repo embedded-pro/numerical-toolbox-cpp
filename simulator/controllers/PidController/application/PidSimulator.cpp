@@ -225,16 +225,23 @@ namespace simulator::controllers
             std::span<const float>(openDen),
             1.0f);
 
+        auto toStd = [](const auto& source, std::vector<std::complex<float>>& destination)
+        {
+            destination.clear();
+            for (const auto& value : source)
+                destination.emplace_back(value.Real(), value.Imaginary());
+        };
+
         RootLocusResult result;
         result.currentGain = rlResult.currentGain;
         result.gains.assign(rlResult.gains.begin(), rlResult.gains.end());
-        result.openLoopPoles.assign(rlResult.openLoopPoles.begin(), rlResult.openLoopPoles.end());
-        result.openLoopZeros.assign(rlResult.openLoopZeros.begin(), rlResult.openLoopZeros.end());
-        result.closedLoopPoles.assign(rlResult.closedLoopPoles.begin(), rlResult.closedLoopPoles.end());
+        toStd(rlResult.openLoopPoles, result.openLoopPoles);
+        toStd(rlResult.openLoopZeros, result.openLoopZeros);
+        toStd(rlResult.closedLoopPoles, result.closedLoopPoles);
 
         result.loci.resize(rlResult.activeBranches);
         for (std::size_t branch = 0; branch < rlResult.activeBranches; ++branch)
-            result.loci[branch].assign(rlResult.loci[branch].begin(), rlResult.loci[branch].end());
+            toStd(rlResult.loci[branch], result.loci[branch]);
 
         return result;
     }

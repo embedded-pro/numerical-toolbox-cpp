@@ -73,7 +73,7 @@ TEST_F(TestHInfinityStateFeedback, closed_loop_is_schur_stable)
     auto roots = dk.Solve(std::span<const float>{ charPoly.data(), 3 });
 
     for (const auto& root : roots)
-        EXPECT_LT(std::abs(root), 1.0f);
+        EXPECT_LT(math::Abs(root), 1.0f);
 }
 
 TEST_F(TestHInfinityStateFeedback, achieves_target_gamma)

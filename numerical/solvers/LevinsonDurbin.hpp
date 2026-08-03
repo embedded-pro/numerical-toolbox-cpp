@@ -83,4 +83,9 @@ namespace solvers
     {
         return LevinsonDurbin<T, N>();
     }
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class LevinsonDurbin<float, 2>;
+    extern template class LevinsonDurbin<float, 3>;
+#endif
 }

@@ -14,6 +14,25 @@
 namespace math
 {
     template<typename T, std::size_t N>
+    [[nodiscard]] OPTIMIZE_FOR_SPEED std::size_t FindPartialPivotRow(const Matrix<T, N, N>& matrix, std::size_t col)
+    {
+        std::size_t pivotRow = col;
+        float maxVal = std::abs(ToFloat(matrix.at(col, col)));
+
+        for (std::size_t row = col + 1; row < N; ++row)
+        {
+            float absVal = std::abs(ToFloat(matrix.at(row, col)));
+            if (absVal > maxVal)
+            {
+                maxVal = absVal;
+                pivotRow = row;
+            }
+        }
+
+        return pivotRow;
+    }
+
+    template<typename T, std::size_t N>
     [[nodiscard]] OPTIMIZE_FOR_SPEED Vector<T, N> SolveUnitLowerTriangular(const Matrix<T, N, N>& l, const Vector<T, N>& c)
     {
         Vector<T, N> y{};

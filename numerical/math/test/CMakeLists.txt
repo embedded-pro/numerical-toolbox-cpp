@@ -5,6 +5,7 @@ emil_add_test(numerical.math_test)
 target_link_libraries(numerical.math_test PUBLIC
     gmock_main
     numerical.math
+    numerical.math_test_helper
 )
 
 target_sources(numerical.math_test PRIVATE
