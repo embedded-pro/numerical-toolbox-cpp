@@ -274,3 +274,120 @@ TEST_F(TestQuaternion, ToEulerGimbalLockNegativePitch)
     auto euler = q.ToEulerZYX();
     EXPECT_NEAR(euler.at(1, 0), -std::numbers::pi_v<float> / 2.0f, math::Tolerance<float>());
 }
+
+TEST_F(TestQuaternion, NormPreservedUnderProduct)
+{
+    auto q1 = math::Quaternion<float>::FromAxisAngle(
+        math::Vector3<float>{ { 1.0f }, { 0.0f }, { 0.0f } }, 0.6f);
+    auto q2 = math::Quaternion<float>::FromAxisAngle(
+        math::Vector3<float>{ { 0.0f }, { 1.0f }, { 0.0f } }, 1.1f);
+    auto product = q1 * q2;
+    EXPECT_NEAR(product.Norm(), q1.Norm() * q2.Norm(), math::Tolerance<float>());
+}
+
+TEST_F(TestQuaternion, FromAxisAngleZeroAxisNoNaN)
+{
+    math::Vector3<float> zeroAxis{ { 0.0f }, { 0.0f }, { 0.0f } };
+    auto q = math::Quaternion<float>::FromAxisAngle(zeroAxis, 1.0f);
+    EXPECT_FALSE(std::isnan(q.w));
+    EXPECT_FALSE(std::isnan(q.x));
+    EXPECT_FALSE(std::isnan(q.y));
+    EXPECT_FALSE(std::isnan(q.z));
+}
+
+TEST_F(TestQuaternion, InverseOfZeroQuaternionIsZero)
+{
+    math::Quaternion<float> zero{ 0.0f, 0.0f, 0.0f, 0.0f };
+    auto inv = zero.Inverse();
+    EXPECT_NEAR(inv.w, 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(inv.x, 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(inv.y, 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(inv.z, 0.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestQuaternion, NormalizeZeroQuaternionNoNaN)
+{
+    math::Quaternion<float> zero{ 0.0f, 0.0f, 0.0f, 0.0f };
+    zero.Normalize();
+    EXPECT_FALSE(std::isnan(zero.w));
+    EXPECT_FALSE(std::isnan(zero.x));
+    EXPECT_FALSE(std::isnan(zero.y));
+    EXPECT_FALSE(std::isnan(zero.z));
+}
+
+TEST_F(TestQuaternion, RotatePreservesVectorNorm)
+{
+    auto q = math::Quaternion<float>::FromAxisAngle(
+        math::Vector3<float>{ { 1.0f }, { 1.0f }, { 1.0f } }, 1.3f);
+    q.Normalize();
+    math::Vector3<float> v{ { 3.0f }, { -2.0f }, { 1.0f } };
+    auto rv = q.Rotate(v);
+    float vNorm = std::sqrt(v.at(0, 0) * v.at(0, 0) + v.at(1, 0) * v.at(1, 0) + v.at(2, 0) * v.at(2, 0));
+    float rvNorm = std::sqrt(rv.at(0, 0) * rv.at(0, 0) + rv.at(1, 0) * rv.at(1, 0) + rv.at(2, 0) * rv.at(2, 0));
+    EXPECT_NEAR(rvNorm, vNorm, math::Tolerance<float>());
+}
+
+TEST_F(TestQuaternion, ToRotationMatrixIdentityGivesIdentityMatrix)
+{
+    auto r = identity.ToRotationMatrix();
+    EXPECT_NEAR(r.at(0, 0), 1.0f, math::Tolerance<float>());
+    EXPECT_NEAR(r.at(1, 1), 1.0f, math::Tolerance<float>());
+    EXPECT_NEAR(r.at(2, 2), 1.0f, math::Tolerance<float>());
+    EXPECT_NEAR(r.at(0, 1), 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(r.at(0, 2), 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(r.at(1, 0), 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(r.at(1, 2), 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(r.at(2, 0), 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(r.at(2, 1), 0.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestQuaternion, RotationCompositionMatchesSequential)
+{
+    auto q1 = math::Quaternion<float>::FromAxisAngle(
+        math::Vector3<float>{ { 0.0f }, { 0.0f }, { 1.0f } },
+        std::numbers::pi_v<float> / 4.0f);
+    auto q2 = math::Quaternion<float>::FromAxisAngle(
+        math::Vector3<float>{ { 1.0f }, { 0.0f }, { 0.0f } },
+        std::numbers::pi_v<float> / 6.0f);
+    math::Vector3<float> v{ { 1.0f }, { 0.0f }, { 0.0f } };
+    auto composed = (q1 * q2).Rotate(v);
+    auto sequential = q1.Rotate(q2.Rotate(v));
+    EXPECT_NEAR(composed.at(0, 0), sequential.at(0, 0), math::Tolerance<float>());
+    EXPECT_NEAR(composed.at(1, 0), sequential.at(1, 0), math::Tolerance<float>());
+    EXPECT_NEAR(composed.at(2, 0), sequential.at(2, 0), math::Tolerance<float>());
+}
+
+TEST_F(TestQuaternion, FromEulerZYXPureYawMatchesClosedForm)
+{
+    float yaw{ std::numbers::pi_v<float> / 3.0f };
+    auto q = math::Quaternion<float>::FromEulerZYX(0.0f, 0.0f, yaw);
+    float halfYaw{ yaw * 0.5f };
+    EXPECT_NEAR(q.w, std::cos(halfYaw), math::Tolerance<float>());
+    EXPECT_NEAR(q.x, 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(q.y, 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(q.z, std::sin(halfYaw), math::Tolerance<float>());
+}
+
+TEST_F(TestQuaternion, SlerpOutputNormIsUnity)
+{
+    auto a = math::Quaternion<float>::FromAxisAngle(
+        math::Vector3<float>{ { 1.0f }, { 0.0f }, { 0.0f } }, 0.4f);
+    auto b = math::Quaternion<float>::FromAxisAngle(
+        math::Vector3<float>{ { 0.0f }, { 1.0f }, { 0.0f } }, 1.2f);
+    std::array<float, 5> ts{ 0.0f, 0.25f, 0.5f, 0.75f, 1.0f };
+    for (float t : ts)
+    {
+        auto s = math::Quaternion<float>::Slerp(a, b, t);
+        EXPECT_NEAR(s.Norm(), 1.0f, math::Tolerance<float>());
+    }
+}
+
+TEST_F(TestQuaternion, ConjugateNegatesVectorPartOnly)
+{
+    math::Quaternion<float> q{ 0.5f, 0.3f, -0.7f, 0.1f };
+    auto c = q.Conjugate();
+    EXPECT_NEAR(c.w, 0.5f, math::Tolerance<float>());
+    EXPECT_NEAR(c.x, -0.3f, math::Tolerance<float>());
+    EXPECT_NEAR(c.y, 0.7f, math::Tolerance<float>());
+    EXPECT_NEAR(c.z, -0.1f, math::Tolerance<float>());
+}

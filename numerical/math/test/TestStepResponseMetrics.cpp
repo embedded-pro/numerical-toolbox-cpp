@@ -162,3 +162,69 @@ TEST_F(TestStepResponseMetrics, steady_state_error_known_offset)
 
     EXPECT_NEAR(result, 0.1f, 1e-4f);
 }
+
+TEST_F(TestStepResponseMetrics, rise_time_never_reaches_threshold_returns_max)
+{
+    Vec v;
+    for (std::size_t i = 0; i < N; ++i)
+        v.at(i, 0) = 0.05f;
+
+    const float result{ math::RiseTime(v, 1.0f) };
+
+    EXPECT_NEAR(result, static_cast<float>(N - 1), math::Tolerance<float>());
+}
+
+TEST_F(TestStepResponseMetrics, rise_time_reaches_lo_but_not_hi_returns_max)
+{
+    Vec v;
+    for (std::size_t i = 0; i < N; ++i)
+        v.at(i, 0) = (i < 10) ? 0.0f : 0.5f;
+
+    const float result{ math::RiseTime(v, 1.0f) };
+
+    EXPECT_NEAR(result, static_cast<float>(N - 1), math::Tolerance<float>());
+}
+
+TEST_F(TestStepResponseMetrics, settling_time_with_dt_scales_result)
+{
+    Vec v{ MakeRampPlateau(1.0f, 20) };
+    const float dt{ 0.01f };
+
+    const float sampleResult{ math::SettlingTime(v, 1.0f, 0.02f) };
+    const float timeResult{ math::SettlingTime(v, 1.0f, 0.02f, dt) };
+
+    EXPECT_NEAR(timeResult, sampleResult * dt, math::Tolerance<float>());
+}
+
+TEST_F(TestStepResponseMetrics, settling_time_always_outside_band_returns_full_duration)
+{
+    Vec v;
+    for (std::size_t i = 0; i < N; ++i)
+        v.at(i, 0) = 0.0f;
+
+    const float result{ math::SettlingTime(v, 1.0f, 0.02f) };
+
+    EXPECT_NEAR(result, static_cast<float>(N), math::Tolerance<float>());
+}
+
+TEST_F(TestStepResponseMetrics, peak_time_at_index_zero_for_monotone_decreasing)
+{
+    Vec v;
+    for (std::size_t i = 0; i < N; ++i)
+        v.at(i, 0) = static_cast<float>(N - i);
+
+    const float result{ math::PeakTime(v) };
+
+    EXPECT_NEAR(result, 0.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestStepResponseMetrics, steady_state_error_custom_tail_size)
+{
+    Vec v;
+    for (std::size_t i = 0; i < N; ++i)
+        v.at(i, 0) = (i < N / 2) ? 0.0f : 0.8f;
+
+    const float result{ math::SteadyStateError<float, N, 8>(v, 1.0f) };
+
+    EXPECT_NEAR(result, 0.2f, 1e-4f);
+}

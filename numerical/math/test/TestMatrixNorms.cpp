@@ -79,3 +79,70 @@ TEST_F(MatrixNormsTest, NormalizeZeroVectorReturnsNullopt)
     auto result = math::Normalize(zero);
     EXPECT_FALSE(result.has_value());
 }
+
+TEST_F(MatrixNormsTest, FrobeniusNormNonSquareMatrix)
+{
+    math::Matrix<float, 2, 3> m{
+        { 1.0f, 2.0f, 3.0f },
+        { 4.0f, 5.0f, 6.0f }
+    };
+    float result = math::FrobeniusNorm(m);
+    EXPECT_NEAR(result, 9.53939f, math::Tolerance<float>());
+}
+
+TEST_F(MatrixNormsTest, FrobeniusNormZeroMatrix)
+{
+    math::Matrix<float, 2, 2> zero{
+        { 0.0f, 0.0f },
+        { 0.0f, 0.0f }
+    };
+    EXPECT_NEAR(math::FrobeniusNorm(zero), 0.0f, math::Tolerance<float>());
+}
+
+TEST_F(MatrixNormsTest, OffDiagonalFrobeniusNormDiagonalMatrix)
+{
+    math::Matrix<float, 3, 3> diag{
+        { 2.0f, 0.0f, 0.0f },
+        { 0.0f, 3.0f, 0.0f },
+        { 0.0f, 0.0f, 5.0f }
+    };
+    EXPECT_NEAR(math::OffDiagonalFrobeniusNorm(diag), 0.0f, math::Tolerance<float>());
+}
+
+TEST_F(MatrixNormsTest, OneNormNonSquareMatrix)
+{
+    math::Matrix<float, 2, 3> m{
+        { 1.0f, 2.0f, 3.0f },
+        { 4.0f, 5.0f, 6.0f }
+    };
+    EXPECT_NEAR(math::OneNorm(m), 9.0f, math::Tolerance<float>());
+}
+
+TEST_F(MatrixNormsTest, InfinityNormNonSquareMatrix)
+{
+    math::Matrix<float, 2, 3> m{
+        { 1.0f, 2.0f, 3.0f },
+        { 4.0f, 5.0f, 6.0f }
+    };
+    EXPECT_NEAR(math::InfinityNorm(m), 15.0f, math::Tolerance<float>());
+}
+
+TEST_F(MatrixNormsTest, VectorNormZeroVector)
+{
+    math::Vector<float, 2> zero{ { 0.0f }, { 0.0f } };
+    EXPECT_NEAR(math::VectorNorm(zero), 0.0f, math::Tolerance<float>());
+}
+
+TEST_F(MatrixNormsTest, NormalizeResultHasUnitNorm)
+{
+    auto result = math::Normalize(v);
+    ASSERT_TRUE(result.has_value());
+    float norm = math::VectorNorm(*result);
+    EXPECT_NEAR(norm, 1.0f, math::Tolerance<float>());
+}
+
+TEST_F(MatrixNormsTest, DotProductCommutativity)
+{
+    math::Vector<float, 2> w{ { 1.0f }, { 2.0f } };
+    EXPECT_NEAR(math::DotProduct(v, w), math::DotProduct(w, v), math::Tolerance<float>());
+}
