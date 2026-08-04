@@ -25,11 +25,12 @@ TEST_F(TestCordic, SinCosZero)
 TEST_F(TestCordic, SinCosQuarterPi)
 {
     auto result = cordic.SineCosine(std::numbers::pi_v<float> / 4.0f);
-    EXPECT_NEAR(result.sin, 0.7071f, math::Tolerance<float>());
-    EXPECT_NEAR(result.cos, 0.7071f, math::Tolerance<float>());
+    const float ref{ std::sqrt(2.0f) / 2.0f };
+    EXPECT_NEAR(result.sin, ref, math::Tolerance<float>());
+    EXPECT_NEAR(result.cos, ref, math::Tolerance<float>());
 }
 
-TEST_F(TestCordic, SinCosMatchesStdOverSweep)
+TEST_F(TestCordic, SinCosMatchesStdInConvergenceDomain)
 {
     const float tolerance{ 1.0f / static_cast<float>(1 << 15) };
     std::array<float, 9> angles{ -1.5f, -1.0f, -0.5f, -0.25f, 0.0f, 0.25f, 0.5f, 1.0f, 1.5f };
@@ -43,48 +44,13 @@ TEST_F(TestCordic, SinCosMatchesStdOverSweep)
 
 TEST_F(TestCordic, PythagoreanIdentity)
 {
-    std::array<float, 7> angles{ -1.5f, -1.0f, -0.5f, 0.0f, 0.5f, 1.0f, 1.5f };
+    std::array<float, 9> angles{ -2.5f, -2.0f, -1.5f, -1.0f, 0.0f, 1.0f, 1.5f, 2.0f, 2.5f };
     for (float angle : angles)
     {
         auto result = cordic.SineCosine(angle);
         float identity{ result.sin * result.sin + result.cos * result.cos };
         EXPECT_NEAR(identity, 1.0f, math::Tolerance<float>());
     }
-}
-
-TEST_F(TestCordic, Atan2AllQuadrants)
-{
-    const float tol{ math::Tolerance<float>() };
-    EXPECT_NEAR(cordic.Arctangent2(1.0f, 1.0f), std::atan2(1.0f, 1.0f), tol);
-    EXPECT_NEAR(cordic.Arctangent2(1.0f, -1.0f), std::atan2(1.0f, -1.0f), tol);
-    EXPECT_NEAR(cordic.Arctangent2(-1.0f, -1.0f), std::atan2(-1.0f, -1.0f), tol);
-    EXPECT_NEAR(cordic.Arctangent2(-1.0f, 1.0f), std::atan2(-1.0f, 1.0f), tol);
-}
-
-TEST_F(TestCordic, Atan2Axes)
-{
-    const float pi{ std::numbers::pi_v<float> };
-    const float tol{ math::Tolerance<float>() };
-    EXPECT_NEAR(cordic.Arctangent2(0.0f, 1.0f), 0.0f, tol);
-    EXPECT_NEAR(cordic.Arctangent2(1.0f, 0.0f), pi / 2.0f, tol);
-    EXPECT_NEAR(cordic.Arctangent2(0.0f, -1.0f), pi, tol);
-}
-
-TEST_F(TestCordic, MagnitudeMatchesHypot)
-{
-    const float tol{ math::Tolerance<float>() };
-    EXPECT_NEAR(cordic.Magnitude(0.6f, 0.8f), 1.0f, tol);
-    EXPECT_NEAR(cordic.Magnitude(0.3f, 0.4f), 0.5f, tol);
-    EXPECT_NEAR(cordic.Magnitude(0.0f, 0.5f), 0.5f, tol);
-}
-
-TEST_F(TestCordic, RotateVector)
-{
-    const float pi{ std::numbers::pi_v<float> };
-    std::array<float, 2> v{ 1.0f, 0.0f };
-    auto result = cordic.Rotate(v, pi / 2.0f);
-    EXPECT_NEAR(result[0], 0.0f, math::Tolerance<float>());
-    EXPECT_NEAR(result[1], 1.0f, math::Tolerance<float>());
 }
 
 TEST_F(TestCordic, SinCosAboveHalfPi)
@@ -103,6 +69,97 @@ TEST_F(TestCordic, SinCosBelowNegHalfPi)
     auto result = cordic.SineCosine(angle);
     EXPECT_NEAR(result.sin, std::sin(angle), tol);
     EXPECT_NEAR(result.cos, std::cos(angle), tol);
+}
+
+TEST_F(TestCordic, Atan2AllQuadrants)
+{
+    const float tol{ math::Tolerance<float>() };
+    EXPECT_NEAR(cordic.Arctangent2(1.0f, 1.0f), std::atan2(1.0f, 1.0f), tol);
+    EXPECT_NEAR(cordic.Arctangent2(1.0f, -1.0f), std::atan2(1.0f, -1.0f), tol);
+    EXPECT_NEAR(cordic.Arctangent2(-1.0f, -1.0f), std::atan2(-1.0f, -1.0f), tol);
+    EXPECT_NEAR(cordic.Arctangent2(-1.0f, 1.0f), std::atan2(-1.0f, 1.0f), tol);
+}
+
+TEST_F(TestCordic, Atan2Axes)
+{
+    const float pi{ std::numbers::pi_v<float> };
+    const float tol{ math::Tolerance<float>() };
+    EXPECT_NEAR(cordic.Arctangent2(0.0f, 1.0f), 0.0f, tol);
+    EXPECT_NEAR(cordic.Arctangent2(1.0f, 0.0f), pi / 2.0f, tol);
+    EXPECT_NEAR(cordic.Arctangent2(-1.0f, 0.0f), -pi / 2.0f, tol);
+    EXPECT_NEAR(cordic.Arctangent2(0.0f, -1.0f), pi, tol);
+}
+
+TEST_F(TestCordic, Atan2RoundTripWithSineCosine)
+{
+    std::array<float, 7> angles{ -1.4f, -1.0f, -0.5f, 0.0f, 0.5f, 1.0f, 1.4f };
+    for (float angle : angles)
+    {
+        auto sc = cordic.SineCosine(angle);
+        float recovered{ cordic.Arctangent2(sc.sin, sc.cos) };
+        EXPECT_NEAR(recovered, angle, math::Tolerance<float>());
+    }
+}
+
+TEST_F(TestCordic, MagnitudeMatchesHypot)
+{
+    const float tol{ math::Tolerance<float>() };
+    EXPECT_NEAR(cordic.Magnitude(0.6f, 0.8f), 1.0f, tol);
+    EXPECT_NEAR(cordic.Magnitude(0.3f, 0.4f), 0.5f, tol);
+    EXPECT_NEAR(cordic.Magnitude(0.0f, 0.5f), 0.5f, tol);
+}
+
+TEST_F(TestCordic, MagnitudeNegativeComponents)
+{
+    const float tol{ math::Tolerance<float>() };
+    EXPECT_NEAR(cordic.Magnitude(-0.6f, 0.8f), std::hypot(0.6f, 0.8f), tol);
+    EXPECT_NEAR(cordic.Magnitude(0.6f, -0.8f), std::hypot(0.6f, 0.8f), tol);
+    EXPECT_NEAR(cordic.Magnitude(-0.6f, -0.8f), std::hypot(0.6f, 0.8f), tol);
+}
+
+TEST_F(TestCordic, MagnitudeZeroInput)
+{
+    EXPECT_NEAR(cordic.Magnitude(0.0f, 0.0f), 0.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestCordic, RotateVectorByHalfPi)
+{
+    const float pi{ std::numbers::pi_v<float> };
+    std::array<float, 2> v{ 1.0f, 0.0f };
+    auto result = cordic.Rotate(v, pi / 2.0f);
+    EXPECT_NEAR(result[0], 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(result[1], 1.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestCordic, RotateIdentity)
+{
+    std::array<float, 2> v{ 0.6f, 0.8f };
+    auto result = cordic.Rotate(v, 0.0f);
+    EXPECT_NEAR(result[0], 0.6f, math::Tolerance<float>());
+    EXPECT_NEAR(result[1], 0.8f, math::Tolerance<float>());
+}
+
+TEST_F(TestCordic, RotateByPi)
+{
+    const float pi{ std::numbers::pi_v<float> };
+    std::array<float, 2> v{ 1.0f, 0.0f };
+    auto result = cordic.Rotate(v, pi);
+    const float tol{ 1.0f / static_cast<float>(1 << 15) };
+    EXPECT_NEAR(result[0], -1.0f, tol);
+    EXPECT_NEAR(result[1], 0.0f, tol);
+}
+
+TEST_F(TestCordic, RotatePreservesNorm)
+{
+    std::array<float, 7> angles{ -2.0f, -1.0f, -0.5f, 0.0f, 0.5f, 1.0f, 2.0f };
+    std::array<float, 2> v{ 3.0f, 4.0f };
+    const float normV{ std::hypot(v[0], v[1]) };
+    for (float angle : angles)
+    {
+        auto rotated = cordic.Rotate(v, angle);
+        float normRotated{ std::hypot(rotated[0], rotated[1]) };
+        EXPECT_NEAR(normRotated, normV, math::Tolerance<float>());
+    }
 }
 
 TEST_F(TestCordic, AccuracyScalesWithIterations)

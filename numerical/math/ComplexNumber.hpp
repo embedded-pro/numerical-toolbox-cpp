@@ -1,5 +1,7 @@
 #pragma once
 #include "numerical/math/QNumber.hpp"
+#include <cmath>
+#include <type_traits>
 
 namespace math
 {
@@ -118,6 +120,13 @@ namespace math
     Complex<QNumberType> Complex<QNumberType>::operator-() const
     {
         return Complex(-real, -imag);
+    }
+
+    template<typename QNumberType>
+    std::enable_if_t<std::is_floating_point_v<QNumberType>, QNumberType>
+    Abs(const Complex<QNumberType>& c)
+    {
+        return std::hypot(c.Real(), c.Imaginary());
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD

@@ -2,7 +2,6 @@
 #include "numerical/math/Tolerance.hpp"
 #include <array>
 #include <cmath>
-#include <complex>
 #include <gtest/gtest.h>
 #include <numbers>
 
@@ -23,8 +22,8 @@ TEST_F(TestRootLocus, open_loop_poles_first_order_plant)
     auto result = rootLocus.Calculate(num, den, 1.0f);
 
     ASSERT_EQ(result.openLoopPoles.size(), 1u);
-    EXPECT_NEAR(result.openLoopPoles[0].real(), -2.0f, math::Tolerance<float>());
-    EXPECT_NEAR(result.openLoopPoles[0].imag(), 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(result.openLoopPoles[0].Real(), -2.0f, math::Tolerance<float>());
+    EXPECT_NEAR(result.openLoopPoles[0].Imaginary(), 0.0f, math::Tolerance<float>());
 }
 
 TEST_F(TestRootLocus, open_loop_poles_second_order_underdamped)
@@ -37,10 +36,10 @@ TEST_F(TestRootLocus, open_loop_poles_second_order_underdamped)
     auto result = rootLocus.Calculate(num, den, 1.0f);
 
     ASSERT_EQ(result.openLoopPoles.size(), 2u);
-    EXPECT_NEAR(result.openLoopPoles[0].real(), -zeta * wn, 1e-2f);
-    EXPECT_NEAR(result.openLoopPoles[1].real(), -zeta * wn, 1e-2f);
+    EXPECT_NEAR(result.openLoopPoles[0].Real(), -zeta * wn, 1e-2f);
+    EXPECT_NEAR(result.openLoopPoles[1].Real(), -zeta * wn, 1e-2f);
     float expectedImag = wn * std::sqrt(1.0f - zeta * zeta);
-    EXPECT_NEAR(std::abs(result.openLoopPoles[0].imag()), expectedImag, 1e-2f);
+    EXPECT_NEAR(std::abs(result.openLoopPoles[0].Imaginary()), expectedImag, 1e-2f);
 }
 
 TEST_F(TestRootLocus, open_loop_zeros_identified)
@@ -51,8 +50,8 @@ TEST_F(TestRootLocus, open_loop_zeros_identified)
     auto result = rootLocus.Calculate(num, den, 1.0f);
 
     ASSERT_EQ(result.openLoopZeros.size(), 1u);
-    EXPECT_NEAR(result.openLoopZeros[0].real(), -3.0f, math::Tolerance<float>());
-    EXPECT_NEAR(result.openLoopZeros[0].imag(), 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(result.openLoopZeros[0].Real(), -3.0f, math::Tolerance<float>());
+    EXPECT_NEAR(result.openLoopZeros[0].Imaginary(), 0.0f, math::Tolerance<float>());
 }
 
 TEST_F(TestRootLocus, gain_sweep_step_count_and_active_branches)
@@ -88,10 +87,10 @@ TEST_F(TestRootLocus, closed_loop_poles_match_analytic_at_k1_doc_example)
     ASSERT_EQ(result.closedLoopPoles.size(), 2u);
     float r0 = (-3.0f - std::sqrt(5.0f)) / 2.0f;
     float r1 = (-3.0f + std::sqrt(5.0f)) / 2.0f;
-    EXPECT_NEAR(result.closedLoopPoles[0].real(), r0, 1e-2f);
-    EXPECT_NEAR(result.closedLoopPoles[0].imag(), 0.0f, 1e-2f);
-    EXPECT_NEAR(result.closedLoopPoles[1].real(), r1, 1e-2f);
-    EXPECT_NEAR(result.closedLoopPoles[1].imag(), 0.0f, 1e-2f);
+    EXPECT_NEAR(result.closedLoopPoles[0].Real(), r0, 1e-2f);
+    EXPECT_NEAR(result.closedLoopPoles[0].Imaginary(), 0.0f, 1e-2f);
+    EXPECT_NEAR(result.closedLoopPoles[1].Real(), r1, 1e-2f);
+    EXPECT_NEAR(result.closedLoopPoles[1].Imaginary(), 0.0f, 1e-2f);
 }
 
 TEST_F(TestRootLocus, current_gain_stored_in_result)
@@ -114,11 +113,11 @@ TEST_F(TestRootLocus, branches_start_near_open_loop_poles_at_low_gain)
     ASSERT_GE(result.loci[0].size(), 1u);
     ASSERT_GE(result.loci[1].size(), 1u);
 
-    float p0 = result.openLoopPoles[0].real();
-    float p1 = result.openLoopPoles[1].real();
+    float p0 = result.openLoopPoles[0].Real();
+    float p1 = result.openLoopPoles[1].Real();
 
-    float loci0Start = result.loci[0].front().real();
-    float loci1Start = result.loci[1].front().real();
+    float loci0Start = result.loci[0].front().Real();
+    float loci1Start = result.loci[1].front().Real();
 
     bool branch0NearP0 = std::abs(loci0Start - p0) < 0.5f;
     bool branch0NearP1 = std::abs(loci0Start - p1) < 0.5f;
@@ -140,11 +139,11 @@ TEST_F(TestRootLocus, asymptote_centroid_three_poles_one_zero)
 
     float sumPoles = 0.0f;
     for (const auto& p : result.openLoopPoles)
-        sumPoles += p.real();
+        sumPoles += p.Real();
 
     float sumZeros = 0.0f;
     for (const auto& z : result.openLoopZeros)
-        sumZeros += z.real();
+        sumZeros += z.Real();
 
     float centroid = (sumPoles - sumZeros) / static_cast<float>(result.openLoopPoles.size() - result.openLoopZeros.size());
 
@@ -178,7 +177,7 @@ TEST_F(TestRootLocus, loci_move_left_with_increasing_gain_first_order)
     auto result = rootLocus.Calculate(num, den, 1.0f, 0.1f, 100.0f);
 
     ASSERT_GE(result.loci[0].size(), 2u);
-    EXPECT_LT(result.loci[0].back().real(), result.loci[0].front().real());
+    EXPECT_LT(result.loci[0].back().Real(), result.loci[0].front().Real());
 }
 
 TEST_F(TestRootLocus, second_order_poles_become_complex_at_high_gain)
@@ -193,7 +192,7 @@ TEST_F(TestRootLocus, second_order_poles_become_complex_at_high_gain)
     bool foundComplex = false;
     for (const auto& root : result.loci[0])
     {
-        if (std::abs(root.imag()) > 0.1f)
+        if (std::abs(root.Imaginary()) > 0.1f)
         {
             foundComplex = true;
             break;
@@ -201,7 +200,7 @@ TEST_F(TestRootLocus, second_order_poles_become_complex_at_high_gain)
     }
     for (const auto& root : result.loci[1])
     {
-        if (std::abs(root.imag()) > 0.1f)
+        if (std::abs(root.Imaginary()) > 0.1f)
         {
             foundComplex = true;
             break;
@@ -222,12 +221,12 @@ TEST_F(TestRootLocus, conjugate_symmetry_when_complex_pair_present)
     bool verified = false;
     for (std::size_t i = 0; i < result.loci[0].size(); ++i)
     {
-        float im0 = result.loci[0][i].imag();
-        float im1 = result.loci[1][i].imag();
+        float im0 = result.loci[0][i].Imaginary();
+        float im1 = result.loci[1][i].Imaginary();
         if (std::abs(im0) > 0.1f && std::abs(im1) > 0.1f)
         {
-            float re0 = result.loci[0][i].real();
-            float re1 = result.loci[1][i].real();
+            float re0 = result.loci[0][i].Real();
+            float re1 = result.loci[1][i].Real();
             EXPECT_NEAR(re0, re1, 1e-2f);
             EXPECT_NEAR(im0, -im1, 1e-2f);
             verified = true;
@@ -244,7 +243,7 @@ TEST_F(TestRootLocus, closed_loop_poles_in_lhp_for_stable_gain)
     auto result = rootLocus.Calculate(num, den, 1.0f);
 
     for (const auto& p : result.closedLoopPoles)
-        EXPECT_LT(p.real(), 0.0f);
+        EXPECT_LT(p.Real(), 0.0f);
 }
 
 TEST_F(TestRootLocus, all_loci_points_are_finite)
@@ -258,8 +257,8 @@ TEST_F(TestRootLocus, all_loci_points_are_finite)
     {
         for (const auto& pt : result.loci[b])
         {
-            EXPECT_TRUE(std::isfinite(pt.real()));
-            EXPECT_TRUE(std::isfinite(pt.imag()));
+            EXPECT_TRUE(std::isfinite(pt.Real()));
+            EXPECT_TRUE(std::isfinite(pt.Imaginary()));
         }
     }
 }
@@ -278,8 +277,8 @@ TEST_F(TestRootLocus, determinism_same_input_same_output)
         ASSERT_EQ(result1.loci[b].size(), result2.loci[b].size());
         for (std::size_t i = 0; i < result1.loci[b].size(); ++i)
         {
-            EXPECT_FLOAT_EQ(result1.loci[b][i].real(), result2.loci[b][i].real());
-            EXPECT_FLOAT_EQ(result1.loci[b][i].imag(), result2.loci[b][i].imag());
+            EXPECT_FLOAT_EQ(result1.loci[b][i].Real(), result2.loci[b][i].Real());
+            EXPECT_FLOAT_EQ(result1.loci[b][i].Imaginary(), result2.loci[b][i].Imaginary());
         }
     }
 }
@@ -315,6 +314,6 @@ TEST_F(TestRootLocus, closed_loop_pole_first_order_analytic)
     auto result = rootLocus.Calculate(num, den, 2.0f);
 
     ASSERT_EQ(result.closedLoopPoles.size(), 1u);
-    EXPECT_NEAR(result.closedLoopPoles[0].real(), -3.0f, math::Tolerance<float>());
-    EXPECT_NEAR(result.closedLoopPoles[0].imag(), 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(result.closedLoopPoles[0].Real(), -3.0f, math::Tolerance<float>());
+    EXPECT_NEAR(result.closedLoopPoles[0].Imaginary(), 0.0f, math::Tolerance<float>());
 }

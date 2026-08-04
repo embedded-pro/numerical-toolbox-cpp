@@ -1,151 +1,290 @@
 #include "numerical/math/ComplexNumber.hpp"
+#include "numerical/math/Tolerance.hpp"
+#include <cmath>
 #include <gtest/gtest.h>
 
 namespace
 {
-    template<typename QNumberType>
-    class ComplexTest
+    class TestComplexNumber
         : public ::testing::Test
     {
     protected:
-        using ComplexType = math::Complex<QNumberType>;
-        static constexpr float kEpsilon = 1e-4f;
-
-        static ComplexType MakeComplex(float real, float imag)
-        {
-            return ComplexType(QNumberType(real), QNumberType(imag));
-        }
-
-        static float ToFloat(const float& value)
-        {
-            return value;
-        }
-
-        static float ToFloat(const math::Q15& value)
-        {
-            return value.ToFloat();
-        }
-
-        static float ToFloat(const math::Q31& value)
-        {
-            return value.ToFloat();
-        }
+        using ComplexType = math::Complex<float>;
     };
-
-    using TestedTypes = ::testing::Types<float, math::Q15, math::Q31>;
-    TYPED_TEST_SUITE(ComplexTest, TestedTypes);
 }
 
-TYPED_TEST(ComplexTest, DefaultConstructor)
+TEST_F(TestComplexNumber, DefaultConstructorIsZero)
 {
-    typename TestFixture::ComplexType num;
-    EXPECT_FLOAT_EQ(this->ToFloat(num.Real()), 0.0f);
-    EXPECT_FLOAT_EQ(this->ToFloat(num.Imaginary()), 0.0f);
+    ComplexType num;
+
+    EXPECT_NEAR(num.Real(), 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(num.Imaginary(), 0.0f, math::Tolerance<float>());
 }
 
-TYPED_TEST(ComplexTest, ComponentConstructor)
+TEST_F(TestComplexNumber, ComponentConstructorStoresValues)
 {
-    TypeParam real(0.5f);
-    TypeParam imag(0.3f);
-    typename TestFixture::ComplexType num(real, imag);
+    ComplexType num(0.5f, 0.3f);
 
-    EXPECT_NEAR(this->ToFloat(num.Real()), 0.5f, TestFixture::kEpsilon);
-    EXPECT_NEAR(this->ToFloat(num.Imaginary()), 0.3f, TestFixture::kEpsilon);
+    EXPECT_NEAR(num.Real(), 0.5f, math::Tolerance<float>());
+    EXPECT_NEAR(num.Imaginary(), 0.3f, math::Tolerance<float>());
 }
 
-TYPED_TEST(ComplexTest, FloatConstructor)
+TEST_F(TestComplexNumber, Addition)
 {
-    auto num = TestFixture::MakeComplex(0.5f, 0.3f);
+    ComplexType a(0.3f, 0.4f);
+    ComplexType b(0.1f, 0.2f);
 
-    EXPECT_NEAR(this->ToFloat(num.Real()), 0.5f, TestFixture::kEpsilon);
-    EXPECT_NEAR(this->ToFloat(num.Imaginary()), 0.3f, TestFixture::kEpsilon);
+    ComplexType result = a + b;
+
+    EXPECT_NEAR(result.Real(), 0.4f, math::Tolerance<float>());
+    EXPECT_NEAR(result.Imaginary(), 0.6f, math::Tolerance<float>());
 }
 
-TYPED_TEST(ComplexTest, Addition)
+TEST_F(TestComplexNumber, Subtraction)
 {
-    auto a = TestFixture::MakeComplex(0.3f, 0.4f);
-    auto b = TestFixture::MakeComplex(0.1f, 0.2f);
-    typename TestFixture::ComplexType result = a + b;
+    ComplexType a(0.3f, 0.4f);
+    ComplexType b(0.1f, 0.2f);
 
-    EXPECT_NEAR(this->ToFloat(result.Real()), 0.4f, TestFixture::kEpsilon);
-    EXPECT_NEAR(this->ToFloat(result.Imaginary()), 0.6f, TestFixture::kEpsilon);
+    ComplexType result = a - b;
+
+    EXPECT_NEAR(result.Real(), 0.2f, math::Tolerance<float>());
+    EXPECT_NEAR(result.Imaginary(), 0.2f, math::Tolerance<float>());
 }
 
-TYPED_TEST(ComplexTest, Subtraction)
+TEST_F(TestComplexNumber, Multiplication)
 {
-    auto a = TestFixture::MakeComplex(0.3f, 0.4f);
-    auto b = TestFixture::MakeComplex(0.1f, 0.2f);
-    typename TestFixture::ComplexType result = a - b;
+    ComplexType a(0.3f, 0.4f);
+    ComplexType b(0.1f, 0.2f);
 
-    EXPECT_NEAR(this->ToFloat(result.Real()), 0.2f, TestFixture::kEpsilon);
-    EXPECT_NEAR(this->ToFloat(result.Imaginary()), 0.2f, TestFixture::kEpsilon);
+    ComplexType result = a * b;
+
+    EXPECT_NEAR(result.Real(), -0.05f, math::Tolerance<float>());
+    EXPECT_NEAR(result.Imaginary(), 0.10f, math::Tolerance<float>());
 }
 
-TYPED_TEST(ComplexTest, Multiplication)
+TEST_F(TestComplexNumber, Division)
 {
-    auto a = TestFixture::MakeComplex(0.3f, 0.4f);
-    auto b = TestFixture::MakeComplex(0.1f, 0.2f);
-    typename TestFixture::ComplexType result = a * b;
+    ComplexType a(0.3f, 0.4f);
+    ComplexType b(0.1f, 0.2f);
 
-    // (0.3 + 0.4i)(0.1 + 0.2i) = (0.3*0.1 - 0.4*0.2) + (0.3*0.2 + 0.4*0.1)i
-    EXPECT_NEAR(this->ToFloat(result.Real()), -0.05f, TestFixture::kEpsilon);
-    EXPECT_NEAR(this->ToFloat(result.Imaginary()), 0.10f, TestFixture::kEpsilon);
+    ComplexType result = a / b;
+
+    EXPECT_NEAR(result.Real(), 2.2f, math::Tolerance<float>());
+    EXPECT_NEAR(result.Imaginary(), -0.4f, math::Tolerance<float>());
 }
 
-TYPED_TEST(ComplexTest, CompoundAddition)
+TEST_F(TestComplexNumber, DivisionByPureRealDivisor)
 {
-    auto a = TestFixture::MakeComplex(0.3f, 0.4f);
-    auto b = TestFixture::MakeComplex(0.1f, 0.2f);
+    ComplexType a(0.3f, 0.4f);
+    ComplexType b(2.0f, 0.0f);
+
+    ComplexType result = a / b;
+
+    EXPECT_NEAR(result.Real(), 0.15f, math::Tolerance<float>());
+    EXPECT_NEAR(result.Imaginary(), 0.2f, math::Tolerance<float>());
+}
+
+TEST_F(TestComplexNumber, DivisionByPureImaginaryDivisor)
+{
+    ComplexType a(0.3f, 0.4f);
+    ComplexType b(0.0f, 1.0f);
+
+    ComplexType result = a / b;
+
+    EXPECT_NEAR(result.Real(), 0.4f, math::Tolerance<float>());
+    EXPECT_NEAR(result.Imaginary(), -0.3f, math::Tolerance<float>());
+}
+
+TEST_F(TestComplexNumber, MultiplyThenDivideRoundTripRecoversOperand)
+{
+    ComplexType a(0.3f, 0.4f);
+    ComplexType b(0.1f, 0.2f);
+
+    ComplexType result = (a * b) / b;
+
+    EXPECT_NEAR(result.Real(), 0.3f, math::Tolerance<float>());
+    EXPECT_NEAR(result.Imaginary(), 0.4f, math::Tolerance<float>());
+}
+
+TEST_F(TestComplexNumber, AdditiveIdentity)
+{
+    ComplexType a(0.3f, -0.4f);
+    ComplexType zero;
+
+    ComplexType result = a + zero;
+
+    EXPECT_NEAR(result.Real(), 0.3f, math::Tolerance<float>());
+    EXPECT_NEAR(result.Imaginary(), -0.4f, math::Tolerance<float>());
+}
+
+TEST_F(TestComplexNumber, MultiplicativeIdentity)
+{
+    ComplexType a(0.3f, -0.4f);
+    ComplexType one(1.0f, 0.0f);
+
+    ComplexType result = a * one;
+
+    EXPECT_NEAR(result.Real(), 0.3f, math::Tolerance<float>());
+    EXPECT_NEAR(result.Imaginary(), -0.4f, math::Tolerance<float>());
+}
+
+TEST_F(TestComplexNumber, ImaginaryUnitSquaredIsNegativeOne)
+{
+    ComplexType i(0.0f, 1.0f);
+
+    ComplexType result = i * i;
+
+    EXPECT_NEAR(result.Real(), -1.0f, math::Tolerance<float>());
+    EXPECT_NEAR(result.Imaginary(), 0.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestComplexNumber, AdditiveInverseYieldsZero)
+{
+    ComplexType a(0.7f, -0.5f);
+
+    ComplexType result = a + (-a);
+
+    EXPECT_NEAR(result.Real(), 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(result.Imaginary(), 0.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestComplexNumber, MultiplicationIsCommutative)
+{
+    ComplexType a(0.3f, 0.4f);
+    ComplexType b(0.5f, -0.2f);
+
+    ComplexType ab = a * b;
+    ComplexType ba = b * a;
+
+    EXPECT_NEAR(ab.Real(), ba.Real(), math::Tolerance<float>());
+    EXPECT_NEAR(ab.Imaginary(), ba.Imaginary(), math::Tolerance<float>());
+}
+
+TEST_F(TestComplexNumber, MultiplicationDistributesOverAddition)
+{
+    ComplexType a(0.3f, 0.4f);
+    ComplexType b(0.1f, 0.2f);
+    ComplexType c(0.5f, -0.1f);
+
+    ComplexType lhs = a * (b + c);
+    ComplexType rhs = a * b + a * c;
+
+    EXPECT_NEAR(lhs.Real(), rhs.Real(), math::Tolerance<float>());
+    EXPECT_NEAR(lhs.Imaginary(), rhs.Imaginary(), math::Tolerance<float>());
+}
+
+TEST_F(TestComplexNumber, AbsMatchesHypot)
+{
+    ComplexType a(3.0f, 4.0f);
+
+    float result = math::Abs(a);
+
+    EXPECT_NEAR(result, 5.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestComplexNumber, AbsOfPureReal)
+{
+    ComplexType a(-2.5f, 0.0f);
+
+    float result = math::Abs(a);
+
+    EXPECT_NEAR(result, 2.5f, math::Tolerance<float>());
+}
+
+TEST_F(TestComplexNumber, AbsOfZeroIsZero)
+{
+    ComplexType zero;
+
+    float result = math::Abs(zero);
+
+    EXPECT_NEAR(result, 0.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestComplexNumber, ModulusSquaredEqualsSumOfSquares)
+{
+    ComplexType a(3.0f, 4.0f);
+
+    float modulus = math::Abs(a);
+    float expected = std::sqrt(a.Real() * a.Real() + a.Imaginary() * a.Imaginary());
+
+    EXPECT_NEAR(modulus, expected, math::Tolerance<float>());
+}
+
+TEST_F(TestComplexNumber, CompoundAddition)
+{
+    ComplexType a(0.3f, 0.4f);
+    ComplexType b(0.1f, 0.2f);
+
     a += b;
 
-    EXPECT_NEAR(this->ToFloat(a.Real()), 0.4f, TestFixture::kEpsilon);
-    EXPECT_NEAR(this->ToFloat(a.Imaginary()), 0.6f, TestFixture::kEpsilon);
+    EXPECT_NEAR(a.Real(), 0.4f, math::Tolerance<float>());
+    EXPECT_NEAR(a.Imaginary(), 0.6f, math::Tolerance<float>());
 }
 
-TYPED_TEST(ComplexTest, CompoundSubtraction)
+TEST_F(TestComplexNumber, CompoundSubtraction)
 {
-    auto a = TestFixture::MakeComplex(0.3f, 0.4f);
-    auto b = TestFixture::MakeComplex(0.1f, 0.2f);
+    ComplexType a(0.3f, 0.4f);
+    ComplexType b(0.1f, 0.2f);
+
     a -= b;
 
-    EXPECT_NEAR(this->ToFloat(a.Real()), 0.2f, TestFixture::kEpsilon);
-    EXPECT_NEAR(this->ToFloat(a.Imaginary()), 0.2f, TestFixture::kEpsilon);
+    EXPECT_NEAR(a.Real(), 0.2f, math::Tolerance<float>());
+    EXPECT_NEAR(a.Imaginary(), 0.2f, math::Tolerance<float>());
 }
 
-TYPED_TEST(ComplexTest, CompoundMultiplication)
+TEST_F(TestComplexNumber, CompoundMultiplication)
 {
-    auto a = TestFixture::MakeComplex(0.3f, 0.4f);
-    auto b = TestFixture::MakeComplex(0.1f, 0.2f);
+    ComplexType a(0.3f, 0.4f);
+    ComplexType b(0.1f, 0.2f);
+
     a *= b;
 
-    EXPECT_NEAR(this->ToFloat(a.Real()), -0.05f, TestFixture::kEpsilon);
-    EXPECT_NEAR(this->ToFloat(a.Imaginary()), 0.10f, TestFixture::kEpsilon);
+    EXPECT_NEAR(a.Real(), -0.05f, math::Tolerance<float>());
+    EXPECT_NEAR(a.Imaginary(), 0.10f, math::Tolerance<float>());
 }
 
-TYPED_TEST(ComplexTest, UnaryPlus)
+TEST_F(TestComplexNumber, UnaryPlus)
 {
-    auto a = TestFixture::MakeComplex(0.3f, 0.4f);
-    typename TestFixture::ComplexType result = +a;
+    ComplexType a(0.3f, 0.4f);
 
-    EXPECT_NEAR(this->ToFloat(result.Real()), 0.3f, TestFixture::kEpsilon);
-    EXPECT_NEAR(this->ToFloat(result.Imaginary()), 0.4f, TestFixture::kEpsilon);
+    ComplexType result = +a;
+
+    EXPECT_NEAR(result.Real(), 0.3f, math::Tolerance<float>());
+    EXPECT_NEAR(result.Imaginary(), 0.4f, math::Tolerance<float>());
 }
 
-TYPED_TEST(ComplexTest, UnaryNegation)
+TEST_F(TestComplexNumber, UnaryNegation)
 {
-    auto a = TestFixture::MakeComplex(0.3f, 0.4f);
-    typename TestFixture::ComplexType result = -a;
+    ComplexType a(0.3f, 0.4f);
 
-    EXPECT_NEAR(this->ToFloat(result.Real()), -0.3f, TestFixture::kEpsilon);
-    EXPECT_NEAR(this->ToFloat(result.Imaginary()), -0.4f, TestFixture::kEpsilon);
+    ComplexType result = -a;
+
+    EXPECT_NEAR(result.Real(), -0.3f, math::Tolerance<float>());
+    EXPECT_NEAR(result.Imaginary(), -0.4f, math::Tolerance<float>());
 }
 
-TYPED_TEST(ComplexTest, EqualityComparison)
+TEST_F(TestComplexNumber, DoubleNegationIsIdentity)
 {
-    auto a = TestFixture::MakeComplex(0.3f, 0.4f);
-    auto b = TestFixture::MakeComplex(0.3f, 0.4f);
-    auto c = TestFixture::MakeComplex(0.3f, 0.5f);
+    ComplexType a(0.3f, -0.7f);
+
+    ComplexType result = -(-a);
+
+    EXPECT_NEAR(result.Real(), 0.3f, math::Tolerance<float>());
+    EXPECT_NEAR(result.Imaginary(), -0.7f, math::Tolerance<float>());
+}
+
+TEST_F(TestComplexNumber, EqualityHoldsForIdenticalComponents)
+{
+    ComplexType a(0.3f, 0.4f);
+    ComplexType b(0.3f, 0.4f);
 
     EXPECT_TRUE(a == b);
+}
+
+TEST_F(TestComplexNumber, EqualityFailsForDifferentImaginaryComponent)
+{
+    ComplexType a(0.3f, 0.4f);
+    ComplexType c(0.3f, 0.5f);
+
     EXPECT_FALSE(a == c);
 }

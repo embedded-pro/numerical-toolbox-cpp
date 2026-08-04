@@ -94,4 +94,10 @@ namespace math
     {
         return buffer[n.offset];
     }
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class RecursiveBuffer<float, 4>;
+    extern template class RecursiveBuffer<Q31, 4>;
+    extern template class RecursiveBuffer<Q15, 4>;
+#endif
 }

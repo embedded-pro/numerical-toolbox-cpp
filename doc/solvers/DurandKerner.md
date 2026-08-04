@@ -74,7 +74,7 @@ After ~15–20 iterations the roots converge to $z \approx \{1, 2, 3\}$ (imagina
 - **Repeated roots.** Convergence degrades from quadratic to linear. Higher tolerance or more iterations may be needed.
 - **Near-degenerate denominators.** When two root estimates are very close ($|z_r - z_j| < 10^{-15}$), the denominator product approaches zero. The implementation excludes such terms to avoid division by near-zero.
 - **Leading coefficient must be non-zero.** The polynomial degree is determined by the first coefficient.
-- **Complex arithmetic required.** This algorithm operates entirely in $\mathbb{C}$, so it is limited to floating-point types (`float`, `double`). Fixed-point types are not supported.
+- **Complex arithmetic required.** This algorithm operates entirely in $\mathbb{C}$, using `math::Complex<T>` (from `numerical/math/ComplexNumber.hpp`), so it is limited to floating-point types (`float`, `double`). Fixed-point types are not supported.
 - **No convergence guarantee for all polynomials.** Wilkinson's polynomial and other pathological cases may require higher precision or alternative methods.
 - **Root ordering.** Results are sorted by real part (ascending), which may not correspond to meaningful branch ordering in applications like [Root Locus](../control_analysis/RootLocus.md).
 

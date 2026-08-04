@@ -1,53 +1,47 @@
 #include "numerical/math/QNumber.hpp"
 #include "numerical/math/Toeplitz.hpp"
+#include "numerical/math/Tolerance.hpp"
+#include "numerical/math/test_doubles/MatrixTestSupport.hpp"
 #include <gtest/gtest.h>
 
 namespace
 {
-    template<typename T>
-    bool AreMatricesNear(const math::Matrix<T, 2, 2>& a,
-        const math::Matrix<T, 2, 2>& b,
-        float epsilon = 1e-4f)
-    {
-        for (size_t i = 0; i < 2; ++i)
-        {
-            for (size_t j = 0; j < 2; ++j)
-            {
-                if (std::abs(math::ToFloat(a.at(i, j)) - math::ToFloat(b.at(i, j))) >= epsilon)
-                    return false;
-            }
-        }
-        return true;
-    }
+    using math::test::AreMatricesNear;
+    using math::test::AreVectorsNear;
 
     template<typename T>
     class ToeplitzMatrixTest
         : public ::testing::Test
     {
     protected:
-        static constexpr size_t N = 2;
+        static constexpr size_t N = 3;
         using ToeplitzType = math::ToeplitzMatrix<T, N>;
         using VectorType = math::Vector<T, N>;
         using MatrixType = math::Matrix<T, N, N>;
 
         static T MakeValue(float f)
         {
-            return T(std::max(std::min(f, 0.1f), -0.1f));
+            return T(std::max(std::min(f, 0.09f), -0.09f));
         }
 
-        VectorType MakeVector(float a, float b)
+        VectorType MakeVector(float a, float b, float c)
         {
             return VectorType{
                 { MakeValue(a) },
-                { MakeValue(b) }
+                { MakeValue(b) },
+                { MakeValue(c) }
             };
         }
 
-        MatrixType MakeMatrix(float a11, float a12, float a21, float a22)
+        MatrixType MakeMatrix(
+            float a00, float a01, float a02,
+            float a10, float a11, float a12,
+            float a20, float a21, float a22)
         {
             return MatrixType{
-                { MakeValue(a11), MakeValue(a12) },
-                { MakeValue(a21), MakeValue(a22) }
+                { MakeValue(a00), MakeValue(a01), MakeValue(a02) },
+                { MakeValue(a10), MakeValue(a11), MakeValue(a12) },
+                { MakeValue(a20), MakeValue(a21), MakeValue(a22) }
             };
         }
     };
@@ -56,162 +50,269 @@ namespace
     TYPED_TEST_SUITE(ToeplitzMatrixTest, TestTypes);
 }
 
-TYPED_TEST(ToeplitzMatrixTest, DefaultConstructor)
+TYPED_TEST(ToeplitzMatrixTest, DefaultConstructorProducesAllZeroEntries)
 {
     typename TestFixture::ToeplitzType t;
+
     auto full = t.ToFullMatrix();
 
     for (size_t i = 0; i < TestFixture::N; ++i)
         for (size_t j = 0; j < TestFixture::N; ++j)
-            EXPECT_FLOAT_EQ(math::ToFloat(full.at(i, j)), 0.0f);
+            EXPECT_NEAR(math::ToFloat(full.at(i, j)), 0.0f, math::Tolerance<float>());
 }
 
-TYPED_TEST(ToeplitzMatrixTest, SymmetricConstructor)
+TYPED_TEST(ToeplitzMatrixTest, SymmetricConstructorProducesSymmetricToeplitzStructure)
 {
-    auto vec = this->MakeVector(0.02f, 0.01f);
+    auto vec = this->MakeVector(0.06f, 0.03f, 0.01f);
+
     typename TestFixture::ToeplitzType t(vec);
 
     EXPECT_TRUE(t.IsSymmetric());
-
-    auto expected = this->MakeMatrix(0.02f, 0.01f, 0.01f, 0.02f);
-    EXPECT_TRUE(AreMatricesNear(t.ToFullMatrix(), expected));
+    EXPECT_TRUE(AreMatricesNear(t.ToFullMatrix(),
+        this->MakeMatrix(
+            0.06f, 0.03f, 0.01f,
+            0.03f, 0.06f, 0.03f,
+            0.01f, 0.03f, 0.06f)));
 }
 
-TYPED_TEST(ToeplitzMatrixTest, GeneralConstructor)
+TYPED_TEST(ToeplitzMatrixTest, GeneralConstructorProducesAsymmetricToeplitzStructure)
 {
-    auto row = this->MakeVector(0.02f, 0.01f);
-    auto col = this->MakeVector(0.02f, -0.01f);
+    auto row = this->MakeVector(0.06f, 0.03f, 0.01f);
+    auto col = this->MakeVector(0.06f, -0.03f, -0.01f);
+
     typename TestFixture::ToeplitzType t(row, col);
 
     EXPECT_FALSE(t.IsSymmetric());
-
-    auto expected = this->MakeMatrix(0.02f, 0.01f, -0.01f, 0.02f);
-    EXPECT_TRUE(AreMatricesNear(t.ToFullMatrix(), expected));
+    EXPECT_TRUE(AreMatricesNear(t.ToFullMatrix(),
+        this->MakeMatrix(
+            0.06f,  0.03f,  0.01f,
+           -0.03f,  0.06f,  0.03f,
+           -0.01f, -0.03f,  0.06f)));
 }
 
-TYPED_TEST(ToeplitzMatrixTest, VectorMultiplication)
+TYPED_TEST(ToeplitzMatrixTest, ElementAccessMatchesConstructedRowAndColumn)
 {
-    auto vec = this->MakeVector(0.02f, 0.01f);
-    typename TestFixture::ToeplitzType t(vec);
+    auto row = this->MakeVector(0.06f, 0.03f, 0.01f);
+    auto col = this->MakeVector(0.06f, -0.03f, -0.01f);
+    typename TestFixture::ToeplitzType t(row, col);
 
-    auto x = this->MakeVector(0.01f, 0.01f);
-    auto result = t * x;
+    EXPECT_NEAR(math::ToFloat(t.at(0, 0)),  0.06f, math::Tolerance<float>());
+    EXPECT_NEAR(math::ToFloat(t.at(0, 1)),  0.03f, math::Tolerance<float>());
+    EXPECT_NEAR(math::ToFloat(t.at(0, 2)),  0.01f, math::Tolerance<float>());
+    EXPECT_NEAR(math::ToFloat(t.at(1, 0)), -0.03f, math::Tolerance<float>());
+    EXPECT_NEAR(math::ToFloat(t.at(1, 1)),  0.06f, math::Tolerance<float>());
+    EXPECT_NEAR(math::ToFloat(t.at(1, 2)),  0.03f, math::Tolerance<float>());
+    EXPECT_NEAR(math::ToFloat(t.at(2, 0)), -0.01f, math::Tolerance<float>());
+    EXPECT_NEAR(math::ToFloat(t.at(2, 1)), -0.03f, math::Tolerance<float>());
+    EXPECT_NEAR(math::ToFloat(t.at(2, 2)),  0.06f, math::Tolerance<float>());
+}
 
-    auto expected = this->MakeVector(0.0003f, 0.0003f);
+TYPED_TEST(ToeplitzMatrixTest, ToFullMatrixConsistentWithAtAccessor)
+{
+    auto row = this->MakeVector(0.06f, 0.03f, 0.01f);
+    auto col = this->MakeVector(0.06f, -0.03f, -0.01f);
+    typename TestFixture::ToeplitzType t(row, col);
+
+    auto full = t.ToFullMatrix();
 
     for (size_t i = 0; i < TestFixture::N; ++i)
-        EXPECT_NEAR(math::ToFloat(result.at(i, 0)), math::ToFloat(expected.at(i, 0)), 1e-4f);
+        for (size_t j = 0; j < TestFixture::N; ++j)
+            EXPECT_NEAR(math::ToFloat(full.at(i, j)), math::ToFloat(t.at(i, j)), math::Tolerance<float>());
 }
 
-TYPED_TEST(ToeplitzMatrixTest, Addition)
+TYPED_TEST(ToeplitzMatrixTest, VectorMultiplicationMatchesFullMatrixMultiply)
 {
-    auto vec1 = this->MakeVector(0.02f, 0.01f);
-    auto vec2 = this->MakeVector(0.01f, 0.005f);
+    auto vec = this->MakeVector(0.06f, 0.03f, 0.01f);
+    typename TestFixture::ToeplitzType t(vec);
+    auto x = this->MakeVector(0.01f, 0.02f, 0.03f);
 
-    typename TestFixture::ToeplitzType t1(vec1);
-    typename TestFixture::ToeplitzType t2(vec2);
+    auto result = t * x;
+
+    auto full = t.ToFullMatrix();
+    typename TestFixture::VectorType expected;
+    for (size_t i = 0; i < TestFixture::N; ++i)
+    {
+        float sum = 0.0f;
+        for (size_t j = 0; j < TestFixture::N; ++j)
+            sum += math::ToFloat(full.at(i, j)) * math::ToFloat(x.at(j, 0));
+        expected.at(i, 0) = typename TestFixture::VectorType::value_type(sum);
+    }
+
+    for (size_t i = 0; i < TestFixture::N; ++i)
+        EXPECT_NEAR(math::ToFloat(result.at(i, 0)), math::ToFloat(expected.at(i, 0)), math::Tolerance<float>());
+}
+
+TYPED_TEST(ToeplitzMatrixTest, ZeroVectorMultiplicationProducesZeroVector)
+{
+    auto vec = this->MakeVector(0.06f, 0.03f, 0.01f);
+    typename TestFixture::ToeplitzType t(vec);
+    typename TestFixture::VectorType zero;
+
+    auto result = t * zero;
+
+    for (size_t i = 0; i < TestFixture::N; ++i)
+        EXPECT_NEAR(math::ToFloat(result.at(i, 0)), 0.0f, math::Tolerance<float>());
+}
+
+TYPED_TEST(ToeplitzMatrixTest, AdditionProducesCorrectToeplitzSum)
+{
+    typename TestFixture::ToeplitzType t1(this->MakeVector(0.04f, 0.02f, 0.01f));
+    typename TestFixture::ToeplitzType t2(this->MakeVector(0.02f, 0.01f, 0.005f));
 
     auto result = t1 + t2;
 
-    auto expected = this->MakeMatrix(0.03f, 0.015f, 0.015f, 0.03f);
-    EXPECT_TRUE(AreMatricesNear(result.ToFullMatrix(), expected));
+    EXPECT_TRUE(AreMatricesNear(result.ToFullMatrix(),
+        this->MakeMatrix(
+            0.06f, 0.03f, 0.015f,
+            0.03f, 0.06f, 0.03f,
+            0.015f, 0.03f, 0.06f)));
 }
 
-TYPED_TEST(ToeplitzMatrixTest, Subtraction)
+TYPED_TEST(ToeplitzMatrixTest, AdditionIsCommutative)
 {
-    auto vec1 = this->MakeVector(0.02f, 0.01f);
-    auto vec2 = this->MakeVector(0.01f, 0.005f);
+    typename TestFixture::ToeplitzType t1(this->MakeVector(0.04f, 0.02f, 0.01f));
+    typename TestFixture::ToeplitzType t2(this->MakeVector(0.02f, 0.01f, 0.005f));
 
-    typename TestFixture::ToeplitzType t1(vec1);
-    typename TestFixture::ToeplitzType t2(vec2);
+    auto ab = t1 + t2;
+    auto ba = t2 + t1;
+
+    EXPECT_TRUE(AreMatricesNear(ab.ToFullMatrix(), ba.ToFullMatrix()));
+}
+
+TYPED_TEST(ToeplitzMatrixTest, SubtractionProducesCorrectToeplitzDifference)
+{
+    typename TestFixture::ToeplitzType t1(this->MakeVector(0.06f, 0.03f, 0.015f));
+    typename TestFixture::ToeplitzType t2(this->MakeVector(0.02f, 0.01f, 0.005f));
 
     auto result = t1 - t2;
 
-    auto expected = this->MakeMatrix(0.01f, 0.005f, 0.005f, 0.01f);
-    EXPECT_TRUE(AreMatricesNear(result.ToFullMatrix(), expected));
+    EXPECT_TRUE(AreMatricesNear(result.ToFullMatrix(),
+        this->MakeMatrix(
+            0.04f, 0.02f, 0.01f,
+            0.02f, 0.04f, 0.02f,
+            0.01f, 0.02f, 0.04f)));
 }
 
-TYPED_TEST(ToeplitzMatrixTest, ElementAccess)
-{
-    auto row = this->MakeVector(0.02f, 0.01f);
-    auto col = this->MakeVector(0.02f, -0.01f);
-    typename TestFixture::ToeplitzType t(row, col);
-
-    EXPECT_NEAR(math::ToFloat(t.at(0, 0)), 0.02f, 1e-4f);
-    EXPECT_NEAR(math::ToFloat(t.at(0, 1)), 0.01f, 1e-4f);
-    EXPECT_NEAR(math::ToFloat(t.at(1, 0)), -0.01f, 1e-4f);
-    EXPECT_NEAR(math::ToFloat(t.at(1, 1)), 0.02f, 1e-4f);
-}
-
-TYPED_TEST(ToeplitzMatrixTest, IsToeplitzMatrix_ValidCase)
+TYPED_TEST(ToeplitzMatrixTest, IsToeplitzMatrixAcceptsValidPattern)
 {
     auto matrix = this->MakeMatrix(
-        0.02f, 0.01f, // First row:    [0.02, 0.01]
-        0.03f, 0.02f  // Second row:   [0.03, 0.02]
-    );
+        0.06f, 0.03f, 0.01f,
+        0.03f, 0.06f, 0.03f,
+        0.01f, 0.03f, 0.06f);
 
     EXPECT_TRUE(TestFixture::ToeplitzType::IsToeplitzMatrix(matrix));
 }
 
-TYPED_TEST(ToeplitzMatrixTest, IsToeplitzMatrix_InvalidCase)
+TYPED_TEST(ToeplitzMatrixTest, IsToeplitzMatrixRejectsNonToeplitzPattern)
 {
     auto matrix = this->MakeMatrix(
-        0.02f, 0.01f, // First row:    [0.02, 0.01]
-        0.03f, 0.05f  // Second row:   [0.03, 0.05] - 0.05 breaks the pattern
-    );
+        0.06f, 0.03f, 0.01f,
+        0.03f, 0.06f, 0.03f,
+        0.01f, 0.03f, 0.09f);
 
     EXPECT_FALSE(TestFixture::ToeplitzType::IsToeplitzMatrix(matrix));
 }
 
-TYPED_TEST(ToeplitzMatrixTest, IsToeplitzMatrix_ZeroMatrix)
+TYPED_TEST(ToeplitzMatrixTest, IsToeplitzMatrixAcceptsZeroMatrix)
 {
     auto matrix = this->MakeMatrix(
-        0.0f, 0.0f,
-        0.0f, 0.0f);
+        0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f);
 
     EXPECT_TRUE(TestFixture::ToeplitzType::IsToeplitzMatrix(matrix));
 }
 
-TYPED_TEST(ToeplitzMatrixTest, ExtractToeplitzVectors_GeneralCase)
+TYPED_TEST(ToeplitzMatrixTest, ToFullMatrixPassesIsToeplitzCheck)
+{
+    auto row = this->MakeVector(0.06f, 0.03f, 0.01f);
+    auto col = this->MakeVector(0.06f, -0.03f, -0.01f);
+    typename TestFixture::ToeplitzType t(row, col);
+
+    EXPECT_TRUE(TestFixture::ToeplitzType::IsToeplitzMatrix(t.ToFullMatrix()));
+}
+
+TYPED_TEST(ToeplitzMatrixTest, ExtractToeplitzVectorsRecoverRowAndColumn)
 {
     auto matrix = this->MakeMatrix(
-        0.02f, 0.01f, // First row:    [0.02, 0.01]
-        0.03f, 0.02f  // Second row:   [0.03, 0.02]
-    );
+        0.06f, 0.03f, 0.01f,
+        0.03f, 0.06f, 0.03f,
+        0.01f, 0.03f, 0.06f);
 
     auto [row, col] = TestFixture::ToeplitzType::ExtractToeplitzVectors(matrix);
 
-    EXPECT_NEAR(math::ToFloat(row.at(0, 0)), 0.02f, 1e-4f);
-    EXPECT_NEAR(math::ToFloat(row.at(1, 0)), 0.01f, 1e-4f);
-
-    EXPECT_NEAR(math::ToFloat(col.at(0, 0)), 0.02f, 1e-4f);
-    EXPECT_NEAR(math::ToFloat(col.at(1, 0)), 0.03f, 1e-4f);
+    EXPECT_NEAR(math::ToFloat(row.at(0, 0)), 0.06f, math::Tolerance<float>());
+    EXPECT_NEAR(math::ToFloat(row.at(1, 0)), 0.03f, math::Tolerance<float>());
+    EXPECT_NEAR(math::ToFloat(row.at(2, 0)), 0.01f, math::Tolerance<float>());
+    EXPECT_NEAR(math::ToFloat(col.at(0, 0)), 0.06f, math::Tolerance<float>());
+    EXPECT_NEAR(math::ToFloat(col.at(1, 0)), 0.03f, math::Tolerance<float>());
+    EXPECT_NEAR(math::ToFloat(col.at(2, 0)), 0.01f, math::Tolerance<float>());
 }
 
-TYPED_TEST(ToeplitzMatrixTest, ExtractToeplitzVectors_SymmetricCase)
+TYPED_TEST(ToeplitzMatrixTest, ExtractThenConstructRoundTripMatchesOriginalMatrix)
 {
     auto matrix = this->MakeMatrix(
-        0.02f, 0.01f, // First row:    [0.02, 0.01]
-        0.01f, 0.02f  // Second row:   [0.01, 0.02]
-    );
+        0.06f, 0.03f, 0.01f,
+        -0.03f, 0.06f, 0.03f,
+        -0.01f, -0.03f, 0.06f);
+
+    auto [row, col] = TestFixture::ToeplitzType::ExtractToeplitzVectors(matrix);
+    typename TestFixture::ToeplitzType t(row, col);
+
+    EXPECT_TRUE(AreMatricesNear(t.ToFullMatrix(), matrix));
+}
+
+TYPED_TEST(ToeplitzMatrixTest, ExtractToeplitzVectorsSymmetricMatrixYieldsEqualRowAndColumn)
+{
+    auto matrix = this->MakeMatrix(
+        0.06f, 0.03f, 0.01f,
+        0.03f, 0.06f, 0.03f,
+        0.01f, 0.03f, 0.06f);
 
     auto [row, col] = TestFixture::ToeplitzType::ExtractToeplitzVectors(matrix);
 
-    EXPECT_NEAR(math::ToFloat(row.at(0, 0)), math::ToFloat(col.at(0, 0)), 1e-4f);
-    EXPECT_NEAR(math::ToFloat(row.at(1, 0)), math::ToFloat(col.at(1, 0)), 1e-4f);
+    for (size_t i = 0; i < TestFixture::N; ++i)
+        EXPECT_NEAR(math::ToFloat(row.at(i, 0)), math::ToFloat(col.at(i, 0)), math::Tolerance<float>());
 }
 
-TYPED_TEST(ToeplitzMatrixTest, ExtractToeplitzVectors_ZeroMatrix)
+TYPED_TEST(ToeplitzMatrixTest, ExtractToeplitzVectorsZeroMatrixYieldsZeroVectors)
 {
     auto matrix = this->MakeMatrix(
-        0.0f, 0.0f,
-        0.0f, 0.0f);
+        0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f);
 
     auto [row, col] = TestFixture::ToeplitzType::ExtractToeplitzVectors(matrix);
 
     for (size_t i = 0; i < TestFixture::N; ++i)
     {
-        EXPECT_NEAR(math::ToFloat(row.at(i, 0)), 0.0f, 1e-4f);
-        EXPECT_NEAR(math::ToFloat(col.at(i, 0)), 0.0f, 1e-4f);
+        EXPECT_NEAR(math::ToFloat(row.at(i, 0)), 0.0f, math::Tolerance<float>());
+        EXPECT_NEAR(math::ToFloat(col.at(i, 0)), 0.0f, math::Tolerance<float>());
     }
+}
+
+TYPED_TEST(ToeplitzMatrixTest, CreateToeplitzMatrixFactoryProducesSameResultAsConstructor)
+{
+    auto vec = this->MakeVector(0.06f, 0.03f, 0.01f);
+
+    auto fromFactory = math::CreateToeplitzMatrix(vec);
+    typename TestFixture::ToeplitzType fromCtor(vec);
+
+    EXPECT_TRUE(AreMatricesNear(fromFactory.ToFullMatrix(), fromCtor.ToFullMatrix()));
+}
+
+TYPED_TEST(ToeplitzMatrixTest, TwoInstancesWithSameInputProduceIdenticalOutput)
+{
+    auto row = this->MakeVector(0.06f, 0.03f, 0.01f);
+    auto col = this->MakeVector(0.06f, -0.03f, -0.01f);
+
+    typename TestFixture::ToeplitzType t1(row, col);
+    typename TestFixture::ToeplitzType t2(row, col);
+
+    auto x = this->MakeVector(0.02f, 0.04f, 0.03f);
+    auto r1 = t1 * x;
+    auto r2 = t2 * x;
+
+    for (size_t i = 0; i < TestFixture::N; ++i)
+        EXPECT_FLOAT_EQ(math::ToFloat(r1.at(i, 0)), math::ToFloat(r2.at(i, 0)));
 }

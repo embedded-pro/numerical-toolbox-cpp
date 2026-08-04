@@ -1,23 +1,17 @@
 #include "numerical/math/QNumber.hpp"
 #include "numerical/math/Statistics.hpp"
+#include "numerical/math/Tolerance.hpp"
 #include <gtest/gtest.h>
 
 namespace
 {
     template<typename T>
-    bool AreValuesNear(T a, T b, float epsilon = 1e-4f)
-    {
-        printf("\noriginal: %f, result: %f\n", math::ToFloat(a), math::ToFloat(b));
-        return (std::abs(math::ToFloat(a) - math::ToFloat(b)) < epsilon);
-    }
-
-    template<typename T>
     class StatisticsTest
         : public ::testing::Test
     {
     protected:
-        using MatrixType = math::Matrix<T, 2, 2>;
         using VectorType = math::Vector<T, 4>;
+        using MatrixType = math::Matrix<T, 2, 2>;
 
         static T MakeValue(float f)
         {
@@ -36,102 +30,136 @@ namespace
                 { MakeValue(d) }
             };
         }
-
-        MatrixType MakeMatrix(float a11, float a12, float a21, float a22)
-        {
-            return MatrixType{
-                { MakeValue(a11), MakeValue(a12) },
-                { MakeValue(a21), MakeValue(a22) }
-            };
-        }
     };
 
     using TestTypes = ::testing::Types<float, math::Q15, math::Q31>;
     TYPED_TEST_SUITE(StatisticsTest, TestTypes);
+
+    class StatisticsFloatTest
+        : public ::testing::Test
+    {};
 }
 
-TYPED_TEST(StatisticsTest, Mean)
+TYPED_TEST(StatisticsTest, MeanOfUniformlySpacedValues)
 {
     auto data = this->MakeVector(0.02f, 0.04f, 0.06f, 0.08f);
+
     auto result = math::Mean(data);
-    EXPECT_TRUE(AreValuesNear(result, this->MakeValue(0.05f)));
+
+    EXPECT_NEAR(math::ToFloat(result), 0.05f, math::Tolerance<float>());
 }
 
-TYPED_TEST(StatisticsTest, Variance)
+TYPED_TEST(StatisticsTest, PopulationVarianceOfUniformlySpacedValues)
 {
     auto data = this->MakeVector(0.02f, 0.04f, 0.06f, 0.08f);
 
-    auto resultPopulation = math::Variance(data, false);
-    EXPECT_TRUE(AreValuesNear(resultPopulation, this->MakeValue(0.0005f)));
+    auto result = math::Variance(data, false);
 
-    auto resultSample = math::Variance(data, true);
-    EXPECT_TRUE(AreValuesNear(resultSample, this->MakeValue(0.000667f)));
+    EXPECT_NEAR(math::ToFloat(result), 0.0005f, math::Tolerance<float>());
 }
 
-TYPED_TEST(StatisticsTest, StandardDeviation)
+TYPED_TEST(StatisticsTest, SampleVarianceOfUniformlySpacedValues)
 {
     auto data = this->MakeVector(0.02f, 0.04f, 0.06f, 0.08f);
 
-    auto resultPopulation = math::StandardDeviation(data, false);
-    EXPECT_TRUE(AreValuesNear(resultPopulation, this->MakeValue(0.02236f), 0.001f));
+    auto result = math::Variance(data, true);
 
-    auto resultSample = math::StandardDeviation(data, true);
-    EXPECT_TRUE(AreValuesNear(resultSample, this->MakeValue(0.02582f), 0.001f));
+    EXPECT_NEAR(math::ToFloat(result), 0.000667f, math::Tolerance<float>());
 }
 
-TYPED_TEST(StatisticsTest, MeanSquaredError)
+TYPED_TEST(StatisticsTest, PopulationStandardDeviationOfUniformlySpacedValues)
+{
+    auto data = this->MakeVector(0.02f, 0.04f, 0.06f, 0.08f);
+
+    auto result = math::StandardDeviation(data, false);
+
+    EXPECT_NEAR(math::ToFloat(result), 0.02236f, math::Tolerance<float>());
+}
+
+TYPED_TEST(StatisticsTest, SampleStandardDeviationOfUniformlySpacedValues)
+{
+    auto data = this->MakeVector(0.02f, 0.04f, 0.06f, 0.08f);
+
+    auto result = math::StandardDeviation(data, true);
+
+    EXPECT_NEAR(math::ToFloat(result), 0.02582f, math::Tolerance<float>());
+}
+
+TYPED_TEST(StatisticsTest, MeanSquaredErrorOfKnownPredictions)
 {
     auto actual = this->MakeVector(0.2f, 0.4f, 0.6f, 0.8f);
     auto predicted = this->MakeVector(0.3f, 0.3f, 0.7f, 0.7f);
 
     auto result = math::MeanSquaredError(actual, predicted);
-    EXPECT_TRUE(AreValuesNear(result, this->MakeValue(0.01f)));
+
+    EXPECT_NEAR(math::ToFloat(result), 0.01f, math::Tolerance<float>());
 }
 
-TYPED_TEST(StatisticsTest, RootMeanSquaredError)
+TYPED_TEST(StatisticsTest, RootMeanSquaredErrorOfKnownPredictions)
 {
     auto actual = this->MakeVector(0.2f, 0.4f, 0.6f, 0.8f);
     auto predicted = this->MakeVector(0.3f, 0.3f, 0.7f, 0.7f);
 
     auto result = math::RootMeanSquaredError(actual, predicted);
-    EXPECT_TRUE(AreValuesNear(result, this->MakeValue(0.1f)));
+
+    EXPECT_NEAR(math::ToFloat(result), 0.1f, math::Tolerance<float>());
 }
 
-TYPED_TEST(StatisticsTest, MeanAbsoluteError)
+TYPED_TEST(StatisticsTest, MeanAbsoluteErrorOfKnownPredictions)
 {
     auto actual = this->MakeVector(0.2f, 0.4f, 0.6f, 0.8f);
     auto predicted = this->MakeVector(0.3f, 0.3f, 0.7f, 0.7f);
 
     auto result = math::MeanAbsoluteError(actual, predicted);
-    EXPECT_TRUE(AreValuesNear(result, this->MakeValue(0.1f)));
+
+    EXPECT_NEAR(math::ToFloat(result), 0.1f, math::Tolerance<float>());
 }
 
-TYPED_TEST(StatisticsTest, RSquaredScore)
+TYPED_TEST(StatisticsTest, RSquaredScoreOfNearPerfectPredictions)
 {
     auto actual = this->MakeVector(0.02f, 0.04f, 0.06f, 0.08f);
     auto predicted = this->MakeVector(0.03f, 0.03f, 0.07f, 0.07f);
 
     auto result = math::RSquaredScore(actual, predicted);
-    EXPECT_TRUE(AreValuesNear(result, this->MakeValue(0.8f), 0.001f));
+
+    EXPECT_NEAR(math::ToFloat(result), 0.8f, math::Tolerance<float>());
 }
 
-TYPED_TEST(StatisticsTest, AutoCorrelation)
+TYPED_TEST(StatisticsTest, AutoCorrelationLagZeroIsUnity)
 {
     auto data = this->MakeVector(0.02f, 0.04f, 0.06f, 0.08f);
+
     auto result = math::AutoCorrelation(data, 2);
 
-    auto expected = this->MakeVector(0.9999f, 0.3333f, -0.6f, 0.0f);
-    for (size_t i = 0; i < 3; ++i)
-        EXPECT_TRUE(AreValuesNear(result.at(i, 0), expected.at(i, 0), 0.001f));
+    EXPECT_NEAR(math::ToFloat(result.at(0, 0)), 0.9999f, math::Tolerance<float>());
 }
 
-TEST(StatisticsTest, ZScore)
+TYPED_TEST(StatisticsTest, AutoCorrelationLagOneValue)
 {
-    auto data = math::Matrix<float, 2, 2>(0.45f, 0.5f, 0.5f, 0.55f);
+    auto data = this->MakeVector(0.02f, 0.04f, 0.06f, 0.08f);
+
+    auto result = math::AutoCorrelation(data, 2);
+
+    EXPECT_NEAR(math::ToFloat(result.at(1, 0)), 0.3333f, math::Tolerance<float>());
+}
+
+TYPED_TEST(StatisticsTest, AutoCorrelationLagTwoValue)
+{
+    auto data = this->MakeVector(0.02f, 0.04f, 0.06f, 0.08f);
+
+    auto result = math::AutoCorrelation(data, 2);
+
+    EXPECT_NEAR(math::ToFloat(result.at(2, 0)), -0.6f, math::Tolerance<float>());
+}
+
+TEST_F(StatisticsFloatTest, ZScoreNormalizesSymmetricData)
+{
+    auto data = math::Matrix<float, 2, 2>{ 0.45f, 0.5f, 0.5f, 0.55f };
+
     auto result = math::ZScore(data);
 
-    auto expected = math::Matrix<float, 2, 2>(-1.4142f, 0.0f, 0.0f, 1.4142f);
-    for (size_t i = 0; i < 2; ++i)
-        for (size_t j = 0; j < 2; ++j)
-            EXPECT_TRUE(AreValuesNear(result.at(i, j), expected.at(i, j)));
+    EXPECT_NEAR(result.at(0, 0), -1.4142f, math::Tolerance<float>());
+    EXPECT_NEAR(result.at(0, 1), 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(result.at(1, 0), 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(result.at(1, 1), 1.4142f, math::Tolerance<float>());
 }

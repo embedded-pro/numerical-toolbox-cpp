@@ -72,7 +72,7 @@ namespace solvers
         T rho{};
         for (std::size_t i = 0; i < roots.size(); ++i)
         {
-            T magnitude = std::abs(roots[i]);
+            T magnitude = math::Abs(roots[i]);
             if (magnitude > rho)
                 rho = magnitude;
         }

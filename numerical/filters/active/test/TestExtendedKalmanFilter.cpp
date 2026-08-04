@@ -1,22 +1,13 @@
 #include "numerical/filters/active/ExtendedKalmanFilter.hpp"
 #include "numerical/math/Tolerance.hpp"
+#include "numerical/math/test_doubles/MatrixTestSupport.hpp"
 #include <gtest/gtest.h>
 
 namespace
 {
-    template<typename T, std::size_t Size>
-    bool AreVectorsNear(const math::Vector<T, Size>& a,
-        const math::Vector<T, Size>& b,
-        float epsilon)
-    {
-        for (std::size_t i = 0; i < Size; ++i)
-            if (std::abs(math::ToFloat(a.at(i, 0)) - math::ToFloat(b.at(i, 0))) >= epsilon)
-                return false;
+    using math::test::AreVectorsNear;
 
-        return true;
-    }
-
-    // Linear state transition: x_new = F * x (constant velocity model)
+    using StateVec2 = math::Vector<float, 2>;
     using StateVec2 = math::Vector<float, 2>;
     using MeasVec1 = math::Vector<float, 1>;
     using StateMat2 = math::SquareMatrix<float, 2>;

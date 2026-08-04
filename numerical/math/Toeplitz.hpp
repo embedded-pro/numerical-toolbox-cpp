@@ -162,4 +162,10 @@ namespace math
     {
         return ToeplitzMatrix<T, N>(autocorrelation);
     }
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class ToeplitzMatrix<float, 2>;
+    extern template class ToeplitzMatrix<Q15, 2>;
+    extern template class ToeplitzMatrix<Q31, 2>;
+#endif
 }

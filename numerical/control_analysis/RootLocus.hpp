@@ -7,10 +7,10 @@
 #include "infra/util/BoundedVector.hpp"
 #include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/ComplexNumber.hpp"
 #include "numerical/solvers/DurandKerner.hpp"
 #include <array>
 #include <cmath>
-#include <complex>
 #include <cstddef>
 #include <numbers>
 #include <span>
@@ -27,9 +27,9 @@ namespace control_analysis
             "MaxGainSteps must be greater than 1");
 
     public:
-        using RootVector = typename infra::BoundedVector<std::complex<T>>::template WithMaxSize<MaxOrder>;
+        using RootVector = typename infra::BoundedVector<math::Complex<T>>::template WithMaxSize<MaxOrder>;
         using GainVector = typename infra::BoundedVector<T>::template WithMaxSize<MaxGainSteps>;
-        using LociBranch = typename infra::BoundedVector<std::complex<T>>::template WithMaxSize<MaxGainSteps>;
+        using LociBranch = typename infra::BoundedVector<math::Complex<T>>::template WithMaxSize<MaxGainSteps>;
 
         struct Result
         {

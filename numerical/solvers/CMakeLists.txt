@@ -34,6 +34,7 @@ numerical_add_coverage_sources(numerical.solver
     DurandKerner.cpp
     GaussianElimination.cpp
     JacobiEigenSolver.cpp
+    LevinsonDurbin.cpp
     LuDecomposition.cpp
     LyapunovSylvester.cpp
     QrDecomposition.cpp

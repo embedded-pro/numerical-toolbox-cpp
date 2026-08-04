@@ -42,6 +42,8 @@ numerical_add_coverage_sources(numerical.math
     MatrixExponential.cpp
     QNumber.cpp
     Quaternion.cpp
+    RecursiveBuffer.cpp
+    Toeplitz.cpp
 )
 
 add_subdirectory(test)

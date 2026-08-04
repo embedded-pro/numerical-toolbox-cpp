@@ -27,47 +27,11 @@ namespace solvers
         SolutionVector Solve(const InputMatrix& a, const InputVector& b) override;
 
     private:
-        std::size_t FindPivotRow(const InputMatrix& matrix, std::size_t col) const;
-        void SwapRows(InputMatrix& matrix, SolutionVector& vector, std::size_t row1, std::size_t row2) const;
         void EliminateBelow(InputMatrix& matrix, SolutionVector& vector, std::size_t col) const;
     };
 
     template<typename T, std::size_t N, std::size_t Cols>
     math::Matrix<T, N, Cols> SolveSystem(const math::Matrix<T, N, N>& a, const math::Matrix<T, N, Cols>& b);
-
-    template<typename T, std::size_t N>
-    std::size_t GaussianElimination<T, N>::FindPivotRow(const InputMatrix& matrix, std::size_t col) const
-    {
-        std::size_t pivotRow = col;
-        float maxVal = std::abs(math::ToFloat(matrix.at(col, col)));
-
-        for (std::size_t row = col + 1; row < N; ++row)
-        {
-            float absVal = std::abs(math::ToFloat(matrix.at(row, col)));
-            if (absVal > maxVal)
-            {
-                maxVal = absVal;
-                pivotRow = row;
-            }
-        }
-
-        return pivotRow;
-    }
-
-    template<typename T, std::size_t N>
-    void GaussianElimination<T, N>::SwapRows(InputMatrix& matrix, SolutionVector& vector, std::size_t row1, std::size_t row2) const
-    {
-        for (std::size_t j = 0; j < N; ++j)
-        {
-            T tmp = matrix.at(row1, j);
-            matrix.at(row1, j) = matrix.at(row2, j);
-            matrix.at(row2, j) = tmp;
-        }
-
-        T tmp = vector.at(row1, 0);
-        vector.at(row1, 0) = vector.at(row2, 0);
-        vector.at(row2, 0) = tmp;
-    }
 
     template<typename T, std::size_t N>
     void GaussianElimination<T, N>::EliminateBelow(InputMatrix& matrix, SolutionVector& vector, std::size_t col) const
@@ -96,10 +60,13 @@ namespace solvers
 
         for (std::size_t col = 0; col < N; ++col)
         {
-            std::size_t pivotRow = FindPivotRow(augA, col);
+            std::size_t pivotRow = math::FindPartialPivotRow(augA, col);
 
             if (pivotRow != col)
-                SwapRows(augA, augB, col, pivotRow);
+            {
+                math::SwapRows(augA, col, pivotRow);
+                math::SwapRows(augB, col, pivotRow);
+            }
 
             EliminateBelow(augA, augB, col);
         }

@@ -1,5 +1,6 @@
 #pragma once
 #include "infra/util/ReallyAssert.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/QNumber.hpp"
 #include <array>
 #include <type_traits>
@@ -17,7 +18,7 @@ namespace math
     {
         template<typename T>
         inline constexpr bool is_supported_type_v =
-            std::disjunction_v<std::is_same<T, float>, is_qnumber<T>>;
+            std::is_floating_point_v<T> || is_qnumber_v<T>;
 
         template<size_t Rows, size_t Cols>
         inline constexpr bool is_valid_dimensions_v = (Rows > 0 && Cols > 0);
@@ -142,8 +143,6 @@ namespace math
     {
         return Matrix<T, Rows, Cols>(init);
     }
-
-    // Implementation //
 
     template<typename T, size_t Rows, size_t Cols>
     constexpr Matrix<T, Rows, Cols>::Matrix() noexcept
@@ -287,9 +286,9 @@ namespace math
         for (size_type i = 0; i < Rows; ++i)
         {
             if constexpr (std::is_floating_point_v<T>)
-                result.at(i, i) = T(1);
+                result.at(i, i) = T{ 1 };
             else
-                result.at(i, i) = T(0.9999f);
+                result.at(i, i) = T{ 0.9999f };
         }
 
         return result;
@@ -309,11 +308,9 @@ namespace math
         return sum;
     }
 
-    // Implementation of new block methods //
-
     template<typename T, size_t Rows, size_t Cols>
     template<size_t SrcRows, size_t SrcCols>
-    constexpr void
+    OPTIMIZE_FOR_SPEED constexpr void
     Matrix<T, Rows, Cols>::SetBlock(const Matrix<T, SrcRows, SrcCols>& src,
         size_type rowOffset, size_type colOffset)
     {
@@ -326,7 +323,7 @@ namespace math
 
     template<typename T, size_t Rows, size_t Cols>
     template<size_t BlockRows, size_t BlockCols>
-    [[nodiscard]] constexpr Matrix<T, BlockRows, BlockCols>
+    [[nodiscard]] OPTIMIZE_FOR_SPEED constexpr Matrix<T, BlockRows, BlockCols>
     Matrix<T, Rows, Cols>::GetBlock(size_type rowOffset, size_type colOffset) const
     {
         static_assert(BlockRows <= Rows && BlockCols <= Cols,
@@ -339,13 +336,24 @@ namespace math
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    [[nodiscard]] constexpr Matrix<T, Rows, 1>
+    [[nodiscard]] OPTIMIZE_FOR_SPEED constexpr Matrix<T, Rows, 1>
     Matrix<T, Rows, Cols>::GetColumn(size_type col) const
     {
         Vector<T, Rows> result;
         for (size_type r = 0; r < Rows; ++r)
             result.at(r, 0) = at(r, col);
         return result;
+    }
+
+    template<typename T, size_t Rows, size_t Cols>
+    OPTIMIZE_FOR_SPEED constexpr void SwapRows(Matrix<T, Rows, Cols>& matrix, size_t row1, size_t row2)
+    {
+        for (size_t j = 0; j < Cols; ++j)
+        {
+            T tmp = matrix.at(row1, j);
+            matrix.at(row1, j) = matrix.at(row2, j);
+            matrix.at(row2, j) = tmp;
+        }
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
