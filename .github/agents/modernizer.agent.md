@@ -49,6 +49,13 @@ Keep existing `Q15`/`Q31` support and its `TYPED_TEST` where the algorithm alrea
 Float-only migration applies ONLY to algorithms that are already float-only; those follow
 `static_assert(std::is_floating_point_v<T>)` + `TEST_F` on `float`.
 
+## Preserve embedded pragmas — hard rule
+
+The file-level `#if defined(__GNUC__) || defined(__clang__)` / `#pragma GCC optimize("O3", "fast-math")` / `#endif`
+block and the per-hot-path `OPTIMIZE_FOR_SPEED` macro are **complementary, not redundant** — keep BOTH.
+- Do **NOT** delete the file-level `#pragma GCC optimize` block; including `CompilerOptimizations.hpp` does not replace it.
+- Every hot path (e.g. `Update`, `Predict`, `Process`) must carry `OPTIMIZE_FOR_SPEED`; add it where missing.
+
 ## Memory — quick reference
 
 **Forbidden**: `new`/`delete`/`malloc`/`free`, `make_unique`/`make_shared`,

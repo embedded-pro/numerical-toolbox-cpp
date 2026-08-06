@@ -1,11 +1,11 @@
 #pragma once
 
-#include "numerical/estimators/Estimator.hpp"
-#include "numerical/math/CompilerOptimizations.hpp"
-
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC optimize("O3", "fast-math")
 #endif
+
+#include "numerical/estimators/Estimator.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
 
 namespace estimators
 {
