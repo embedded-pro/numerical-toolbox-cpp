@@ -6,6 +6,7 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
+#include "numerical/math/Statistics.hpp"
 #include "numerical/math/Toeplitz.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 
@@ -44,10 +45,7 @@ namespace estimators
     template<typename T, std::size_t Samples, std::size_t Order>
     OPTIMIZE_FOR_SPEED void YuleWalker<T, Samples, Order>::Fit(const InputVector& x)
     {
-        mean = T(0.0f);
-        for (std::size_t i = 0; i < Samples; ++i)
-            mean += x[i];
-        mean = mean / T(static_cast<float>(Samples));
+        mean = math::Mean(x);
 
         auto r = ComputeAutocovariance(x, mean);
 

@@ -11,7 +11,6 @@ target_link_libraries(numerical.solver ${NUMERICAL_VISIBILITY}
 )
 
 target_sources(numerical.solver PRIVATE
-    CholeskyDecomposition.hpp
     ConditionNumber.hpp
     DiscreteAlgebraicRiccatiEquation.hpp
     DormandPrince45.hpp

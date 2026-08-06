@@ -86,7 +86,7 @@ The average NEES over a Monte-Carlo ensemble of $M$ runs and $K$ time steps yiel
 
 ## Connections to Other Algorithms
 
-NEES and NIS are statistical companions to the standard Kalman filter update step. They depend on the covariance propagation produced by the `filters/active` family (KF, EKF, UKF). The linear solve reuses `solvers::GaussianElimination`, and the state-error representation aligns with `estimators::EstimationMetrics`.
+NEES and NIS are statistical companions to the standard Kalman filter update step. They depend on the covariance propagation produced by the `filters/active` family (KF, EKF, UKF). The covariance being symmetric positive-definite, the linear solve reuses `math::CholeskyDecomposition::Solve` (factorisation plus forward/back substitution), keeping the metric a dependency-free `math` primitive.
 
 ## References & Further Reading
 

@@ -32,21 +32,44 @@ namespace math
         return pivotRow;
     }
 
+    namespace detail
+    {
+        template<bool Unit, typename T, std::size_t N>
+        [[nodiscard]] OPTIMIZE_FOR_SPEED Vector<T, N> ForwardSubstitute(const Matrix<T, N, N>& l, const Vector<T, N>& c)
+        {
+            Vector<T, N> x{};
+
+            for (std::size_t i = 0; i < N; ++i)
+            {
+                T sum = c.at(i, 0);
+                for (std::size_t j = 0; j < i; ++j)
+                    sum = sum - l.at(i, j) * x.at(j, 0);
+
+                if constexpr (Unit)
+                {
+                    x.at(i, 0) = sum;
+                }
+                else
+                {
+                    really_assert(std::abs(ToFloat(l.at(i, i))) > 0.0f);
+                    x.at(i, 0) = sum / l.at(i, i);
+                }
+            }
+
+            return x;
+        }
+    }
+
     template<typename T, std::size_t N>
     [[nodiscard]] OPTIMIZE_FOR_SPEED Vector<T, N> SolveUnitLowerTriangular(const Matrix<T, N, N>& l, const Vector<T, N>& c)
     {
-        Vector<T, N> y{};
+        return detail::ForwardSubstitute<true>(l, c);
+    }
 
-        for (std::size_t i = 0; i < N; ++i)
-        {
-            T sum = c.at(i, 0);
-            for (std::size_t j = 0; j < i; ++j)
-                sum = sum - l.at(i, j) * y.at(j, 0);
-
-            y.at(i, 0) = sum;
-        }
-
-        return y;
+    template<typename T, std::size_t N>
+    [[nodiscard]] OPTIMIZE_FOR_SPEED Vector<T, N> SolveLowerTriangular(const Matrix<T, N, N>& l, const Vector<T, N>& c)
+    {
+        return detail::ForwardSubstitute<false>(l, c);
     }
 
     template<typename T, std::size_t N>

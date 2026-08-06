@@ -12,14 +12,8 @@ target_link_libraries(numerical.estimators ${NUMERICAL_VISIBILITY}
 )
 
 target_sources(numerical.estimators PRIVATE
-    ConsistencyMetrics.hpp
     Estimator.hpp
-)
-
-numerical_add_coverage_sources(numerical.estimators
-    ConsistencyMetrics.cpp
 )
 
 add_subdirectory(offline)
 add_subdirectory(online)
-add_subdirectory(test)

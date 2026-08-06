@@ -64,8 +64,9 @@ $$L = \begin{bmatrix} 2 & 0 \\ 1 & 2 \end{bmatrix}$$
 
 | Algorithm                                                             | Relationship                                                      |
 |-----------------------------------------------------------------------|-------------------------------------------------------------------|
-| [Unscented Kalman Filter](../filters/active/UnscentedKalmanFilter.md) | Uses Cholesky to generate sigma points from the covariance matrix |
-| [Gaussian Elimination](GaussianElimination.md)                        | General-purpose alternative; does not exploit symmetry            |
+| [Unscented Kalman Filter](../filters/active/UnscentedKalmanFilter.md) | Uses `Factor` to generate sigma points from the covariance matrix |
+| [Consistency Metrics](ConsistencyMetrics.md)                          | Uses `Solve` for the SPD covariance solve behind NEES/NIS         |
+| [Gaussian Elimination](../solvers/GaussianElimination.md)             | General-purpose alternative; does not exploit symmetry            |
 
 ## References & Further Reading
 

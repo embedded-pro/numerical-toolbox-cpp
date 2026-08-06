@@ -146,7 +146,7 @@ graph LR
 |------------------------------------------------------------------|---------------------------------------------------------------------------------------|
 | [Kalman Filter](KalmanFilter.md)                                 | The UKF reduces to the standard KF when $f$ and $h$ are linear                        |
 | [Extended Kalman Filter](ExtendedKalmanFilter.md)                | Uses Jacobians instead of sigma points; simpler but less accurate for nonlinear cases |
-| [Cholesky Decomposition](../../solvers/CholeskyDecomposition.md) | Used internally to generate sigma points from the covariance matrix                   |
+| [Cholesky Decomposition](../../math/CholeskyDecomposition.md) | Used internally to generate sigma points from the covariance matrix                   |
 
 ## References & Further Reading
 

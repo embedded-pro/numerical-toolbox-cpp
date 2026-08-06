@@ -1,6 +1,5 @@
-// Copyright 2025 Numerical Toolbox Contributors
-// SPDX-License-Identifier: MIT
-#include "numerical/estimators/ConsistencyMetrics.hpp"
+#include "numerical/math/ConsistencyMetrics.hpp"
+#include "numerical/math/Tolerance.hpp"
 #include <gtest/gtest.h>
 
 namespace
@@ -9,7 +8,7 @@ namespace
         : public ::testing::Test
     {
     protected:
-        using Metrics = estimators::ConsistencyMetrics<float, 1>;
+        using Metrics = math::ConsistencyMetrics<float, 1>;
         using Vec1 = math::Vector<float, 1>;
         using Mat1 = math::Matrix<float, 1, 1>;
     };
@@ -18,7 +17,7 @@ namespace
         : public ::testing::Test
     {
     protected:
-        using Metrics = estimators::ConsistencyMetrics<float, 2>;
+        using Metrics = math::ConsistencyMetrics<float, 2>;
         using Vec2 = math::Vector<float, 2>;
         using Mat2 = math::Matrix<float, 2, 2>;
     };
@@ -27,7 +26,7 @@ namespace
         : public ::testing::Test
     {
     protected:
-        using Metrics = estimators::ConsistencyMetrics<float, 3>;
+        using Metrics = math::ConsistencyMetrics<float, 3>;
         using Vec3 = math::Vector<float, 3>;
         using Mat3 = math::Matrix<float, 3, 3>;
     };
@@ -43,7 +42,7 @@ TEST_F(ConsistencyMetrics1DTest, NeesScalarIdentityCovariance)
     auto result = Metrics::Nees(error, cov);
 
     ASSERT_TRUE(result.has_value());
-    EXPECT_NEAR(*result, 4.0f, 1e-4f);
+    EXPECT_NEAR(*result, 4.0f, math::Tolerance<float>());
 }
 
 TEST_F(ConsistencyMetrics1DTest, NisScalarIdentityCovariance)
@@ -56,7 +55,7 @@ TEST_F(ConsistencyMetrics1DTest, NisScalarIdentityCovariance)
     auto result = Metrics::Nis(innovation, cov);
 
     ASSERT_TRUE(result.has_value());
-    EXPECT_NEAR(*result, 9.0f, 1e-4f);
+    EXPECT_NEAR(*result, 9.0f, math::Tolerance<float>());
 }
 
 TEST_F(ConsistencyMetrics1DTest, NeesScaledCovariance)
@@ -69,7 +68,7 @@ TEST_F(ConsistencyMetrics1DTest, NeesScaledCovariance)
     auto result = Metrics::Nees(error, cov);
 
     ASSERT_TRUE(result.has_value());
-    EXPECT_NEAR(*result, 1.0f, 1e-4f);
+    EXPECT_NEAR(*result, 1.0f, math::Tolerance<float>());
 }
 
 TEST_F(ConsistencyMetrics1DTest, NeesSingularCovarianceReturnsNullopt)
@@ -84,16 +83,38 @@ TEST_F(ConsistencyMetrics1DTest, NeesSingularCovarianceReturnsNullopt)
     EXPECT_FALSE(result.has_value());
 }
 
+TEST_F(ConsistencyMetrics1DTest, NisSingularCovarianceReturnsNullopt)
+{
+    Vec1 innovation;
+    innovation.at(0, 0) = 1.0f;
+    Mat1 cov;
+    cov.at(0, 0) = 0.0f;
+
+    auto result = Metrics::Nis(innovation, cov);
+
+    EXPECT_FALSE(result.has_value());
+}
+
 TEST_F(ConsistencyMetrics1DTest, IsConsistentInsideBounds)
 {
-    const float midpoint = (estimators::detail::kChi2Lo95[0] + estimators::detail::kChi2Hi95[0]) / 2.0f;
+    const float midpoint = (math::detail::kChi2Lo95[0] + math::detail::kChi2Hi95[0]) / 2.0f;
 
     EXPECT_TRUE(Metrics::IsConsistent(midpoint));
 }
 
+TEST_F(ConsistencyMetrics1DTest, IsConsistentAtExactLowerBound)
+{
+    EXPECT_TRUE(Metrics::IsConsistent(math::detail::kChi2Lo95[0]));
+}
+
+TEST_F(ConsistencyMetrics1DTest, IsConsistentAtExactUpperBound)
+{
+    EXPECT_TRUE(Metrics::IsConsistent(math::detail::kChi2Hi95[0]));
+}
+
 TEST_F(ConsistencyMetrics1DTest, IsConsistentOutsideBoundsHigh)
 {
-    const float aboveHi = estimators::detail::kChi2Hi95[0] + 1.0f;
+    const float aboveHi = math::detail::kChi2Hi95[0] + 1.0f;
 
     EXPECT_FALSE(Metrics::IsConsistent(aboveHi));
 }
@@ -106,6 +127,20 @@ TEST_F(ConsistencyMetrics1DTest, IsConsistentOutsideBoundsLow)
 TEST_F(ConsistencyMetrics1DTest, IsTimeAveragedConsistentZeroSamplesReturnsFalse)
 {
     EXPECT_FALSE(Metrics::IsTimeAveragedConsistent(1.0f, 0));
+}
+
+TEST_F(ConsistencyMetrics1DTest, IsTimeAveragedConsistentMultipleSamplesInsideBounds)
+{
+    const float lo = math::detail::kChi2Lo95[1] / 2.0f;
+    const float hi = math::detail::kChi2Hi95[1] / 2.0f;
+    const float midpoint = (lo + hi) / 2.0f;
+
+    EXPECT_TRUE(Metrics::IsTimeAveragedConsistent(midpoint, 2));
+}
+
+TEST_F(ConsistencyMetrics1DTest, IsTimeAveragedConsistentInconsistentOutOfBounds)
+{
+    EXPECT_FALSE(Metrics::IsTimeAveragedConsistent(0.0f, 2));
 }
 
 TEST_F(ConsistencyMetrics2DTest, Nees2DIdentityCovariance)
@@ -122,7 +157,7 @@ TEST_F(ConsistencyMetrics2DTest, Nees2DIdentityCovariance)
     auto result = Metrics::Nees(error, cov);
 
     ASSERT_TRUE(result.has_value());
-    EXPECT_NEAR(*result, 5.0f, 1e-4f);
+    EXPECT_NEAR(*result, 5.0f, math::Tolerance<float>());
 }
 
 TEST_F(ConsistencyMetrics2DTest, Nis2DScaledDiagonalCovariance)
@@ -139,12 +174,45 @@ TEST_F(ConsistencyMetrics2DTest, Nis2DScaledDiagonalCovariance)
     auto result = Metrics::Nis(innovation, cov);
 
     ASSERT_TRUE(result.has_value());
-    EXPECT_NEAR(*result, 2.0f, 1e-4f);
+    EXPECT_NEAR(*result, 2.0f, math::Tolerance<float>());
+}
+
+TEST_F(ConsistencyMetrics2DTest, Nees2DFullCovarianceHandComputed)
+{
+    Vec2 error;
+    error.at(0, 0) = 1.0f;
+    error.at(1, 0) = 0.0f;
+    Mat2 cov;
+    cov.at(0, 0) = 2.0f;
+    cov.at(0, 1) = 1.0f;
+    cov.at(1, 0) = 1.0f;
+    cov.at(1, 1) = 2.0f;
+
+    auto result = Metrics::Nees(error, cov);
+
+    ASSERT_TRUE(result.has_value());
+    EXPECT_NEAR(*result, 2.0f / 3.0f, math::Tolerance<float>());
+}
+
+TEST_F(ConsistencyMetrics2DTest, Nis2DSingularCovarianceReturnsNullopt)
+{
+    Vec2 innovation;
+    innovation.at(0, 0) = 1.0f;
+    innovation.at(1, 0) = 1.0f;
+    Mat2 cov;
+    cov.at(0, 0) = 0.0f;
+    cov.at(0, 1) = 0.0f;
+    cov.at(1, 0) = 0.0f;
+    cov.at(1, 1) = 1.0f;
+
+    auto result = Metrics::Nis(innovation, cov);
+
+    EXPECT_FALSE(result.has_value());
 }
 
 TEST_F(ConsistencyMetrics2DTest, IsConsistent2DWithinBounds)
 {
-    const float midpoint = (estimators::detail::kChi2Lo95[1] + estimators::detail::kChi2Hi95[1]) / 2.0f;
+    const float midpoint = (math::detail::kChi2Lo95[1] + math::detail::kChi2Hi95[1]) / 2.0f;
 
     EXPECT_TRUE(Metrics::IsConsistent(midpoint));
 }
@@ -163,10 +231,10 @@ TEST_F(ConsistencyMetrics3DTest, Nees3DIdentityCovariance)
     auto result = Metrics::Nees(error, cov);
 
     ASSERT_TRUE(result.has_value());
-    EXPECT_NEAR(*result, 3.0f, 1e-4f);
+    EXPECT_NEAR(*result, 3.0f, math::Tolerance<float>());
 }
 
-TEST_F(ConsistencyMetrics3DTest, Nis3DFullCovariance)
+TEST_F(ConsistencyMetrics3DTest, Nis3DScaledDiagonalCovariance)
 {
     Vec3 innovation;
     innovation.at(0, 0) = 1.0f;
@@ -180,12 +248,28 @@ TEST_F(ConsistencyMetrics3DTest, Nis3DFullCovariance)
     auto result = Metrics::Nis(innovation, cov);
 
     ASSERT_TRUE(result.has_value());
-    EXPECT_NEAR(*result, 0.5f, 1e-4f);
+    EXPECT_NEAR(*result, 0.5f, math::Tolerance<float>());
 }
 
 TEST_F(ConsistencyMetrics3DTest, IsTimeAveragedConsistentWithOneSample)
 {
-    const float midpoint = (estimators::detail::kChi2Lo95[2] + estimators::detail::kChi2Hi95[2]) / 2.0f;
+    const float midpoint = (math::detail::kChi2Lo95[2] + math::detail::kChi2Hi95[2]) / 2.0f;
 
     EXPECT_TRUE(Metrics::IsTimeAveragedConsistent(midpoint, 1));
+}
+
+TEST_F(ConsistencyMetrics3DTest, IsTimeAveragedConsistentDofClampBranch)
+{
+    const float lo = math::detail::kChi2Lo95[math::detail::kMaxChiSquareDim - 1] / 5.0f;
+    const float hi = math::detail::kChi2Hi95[math::detail::kMaxChiSquareDim - 1] / 5.0f;
+    const float midpoint = (lo + hi) / 2.0f;
+
+    EXPECT_TRUE(Metrics::IsTimeAveragedConsistent(midpoint, 5));
+}
+
+TEST_F(ConsistencyMetrics3DTest, IsTimeAveragedConsistentInconsistentOutOfBounds)
+{
+    const float aboveHi = math::detail::kChi2Hi95[math::detail::kMaxChiSquareDim - 1] / 1.0f + 1.0f;
+
+    EXPECT_FALSE(Metrics::IsTimeAveragedConsistent(aboveHi, 1));
 }

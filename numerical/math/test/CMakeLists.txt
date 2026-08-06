@@ -10,6 +10,7 @@ target_link_libraries(numerical.math_test PUBLIC
 
 target_sources(numerical.math_test PRIVATE
     TestComplexNumber.cpp
+    TestConsistencyMetrics.cpp
     TestCordic.cpp
     TestGivensRotation.cpp
     TestHouseholderTransform.cpp
