@@ -60,6 +60,7 @@ namespace filters::passive
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class MovingAverage<float, 1>;
     extern template class MovingAverage<float, 4>;
 #endif
 }
