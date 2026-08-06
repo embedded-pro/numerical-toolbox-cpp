@@ -111,9 +111,9 @@ TEST_F(TestGaussianEliminationFloat, solve_system_delegates_per_column)
 TEST_F(TestGaussianEliminationFloat3, general_3x3_well_conditioned_full_solve)
 {
     math::SquareMatrix<float, 3> a{
-        { 2.0f,  1.0f, -1.0f },
-        { -3.0f, -1.0f,  2.0f },
-        { -2.0f,  1.0f,  2.0f }
+        { 2.0f, 1.0f, -1.0f },
+        { -3.0f, -1.0f, 2.0f },
+        { -2.0f, 1.0f, 2.0f }
     };
     math::Vector<float, 3> b{ { 8.0f }, { -11.0f }, { -3.0f } };
 

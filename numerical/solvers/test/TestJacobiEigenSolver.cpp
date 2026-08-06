@@ -147,10 +147,10 @@ TEST_F(TestJacobiEigenSolver, sweeps_nonzero_and_bounded_after_off_diagonal_solv
 TEST_F(TestJacobiEigenSolver, four_by_four_discrete_laplacian_eigenvalues)
 {
     math::Matrix<float, 4, 4> a{
-        {  2.0f, -1.0f,  0.0f,  0.0f },
-        { -1.0f,  2.0f, -1.0f,  0.0f },
-        {  0.0f, -1.0f,  2.0f, -1.0f },
-        {  0.0f,  0.0f, -1.0f,  2.0f }
+        { 2.0f, -1.0f, 0.0f, 0.0f },
+        { -1.0f, 2.0f, -1.0f, 0.0f },
+        { 0.0f, -1.0f, 2.0f, -1.0f },
+        { 0.0f, 0.0f, -1.0f, 2.0f }
     };
 
     EXPECT_TRUE(solver4.Solve(a));
