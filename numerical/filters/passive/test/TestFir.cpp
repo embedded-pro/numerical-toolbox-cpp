@@ -4,8 +4,8 @@
 #include "numerical/math/Tolerance.hpp"
 #include <array>
 #include <cmath>
-#include <numbers>
 #include <gtest/gtest.h>
+#include <numbers>
 
 namespace
 {
@@ -159,7 +159,7 @@ TEST_F(TestFir, LinearitySuperpositionProperty)
     filters::passive::Fir<float, N> firC{ coeffs };
 
     constexpr std::array<float, 5> x{ 0.1f, -0.3f, 0.7f, 0.0f, 0.5f };
-    constexpr std::array<float, 5> z{ 0.4f,  0.2f, -0.1f, 0.6f, -0.2f };
+    constexpr std::array<float, 5> z{ 0.4f, 0.2f, -0.1f, 0.6f, -0.2f };
     constexpr float alpha = 2.0f;
     constexpr float beta = -0.5f;
 
