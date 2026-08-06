@@ -47,9 +47,9 @@ TEST_F(ConditionNumberTest, DiagonalScaling3x3)
 TEST_F(ConditionNumberTest, IllConditionedHilbert3x3)
 {
     math::SquareMatrix<float, 3> hilbert{
-        { 1.0f,       0.5f,       1.0f / 3.0f },
-        { 0.5f,       1.0f / 3.0f, 0.25f      },
-        { 1.0f / 3.0f, 0.25f,     0.2f        }
+        { 1.0f, 0.5f, 1.0f / 3.0f },
+        { 0.5f, 1.0f / 3.0f, 0.25f },
+        { 1.0f / 3.0f, 0.25f, 0.2f }
     };
     auto result = solvers::ConditionNumber(hilbert);
     ASSERT_TRUE(result.has_value());
@@ -69,7 +69,7 @@ TEST_F(ConditionNumberTest, ZeroRowReturnsNullopt)
 TEST_F(ConditionNumberTest, AllTinyRowReturnsNullopt)
 {
     math::SquareMatrix<float, 2> nearZero{
-        { 1.0f,  2.0f  },
+        { 1.0f, 2.0f },
         { 5e-13f, 5e-13f }
     };
     auto result = solvers::ConditionNumber(nearZero);
