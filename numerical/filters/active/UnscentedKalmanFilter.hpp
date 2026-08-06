@@ -2,9 +2,9 @@
 
 #include "infra/util/Function.hpp"
 #include "numerical/filters/active/KalmanFilterBase.hpp"
+#include "numerical/math/CholeskyDecomposition.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/MatrixOperations.hpp"
-#include "numerical/math/CholeskyDecomposition.hpp"
 #include <algorithm>
 #include <array>
 #include <cmath>

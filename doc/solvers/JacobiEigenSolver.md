@@ -119,11 +119,11 @@ graph LR
     JAC -.->|"eigenvalue floor keeps SPD"| CHOL
 ```
 
-| Algorithm                                          | Relationship                                                                                                          |
-|----------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
-| [QR Decomposition](QrDecomposition.md)             | Both are built from orthogonal (Givens/Householder) transforms; QR underlies the alternative tridiagonal eigen-method |
+| Algorithm                                                  | Relationship                                                                                                          |
+|------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| [QR Decomposition](QrDecomposition.md)                     | Both are built from orthogonal (Givens/Householder) transforms; QR underlies the alternative tridiagonal eigen-method |
 | [Cholesky Decomposition](../math/CholeskyDecomposition.md) | Requires symmetric positive-definite input; Jacobi eigenvalues certify or restore definiteness                        |
-| [Spectral Radius](SpectralRadius.md)               | Returns only the dominant eigenvalue magnitude; Jacobi returns the full spectrum and vectors                          |
+| [Spectral Radius](SpectralRadius.md)                       | Returns only the dominant eigenvalue magnitude; Jacobi returns the full spectrum and vectors                          |
 
 ## References & Further Reading
 
