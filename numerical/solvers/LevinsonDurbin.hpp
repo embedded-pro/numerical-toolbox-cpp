@@ -24,6 +24,7 @@ namespace solvers
 
     private:
         bool IsToeplitz(const InputMatrix& A) const;
+        static T WeightedTail(const InputVector& r, const SolutionVector& v, size_t n);
     };
 
     // Implementation //
@@ -35,41 +36,56 @@ namespace solvers
     {
         really_assert(IsToeplitz(A));
 
-        auto [first_row, first_col] = math::ToeplitzMatrix<T, N>::ExtractToeplitzVectors(A);
-        auto toeplitz = math::ToeplitzMatrix<T, N>(first_row, first_col);
+        auto first_row = math::ToeplitzMatrix<T, N>::ExtractToeplitzVectors(A).first;
 
-        SolutionVector phi;
-        SolutionVector prev_phi;
-        SolutionVector k;
+        SolutionVector x;
+        SolutionVector y;
+        SolutionVector prev_y;
 
-        T prev_error = first_row.at(0, 0);
+        const T r0 = first_row.at(0, 0);
+        T error = r0;
+        T reflection = T(0.0f);
 
-        k.at(0, 0) = b.at(0, 0) / prev_error;
-        phi.at(0, 0) = k.at(0, 0);
-        prev_error *= (T(1.0f) - k.at(0, 0) * k.at(0, 0));
+        x.at(0, 0) = b.at(0, 0) / r0;
+
+        if constexpr (N > 1)
+        {
+            y.at(0, 0) = -first_row.at(1, 0) / r0;
+            reflection = y.at(0, 0);
+        }
 
         for (size_t n = 1; n < N; ++n)
         {
-            T alpha = b.at(n, 0);
+            error *= (T(1.0f) - reflection * reflection);
+
+            const T mu = (b.at(n, 0) - WeightedTail(first_row, x, n)) / error;
 
             for (size_t j = 0; j < n; ++j)
-                alpha -= phi.at(j, 0) * first_row.at(n - j, 0);
+                x.at(j, 0) += mu * y.at(n - 1 - j, 0);
+            x.at(n, 0) = mu;
 
-            k.at(n, 0) = alpha / prev_error;
+            if (n + 1 < N)
+            {
+                reflection = -(first_row.at(n + 1, 0) + WeightedTail(first_row, y, n)) / error;
 
-            for (size_t j = 0; j < n; ++j)
-                prev_phi.at(j, 0) = phi.at(j, 0);
-
-            for (size_t j = 0; j <= n; ++j)
-                if (j < n)
-                    phi.at(j, 0) = prev_phi.at(j, 0) + k.at(n, 0) * prev_phi.at(n - 1 - j, 0);
-                else
-                    phi.at(n, 0) = k.at(n, 0);
-
-            prev_error *= (T(1.0f) - k.at(n, 0) * k.at(n, 0));
+                for (size_t j = 0; j < n; ++j)
+                    prev_y.at(j, 0) = y.at(j, 0);
+                for (size_t j = 0; j < n; ++j)
+                    y.at(j, 0) = prev_y.at(j, 0) + reflection * prev_y.at(n - 1 - j, 0);
+                y.at(n, 0) = reflection;
+            }
         }
 
-        return phi;
+        return x;
+    }
+
+    template<typename T, std::size_t N>
+    T LevinsonDurbin<T, N>::WeightedTail(const InputVector& r, const SolutionVector& v, size_t n)
+    {
+        T acc = T(0.0f);
+        for (size_t i = 1; i <= n; ++i)
+            acc += r.at(i, 0) * v.at(n - i, 0);
+        return acc;
     }
 
     template<typename T, std::size_t N>

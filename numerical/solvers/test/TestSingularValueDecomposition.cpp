@@ -1,5 +1,4 @@
 #include "numerical/math/Tolerance.hpp"
-#include "numerical/solvers/QrDecomposition.hpp"
 #include "numerical/solvers/SingularValueDecomposition.hpp"
 #include <cmath>
 #include <gtest/gtest.h>
@@ -90,26 +89,26 @@ TEST_F(TestSingularValueDecomposition, sigma_squared_matches_eig_AtA)
     svd.Decompose(a43);
     auto sig = svd.SingularValues();
 
-    auto at = a43.Transpose();
-    auto ata = at * a43;
-
-    solvers::QrDecomposition<float, 3, 3> qrAta{};
-    qrAta.Decompose(ata);
-
-    for (std::size_t i = 0; i < 3; ++i)
-    {
-        float sigSq = sig.at(i, 0) * sig.at(i, 0);
-        float ataTrace = ata.at(0, 0) + ata.at(1, 1) + ata.at(2, 2);
-        EXPECT_GE(sigSq, 0.0f);
-        (void)ataTrace;
-    }
+    auto ata = a43.Transpose() * a43;
+    float traceAtA = ata.at(0, 0) + ata.at(1, 1) + ata.at(2, 2);
 
     float sumSigSq = 0.0f;
-    float traceAtA = ata.at(0, 0) + ata.at(1, 1) + ata.at(2, 2);
     for (std::size_t i = 0; i < 3; ++i)
         sumSigSq += sig.at(i, 0) * sig.at(i, 0);
 
     EXPECT_NEAR(sumSigSq, traceAtA, 1e-2f);
+}
+
+TEST_F(TestSingularValueDecomposition, pseudo_inverse_satisfies_moore_penrose)
+{
+    svd.Decompose(a43);
+    auto aPlus = svd.PseudoInverse(1e-6f);
+
+    auto aaPlusA = a43 * aPlus * a43;
+
+    for (std::size_t i = 0; i < 4; ++i)
+        for (std::size_t j = 0; j < 3; ++j)
+            EXPECT_NEAR(aaPlusA.at(i, j), a43.at(i, j), 1e-4f);
 }
 
 TEST_F(TestSingularValueDecomposition, pseudo_inverse_solves_least_squares)
