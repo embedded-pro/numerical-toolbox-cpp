@@ -14,7 +14,6 @@ target_link_libraries(numerical.optimization ${NUMERICAL_VISIBILITY}
 
 target_sources(numerical.optimization PRIVATE
     BayesianOptimization.hpp
-    BlackBoxObjective.hpp
     GradientDescent.hpp
     Optimizer.hpp
 )
