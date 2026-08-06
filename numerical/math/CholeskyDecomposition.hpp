@@ -13,6 +13,18 @@
 
 namespace math
 {
+    namespace detail
+    {
+        template<typename T, std::size_t N>
+        [[nodiscard]] OPTIMIZE_FOR_SPEED float CholeskyInnerProduct(const SquareMatrix<T, N>& l, std::size_t i, std::size_t j)
+        {
+            float sum = 0.0f;
+            for (std::size_t k = 0; k < j; ++k)
+                sum += ToFloat(l.at(i, k)) * ToFloat(l.at(j, k));
+            return sum;
+        }
+    }
+
     template<typename T, std::size_t N>
     class CholeskyDecomposition
     {
@@ -34,20 +46,14 @@ namespace math
         {
             for (std::size_t j = 0; j <= i; ++j)
             {
-                float sum = ToFloat(a.at(i, j));
-                for (std::size_t k = 0; k < j; ++k)
-                    sum -= ToFloat(l.at(i, k)) * ToFloat(l.at(j, k));
+                const float sum = ToFloat(a.at(i, j)) - detail::CholeskyInnerProduct(l, i, j);
 
-                if (i == j)
-                {
-                    if (sum < 1e-10f)
-                        return std::nullopt;
-                    l.at(i, j) = T(std::sqrt(sum));
-                }
-                else
-                {
+                if (i != j)
                     l.at(i, j) = T(sum / ToFloat(l.at(j, j)));
-                }
+                else if (sum < 1e-10f)
+                    return std::nullopt;
+                else
+                    l.at(i, j) = T(std::sqrt(sum));
             }
         }
 
