@@ -9,56 +9,52 @@
 
 namespace regularization
 {
-    template<typename QNumberType, std::size_t Size>
+    template<typename T, std::size_t Size>
     class L1
-        : public Regularization<QNumberType, Size>
+        : public Regularization<T, Size>
     {
-    public:
-        using Vector = typename Regularization<QNumberType, Size>::Vector;
+        static_assert(std::is_floating_point_v<T>, "L1 supports floating-point types");
 
-        explicit L1(QNumberType lambda);
-        QNumberType Calculate(const Vector& parameters) const override;
+    public:
+        using Vector = typename Regularization<T, Size>::Vector;
+
+        explicit L1(T lambda);
+        T Calculate(const Vector& parameters) const override;
         Vector Gradient(const Vector& parameters) const override;
 
     private:
-        QNumberType lambda;
+        T lambda;
     };
 
-    // Implementation //
-
-    template<typename QNumberType, std::size_t Size>
-    L1<QNumberType, Size>::L1(QNumberType lambda)
+    template<typename T, std::size_t Size>
+    L1<T, Size>::L1(T lambda)
         : lambda(lambda)
     {}
 
-    template<typename QNumberType, std::size_t Size>
-    OPTIMIZE_FOR_SPEED
-        QNumberType
-        L1<QNumberType, Size>::Calculate(const Vector& parameters) const
+    template<typename T, std::size_t Size>
+    OPTIMIZE_FOR_SPEED T L1<T, Size>::Calculate(const Vector& parameters) const
     {
-        QNumberType sum = QNumberType(0.0f);
+        T sum{ 0.0f };
 
         for (std::size_t i = 0; i < Size; ++i)
-            sum += parameters[i] < QNumberType(0.0f) ? -parameters[i] : parameters[i];
+            sum += parameters[i] < T(0.0f) ? -parameters[i] : parameters[i];
 
         return lambda * sum;
     }
 
-    template<typename QNumberType, std::size_t Size>
-    OPTIMIZE_FOR_SPEED
-        typename L1<QNumberType, Size>::Vector
-        L1<QNumberType, Size>::Gradient(const Vector& parameters) const
+    template<typename T, std::size_t Size>
+    OPTIMIZE_FOR_SPEED typename L1<T, Size>::Vector L1<T, Size>::Gradient(const Vector& parameters) const
     {
         Vector gradient;
 
         for (std::size_t i = 0; i < Size; ++i)
         {
-            if (parameters[i] > QNumberType(0.0f))
+            if (parameters[i] > T(0.0f))
                 gradient[i] = lambda;
-            else if (parameters[i] < QNumberType(0.0f))
+            else if (parameters[i] < T(0.0f))
                 gradient[i] = -lambda;
             else
-                gradient[i] = QNumberType(0.0f);
+                gradient[i] = T(0.0f);
         }
 
         return gradient;
@@ -66,7 +62,5 @@ namespace regularization
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class L1<float, 4>;
-    extern template class L1<math::Q15, 4>;
-    extern template class L1<math::Q31, 4>;
 #endif
 }

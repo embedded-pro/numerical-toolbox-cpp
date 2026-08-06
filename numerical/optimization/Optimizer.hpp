@@ -1,7 +1,7 @@
 #pragma once
 
 #include "numerical/math/QNumber.hpp"
-#include "numerical/neural_network/losses/Loss.hpp"
+#include "numerical/optimization/ObjectiveFunction.hpp"
 
 namespace optimization
 {
@@ -12,7 +12,7 @@ namespace optimization
             "Optimizer can only be instantiated with math::QNumber types.");
 
     public:
-        using Vector = typename neural_network::Loss<QNumberType, NumberOfFeatures>::Vector;
+        using Vector = math::Vector<QNumberType, NumberOfFeatures>;
 
         struct Result
         {
@@ -27,6 +27,6 @@ namespace optimization
             std::size_t iterations;
         };
 
-        virtual const Result& Minimize(const Vector& initialGuess, neural_network::Loss<QNumberType, NumberOfFeatures>& loss) = 0;
+        virtual const Result& Minimize(const Vector& initialGuess, ObjectiveFunction<QNumberType, NumberOfFeatures>& objective) = 0;
     };
 }

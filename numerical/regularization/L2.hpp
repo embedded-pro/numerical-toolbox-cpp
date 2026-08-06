@@ -9,45 +9,41 @@
 
 namespace regularization
 {
-    template<typename QNumberType, std::size_t Size>
+    template<typename T, std::size_t Size>
     class L2
-        : public Regularization<QNumberType, Size>
+        : public Regularization<T, Size>
     {
-    public:
-        using Vector = typename Regularization<QNumberType, Size>::Vector;
+        static_assert(std::is_floating_point_v<T>, "L2 supports floating-point types");
 
-        explicit L2(QNumberType lambda);
-        QNumberType Calculate(const Vector& parameters) const override;
+    public:
+        using Vector = typename Regularization<T, Size>::Vector;
+
+        explicit L2(T lambda);
+        T Calculate(const Vector& parameters) const override;
         Vector Gradient(const Vector& parameters) const override;
 
     private:
-        QNumberType lambda;
+        T lambda;
     };
 
-    // Implementation //
-
-    template<typename QNumberType, std::size_t Size>
-    L2<QNumberType, Size>::L2(QNumberType lambda)
+    template<typename T, std::size_t Size>
+    L2<T, Size>::L2(T lambda)
         : lambda(lambda)
     {}
 
-    template<typename QNumberType, std::size_t Size>
-    OPTIMIZE_FOR_SPEED
-        QNumberType
-        L2<QNumberType, Size>::Calculate(const Vector& parameters) const
+    template<typename T, std::size_t Size>
+    OPTIMIZE_FOR_SPEED T L2<T, Size>::Calculate(const Vector& parameters) const
     {
-        QNumberType sum = QNumberType(0.0f);
+        T sum{ 0.0f };
 
         for (std::size_t i = 0; i < Size; ++i)
             sum += parameters[i] * parameters[i];
 
-        return QNumberType(math::ToFloat(lambda * sum) / 2.0f);
+        return lambda * sum / T(2.0f);
     }
 
-    template<typename QNumberType, std::size_t Size>
-    OPTIMIZE_FOR_SPEED
-        typename L2<QNumberType, Size>::Vector
-        L2<QNumberType, Size>::Gradient(const Vector& parameters) const
+    template<typename T, std::size_t Size>
+    OPTIMIZE_FOR_SPEED typename L2<T, Size>::Vector L2<T, Size>::Gradient(const Vector& parameters) const
     {
         Vector gradient;
 
@@ -59,7 +55,5 @@ namespace regularization
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class L2<float, 4>;
-    extern template class L2<math::Q15, 4>;
-    extern template class L2<math::Q31, 4>;
 #endif
 }
