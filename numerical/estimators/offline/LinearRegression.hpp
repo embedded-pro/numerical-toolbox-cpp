@@ -4,9 +4,8 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
-#include "numerical/math/CompilerOptimizations.hpp"
-
 #include "numerical/estimators/Estimator.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/solvers/QrDecomposition.hpp"
 
 namespace estimators

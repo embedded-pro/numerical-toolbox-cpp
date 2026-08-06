@@ -59,10 +59,14 @@ TEST_F(TestPolynomialFitting, predict_matches_doc_worked_example)
     math::Matrix<float, 4, 1> x;
     math::Matrix<float, 4, 1> y;
 
-    x.at(0, 0) = 0.0f;  y.at(0, 0) = 1.0f;
-    x.at(1, 0) = 1.0f;  y.at(1, 0) = 0.75f;
-    x.at(2, 0) = 2.0f;  y.at(2, 0) = 1.0f;
-    x.at(3, 0) = 3.0f;  y.at(3, 0) = 1.75f;
+    x.at(0, 0) = 0.0f;
+    y.at(0, 0) = 1.0f;
+    x.at(1, 0) = 1.0f;
+    y.at(1, 0) = 0.75f;
+    x.at(2, 0) = 2.0f;
+    y.at(2, 0) = 1.0f;
+    x.at(3, 0) = 3.0f;
+    y.at(3, 0) = 1.75f;
 
     docFitter.Fit(x, y);
 
