@@ -157,3 +157,158 @@ TEST_F(TestLuDecomposition, matches_gaussian_elimination)
     for (std::size_t i = 0; i < 3; ++i)
         EXPECT_NEAR(xLu.at(i, 0), xGe.at(i, 0), math::Tolerance<float>());
 }
+
+TEST_F(TestLuDecomposition, is_singular_false_after_successful_decompose)
+{
+    math::Matrix<float, 3, 3> a{
+        { 2.0f, 1.0f, -1.0f },
+        { -3.0f, -1.0f, 2.0f },
+        { -2.0f, 1.0f, 2.0f }
+    };
+
+    lu.Decompose(a);
+
+    EXPECT_FALSE(lu.IsSingular());
+}
+
+TEST_F(TestLuDecomposition, is_singular_true_after_singular_decompose)
+{
+    math::Matrix<float, 3, 3> a{
+        { 1.0f, 2.0f, 3.0f },
+        { 4.0f, 5.0f, 6.0f },
+        { 7.0f, 8.0f, 9.0f }
+    };
+
+    lu.Decompose(a);
+
+    EXPECT_TRUE(lu.IsSingular());
+}
+
+TEST_F(TestLuDecomposition, P_is_valid_permutation_matrix)
+{
+    math::Matrix<float, 3, 3> a{
+        { 2.0f, 1.0f, -1.0f },
+        { -3.0f, -1.0f, 2.0f },
+        { -2.0f, 1.0f, 2.0f }
+    };
+
+    lu.Decompose(a);
+    auto p = lu.P();
+
+    for (std::size_t i = 0; i < 3; ++i)
+    {
+        float rowSum{ 0.0f };
+        float colSum{ 0.0f };
+        for (std::size_t j = 0; j < 3; ++j)
+        {
+            rowSum += p.at(i, j);
+            colSum += p.at(j, i);
+        }
+        EXPECT_NEAR(rowSum, 1.0f, math::Tolerance<float>());
+        EXPECT_NEAR(colSum, 1.0f, math::Tolerance<float>());
+    }
+}
+
+TEST_F(TestLuDecomposition, L_has_unit_diagonal_and_lower_triangular_structure)
+{
+    math::Matrix<float, 3, 3> a{
+        { 2.0f, 1.0f, -1.0f },
+        { -3.0f, -1.0f, 2.0f },
+        { -2.0f, 1.0f, 2.0f }
+    };
+
+    lu.Decompose(a);
+    auto l = lu.L();
+
+    for (std::size_t i = 0; i < 3; ++i)
+    {
+        EXPECT_NEAR(l.at(i, i), 1.0f, math::Tolerance<float>());
+        for (std::size_t j = i + 1; j < 3; ++j)
+            EXPECT_NEAR(l.at(i, j), 0.0f, math::Tolerance<float>());
+    }
+}
+
+TEST_F(TestLuDecomposition, U_has_upper_triangular_structure)
+{
+    math::Matrix<float, 3, 3> a{
+        { 2.0f, 1.0f, -1.0f },
+        { -3.0f, -1.0f, 2.0f },
+        { -2.0f, 1.0f, 2.0f }
+    };
+
+    lu.Decompose(a);
+    auto u = lu.U();
+
+    for (std::size_t i = 1; i < 3; ++i)
+        for (std::size_t j = 0; j < i; ++j)
+            EXPECT_NEAR(u.at(i, j), 0.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestLuDecomposition, determinant_identity_matrix_is_one)
+{
+    math::Matrix<float, 3, 3> identity{
+        { 1.0f, 0.0f, 0.0f },
+        { 0.0f, 1.0f, 0.0f },
+        { 0.0f, 0.0f, 1.0f }
+    };
+
+    lu.Decompose(identity);
+
+    EXPECT_NEAR(lu.Determinant(), 1.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestLuDecomposition, determinant_diagonal_matrix_is_product_of_diagonal)
+{
+    math::Matrix<float, 3, 3> d{
+        { 2.0f, 0.0f, 0.0f },
+        { 0.0f, 3.0f, 0.0f },
+        { 0.0f, 0.0f, 5.0f }
+    };
+
+    lu.Decompose(d);
+
+    EXPECT_NEAR(lu.Determinant(), 30.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestLuDecomposition, hilbert_3x3_residual_bounded_by_conditioning)
+{
+    math::Matrix<float, 3, 3> h{
+        { 1.0f, 0.5f, 1.0f / 3.0f },
+        { 0.5f, 1.0f / 3.0f, 0.25f },
+        { 1.0f / 3.0f, 0.25f, 0.2f }
+    };
+
+    math::Vector<float, 3> b{ { 1.0f }, { 1.0f }, { 1.0f } };
+
+    lu.Decompose(h);
+    auto x = lu.Solve(b);
+    auto residual = h * x;
+
+    for (std::size_t i = 0; i < 3; ++i)
+        EXPECT_NEAR(residual.at(i, 0), b.at(i, 0), 1e-2f);
+}
+
+TEST_F(TestLuDecomposition, decompose_is_deterministic)
+{
+    math::Matrix<float, 3, 3> a{
+        { 2.0f, 1.0f, -1.0f },
+        { -3.0f, -1.0f, 2.0f },
+        { -2.0f, 1.0f, 2.0f }
+    };
+
+    solvers::LuDecomposition<float, 3> lu2{};
+    lu.Decompose(a);
+    lu2.Decompose(a);
+
+    auto l1 = lu.L();
+    auto l2 = lu2.L();
+    auto u1 = lu.U();
+    auto u2 = lu2.U();
+
+    for (std::size_t i = 0; i < 3; ++i)
+        for (std::size_t j = 0; j < 3; ++j)
+        {
+            EXPECT_FLOAT_EQ(l1.at(i, j), l2.at(i, j));
+            EXPECT_FLOAT_EQ(u1.at(i, j), u2.at(i, j));
+        }
+}

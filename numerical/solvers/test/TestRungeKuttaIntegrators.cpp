@@ -103,10 +103,11 @@ TEST_F(TestRungeKutta, rk4_is_fourth_order)
     };
 
     float exact{ std::exp(-1.0f) };
-    float errCoarse{ std::abs(integrate(0.1f, 10) - exact) };
-    float errFine{ std::abs(integrate(0.05f, 20) - exact) };
+    float errCoarse{ std::abs(integrate(0.5f, 2) - exact) };
+    float errFine{ std::abs(integrate(0.25f, 4) - exact) };
 
     EXPECT_GT(errCoarse / errFine, 8.0f);
+    EXPECT_LT(errCoarse / errFine, 32.0f);
 }
 
 TEST_F(TestRungeKutta, rk4_conserves_oscillator_energy)
@@ -123,6 +124,22 @@ TEST_F(TestRungeKutta, rk4_conserves_oscillator_energy)
     }
     float energyFinal{ 0.5f * (x.at(1, 0) * x.at(1, 0) + omega * omega * x.at(0, 0) * x.at(0, 0)) };
     EXPECT_NEAR(energyFinal, energyInitial, 1e-3f);
+}
+
+TEST_F(TestRungeKutta, rk4_zero_derivative_is_fixed_point)
+{
+    solvers::RungeKutta4<float, 1, 0> rk4Zero{ zeroSys, 0.1f };
+    State1 x{ { 3.14f } };
+    State1 xNext{ rk4Zero.Step(x, 0.0f) };
+    EXPECT_NEAR(xNext.at(0, 0), 3.14f, math::Tolerance<float>());
+}
+
+TEST_F(TestRungeKutta, rk4_deterministic_same_input)
+{
+    State1 x{ { 1.0f } };
+    State1 a{ rk4.Step(x, 0.0f) };
+    State1 b{ rk4.Step(x, 0.0f) };
+    EXPECT_FLOAT_EQ(a.at(0, 0), b.at(0, 0));
 }
 
 TEST_F(TestRungeKutta, dp45_keeps_error_below_tolerance)
@@ -201,15 +218,23 @@ TEST_F(TestRungeKutta, dp45_fsal_uses_six_evaluations)
     EXPECT_TRUE(second.accepted);
 }
 
-TEST_F(TestRungeKutta, zero_derivative_is_fixed_point)
+TEST_F(TestRungeKutta, dp45_zero_derivative_is_fixed_point)
 {
-    solvers::RungeKutta4<float, 1, 0> rk4Zero{ zeroSys, 0.1f };
-    State1 x{ { 3.14f } };
-    auto xNext{ rk4Zero.Step(x, 0.0f) };
-    EXPECT_NEAR(xNext.at(0, 0), 3.14f, math::Tolerance<float>());
-
     solvers::DormandPrince45<float, 1, 0> dp45Zero{ zeroSys, 1e-6f, 1e-6f };
+    State1 x{ { 3.14f } };
     auto result{ dp45Zero.Step(x, 0.0f, 0.1f) };
-    if (result.accepted)
-        EXPECT_NEAR(result.xNext.at(0, 0), 3.14f, math::Tolerance<float>());
+    ASSERT_TRUE(result.accepted);
+    EXPECT_NEAR(result.xNext.at(0, 0), 3.14f, math::Tolerance<float>());
+}
+
+TEST_F(TestRungeKutta, dp45_deterministic_same_input)
+{
+    solvers::DormandPrince45<float, 1, 0> dpA{ decay, 1e-6f, 1e-6f };
+    solvers::DormandPrince45<float, 1, 0> dpB{ decay, 1e-6f, 1e-6f };
+    State1 x{ { 1.0f } };
+    auto a{ dpA.Step(x, 0.0f, 0.05f) };
+    auto b{ dpB.Step(x, 0.0f, 0.05f) };
+    EXPECT_FLOAT_EQ(a.xNext.at(0, 0), b.xNext.at(0, 0));
+    EXPECT_FLOAT_EQ(a.hNext, b.hNext);
+    EXPECT_EQ(a.accepted, b.accepted);
 }

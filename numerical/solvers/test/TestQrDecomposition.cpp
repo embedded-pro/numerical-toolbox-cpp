@@ -1,5 +1,6 @@
 #include "numerical/math/Tolerance.hpp"
 #include "numerical/solvers/QrDecomposition.hpp"
+#include <cmath>
 #include <gtest/gtest.h>
 
 namespace
@@ -185,4 +186,104 @@ TEST_F(TestQrDecomposition, identity_factors_to_identity)
     for (std::size_t i = 0; i < 3; ++i)
         for (std::size_t j = 0; j < 3; ++j)
             EXPECT_NEAR(r.at(i, j), a.at(i, j), math::Tolerance<float>());
+}
+
+TEST_F(TestQrDecomposition, decompose_returns_true_on_full_rank)
+{
+    math::Matrix<float, 4, 3> a{
+        { 1.0f, 2.0f, 3.0f },
+        { 4.0f, 5.0f, 6.0f },
+        { 7.0f, 8.0f, 10.0f },
+        { 1.0f, 0.0f, 2.0f }
+    };
+
+    bool ok = qr.Decompose(a);
+
+    EXPECT_TRUE(ok);
+}
+
+TEST_F(TestQrDecomposition, solves_square_system_exactly)
+{
+    math::Matrix<float, 3, 3> a{
+        { 2.0f, 1.0f, 0.0f },
+        { 1.0f, 3.0f, 1.0f },
+        { 0.0f, 1.0f, 2.0f }
+    };
+
+    math::Vector<float, 3> b{ { 5.0f }, { 10.0f }, { 7.0f } };
+
+    qrSquare.Decompose(a);
+    auto x = qrSquare.SolveLeastSquares(b);
+
+    EXPECT_NEAR(x.at(0, 0), 1.5f, 1e-4f);
+    EXPECT_NEAR(x.at(1, 0), 2.0f, 1e-4f);
+    EXPECT_NEAR(x.at(2, 0), 2.5f, 1e-4f);
+}
+
+TEST_F(TestQrDecomposition, normal_equations_satisfied)
+{
+    math::Matrix<float, 4, 3> a{
+        { 1.0f, 0.0f, 0.0f },
+        { 0.0f, 1.0f, 0.0f },
+        { 0.0f, 0.0f, 1.0f },
+        { 1.0f, 1.0f, 1.0f }
+    };
+
+    math::Vector<float, 4> b{ { 1.0f }, { 2.0f }, { 3.0f }, { 6.5f } };
+
+    qr.Decompose(a);
+    auto x = qr.SolveLeastSquares(b);
+
+    auto residual = a * x;
+    math::Vector<float, 4> r{};
+    for (std::size_t i = 0; i < 4; ++i)
+        r.at(i, 0) = residual.at(i, 0) - b.at(i, 0);
+
+    auto normalEq = a.Transpose() * r;
+    for (std::size_t i = 0; i < 3; ++i)
+        EXPECT_NEAR(normalEq.at(i, 0), 0.0f, 1e-4f);
+}
+
+TEST_F(TestQrDecomposition, decompose_is_deterministic)
+{
+    math::Matrix<float, 4, 3> a{
+        { 1.0f, 2.0f, 3.0f },
+        { 4.0f, 5.0f, 6.0f },
+        { 7.0f, 8.0f, 10.0f },
+        { 1.0f, 0.0f, 2.0f }
+    };
+
+    solvers::QrDecomposition<float, 4, 3> qr2{};
+    qr.Decompose(a);
+    qr2.Decompose(a);
+
+    auto q1 = qr.Q();
+    auto q2 = qr2.Q();
+    auto r1 = qr.R();
+    auto r2 = qr2.R();
+
+    for (std::size_t i = 0; i < 4; ++i)
+        for (std::size_t j = 0; j < 3; ++j)
+            EXPECT_FLOAT_EQ(q1.at(i, j), q2.at(i, j));
+
+    for (std::size_t i = 0; i < 3; ++i)
+        for (std::size_t j = 0; j < 3; ++j)
+            EXPECT_FLOAT_EQ(r1.at(i, j), r2.at(i, j));
+}
+
+TEST_F(TestQrDecomposition, hilbert_3x3_reconstruction_within_tolerance)
+{
+    math::Matrix<float, 3, 3> h{
+        { 1.0f, 0.5f, 1.0f / 3.0f },
+        { 0.5f, 1.0f / 3.0f, 0.25f },
+        { 1.0f / 3.0f, 0.25f, 0.2f }
+    };
+
+    bool ok = qrSquare.Decompose(h);
+    EXPECT_TRUE(ok);
+
+    auto reconstructed = qrSquare.Q() * qrSquare.R();
+    for (std::size_t i = 0; i < 3; ++i)
+        for (std::size_t j = 0; j < 3; ++j)
+            EXPECT_NEAR(reconstructed.at(i, j), h.at(i, j), 1e-4f);
 }
