@@ -8,7 +8,7 @@
 #include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/MatrixOperations.hpp"
-#include "numerical/solvers/CholeskyDecomposition.hpp"
+#include "numerical/math/CholeskyDecomposition.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 #include <array>
 #include <cmath>
@@ -221,7 +221,7 @@ namespace filters
         const MeasurementCovariance& innovationCovariance) const
     {
         static const float log2pi = std::log(2.0f * std::numbers::pi_v<float>);
-        const auto L = solvers::CholeskyDecomposition(innovationCovariance);
+        const auto L = math::CholeskyDecomposition<float, MeasurementSize>::Factor(innovationCovariance);
         const auto sInvNu = solvers::SolveSystem<float, MeasurementSize, 1>(innovationCovariance, innovation);
         float logDetS = 0.0f;
         for (std::size_t i = 0; i < MeasurementSize; ++i)

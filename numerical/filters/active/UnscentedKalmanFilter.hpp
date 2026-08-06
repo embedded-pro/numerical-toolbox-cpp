@@ -4,7 +4,7 @@
 #include "numerical/filters/active/KalmanFilterBase.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/MatrixOperations.hpp"
-#include "numerical/solvers/CholeskyDecomposition.hpp"
+#include "numerical/math/CholeskyDecomposition.hpp"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -141,7 +141,7 @@ namespace filters
     {
         constexpr auto n = static_cast<float>(StateSize);
         float scaleFactor = std::sqrt(n + lambda);
-        auto L = solvers::CholeskyDecomposition<QNumberType, StateSize>(this->covariance());
+        auto L = math::CholeskyDecomposition<QNumberType, StateSize>::Factor(this->covariance());
 
         sigmaPoints[0] = this->state();
 

@@ -4,21 +4,19 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
+#include "numerical/math/CholeskyDecomposition.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/MatrixNorms.hpp"
-#include "numerical/solvers/GaussianElimination.hpp"
 #include <array>
-#include <cmath>
 #include <cstddef>
 #include <optional>
 
-namespace estimators
+namespace math
 {
     namespace detail
     {
         static constexpr std::size_t kMaxChiSquareDim = 10;
-        static constexpr std::size_t kNumAlpha = 1;
 
         static constexpr std::array<float, kMaxChiSquareDim> kChi2Lo95 = {
             0.000982f, 0.050636f, 0.215795f, 0.484419f, 0.831212f,
@@ -46,15 +44,12 @@ namespace estimators
         [[nodiscard]] static OPTIMIZE_FOR_SPEED std::optional<T> Nis(const StateVector& innovation, const CovarianceMatrix& innovationCovariance);
         [[nodiscard]] static bool IsConsistent(T value);
         [[nodiscard]] static bool IsTimeAveragedConsistent(T averagedValue, std::size_t numSamples);
-
-    private:
-        [[nodiscard]] static OPTIMIZE_FOR_SPEED std::optional<StateVector> Solve(const CovarianceMatrix& matrix, const StateVector& rhs);
     };
 
     template<typename T, std::size_t Dim>
     OPTIMIZE_FOR_SPEED std::optional<T> ConsistencyMetrics<T, Dim>::Nees(const StateVector& error, const CovarianceMatrix& covariance)
     {
-        auto z = Solve(covariance, error);
+        auto z = CholeskyDecomposition<T, Dim>::Solve(covariance, error);
         if (!z.has_value())
             return std::nullopt;
         return math::DotProduct(error, z.value());
@@ -63,7 +58,7 @@ namespace estimators
     template<typename T, std::size_t Dim>
     OPTIMIZE_FOR_SPEED std::optional<T> ConsistencyMetrics<T, Dim>::Nis(const StateVector& innovation, const CovarianceMatrix& innovationCovariance)
     {
-        auto z = Solve(innovationCovariance, innovation);
+        auto z = CholeskyDecomposition<T, Dim>::Solve(innovationCovariance, innovation);
         if (!z.has_value())
             return std::nullopt;
         return math::DotProduct(innovation, z.value());
@@ -90,20 +85,6 @@ namespace estimators
                              : detail::kChi2Hi95[detail::kMaxChiSquareDim - 1] / static_cast<float>(numSamples);
         return static_cast<float>(averagedValue) >= lo &&
                static_cast<float>(averagedValue) <= hi;
-    }
-
-    template<typename T, std::size_t Dim>
-    OPTIMIZE_FOR_SPEED std::optional<typename ConsistencyMetrics<T, Dim>::StateVector> ConsistencyMetrics<T, Dim>::Solve(const CovarianceMatrix& matrix, const StateVector& rhs)
-    {
-        for (std::size_t i = 0; i < Dim; ++i)
-        {
-            float pivot = std::abs(static_cast<float>(matrix.at(i, i)));
-            if (pivot < 1e-10f)
-                return std::nullopt;
-        }
-
-        solvers::GaussianElimination<T, Dim> solver;
-        return solver.Solve(matrix, rhs);
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD

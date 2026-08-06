@@ -11,7 +11,9 @@ target_link_libraries(numerical.math ${NUMERICAL_VISIBILITY}
 
 target_sources(numerical.math PRIVATE
     AdvancedFunctions.hpp
+    CholeskyDecomposition.hpp
     ComplexNumber.hpp
+    ConsistencyMetrics.hpp
     Cordic.hpp
     Geometry3D.hpp
     GivensRotation.hpp
@@ -36,6 +38,7 @@ target_sources(numerical.math PRIVATE
 
 numerical_add_coverage_sources(numerical.math
     ComplexNumber.cpp
+    ConsistencyMetrics.cpp
     Cordic.cpp
     LinearTimeInvariant.cpp
     Matrix.cpp

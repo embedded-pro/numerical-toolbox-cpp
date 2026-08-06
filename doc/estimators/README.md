@@ -17,9 +17,3 @@ Statistical estimation algorithms for fitting models to observed data and making
 | Algorithm                                           | Description                                                              |
 |-----------------------------------------------------|--------------------------------------------------------------------------|
 | [Recursive Least Squares](RecursiveLeastSquares.md) | Sample-by-sample parameter estimation with exponential forgetting factor |
-
-## Consistency Metrics
-
-| Algorithm                                               | Description                                                                         |
-|---------------------------------------------------------|-------------------------------------------------------------------------------------|
-| [Consistency Metrics (NEES/NIS)](ConsistencyMetrics.md) | Normalised Estimation Error Squared and Normalised Innovation Squared with χ² gates |

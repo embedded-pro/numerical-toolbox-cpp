@@ -1,7 +1,7 @@
 #include "numerical/filters/active/KalmanFilter.hpp"
 #include "numerical/filters/active/SquareRootKalmanFilter.hpp"
 #include "numerical/math/Tolerance.hpp"
-#include "numerical/solvers/CholeskyDecomposition.hpp"
+#include "numerical/math/CholeskyDecomposition.hpp"
 #include <cmath>
 #include <gtest/gtest.h>
 
@@ -72,7 +72,7 @@ namespace
         : public ::testing::Test
     {
     protected:
-        StateMat S0 = solvers::CholeskyDecomposition<float, 2>(MakeP0());
+        StateMat S0 = math::CholeskyDecomposition<float, 2>::Factor(MakeP0());
 
         SrkfType filter{ MakeX0(), S0 };
         KfType reference{ MakeX0(), MakeP0() };
@@ -81,8 +81,8 @@ namespace
         {
             filter.SetStateTransition(MakeF());
             filter.SetMeasurementMatrix(MakeH());
-            filter.SetProcessNoiseFactor(solvers::CholeskyDecomposition<float, 2>(MakeQ()));
-            filter.SetMeasurementNoiseFactor(solvers::CholeskyDecomposition<float, 1>(MakeR()));
+            filter.SetProcessNoiseFactor(math::CholeskyDecomposition<float, 2>::Factor(MakeQ()));
+            filter.SetMeasurementNoiseFactor(math::CholeskyDecomposition<float, 1>::Factor(MakeR()));
 
             reference.SetStateTransition(MakeF());
             reference.SetMeasurementMatrix(MakeH());
@@ -165,7 +165,7 @@ TEST_F(TestSquareRootKalmanFilter, factor_reconstructs_covariance)
 TEST_F(TestSquareRootKalmanFilter, predict_grows_uncertainty)
 {
     filter.SetStateTransition(MakeF());
-    filter.SetProcessNoiseFactor(solvers::CholeskyDecomposition<float, 2>(MakeQ()));
+    filter.SetProcessNoiseFactor(math::CholeskyDecomposition<float, 2>::Factor(MakeQ()));
 
     float traceBefore = MatrixTrace(filter.GetCovariance());
     filter.Predict();
@@ -194,13 +194,13 @@ TEST_F(TestSquareRootKalmanFilter, ill_conditioned_stays_stable)
         { 1e8f, 0.0f },
         { 0.0f, 1.0f }
     };
-    StateMat S0ill = solvers::CholeskyDecomposition<float, 2>(P0ill);
+    StateMat S0ill = math::CholeskyDecomposition<float, 2>::Factor(P0ill);
 
     SrkfType illFilter{ MakeX0(), S0ill };
     illFilter.SetStateTransition(MakeF());
     illFilter.SetMeasurementMatrix(MakeH());
-    illFilter.SetProcessNoiseFactor(solvers::CholeskyDecomposition<float, 2>(MakeQ()));
-    illFilter.SetMeasurementNoiseFactor(solvers::CholeskyDecomposition<float, 1>(MakeR()));
+    illFilter.SetProcessNoiseFactor(math::CholeskyDecomposition<float, 2>::Factor(MakeQ()));
+    illFilter.SetMeasurementNoiseFactor(math::CholeskyDecomposition<float, 1>::Factor(MakeR()));
 
     for (int step = 0; step < 20; ++step)
     {
@@ -223,7 +223,7 @@ TEST_F(TestSquareRootKalmanFilter, perfect_measurement_collapses_variance)
 
     filter.SetStateTransition(MakeF());
     filter.SetMeasurementMatrix(MakeH());
-    filter.SetProcessNoiseFactor(solvers::CholeskyDecomposition<float, 2>(MakeQ()));
+    filter.SetProcessNoiseFactor(math::CholeskyDecomposition<float, 2>::Factor(MakeQ()));
     filter.SetMeasurementNoiseFactor(sqrtRtiny);
 
     filter.Predict();
@@ -241,7 +241,7 @@ TEST_F(TestSquareRootKalmanFilter, vague_measurement_is_ignored)
 
     filter.SetStateTransition(MakeF());
     filter.SetMeasurementMatrix(MakeH());
-    filter.SetProcessNoiseFactor(solvers::CholeskyDecomposition<float, 2>(MakeQ()));
+    filter.SetProcessNoiseFactor(math::CholeskyDecomposition<float, 2>::Factor(MakeQ()));
     filter.SetMeasurementNoiseFactor(sqrtRlarge);
 
     filter.Predict();
@@ -300,8 +300,8 @@ TEST_F(TestSquareRootKalmanFilter, control_input_matches_conventional_kalman)
     SrkfCtrl srkf{ MakeX0(), S0 };
     srkf.SetStateTransition(MakeF());
     srkf.SetMeasurementMatrix(MakeH());
-    srkf.SetProcessNoiseFactor(solvers::CholeskyDecomposition<float, 2>(MakeQ()));
-    srkf.SetMeasurementNoiseFactor(solvers::CholeskyDecomposition<float, 1>(MakeR()));
+    srkf.SetProcessNoiseFactor(math::CholeskyDecomposition<float, 2>::Factor(MakeQ()));
+    srkf.SetMeasurementNoiseFactor(math::CholeskyDecomposition<float, 1>::Factor(MakeR()));
     srkf.SetControlInputMatrix(B);
 
     KfCtrl reference2{ MakeX0(), MakeP0() };
