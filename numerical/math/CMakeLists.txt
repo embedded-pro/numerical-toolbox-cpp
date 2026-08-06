@@ -10,7 +10,6 @@ target_link_libraries(numerical.math ${NUMERICAL_VISIBILITY}
 )
 
 target_sources(numerical.math PRIVATE
-    AdvancedFunctions.hpp
     CholeskyDecomposition.hpp
     ComplexNumber.hpp
     ConsistencyMetrics.hpp
@@ -27,16 +26,17 @@ target_sources(numerical.math PRIVATE
     QNumber.hpp
     Quaternion.hpp
     RecursiveBuffer.hpp
-    SingleInstructionMultipleData.hpp
     Statistics.hpp
     StepResponseMetrics.hpp
     Toeplitz.hpp
     Tolerance.hpp
+    Math.hpp
     TriangularSolve.hpp
     TrigonometricFunctions.hpp
 )
 
 numerical_add_coverage_sources(numerical.math
+    Math.cpp
     ComplexNumber.cpp
     ConsistencyMetrics.cpp
     Cordic.cpp

@@ -7,7 +7,7 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/solvers/OdeSystem.hpp"
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <type_traits>
 
@@ -125,11 +125,11 @@ namespace solvers
             T sum{ T{ 0 } };
             for (std::size_t i{ 0 }; i < StateSize; ++i)
             {
-                T scale{ absTol + relTol * std::abs(x.at(i, 0)) };
+                T scale{ absTol + relTol * math::Abs(x.at(i, 0)) };
                 T term{ diff.at(i, 0) / scale };
                 sum += term * term;
             }
-            return std::sqrt(sum / T(StateSize));
+            return math::Sqrt(sum / T(StateSize));
         }
 
         template<typename T, std::size_t StateSize, typename DerivFn>
@@ -173,7 +173,7 @@ namespace solvers
 
             T err{ DpWeightedNorm(y5 - y4, x, cfg.absTol, cfg.relTol) };
             T scaledErr{ err <= T{ 0 } ? static_cast<T>(1e-10) : err };
-            T factor{ DpClamp(static_cast<T>(0.9) * std::pow(scaledErr, T{ -1 } / T{ 5 }), static_cast<T>(0.2), T{ 5 }) };
+            T factor{ DpClamp(static_cast<T>(0.9) * math::Pow(scaledErr, T{ -1 } / T{ 5 }), static_cast<T>(0.2), T{ 5 }) };
             T hNew{ DpClamp(h * factor, cfg.hMin, cfg.hMax) };
 
             if (err <= T{ 1 })

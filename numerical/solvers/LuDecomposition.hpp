@@ -8,7 +8,7 @@
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/TriangularSolve.hpp"
 #include <array>
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <type_traits>
 
@@ -58,10 +58,10 @@ namespace solvers
         for (std::size_t k = 0; k < N; ++k)
         {
             std::size_t p = k;
-            T maxVal = std::abs(lu.at(k, k));
+            T maxVal = math::Abs(lu.at(k, k));
             for (std::size_t i = k + 1; i < N; ++i)
             {
-                T candidate = std::abs(lu.at(i, k));
+                T candidate = math::Abs(lu.at(i, k));
                 if (candidate > maxVal)
                 {
                     maxVal = candidate;

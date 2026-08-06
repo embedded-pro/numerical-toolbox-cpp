@@ -6,7 +6,7 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/ComplexNumber.hpp"
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <numbers>
 #include <type_traits>
@@ -42,9 +42,9 @@ namespace analysis
 
     template<typename T>
     GoertzelAlgorithm<T>::GoertzelAlgorithm(std::size_t k, std::size_t blockLength)
-        : coeff{ T{ 2 } * std::cos(T{ 2 } * std::numbers::pi_v<T> * static_cast<T>(k) / static_cast<T>(blockLength)) }
-        , cosine{ std::cos(T{ 2 } * std::numbers::pi_v<T> * static_cast<T>(k) / static_cast<T>(blockLength)) }
-        , sine{ std::sin(T{ 2 } * std::numbers::pi_v<T> * static_cast<T>(k) / static_cast<T>(blockLength)) }
+        : coeff{ T{ 2 } * math::Cos(T{ 2 } * std::numbers::pi_v<T> * static_cast<T>(k) / static_cast<T>(blockLength)) }
+        , cosine{ math::Cos(T{ 2 } * std::numbers::pi_v<T> * static_cast<T>(k) / static_cast<T>(blockLength)) }
+        , sine{ math::Sin(T{ 2 } * std::numbers::pi_v<T> * static_cast<T>(k) / static_cast<T>(blockLength)) }
         , blockSize{ blockLength }
     {}
 
@@ -82,7 +82,7 @@ namespace analysis
     template<typename T>
     T GoertzelAlgorithm<T>::Magnitude() const
     {
-        return std::sqrt(s1 * s1 + s2 * s2 - coeff * s1 * s2);
+        return math::Sqrt(s1 * s1 + s2 * s2 - coeff * s1 * s2);
     }
 
     template<typename T>
@@ -96,7 +96,7 @@ namespace analysis
     template<typename T>
     T GoertzelAlgorithm<T>::Coefficient(std::size_t k, std::size_t blockLength)
     {
-        return T{ 2 } * std::cos(T{ 2 } * std::numbers::pi_v<T> * static_cast<T>(k) / static_cast<T>(blockLength));
+        return T{ 2 } * math::Cos(T{ 2 } * std::numbers::pi_v<T> * static_cast<T>(k) / static_cast<T>(blockLength));
     }
 }
 

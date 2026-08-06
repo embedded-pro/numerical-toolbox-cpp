@@ -6,7 +6,7 @@
 
 #include "infra/util/BoundedVector.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <complex>
 #include <limits>
 #include <numbers>
@@ -53,11 +53,11 @@ namespace control_analysis
         const auto maxSize = static_cast<T>(response.max_size());
         const auto fstart = sampleFrequency / maxSize;
         const auto fend = sampleFrequency / static_cast<T>(2);
-        const auto multiplier = static_cast<T>(std::pow(static_cast<double>(fend / fstart), 1.0 / (static_cast<double>(maxSize) - 1.0)));
+        const auto multiplier = static_cast<T>(math::Pow(static_cast<double>(fend / fstart), 1.0 / (static_cast<double>(maxSize) - 1.0)));
 
         for (std::size_t n = 0; n < response.max_size(); ++n)
         {
-            auto f = fstart * static_cast<T>(std::pow(static_cast<double>(multiplier), static_cast<double>(n)));
+            auto f = fstart * static_cast<T>(math::Pow(static_cast<double>(multiplier), static_cast<double>(n)));
             auto omega = static_cast<T>(2) * static_cast<T>(std::numbers::pi) * f / sampleFrequency;
 
             std::complex<T> numerator(static_cast<T>(0), static_cast<T>(0));
@@ -76,7 +76,7 @@ namespace control_analysis
             auto magnitude = std::max(std::abs(h), std::numeric_limits<T>::min());
 
             frequencies.emplace_back(f);
-            response.emplace_back(static_cast<T>(20) * std::log10(magnitude));
+            response.emplace_back(static_cast<T>(20) * math::Log10(magnitude));
             phase.emplace_back(std::arg(h) * static_cast<T>(180) / static_cast<T>(std::numbers::pi));
         }
 

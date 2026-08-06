@@ -7,7 +7,7 @@
 #include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include <array>
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <type_traits>
 
@@ -79,7 +79,7 @@ namespace nonlinear_control
         {
             const T f = model.Drift(i, x);
             const T g = model.Gain(i, x);
-            really_assert(std::abs(g) > T{ 0 });
+            really_assert(math::Abs(g) > T{ 0 });
 
             const T cross = (i == 0) ? T{ 0 } : model.Gain(i - 1, x) * z[i - 1];
             alpha = (alphaDot - f - gains[i] * z[i] - cross) / g;

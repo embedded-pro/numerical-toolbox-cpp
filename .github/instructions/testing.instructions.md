@@ -44,6 +44,7 @@ TEST_F(TestDare, solves_simple_system)
 - `TEST_F` macros go **outside** the anonymous namespace
 - Include `<gtest/gtest.h>` (not `<gmock/gmock.h>`) unless gmock matchers are needed
 - Use `testing::StrictMock<MockType>` for strict mock expectations
+- **Math in tests**: use `std::sin`, `std::cos`, `std::abs`, etc. directly — never `math::Sin`, `math::Cos`, `math::Abs`, etc. in test code
 - **ONLY `StrictMock`**: Never use `testing::NiceMock<>` or bare mock instantiation — `NiceMock` silences unexpected-call warnings, masking test gaps; `StrictMock` enforces all interactions explicitly
 - Test `float` only (single type) — no multi-type tests
 - **No redundant tests** — implement exactly the spec's enumerated cases; no overlapping/extra cases

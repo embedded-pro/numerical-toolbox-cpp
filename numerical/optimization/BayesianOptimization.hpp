@@ -9,7 +9,7 @@
 #include "numerical/optimization/BlackBoxObjective.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 #include <array>
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <cstdint>
 #include <numbers>
 #include <utility>
@@ -159,7 +159,7 @@ namespace optimization
             vDotKStar += v.at(i, 0) * kStar.at(i, 0);
 
         const float sigma2 = std::max(0.0f, kSS - vDotKStar);
-        return { mu, std::sqrt(sigma2) };
+        return { mu, math::Sqrt(sigma2) };
     }
 
     template<std::size_t NumParams, std::size_t MaxObservations, std::size_t NumCandidates>
@@ -263,7 +263,7 @@ namespace optimization
             dist2 += diff * diff;
         }
         return hp.signalVariance * hp.signalVariance *
-               std::exp(-dist2 / (2.0f * hp.lengthScale * hp.lengthScale));
+               math::Exp(-dist2 / (2.0f * hp.lengthScale * hp.lengthScale));
     }
 
     template<std::size_t NumParams, std::size_t MaxObservations, std::size_t NumCandidates>
@@ -284,13 +284,13 @@ namespace optimization
     template<std::size_t NumParams, std::size_t MaxObservations, std::size_t NumCandidates>
     float BayesianOptimization<NumParams, MaxObservations, NumCandidates>::NormalCdf(float z)
     {
-        return 0.5f * std::erfc(-z * std::numbers::sqrt2_v<float> * 0.5f);
+        return 0.5f * math::Erfc(-z * std::numbers::sqrt2_v<float> * 0.5f);
     }
 
     template<std::size_t NumParams, std::size_t MaxObservations, std::size_t NumCandidates>
     float BayesianOptimization<NumParams, MaxObservations, NumCandidates>::NormalPdf(float z)
     {
-        return std::exp(-0.5f * z * z) / std::sqrt(2.0f * std::numbers::pi_v<float>);
+        return math::Exp(-0.5f * z * z) / math::Sqrt(2.0f * std::numbers::pi_v<float>);
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD

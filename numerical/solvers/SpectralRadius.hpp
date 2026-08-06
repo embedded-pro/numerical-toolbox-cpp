@@ -8,7 +8,7 @@
 #include "numerical/math/Matrix.hpp"
 #include "numerical/solvers/DurandKerner.hpp"
 #include <array>
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <span>
 #include <type_traits>
@@ -62,7 +62,7 @@ namespace solvers
     T SpectralRadius<T, Size>::Compute(const math::SquareMatrix<T, Size>& matrix) const
     {
         if constexpr (Size == 1)
-            return std::abs(matrix.at(0, 0));
+            return math::Abs(matrix.at(0, 0));
 
         const std::array<T, Size + 1> poly = CharacteristicPolynomial(matrix);
 

@@ -6,7 +6,7 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include <array>
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <numbers>
 #include <type_traits>
@@ -91,8 +91,8 @@ namespace filters::passive
     BiquadCoeffs<T> Biquad<T>::LowPass(T fc, T fs, T Q) noexcept
     {
         const T w0{ T{ 2 } * std::numbers::pi_v<T> * fc / fs };
-        const T cw{ std::cos(w0) };
-        const T alpha{ std::sin(w0) / (T{ 2 } * Q) };
+        const T cw{ math::Cos(w0) };
+        const T alpha{ math::Sin(w0) / (T{ 2 } * Q) };
         const T a0{ T{ 1 } + alpha };
         return BiquadCoeffs<T>{
             (T{ 1 } - cw) / (T{ 2 } * a0),
@@ -107,8 +107,8 @@ namespace filters::passive
     BiquadCoeffs<T> Biquad<T>::HighPass(T fc, T fs, T Q) noexcept
     {
         const T w0{ T{ 2 } * std::numbers::pi_v<T> * fc / fs };
-        const T cw{ std::cos(w0) };
-        const T alpha{ std::sin(w0) / (T{ 2 } * Q) };
+        const T cw{ math::Cos(w0) };
+        const T alpha{ math::Sin(w0) / (T{ 2 } * Q) };
         const T a0{ T{ 1 } + alpha };
         return BiquadCoeffs<T>{
             (T{ 1 } + cw) / (T{ 2 } * a0),
@@ -123,13 +123,13 @@ namespace filters::passive
     BiquadCoeffs<T> Biquad<T>::BandPass(T fc, T fs, T Q) noexcept
     {
         const T w0{ T{ 2 } * std::numbers::pi_v<T> * fc / fs };
-        const T alpha{ std::sin(w0) / (T{ 2 } * Q) };
-        const T cw{ std::cos(w0) };
+        const T alpha{ math::Sin(w0) / (T{ 2 } * Q) };
+        const T cw{ math::Cos(w0) };
         const T a0{ T{ 1 } + alpha };
         return BiquadCoeffs<T>{
-            (std::sin(w0) / T{ 2 }) / a0,
+            (math::Sin(w0) / T{ 2 }) / a0,
             T{ 0 },
-            -(std::sin(w0) / T{ 2 }) / a0,
+            -(math::Sin(w0) / T{ 2 }) / a0,
             (T{ -2 } * cw) / a0,
             (T{ 1 } - alpha) / a0
         };
@@ -139,8 +139,8 @@ namespace filters::passive
     BiquadCoeffs<T> Biquad<T>::Notch(T fc, T fs, T Q) noexcept
     {
         const T w0{ T{ 2 } * std::numbers::pi_v<T> * fc / fs };
-        const T cw{ std::cos(w0) };
-        const T alpha{ std::sin(w0) / (T{ 2 } * Q) };
+        const T cw{ math::Cos(w0) };
+        const T alpha{ math::Sin(w0) / (T{ 2 } * Q) };
         const T a0{ T{ 1 } + alpha };
         return BiquadCoeffs<T>{
             T{ 1 } / a0,
@@ -154,10 +154,10 @@ namespace filters::passive
     template<typename T>
     BiquadCoeffs<T> Biquad<T>::Peaking(T fc, T fs, T Q, T gainDb) noexcept
     {
-        const T A{ std::pow(T{ 10 }, gainDb / T{ 40 }) };
+        const T A{ math::Pow(T{ 10 }, gainDb / T{ 40 }) };
         const T w0{ T{ 2 } * std::numbers::pi_v<T> * fc / fs };
-        const T cw{ std::cos(w0) };
-        const T alpha{ std::sin(w0) / (T{ 2 } * Q) };
+        const T cw{ math::Cos(w0) };
+        const T alpha{ math::Sin(w0) / (T{ 2 } * Q) };
         const T a0{ T{ 1 } + alpha / A };
         return BiquadCoeffs<T>{
             (T{ 1 } + alpha * A) / a0,

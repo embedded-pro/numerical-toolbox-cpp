@@ -7,7 +7,7 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/solvers/SingularValueDecomposition.hpp"
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <type_traits>
 
@@ -53,7 +53,7 @@ namespace estimators
 
         const auto& v = svd.V();
         T denom = v.at(Features, Features);
-        if (std::abs(denom) < T{ 1e-6f })
+        if (math::Abs(denom) < T{ 1e-6f })
             return false;
 
         for (std::size_t i = 0; i < Features; ++i)

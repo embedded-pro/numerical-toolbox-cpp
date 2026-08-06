@@ -10,7 +10,7 @@
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/TriangularSolve.hpp"
 #include <array>
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <type_traits>
 

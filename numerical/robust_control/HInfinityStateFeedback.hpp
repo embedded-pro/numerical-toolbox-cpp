@@ -9,7 +9,7 @@
 #include "numerical/solvers/DiscreteAlgebraicRiccatiEquation.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 #include "numerical/solvers/SpectralRadius.hpp"
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <type_traits>
 
@@ -144,7 +144,7 @@ namespace robust_control
 
         for (std::size_t i = 0; i < StateSize; ++i)
             for (std::size_t j = 0; j < StateSize; ++j)
-                if (std::abs(Xresid.at(i, j) - Xcandidate.at(i, j)) > T{ 1 })
+                if (math::Abs(Xresid.at(i, j) - Xcandidate.at(i, j)) > T{ 1 })
                     return false;
 
         return true;

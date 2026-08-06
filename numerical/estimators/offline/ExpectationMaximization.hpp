@@ -10,7 +10,7 @@
 #include "numerical/math/MatrixOperations.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 #include <array>
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <limits>
 #include <utility>
 
@@ -113,7 +113,7 @@ namespace estimators
             logLikelihood = smootherOutput.logLikelihood;
             ++iter;
 
-            if (std::abs(logLikelihood - prevLogLikelihood) < convergenceTolerance)
+            if (math::Abs(logLikelihood - prevLogLikelihood) < convergenceTolerance)
             {
                 converged = true;
                 break;

@@ -7,7 +7,7 @@
 #include "numerical/math/MatrixNorms.hpp"
 #include "numerical/math/TriangularSolve.hpp"
 #include <array>
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <type_traits>
 
@@ -68,10 +68,10 @@ namespace math
         for (std::size_t k = 0; k < N; ++k)
         {
             std::size_t p = k;
-            T maxVal = std::abs(lu.at(k, k));
+            T maxVal = math::Abs(lu.at(k, k));
             for (std::size_t i = k + 1; i < N; ++i)
             {
-                T candidate = std::abs(lu.at(i, k));
+                T candidate = math::Abs(lu.at(i, k));
                 if (candidate > maxVal)
                 {
                     maxVal = candidate;
@@ -124,8 +124,8 @@ namespace math
         int s{ 0 };
         if (norm > T{ 1 })
         {
-            const T lg = std::log2(norm);
-            s = static_cast<int>(std::ceil(lg));
+            const T lg = math::Log2(norm);
+            s = static_cast<int>(math::Ceil(lg));
             if (s < 0)
                 s = 0;
         }

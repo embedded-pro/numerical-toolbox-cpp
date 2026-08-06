@@ -5,6 +5,7 @@
 #endif
 
 #include "numerical/estimators/Estimator.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 
 namespace estimators
@@ -110,7 +111,7 @@ namespace estimators
         State
         RecursiveLeastSquares<T, Features>::EvaluateConvergence(const EstimationMetrics& metrics, T innovationThreshold, T uncertaintyThreshold) noexcept
     {
-        if (std::abs(metrics.innovation) < innovationThreshold && metrics.uncertainty < uncertaintyThreshold) [[likely]]
+        if (math::Abs(metrics.innovation) < innovationThreshold && metrics.uncertainty < uncertaintyThreshold) [[likely]]
             return State::converged;
         else
             return State::unstable;

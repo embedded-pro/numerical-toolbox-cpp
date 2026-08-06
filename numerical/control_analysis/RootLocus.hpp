@@ -10,7 +10,7 @@
 #include "numerical/math/ComplexNumber.hpp"
 #include "numerical/solvers/DurandKerner.hpp"
 #include <array>
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <numbers>
 #include <span>
@@ -108,15 +108,15 @@ namespace control_analysis
         std::size_t polyOrder = denominator.size() - 1;
         result.activeBranches = polyOrder;
 
-        T logMin = std::log10(gainMin);
-        T logMax = std::log10(gainMax);
+        T logMin = math::Log10(gainMin);
+        T logMax = math::Log10(gainMax);
 
         std::array<T, MaxOrder + 1> charPolyStorage{};
 
         for (std::size_t step = 0; step < MaxGainSteps; ++step)
         {
             T logK = logMin + (logMax - logMin) * static_cast<T>(step) / static_cast<T>(MaxGainSteps - 1);
-            T K = std::pow(T(10), logK);
+            T K = math::Pow(T(10), logK);
             result.gains.push_back(K);
 
             auto charPoly = std::span<T>(charPolyStorage.data(), denominator.size());

@@ -6,7 +6,7 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include <array>
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <numbers>
 #include <type_traits>
@@ -58,8 +58,8 @@ namespace filters::passive
     NotchFilter<T>::NotchFilter(T f0, T fs, T Q) noexcept
     {
         const T w0{ T{ 2 } * std::numbers::pi_v<T> * f0 / fs };
-        const T cw{ std::cos(w0) };
-        const T alpha{ std::sin(w0) / (T{ 2 } * Q) };
+        const T cw{ math::Cos(w0) };
+        const T alpha{ math::Sin(w0) / (T{ 2 } * Q) };
         const T a0{ T{ 1 } + alpha };
         b0 = T{ 1 } / a0;
         b1 = (T{ -2 } * cw) / a0;

@@ -8,7 +8,7 @@
 #include "numerical/analysis/FastFourierTransform.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/ComplexNumber.hpp"
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <numbers>
 
 namespace analysis
@@ -59,17 +59,17 @@ namespace analysis
 
         auto& fftResult = fft.Forward(reordered);
 
-        output[0] = QNumberType(math::ToFloat(fftResult[0].Real()) / std::sqrt(static_cast<float>(Length)));
+        output[0] = QNumberType(math::ToFloat(fftResult[0].Real()) / math::Sqrt(static_cast<float>(Length)));
 
         for (std::size_t k = 1; k < Length; ++k)
         {
             float angle = -static_cast<float>(k) * std::numbers::pi_v<float> / (2.0f * Length);
-            float scale = 2.0f / std::sqrt(static_cast<float>(Length));
+            float scale = 2.0f / math::Sqrt(static_cast<float>(Length));
 
             float real = math::ToFloat(fftResult[k].Real());
             float imag = math::ToFloat(fftResult[k].Imaginary());
 
-            output[k] = QNumberType((real * std::cos(angle) - imag * std::sin(angle)) * scale);
+            output[k] = QNumberType((real * math::Cos(angle) - imag * math::Sin(angle)) * scale);
         }
 
         return output;
@@ -78,7 +78,7 @@ namespace analysis
     template<typename QNumberType, std::size_t Length>
     typename DiscreteConsineTransform<QNumberType, Length>::VectorReal& DiscreteConsineTransform<QNumberType, Length>::Inverse(VectorReal& input)
     {
-        float sqrtN = std::sqrt(static_cast<float>(Length));
+        float sqrtN = math::Sqrt(static_cast<float>(Length));
 
         complexBuffer[0] = math::Complex<QNumberType>{ QNumberType(math::ToFloat(input[0]) * sqrtN), QNumberType(0.0f) };
 
@@ -88,8 +88,8 @@ namespace analysis
             float imag = -math::ToFloat(input[Length - k]) * sqrtN / 2.0f;
 
             float angle = static_cast<float>(k) * std::numbers::pi_v<float> / (2.0f * static_cast<float>(Length));
-            float cosine = std::cos(angle);
-            float sine = std::sin(angle);
+            float cosine = math::Cos(angle);
+            float sine = math::Sin(angle);
 
             complexBuffer[k] = math::Complex<QNumberType>{ QNumberType(real * cosine - imag * sine), QNumberType(real * sine + imag * cosine) };
         }

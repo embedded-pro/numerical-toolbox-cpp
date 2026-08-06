@@ -6,7 +6,7 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/neural_network/activation/ActivationFunction.hpp"
-#include <cmath>
+#include "numerical/math/Math.hpp"
 
 namespace neural_network
 {
@@ -26,7 +26,7 @@ namespace neural_network
         QNumberType
         Sigmoid<QNumberType>::Forward(QNumberType x) const
     {
-        return QNumberType(1.0f / (1.0f + std::exp(-math::ToFloat(x))));
+        return QNumberType(1.0f / (1.0f + math::Exp(-math::ToFloat(x))));
     }
 
     template<typename QNumberType>

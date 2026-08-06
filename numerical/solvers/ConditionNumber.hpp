@@ -6,7 +6,7 @@
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/MatrixNorms.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <optional>
 #include <type_traits>
@@ -23,7 +23,7 @@ namespace solvers
                 bool allZero = true;
                 for (std::size_t j = 0; j < N; ++j)
                 {
-                    if (std::abs(a.at(i, j)) > static_cast<T>(1e-12))
+                    if (math::Abs(a.at(i, j)) > static_cast<T>(1e-12))
                     {
                         allZero = false;
                         break;

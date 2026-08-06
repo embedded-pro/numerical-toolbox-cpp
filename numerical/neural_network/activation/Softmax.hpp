@@ -6,7 +6,7 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/neural_network/activation/ActivationFunction.hpp"
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <span>
 
 namespace neural_network
@@ -27,7 +27,7 @@ namespace neural_network
         QNumberType
         Softmax<QNumberType>::Forward(QNumberType x) const
     {
-        return QNumberType(std::exp(math::ToFloat(x)));
+        return QNumberType(math::Exp(math::ToFloat(x)));
     }
 
     template<typename QNumberType>
@@ -50,7 +50,7 @@ namespace neural_network
         QNumberType sum = QNumberType(0.0f);
         for (std::size_t i = 0; i < output.size(); ++i)
         {
-            output[i] = QNumberType(std::exp(math::ToFloat(input[i]) - math::ToFloat(maxVal)));
+            output[i] = QNumberType(math::Exp(math::ToFloat(input[i]) - math::ToFloat(maxVal)));
             sum += output[i];
         }
 

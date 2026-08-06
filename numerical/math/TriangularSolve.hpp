@@ -8,7 +8,7 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/QNumber.hpp"
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <cstddef>
 
 namespace math
@@ -17,11 +17,11 @@ namespace math
     [[nodiscard]] OPTIMIZE_FOR_SPEED std::size_t FindPartialPivotRow(const Matrix<T, N, N>& matrix, std::size_t col)
     {
         std::size_t pivotRow = col;
-        float maxVal = std::abs(ToFloat(matrix.at(col, col)));
+        float maxVal = math::Abs(ToFloat(matrix.at(col, col)));
 
         for (std::size_t row = col + 1; row < N; ++row)
         {
-            float absVal = std::abs(ToFloat(matrix.at(row, col)));
+            float absVal = math::Abs(ToFloat(matrix.at(row, col)));
             if (absVal > maxVal)
             {
                 maxVal = absVal;
@@ -51,7 +51,7 @@ namespace math
                 }
                 else
                 {
-                    really_assert(std::abs(ToFloat(l.at(i, i))) > 0.0f);
+                    really_assert(math::Abs(ToFloat(l.at(i, i))) > 0.0f);
                     x.at(i, 0) = sum / l.at(i, i);
                 }
             }
@@ -84,7 +84,7 @@ namespace math
             for (std::size_t j = row + 1; j < N; ++j)
                 sum = sum - r.at(row, j) * x.at(j, 0);
 
-            really_assert(std::abs(ToFloat(r.at(row, row))) > 0.0f);
+            really_assert(math::Abs(ToFloat(r.at(row, row))) > 0.0f);
             x.at(row, 0) = sum / r.at(row, row);
         }
 

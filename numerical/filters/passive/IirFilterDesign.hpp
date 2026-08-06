@@ -8,7 +8,7 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/ComplexNumber.hpp"
 #include <array>
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <numbers>
 #include <type_traits>
@@ -93,23 +93,23 @@ namespace filters::passive
         for (std::size_t k{ 0 }; k < order; ++k)
         {
             const T theta{ std::numbers::pi_v<T> * (T{ 2 } * static_cast<T>(k) + static_cast<T>(order) + T{ 1 }) / (T{ 2 } * static_cast<T>(order)) };
-            poles[k] = { std::cos(theta), std::sin(theta) };
+            poles[k] = { math::Cos(theta), math::Sin(theta) };
         }
     }
 
     template<typename T, std::size_t MaxOrder>
     void IirFilterDesign<T, MaxOrder>::ChebyPoles(std::size_t order, T rippleDb, std::array<ComplexT, 16>& poles) noexcept
     {
-        const T epsilon{ std::sqrt(std::pow(T{ 10 }, rippleDb / T{ 10 }) - T{ 1 }) };
+        const T epsilon{ math::Sqrt(math::Pow(T{ 10 }, rippleDb / T{ 10 }) - T{ 1 }) };
         const T n{ static_cast<T>(order) };
-        const T asinh_val{ std::log(T{ 1 } / epsilon + std::sqrt(T{ 1 } / (epsilon * epsilon) + T{ 1 })) };
-        const T sigma0{ std::sinh(asinh_val / n) };
-        const T omega0{ std::cosh(asinh_val / n) };
+        const T asinh_val{ math::Log(T{ 1 } / epsilon + math::Sqrt(T{ 1 } / (epsilon * epsilon) + T{ 1 })) };
+        const T sigma0{ math::Sinh(asinh_val / n) };
+        const T omega0{ math::Cosh(asinh_val / n) };
 
         for (std::size_t k{ 0 }; k < order; ++k)
         {
             const T theta{ std::numbers::pi_v<T> * (T{ 2 } * static_cast<T>(k) + T{ 1 }) / (T{ 2 } * n) };
-            poles[k] = { -sigma0 * std::sin(theta), omega0 * std::cos(theta) };
+            poles[k] = { -sigma0 * math::Sin(theta), omega0 * math::Cos(theta) };
         }
     }
 
@@ -130,7 +130,7 @@ namespace filters::passive
         std::size_t idx{ start };
         for (std::size_t j{ start }; j < numA; ++j)
         {
-            if (!used[j] && std::abs(az[j].Imaginary()) > std::abs(az[idx].Imaginary()))
+            if (!used[j] && math::Abs(az[j].Imaginary()) > math::Abs(az[idx].Imaginary()))
                 idx = j;
         }
         return idx;
@@ -146,7 +146,7 @@ namespace filters::passive
         {
             if (!used[j])
             {
-                const T dist{ std::abs(az[j].Real() - p.Real()) + std::abs(az[j].Imaginary() + p.Imaginary()) };
+                const T dist{ math::Abs(az[j].Real() - p.Real()) + math::Abs(az[j].Imaginary() + p.Imaginary()) };
                 if (dist < bestDist)
                 {
                     bestDist = dist;
@@ -166,7 +166,7 @@ namespace filters::passive
         const ComplexT p{ az[idx] };
         used[idx] = true;
 
-        if (std::abs(p.Imaginary()) > static_cast<T>(1e-6))
+        if (math::Abs(p.Imaginary()) > static_cast<T>(1e-6))
         {
             MarkConjugate(az, numA, used, p);
             a1 = -T{ 2 } * p.Real();
@@ -220,13 +220,13 @@ namespace filters::passive
         used[bi] = true;
         ++bi;
 
-        if (std::abs(z1.Imaginary()) > static_cast<T>(1e-6) && bi < numB && !used[bi])
+        if (math::Abs(z1.Imaginary()) > static_cast<T>(1e-6) && bi < numB && !used[bi])
         {
             used[bi] = true;
             ++bi;
             PairComplexZero(z1, b1, b2);
         }
-        else if (std::abs(z1.Imaginary()) <= static_cast<T>(1e-6))
+        else if (math::Abs(z1.Imaginary()) <= static_cast<T>(1e-6))
         {
             PairRealZeros(bz, numB, used, bi, z1, b1, b2);
         }
@@ -256,7 +256,7 @@ namespace filters::passive
 
             const T sectionGain{ (count == 0) ? gain : T{ 1 } };
 
-            if (std::abs(a2) < static_cast<T>(1e-10))
+            if (math::Abs(a2) < static_cast<T>(1e-10))
                 out[count] = { sectionGain * b0, sectionGain * b1, T{ 0 }, a1, T{ 0 } };
             else
                 out[count] = { sectionGain * b0, sectionGain * b1, sectionGain * b2, a1, a2 };
@@ -291,7 +291,7 @@ namespace filters::passive
             dcNum *= T{ 2 };
             const T pre{ T{ 1 } - az[k].Real() };
             const T pim{ az[k].Imaginary() };
-            dcDen *= std::sqrt(pre * pre + pim * pim);
+            dcDen *= math::Sqrt(pre * pre + pim * pim);
         }
 
         const T rawGain{ (dcDen > T{ 0 }) ? (dcNum / dcDen) : T{ 1 } };
@@ -325,7 +325,7 @@ namespace filters::passive
             nyqNum *= T{ 2 };
             const T dre{ T{ 1 } + az[k].Real() };
             const T dim{ az[k].Imaginary() };
-            nyqDen *= std::sqrt(dre * dre + dim * dim);
+            nyqDen *= math::Sqrt(dre * dre + dim * dim);
         }
         return (nyqDen > T{ 0 }) ? (T{ 1 } / (nyqNum / nyqDen)) : T{ 1 };
     }
@@ -362,9 +362,9 @@ namespace filters::passive
             const ComplexT lp{ protoPoles[k].Real() * bw / T{ 2 }, protoPoles[k].Imaginary() * bw / T{ 2 } };
             const T discRe{ lp.Real() * lp.Real() - lp.Imaginary() * lp.Imaginary() - wc0 * wc0 };
             const T discIm{ T{ 2 } * lp.Real() * lp.Imaginary() };
-            const T discMag{ std::sqrt(std::sqrt(discRe * discRe + discIm * discIm)) };
-            const T discAngle{ std::atan2(discIm, discRe) / T{ 2 } };
-            const ComplexT sqrtDisc{ discMag * std::cos(discAngle), discMag * std::sin(discAngle) };
+            const T discMag{ math::Sqrt(math::Sqrt(discRe * discRe + discIm * discIm)) };
+            const T discAngle{ math::Atan2(discIm, discRe) / T{ 2 } };
+            const ComplexT sqrtDisc{ discMag * math::Cos(discAngle), discMag * math::Sin(discAngle) };
 
             az[numA++] = BilinearS2Z(lp + sqrtDisc, fs);
             az[numA++] = BilinearS2Z(lp - sqrtDisc, fs);
@@ -396,9 +396,9 @@ namespace filters::passive
 
             const T discRe{ bsLp.Real() * bsLp.Real() - bsLp.Imaginary() * bsLp.Imaginary() - wc0 * wc0 };
             const T discIm{ T{ 2 } * bsLp.Real() * bsLp.Imaginary() };
-            const T discMag{ std::sqrt(std::sqrt(discRe * discRe + discIm * discIm)) };
-            const T discAngle{ std::atan2(discIm, discRe) / T{ 2 } };
-            const ComplexT sqrtDisc{ discMag * std::cos(discAngle), discMag * std::sin(discAngle) };
+            const T discMag{ math::Sqrt(math::Sqrt(discRe * discRe + discIm * discIm)) };
+            const T discAngle{ math::Atan2(discIm, discRe) / T{ 2 } };
+            const ComplexT sqrtDisc{ discMag * math::Cos(discAngle), discMag * math::Sin(discAngle) };
 
             az[numA++] = BilinearS2Z(bsLp + sqrtDisc, fs);
             az[numA++] = BilinearS2Z(bsLp - sqrtDisc, fs);
@@ -426,7 +426,7 @@ namespace filters::passive
         else
             ChebyPoles(order, rippleDb, protoPoles);
 
-        const T wc{ T{ 2 } * sampleHz * std::tan(std::numbers::pi_v<T> * cutoffHz / sampleHz) };
+        const T wc{ T{ 2 } * sampleHz * math::Tan(std::numbers::pi_v<T> * cutoffHz / sampleHz) };
 
         switch (kind)
         {

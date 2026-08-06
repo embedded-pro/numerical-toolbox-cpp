@@ -7,7 +7,7 @@
 #include "numerical/math/MatrixOperations.hpp"
 #include <algorithm>
 #include <array>
-#include <cmath>
+#include "numerical/math/Math.hpp"
 
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC optimize("O3", "fast-math")
@@ -140,7 +140,7 @@ namespace filters
         std::array<StateVector, SigmaPointCount>& sigmaPoints) const
     {
         constexpr auto n = static_cast<float>(StateSize);
-        float scaleFactor = std::sqrt(n + lambda);
+        float scaleFactor = math::Sqrt(n + lambda);
         auto L = math::CholeskyDecomposition<QNumberType, StateSize>::Factor(this->covariance());
 
         sigmaPoints[0] = this->state();

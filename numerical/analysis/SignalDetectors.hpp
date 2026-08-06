@@ -5,7 +5,7 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <cstdint>
 #include <type_traits>
 
@@ -71,7 +71,7 @@ namespace analysis
     template<typename T>
     OPTIMIZE_FOR_SPEED T PeakHold<T>::Update(T x)
     {
-        T m{ std::abs(x) };
+        T m{ math::Abs(x) };
         peak = (m > peak * decay) ? m : peak * decay;
         return peak;
     }
@@ -90,7 +90,7 @@ namespace analysis
     template<typename T>
     OPTIMIZE_FOR_SPEED bool ZeroCrossingCounter<T>::Update(T x)
     {
-        bool crossed{ (previous < T{ 0 } ? x > T{ 0 } : x < T{ 0 }) && (std::abs(x) > hysteresis) };
+        bool crossed{ (previous < T{ 0 } ? x > T{ 0 } : x < T{ 0 }) && (math::Abs(x) > hysteresis) };
         if (crossed)
             ++count;
         previous = x;
@@ -119,7 +119,7 @@ namespace analysis
     OPTIMIZE_FOR_SPEED T RmsEnvelope<T>::Update(T x)
     {
         meanSquare += alpha * (x * x - meanSquare);
-        return std::sqrt(meanSquare);
+        return math::Sqrt(meanSquare);
     }
 
     template<typename T>

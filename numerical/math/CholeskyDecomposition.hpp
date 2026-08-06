@@ -7,7 +7,7 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/TriangularSolve.hpp"
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <optional>
 
@@ -53,7 +53,7 @@ namespace math
                 else if (sum < 1e-10f)
                     return std::nullopt;
                 else
-                    l.at(i, j) = T(std::sqrt(sum));
+                    l.at(i, j) = T(math::Sqrt(sum));
             }
         }
 

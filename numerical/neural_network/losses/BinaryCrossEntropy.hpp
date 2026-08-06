@@ -7,7 +7,7 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/neural_network/losses/Loss.hpp"
 #include "numerical/regularization/Regularization.hpp"
-#include <cmath>
+#include "numerical/math/Math.hpp"
 
 namespace neural_network
 {
@@ -48,8 +48,8 @@ namespace neural_network
         {
             QNumberType pred = std::max(std::min(parameters[i], QNumberType(0.9999f)), QNumberType(0.0001f));
 
-            cost += -(target[i] * std::log(math::ToFloat(pred)) +
-                      (QNumberType(0.9999f) - target[i]) * std::log(math::ToFloat(QNumberType(0.9999f) - pred)));
+            cost += -(target[i] * math::Log(math::ToFloat(pred)) +
+                      (QNumberType(0.9999f) - target[i]) * math::Log(math::ToFloat(QNumberType(0.9999f) - pred)));
         }
 
         return cost + regularization.Calculate(parameters);

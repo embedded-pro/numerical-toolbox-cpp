@@ -6,7 +6,7 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include <array>
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <type_traits>
 
@@ -130,9 +130,9 @@ namespace filters
     template<typename T, std::size_t Order>
     typename AlphaBetaFilter<T, Order>::Gains AlphaBetaFilter<T, Order>::GainsFromTrackingIndex(T lambda)
     {
-        T r{ (T{ 4 } + lambda - std::sqrt(T{ 8 } * lambda + lambda * lambda)) / T{ 4 } };
+        T r{ (T{ 4 } + lambda - math::Sqrt(T{ 8 } * lambda + lambda * lambda)) / T{ 4 } };
         T alpha{ T{ 1 } - r * r };
-        T beta{ T{ 2 } * (T{ 2 } - alpha) - T{ 4 } * std::sqrt(T{ 1 } - alpha) };
+        T beta{ T{ 2 } * (T{ 2 } - alpha) - T{ 4 } * math::Sqrt(T{ 1 } - alpha) };
         return Gains{ alpha, beta };
     }
 

@@ -9,7 +9,7 @@
 #include "numerical/math/HouseholderTransform.hpp"
 #include "numerical/math/Matrix.hpp"
 #include <array>
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <type_traits>
 
@@ -170,16 +170,16 @@ namespace solvers
     {
         for (std::size_t i = 0; i < Cols - 1; ++i)
         {
-            T thresh = T{ 1e-6f } * (std::abs(sigma.at(i, 0)) + std::abs(sigma.at(i + 1, 0)));
-            if (std::abs(superdiag.at(i, 0)) <= thresh)
+            T thresh = T{ 1e-6f } * (math::Abs(sigma.at(i, 0)) + math::Abs(sigma.at(i + 1, 0)));
+            if (math::Abs(superdiag.at(i, 0)) <= thresh)
                 superdiag.at(i, 0) = T{};
         }
 
         std::size_t right = Cols - 1;
         while (right > 0)
         {
-            T thresh = T{ 1e-6f } * (std::abs(sigma.at(right - 1, 0)) + std::abs(sigma.at(right, 0)));
-            if (std::abs(superdiag.at(right - 1, 0)) > thresh)
+            T thresh = T{ 1e-6f } * (math::Abs(sigma.at(right - 1, 0)) + math::Abs(sigma.at(right, 0)));
+            if (math::Abs(superdiag.at(right - 1, 0)) > thresh)
                 break;
             superdiag.at(right - 1, 0) = T{};
             --right;
@@ -191,8 +191,8 @@ namespace solvers
         std::size_t left = right - 1;
         while (left > 0)
         {
-            T thresh = T{ 1e-6f } * (std::abs(sigma.at(left - 1, 0)) + std::abs(sigma.at(left, 0)));
-            if (std::abs(superdiag.at(left - 1, 0)) <= thresh)
+            T thresh = T{ 1e-6f } * (math::Abs(sigma.at(left - 1, 0)) + math::Abs(sigma.at(left, 0)));
+            if (math::Abs(superdiag.at(left - 1, 0)) <= thresh)
                 break;
             --left;
         }
@@ -228,14 +228,14 @@ namespace solvers
         T t12 = dq * eq;
         T t22 = eq * eq + dqp1 * dqp1;
         T half = (t11 - t22) / T{ 2 };
-        return t22 - t12 * t12 / (half + std::copysign(std::sqrt(half * half + t12 * t12), half));
+        return t22 - t12 * t12 / (half + math::Copysign(math::Sqrt(half * half + t12 * t12), half));
     }
 
     template<typename T, std::size_t Rows, std::size_t Cols>
     OPTIMIZE_FOR_SPEED void SingularValueDecomposition<T, Rows, Cols>::QrSweep(
         std::size_t p, std::size_t q)
     {
-        T mu = (std::abs(sigma.at(q + 1, 0)) <= T{ 1e-6f } * std::abs(sigma.at(q, 0)))
+        T mu = (math::Abs(sigma.at(q + 1, 0)) <= T{ 1e-6f } * math::Abs(sigma.at(q, 0)))
                    ? T{}
                    : WilkinsonShift(q);
 
@@ -254,7 +254,7 @@ namespace solvers
             T dkp1 = sigma.at(k + 1, 0);
 
             if (k > p)
-                superdiag.at(k - 1, 0) = std::sqrt(f * f + g * g);
+                superdiag.at(k - 1, 0) = math::Sqrt(f * f + g * g);
 
             f = gv.c * dk + gv.s * ek;
             ek = gv.c * ek - gv.s * dk;
@@ -266,7 +266,7 @@ namespace solvers
             for (std::size_t i = 0; i < Rows; ++i)
                 math::ApplyGivens(gu, uMat.at(i, k), uMat.at(i, k + 1));
 
-            sigma.at(k, 0) = std::sqrt(f * f + g * g);
+            sigma.at(k, 0) = math::Sqrt(f * f + g * g);
 
             f = gu.c * ek + gu.s * dkp1;
             dkp1 = gu.c * dkp1 - gu.s * ek;
