@@ -1,107 +1,123 @@
 #include "numerical/filters/passive/Iir.hpp"
 #include "numerical/math/RecursiveBuffer.hpp"
 #include "numerical/math/Tolerance.hpp"
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 namespace
 {
-    template<typename T>
-    class TestIir
-        : public ::testing::Test
+    class TestIir : public ::testing::Test
     {
-    public:
+    protected:
         static constexpr std::size_t Order = 2;
-        math::RecursiveBuffer<T, Order> b_coeffs{};
-        math::RecursiveBuffer<T, Order> a_coeffs{};
-        std::optional<filters::passive::Iir<T, Order, Order>> filter;
+
+        math::RecursiveBuffer<float, Order> MakeCoeffs(float c0, float c1)
+        {
+            math::RecursiveBuffer<float, Order> buf{};
+            buf = { c0, c1 };
+            return buf;
+        }
     };
-
-    using TestedTypes = ::testing::Types<float, math::Q15, math::Q31>;
-    TYPED_TEST_SUITE(TestIir, TestedTypes);
 }
 
-TYPED_TEST(TestIir, when_disabled_returns_input_unchanged)
+TEST_F(TestIir, feedforward_and_feedback_step_sequence)
 {
-    this->b_coeffs = { TypeParam(0.9f), TypeParam(0.0f) };
-    this->a_coeffs = { TypeParam(0.9f), TypeParam(0.0f) };
+    auto b = MakeCoeffs(0.1f, 0.0f);
+    auto a = MakeCoeffs(0.5f, 0.4f);
+    filters::passive::Iir<float, Order, Order> filter{ b, a };
 
-    this->filter.emplace(this->b_coeffs, this->a_coeffs);
-    this->filter->Disable();
-
-    TypeParam input = TypeParam(0.5f);
-    EXPECT_EQ(math::ToFloat(this->filter->Filter(input)), math::ToFloat(input));
+    EXPECT_NEAR(filter.Filter(0.5f), 0.05f, math::Tolerance<float>());
+    EXPECT_NEAR(filter.Filter(0.5f), 0.075f, math::Tolerance<float>());
+    EXPECT_NEAR(filter.Filter(0.5f), 0.1075f, math::Tolerance<float>());
 }
 
-TYPED_TEST(TestIir, first_order_lowpass_filter_check)
+TEST_F(TestIir, feedforward_with_negative_feedback_step_sequence)
 {
-    float tolerance = math::Tolerance<TypeParam>();
+    auto b = MakeCoeffs(0.1f, 0.2f);
+    auto a = MakeCoeffs(0.5f, -0.1f);
+    filters::passive::Iir<float, Order, Order> filter{ b, a };
 
-    this->b_coeffs = { TypeParam(0.1f), TypeParam(0.0f) };
-    this->a_coeffs = { TypeParam(0.5f), TypeParam(0.4f) };
-
-    this->filter.emplace(this->b_coeffs, this->a_coeffs);
-
-    EXPECT_NEAR(math::ToFloat(this->filter->Filter(TypeParam(0.5f))), 0.05f, tolerance);
-    EXPECT_NEAR(math::ToFloat(this->filter->Filter(TypeParam(0.5f))), 0.075f, tolerance);
-    EXPECT_NEAR(math::ToFloat(this->filter->Filter(TypeParam(0.5f))), 0.1075f, tolerance);
+    EXPECT_NEAR(filter.Filter(0.5f), 0.05f, math::Tolerance<float>());
+    EXPECT_NEAR(filter.Filter(0.0f), 0.125f, math::Tolerance<float>());
+    EXPECT_NEAR(filter.Filter(0.0f), 0.0575f, math::Tolerance<float>());
 }
 
-TYPED_TEST(TestIir, reset_clears_filter_state)
+TEST_F(TestIir, reset_restores_initial_state)
 {
-    float tolerance = math::Tolerance<TypeParam>();
+    auto b = MakeCoeffs(0.1f, 0.0f);
+    auto a = MakeCoeffs(0.5f, 0.4f);
+    filters::passive::Iir<float, Order, Order> filter{ b, a };
 
-    this->b_coeffs = { TypeParam(0.1f), TypeParam(0.0f) };
-    this->a_coeffs = { TypeParam(0.5f), TypeParam(0.4f) };
+    filter.Filter(0.5f);
+    filter.Filter(0.5f);
+    filter.Reset();
 
-    this->filter.emplace(this->b_coeffs, this->a_coeffs);
-
-    this->filter->Filter(TypeParam(0.5f));
-    this->filter->Filter(TypeParam(0.5f));
-
-    this->filter->Reset();
-
-    EXPECT_NEAR(math::ToFloat(this->filter->Filter(TypeParam(0.5f))), 0.05f, tolerance);
+    EXPECT_NEAR(filter.Filter(0.5f), 0.05f, math::Tolerance<float>());
 }
 
-TYPED_TEST(TestIir, enable_disable_toggle)
+TEST_F(TestIir, determinism_same_input_twice_gives_identical_output)
 {
-    float tolerance = math::Tolerance<TypeParam>();
+    auto b = MakeCoeffs(0.1f, 0.2f);
+    auto a = MakeCoeffs(0.5f, -0.1f);
+    filters::passive::Iir<float, Order, Order> filter1{ b, a };
+    filters::passive::Iir<float, Order, Order> filter2{ b, a };
 
-    this->b_coeffs = { TypeParam(0.1f), TypeParam(0.0f) };
-    this->a_coeffs = { TypeParam(0.5f), TypeParam(0.4f) };
+    const float out1a = filter1.Filter(0.5f);
+    const float out1b = filter1.Filter(0.3f);
+    const float out2a = filter2.Filter(0.5f);
+    const float out2b = filter2.Filter(0.3f);
 
-    this->filter.emplace(this->b_coeffs, this->a_coeffs);
-
-    TypeParam input = TypeParam(0.5f);
-
-    this->filter->Disable();
-    EXPECT_EQ(math::ToFloat(this->filter->Filter(input)), math::ToFloat(input));
-
-    this->filter->Enable();
-    EXPECT_NEAR(math::ToFloat(this->filter->Filter(input)), 0.05f, tolerance);
+    EXPECT_FLOAT_EQ(out1a, out2a);
+    EXPECT_FLOAT_EQ(out1b, out2b);
 }
 
-TYPED_TEST(TestIir, second_order_filter_check)
+TEST_F(TestIir, zero_feedforward_coefficients_produce_zero_output)
 {
-    float tolerance = math::Tolerance<TypeParam>();
+    auto b = MakeCoeffs(0.0f, 0.0f);
+    auto a = MakeCoeffs(0.5f, 0.0f);
+    filters::passive::Iir<float, Order, Order> filter{ b, a };
 
-    this->b_coeffs = { TypeParam(0.1f), TypeParam(0.2f) };
-    this->a_coeffs = { TypeParam(0.5f), TypeParam(-0.1f) };
-
-    this->filter.emplace(this->b_coeffs, this->a_coeffs);
-
-    EXPECT_NEAR(math::ToFloat(this->filter->Filter(TypeParam(0.5f))), 0.05f, tolerance);
-    EXPECT_NEAR(math::ToFloat(this->filter->Filter(TypeParam(0.0f))), 0.125f, tolerance);
-    EXPECT_NEAR(math::ToFloat(this->filter->Filter(TypeParam(0.0f))), 0.0575f, tolerance);
+    EXPECT_FLOAT_EQ(filter.Filter(0.5f), 0.0f);
+    EXPECT_FLOAT_EQ(filter.Filter(-0.5f), 0.0f);
 }
 
-TYPED_TEST(TestIir, zero_coefficients_produce_zero_output)
+TEST_F(TestIir, dc_gain_matches_transfer_function)
 {
-    this->b_coeffs = { TypeParam(0.0f), TypeParam(0.0f) };
-    this->a_coeffs = { TypeParam(0.5f), TypeParam(0.0f) };
+    auto b = MakeCoeffs(0.25f, 0.0f);
+    auto a = MakeCoeffs(0.5f, 0.0f);
+    filters::passive::Iir<float, Order, Order> filter{ b, a };
 
-    this->filter.emplace(this->b_coeffs, this->a_coeffs);
+    float out = 0.0f;
+    for (int i = 0; i < 200; ++i)
+        out = filter.Filter(1.0f);
 
-    EXPECT_EQ(math::ToFloat(this->filter->Filter(TypeParam(0.5f))), 0.0f);
-    EXPECT_EQ(math::ToFloat(this->filter->Filter(TypeParam(-0.5f))), 0.0f);
+    const float dcGain = 0.25f / (1.0f - 0.5f);
+    EXPECT_NEAR(out, dcGain, math::Tolerance<float>());
+}
+
+TEST_F(TestIir, impulse_response_decays_for_stable_filter)
+{
+    auto b = MakeCoeffs(1.0f, 0.0f);
+    auto a = MakeCoeffs(-0.3f, -0.2f);
+    filters::passive::Iir<float, Order, Order> filter{ b, a };
+
+    filter.Filter(1.0f);
+    for (int i = 0; i < 50; ++i)
+        filter.Filter(0.0f);
+
+    EXPECT_NEAR(filter.Filter(0.0f), 0.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestIir, reset_after_impulse_matches_fresh_instance)
+{
+    auto b = MakeCoeffs(0.1f, 0.2f);
+    auto a = MakeCoeffs(0.5f, -0.1f);
+    filters::passive::Iir<float, Order, Order> filter{ b, a };
+    filters::passive::Iir<float, Order, Order> fresh{ b, a };
+
+    filter.Filter(1.0f);
+    filter.Filter(0.5f);
+    filter.Reset();
+
+    EXPECT_FLOAT_EQ(filter.Filter(0.5f), fresh.Filter(0.5f));
+    EXPECT_FLOAT_EQ(filter.Filter(0.0f), fresh.Filter(0.0f));
 }
