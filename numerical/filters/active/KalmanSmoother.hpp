@@ -8,7 +8,6 @@
 #include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/MatrixOperations.hpp"
-#include "numerical/math/CholeskyDecomposition.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 #include <array>
 #include <cmath>

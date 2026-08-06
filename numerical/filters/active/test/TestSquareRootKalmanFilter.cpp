@@ -1,7 +1,7 @@
 #include "numerical/filters/active/KalmanFilter.hpp"
 #include "numerical/filters/active/SquareRootKalmanFilter.hpp"
-#include "numerical/math/Tolerance.hpp"
 #include "numerical/math/CholeskyDecomposition.hpp"
+#include "numerical/math/Tolerance.hpp"
 #include <cmath>
 #include <gtest/gtest.h>
 
