@@ -4,6 +4,7 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
+#include "numerical/math/CholeskyDecomposition.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/math/Matrix.hpp"
