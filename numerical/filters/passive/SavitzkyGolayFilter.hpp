@@ -68,10 +68,10 @@ namespace filters::passive
         OPTIMIZE_FOR_SPEED T Filter(T input) noexcept;
         void Reset(T value = T{}) noexcept;
 
-        [[nodiscard]] static constexpr std::array<T, Window> Coefficients() noexcept;
+        [[nodiscard]] static std::array<T, Window> Coefficients() noexcept;
 
     private:
-        static constexpr std::array<T, Window> coeffs{ detail::ComputeKernel<T, Window, Order, Deriv>() };
+        static inline const std::array<T, Window> coeffs{ detail::ComputeKernel<T, Window, Order, Deriv>() };
         std::array<T, Window> line;
         std::size_t head;
     };
@@ -104,7 +104,7 @@ namespace filters::passive
     }
 
     template<typename T, std::size_t Window, std::size_t Order, std::size_t Deriv>
-    constexpr std::array<T, Window> SavitzkyGolayFilter<T, Window, Order, Deriv>::Coefficients() noexcept
+    std::array<T, Window> SavitzkyGolayFilter<T, Window, Order, Deriv>::Coefficients() noexcept
     {
         return coeffs;
     }

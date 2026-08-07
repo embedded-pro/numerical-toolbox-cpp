@@ -5,8 +5,8 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
-#include <cmath>
 #include <cstddef>
 #include <type_traits>
 
@@ -30,7 +30,7 @@ namespace math
             return;
         }
 
-        T norm = std::sqrt(x.at(start, 0) * x.at(start, 0) + sigma);
+        T norm = math::Sqrt(x.at(start, 0) * x.at(start, 0) + sigma);
         T v0;
         if (x.at(start, 0) <= T{})
             v0 = x.at(start, 0) - norm;

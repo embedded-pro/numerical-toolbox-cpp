@@ -5,8 +5,8 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/neural_network/activation/ActivationFunction.hpp"
-#include <cmath>
 
 namespace neural_network
 {
@@ -26,7 +26,7 @@ namespace neural_network
         QNumberType
         Tanh<QNumberType>::Forward(QNumberType x) const
     {
-        return QNumberType(std::tanh(math::ToFloat(x)));
+        return QNumberType(math::Tanh(math::ToFloat(x)));
     }
 
     template<typename QNumberType>

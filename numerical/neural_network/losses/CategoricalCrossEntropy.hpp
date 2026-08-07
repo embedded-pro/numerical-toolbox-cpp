@@ -5,10 +5,10 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/neural_network/activation/Softmax.hpp"
 #include "numerical/neural_network/losses/Loss.hpp"
 #include "numerical/regularization/Regularization.hpp"
-#include <cmath>
 
 namespace neural_network
 {
@@ -73,7 +73,7 @@ namespace neural_network
         QNumberType cost = QNumberType(0.0f);
 
         for (std::size_t i = 0; i < NumberOfFeatures; ++i)
-            cost += -target[i] * std::log(math::ToFloat(probabilities[i]));
+            cost += -target[i] * math::Log(math::ToFloat(probabilities[i]));
 
         return cost + regularization.Calculate(parameters);
     }

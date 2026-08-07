@@ -7,10 +7,10 @@
 #include "numerical/filters/active/KalmanFilterBase.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/GivensRotation.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/TriangularSolve.hpp"
 #include <array>
-#include <cmath>
 #include <cstddef>
 #include <type_traits>
 

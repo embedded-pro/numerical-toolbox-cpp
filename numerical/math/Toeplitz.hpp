@@ -1,6 +1,7 @@
 #pragma once
 #include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -135,7 +136,7 @@ namespace math
     {
         for (size_t i = 1; i < N; ++i)
             for (size_t j = 1; j < N; ++j)
-                if (std::abs(math::ToFloat(matrix.at(i, j)) - math::ToFloat(matrix.at(i - 1, j - 1))) > math::ToFloat(epsilon))
+                if (math::Abs(math::ToFloat(matrix.at(i, j)) - math::ToFloat(matrix.at(i - 1, j - 1))) > math::ToFloat(epsilon))
                     return false;
 
         return true;

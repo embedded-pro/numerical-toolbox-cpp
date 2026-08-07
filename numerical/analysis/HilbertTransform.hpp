@@ -8,8 +8,8 @@
 #include "numerical/analysis/FastFourierTransform.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/ComplexNumber.hpp"
+#include "numerical/math/Math.hpp"
 #include <array>
-#include <cmath>
 #include <numbers>
 #include <type_traits>
 
@@ -101,13 +101,13 @@ namespace analysis
     template<typename T, std::size_t N>
     T AnalyticSignalFft<T, N>::InstantaneousAmplitude(Complex a)
     {
-        return std::sqrt(a.Real() * a.Real() + a.Imaginary() * a.Imaginary());
+        return math::Sqrt(a.Real() * a.Real() + a.Imaginary() * a.Imaginary());
     }
 
     template<typename T, std::size_t N>
     T AnalyticSignalFft<T, N>::InstantaneousPhase(Complex a)
     {
-        return std::atan2(a.Imaginary(), a.Real());
+        return math::Atan2(a.Imaginary(), a.Real());
     }
 
     template<typename T, std::size_t N>
@@ -133,7 +133,7 @@ namespace analysis
             int k{ static_cast<int>(i) - static_cast<int>(centerTap) };
             if (k != 0 && (k % 2) != 0)
             {
-                T w{ T(0.54) - T(0.46) * std::cos(T(2) * std::numbers::pi_v<T> * static_cast<T>(i) / static_cast<T>(Taps - 1)) };
+                T w{ T(0.54) - T(0.46) * math::Cos(T(2) * std::numbers::pi_v<T> * static_cast<T>(i) / static_cast<T>(Taps - 1)) };
                 coeff[i] = (T(2) / (std::numbers::pi_v<T> * static_cast<T>(k))) * w;
             }
         }

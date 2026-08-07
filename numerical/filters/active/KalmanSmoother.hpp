@@ -11,7 +11,6 @@
 #include "numerical/math/MatrixOperations.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 #include <array>
-#include <cmath>
 #include <numbers>
 
 namespace filters
@@ -220,12 +219,12 @@ namespace filters
         const MeasurementVector& innovation,
         const MeasurementCovariance& innovationCovariance) const
     {
-        static const float log2pi = std::log(2.0f * std::numbers::pi_v<float>);
+        static const float log2pi = math::Log(2.0f * std::numbers::pi_v<float>);
         const auto L = math::CholeskyDecomposition<float, MeasurementSize>::Factor(innovationCovariance);
         const auto sInvNu = solvers::SolveSystem<float, MeasurementSize, 1>(innovationCovariance, innovation);
         float logDetS = 0.0f;
         for (std::size_t i = 0; i < MeasurementSize; ++i)
-            logDetS += std::log(L.at(i, i));
+            logDetS += math::Log(L.at(i, i));
         logDetS *= 2.0f;
         const float quadForm = (innovation.Transpose() * sInvNu).at(0, 0);
         return -0.5f * (logDetS + quadForm + static_cast<float>(MeasurementSize) * log2pi);

@@ -5,10 +5,10 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 #include <array>
-#include <cmath>
 #include <cstdint>
 #include <numbers>
 #include <utility>
@@ -180,7 +180,7 @@ namespace optimization
             vDotKStar += v.at(i, 0) * kStar.at(i, 0);
 
         const float sigma2 = std::max(0.0f, kSS - vDotKStar);
-        return { mu, std::sqrt(sigma2) };
+        return { mu, math::Sqrt(sigma2) };
     }
 
     template<std::size_t NumParams, std::size_t MaxObservations, std::size_t NumCandidates>
@@ -277,7 +277,7 @@ namespace optimization
             dist2 += diff * diff;
         }
         return hp.signalVariance * hp.signalVariance *
-               std::exp(-dist2 / (2.0f * hp.lengthScale * hp.lengthScale));
+               math::Exp(-dist2 / (2.0f * hp.lengthScale * hp.lengthScale));
     }
 
     template<std::size_t NumParams, std::size_t MaxObservations, std::size_t NumCandidates>

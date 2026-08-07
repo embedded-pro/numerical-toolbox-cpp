@@ -5,9 +5,9 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
 #include <algorithm>
-#include <cmath>
 #include <cstddef>
 #include <type_traits>
 
@@ -44,13 +44,13 @@ namespace math
     {
         static_assert(std::is_floating_point_v<T>, "SettlingTime supports floating-point types only");
 
-        const T absThreshold{ std::abs(steady) * band };
+        const T absThreshold{ math::Abs(steady) * band };
         std::size_t lastOutside{ 0 };
         bool anyOutside{ false };
 
         for (std::size_t i = 0; i < Size; ++i)
         {
-            if (std::abs(response.at(i, 0) - steady) > absThreshold)
+            if (math::Abs(response.at(i, 0) - steady) > absThreshold)
             {
                 lastOutside = i;
                 anyOutside = true;

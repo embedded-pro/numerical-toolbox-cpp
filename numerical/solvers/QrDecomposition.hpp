@@ -7,9 +7,9 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/GivensRotation.hpp"
 #include "numerical/math/HouseholderTransform.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/TriangularSolve.hpp"
-#include <cmath>
 #include <cstddef>
 #include <type_traits>
 
@@ -66,7 +66,7 @@ namespace solvers
                     qr.at(i, k) = v.at(i, 0);
             }
 
-            T pivot = std::abs(qr.at(k, k));
+            T pivot = math::Abs(qr.at(k, k));
             if (pivot > maxPivot)
                 maxPivot = pivot;
 

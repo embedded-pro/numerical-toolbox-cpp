@@ -6,7 +6,7 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Geometry3D.hpp"
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <numbers>
 #include <type_traits>
 
@@ -74,10 +74,10 @@ namespace math
     Quaternion<T> Quaternion<T>::FromAxisAngle(const Vector3<T>& axis, T angle)
     {
         T halfAngle = angle * T(0.5);
-        T s = std::sin(halfAngle);
+        T s = math::Sin(halfAngle);
         T n = VectorNorm(axis);
         T invN = (n > T(0)) ? T(1) / n : T(0);
-        return Quaternion<T>{ std::cos(halfAngle), axis.at(0, 0) * invN * s, axis.at(1, 0) * invN * s, axis.at(2, 0) * invN * s };
+        return Quaternion<T>{ math::Cos(halfAngle), axis.at(0, 0) * invN * s, axis.at(1, 0) * invN * s, axis.at(2, 0) * invN * s };
     }
 
     template<typename T>
@@ -87,7 +87,7 @@ namespace math
         Quaternion<T> q;
         if (trace > T(0))
         {
-            T s = T(0.5) / std::sqrt(trace + T(1));
+            T s = T(0.5) / math::Sqrt(trace + T(1));
             q.w = T(0.25) / s;
             q.x = (r.at(2, 1) - r.at(1, 2)) * s;
             q.y = (r.at(0, 2) - r.at(2, 0)) * s;
@@ -95,7 +95,7 @@ namespace math
         }
         else if (r.at(0, 0) > r.at(1, 1) && r.at(0, 0) > r.at(2, 2))
         {
-            T s = T(2) * std::sqrt(T(1) + r.at(0, 0) - r.at(1, 1) - r.at(2, 2));
+            T s = T(2) * math::Sqrt(T(1) + r.at(0, 0) - r.at(1, 1) - r.at(2, 2));
             q.w = (r.at(2, 1) - r.at(1, 2)) / s;
             q.x = T(0.25) * s;
             q.y = (r.at(0, 1) + r.at(1, 0)) / s;
@@ -103,7 +103,7 @@ namespace math
         }
         else if (r.at(1, 1) > r.at(2, 2))
         {
-            T s = T(2) * std::sqrt(T(1) + r.at(1, 1) - r.at(0, 0) - r.at(2, 2));
+            T s = T(2) * math::Sqrt(T(1) + r.at(1, 1) - r.at(0, 0) - r.at(2, 2));
             q.w = (r.at(0, 2) - r.at(2, 0)) / s;
             q.x = (r.at(0, 1) + r.at(1, 0)) / s;
             q.y = T(0.25) * s;
@@ -111,7 +111,7 @@ namespace math
         }
         else
         {
-            T s = T(2) * std::sqrt(T(1) + r.at(2, 2) - r.at(0, 0) - r.at(1, 1));
+            T s = T(2) * math::Sqrt(T(1) + r.at(2, 2) - r.at(0, 0) - r.at(1, 1));
             q.w = (r.at(1, 0) - r.at(0, 1)) / s;
             q.x = (r.at(0, 2) + r.at(2, 0)) / s;
             q.y = (r.at(1, 2) + r.at(2, 1)) / s;
@@ -123,12 +123,12 @@ namespace math
     template<typename T>
     Quaternion<T> Quaternion<T>::FromEulerZYX(T roll, T pitch, T yaw)
     {
-        T cr = std::cos(roll * T(0.5));
-        T sr = std::sin(roll * T(0.5));
-        T cp = std::cos(pitch * T(0.5));
-        T sp = std::sin(pitch * T(0.5));
-        T cy = std::cos(yaw * T(0.5));
-        T sy = std::sin(yaw * T(0.5));
+        T cr = math::Cos(roll * T(0.5));
+        T sr = math::Sin(roll * T(0.5));
+        T cp = math::Cos(pitch * T(0.5));
+        T sp = math::Sin(pitch * T(0.5));
+        T cy = math::Cos(yaw * T(0.5));
+        T sy = math::Sin(yaw * T(0.5));
         return Quaternion<T>{
             cr * cp * cy + sr * sp * sy,
             sr * cp * cy - cr * sp * sy,
@@ -171,7 +171,7 @@ namespace math
     template<typename T>
     T Quaternion<T>::Norm() const
     {
-        return std::sqrt(w * w + x * x + y * y + z * z);
+        return math::Sqrt(w * w + x * x + y * y + z * z);
     }
 
     template<typename T>
@@ -241,18 +241,18 @@ namespace math
     {
         T sinR = T(2) * (w * x + y * z);
         T cosR = T(1) - T(2) * (x * x + y * y);
-        T roll = std::atan2(sinR, cosR);
+        T roll = math::Atan2(sinR, cosR);
 
         T sinP = T(2) * (w * y - z * x);
         T pitch;
-        if (std::abs(sinP) >= T(1))
-            pitch = std::copysign(std::numbers::pi_v<T> / T(2), sinP);
+        if (math::Abs(sinP) >= T(1))
+            pitch = math::Copysign(std::numbers::pi_v<T> / T(2), sinP);
         else
-            pitch = std::asin(sinP);
+            pitch = math::Asin(sinP);
 
         T sinY = T(2) * (w * z + x * y);
         T cosY = T(1) - T(2) * (y * y + z * z);
-        T yaw = std::atan2(sinY, cosY);
+        T yaw = math::Atan2(sinY, cosY);
 
         return Vector3<T>{ { roll }, { pitch }, { yaw } };
     }
@@ -278,10 +278,10 @@ namespace math
             result.Normalize();
             return result;
         }
-        T theta = std::acos(d);
-        T sinTheta = std::sin(theta);
-        T s0 = std::sin((T(1) - t) * theta) / sinTheta;
-        T s1 = std::sin(t * theta) / sinTheta;
+        T theta = math::Acos(d);
+        T sinTheta = math::Sin(theta);
+        T s0 = math::Sin((T(1) - t) * theta) / sinTheta;
+        T s1 = math::Sin(t * theta) / sinTheta;
         return Quaternion<T>{
             s0 * a.w + s1 * bAdjusted.w,
             s0 * a.x + s1 * bAdjusted.x,

@@ -1,7 +1,7 @@
 #pragma once
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/QNumber.hpp"
-#include <cmath>
 
 namespace math
 {
@@ -39,7 +39,7 @@ namespace math
     template<typename T, size_t Rows, size_t Cols>
     [[nodiscard]] constexpr T StandardDeviation(const Matrix<T, Rows, Cols>& data, bool sample = true)
     {
-        return T{ std::sqrt(math::ToFloat(Variance(data, sample))) };
+        return T{ math::Sqrt(math::ToFloat(Variance(data, sample))) };
     }
 
     template<typename T, size_t Size>
@@ -68,7 +68,7 @@ namespace math
             sum_sq_error += diff * diff;
         }
 
-        return T{ std::sqrt(sum_sq_error / static_cast<float>(Size)) };
+        return T{ math::Sqrt(sum_sq_error / static_cast<float>(Size)) };
     }
 
     template<typename T, size_t Size>
@@ -79,7 +79,7 @@ namespace math
 
         float sum_abs_error = 0.0f;
         for (size_t i = 0; i < Size; ++i)
-            sum_abs_error += std::abs(math::ToFloat(actual.at(i, 0) - predicted.at(i, 0)));
+            sum_abs_error += math::Abs(math::ToFloat(actual.at(i, 0) - predicted.at(i, 0)));
 
         return T{ sum_abs_error / static_cast<float>(Size) };
     }

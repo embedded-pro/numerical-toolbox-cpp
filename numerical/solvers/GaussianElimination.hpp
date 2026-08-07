@@ -10,7 +10,6 @@
 #include "numerical/math/QNumber.hpp"
 #include "numerical/math/TriangularSolve.hpp"
 #include "numerical/solvers/Solver.hpp"
-#include <cmath>
 
 namespace solvers
 {
@@ -37,7 +36,7 @@ namespace solvers
     void GaussianElimination<T, N>::EliminateBelow(InputMatrix& matrix, SolutionVector& vector, std::size_t col) const
     {
         T pivot = matrix.at(col, col);
-        really_assert(std::abs(math::ToFloat(pivot)) > 0.0f);
+        really_assert(math::Abs(math::ToFloat(pivot)) > 0.0f);
 
         for (std::size_t row = col + 1; row < N; ++row)
         {

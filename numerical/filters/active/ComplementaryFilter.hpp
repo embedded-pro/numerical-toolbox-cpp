@@ -5,8 +5,8 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Math.hpp"
 #include <cassert>
-#include <cmath>
 #include <numbers>
 #include <type_traits>
 
@@ -88,7 +88,7 @@ namespace filters
     {
         constexpr T pi{ std::numbers::pi_v<T> };
         constexpr T twoPi{ T{ 2 } * std::numbers::pi_v<T> };
-        T wrapped{ std::fmod(x + pi, twoPi) };
+        T wrapped{ math::Fmod(x + pi, twoPi) };
         if (wrapped < T{})
             wrapped += twoPi;
         return wrapped - pi;

@@ -6,8 +6,8 @@
 
 #include "infra/util/BoundedVector.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Math.hpp"
 #include <array>
-#include <cmath>
 #include <cstddef>
 #include <type_traits>
 

@@ -8,9 +8,9 @@
 #include "numerical/filters/passive/BiquadCascade.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
 #include <array>
-#include <cmath>
 #include <cstddef>
 #include <type_traits>
 

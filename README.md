@@ -89,6 +89,77 @@ xhost +local:docker
 > **Note:** The Dev Container sets `DISPLAY=host.docker.internal:0.0` to forward GUI windows over TCP. On Linux, if you prefer Unix socket forwarding, you can override `DISPLAY` to `:0` inside the container and add a bind mount for `/tmp/.X11-unix`.
 
 
+## Math Function Overrides
+
+All math functions used by the library (`Sin`, `Cos`, `Abs`, `Sqrt`, `Pow`, …) are centralised in
+`numerical/math/Math.hpp` under the `math::` namespace.
+Each function ships with a default `constexpr` implementation that forwards to the corresponding
+`std::` counterpart, but every one of them can be replaced at compile time with a
+platform-specific implementation — CORDIC, hardware intrinsics, look-up tables, etc.
+
+### How to override a function
+
+**1. Define the override macro in CMake** (suppresses the default definition):
+
+```cmake
+target_compile_definitions(your_target PRIVATE MATH_SIN_OVERRIDE MATH_COS_OVERRIDE)
+```
+
+**2. Provide your own template definition** in a header included before any call site:
+
+```cpp
+// platform/PlatformMath.hpp
+#pragma once
+namespace math
+{
+    template<typename T>
+    constexpr T Sin(T x) { return cordic_sin(static_cast<float>(x)); }
+
+    template<typename T>
+    constexpr T Cos(T x) { return cordic_cos(static_cast<float>(x)); }
+}
+```
+
+**3. Include your header** before `numerical/math/Math.hpp` — or use a CMake forced-include so it
+applies to every translation unit automatically:
+
+```cmake
+target_compile_options(your_target PRIVATE -include platform/PlatformMath.hpp)
+```
+
+### Available override macros
+
+| Macro                    | Function         |
+|--------------------------|------------------|
+| `MATH_ABS_OVERRIDE`      | `math::Abs`      |
+| `MATH_SQRT_OVERRIDE`     | `math::Sqrt`     |
+| `MATH_SIN_OVERRIDE`      | `math::Sin`      |
+| `MATH_COS_OVERRIDE`      | `math::Cos`      |
+| `MATH_TAN_OVERRIDE`      | `math::Tan`      |
+| `MATH_ASIN_OVERRIDE`     | `math::Asin`     |
+| `MATH_ACOS_OVERRIDE`     | `math::Acos`     |
+| `MATH_ATAN_OVERRIDE`     | `math::Atan`     |
+| `MATH_ATAN2_OVERRIDE`    | `math::Atan2`    |
+| `MATH_EXP_OVERRIDE`      | `math::Exp`      |
+| `MATH_LOG_OVERRIDE`      | `math::Log`      |
+| `MATH_LOG10_OVERRIDE`    | `math::Log10`    |
+| `MATH_LOG2_OVERRIDE`     | `math::Log2`     |
+| `MATH_POW_OVERRIDE`      | `math::Pow`      |
+| `MATH_SINH_OVERRIDE`     | `math::Sinh`     |
+| `MATH_COSH_OVERRIDE`     | `math::Cosh`     |
+| `MATH_TANH_OVERRIDE`     | `math::Tanh`     |
+| `MATH_HYPOT_OVERRIDE`    | `math::Hypot`    |
+| `MATH_COPYSIGN_OVERRIDE` | `math::Copysign` |
+| `MATH_FMOD_OVERRIDE`     | `math::Fmod`     |
+| `MATH_CEIL_OVERRIDE`     | `math::Ceil`     |
+| `MATH_FLOOR_OVERRIDE`    | `math::Floor`    |
+| `MATH_ROUND_OVERRIDE`    | `math::Round`    |
+| `MATH_ERFC_OVERRIDE`     | `math::Erfc`     |
+
+Overrides are fully compile-time: the default body is excluded from the translation unit, so the
+replacement is used even for inlined calls. Non-overridden functions continue to use the `std::`
+defaults unchanged.
+
 ## Roadmap
 
 Planned algorithms and components are tracked in [ROADMAP.md](ROADMAP.md) — a prioritized backlog

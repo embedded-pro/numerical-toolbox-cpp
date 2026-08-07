@@ -3,8 +3,8 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
-#include <cmath>
 #include <cstddef>
 #include <optional>
 #include <type_traits>
@@ -19,7 +19,7 @@ namespace math
         for (std::size_t i = 0; i < Rows; ++i)
             for (std::size_t j = 0; j < Cols; ++j)
                 sum += a.at(i, j) * a.at(i, j);
-        return std::sqrt(sum);
+        return math::Sqrt(sum);
     }
 
     template<typename T, std::size_t N>
@@ -30,7 +30,7 @@ namespace math
         for (std::size_t i = 0; i < N; ++i)
             for (std::size_t j = i + 1; j < N; ++j)
                 sum += a.at(i, j) * a.at(i, j) + a.at(j, i) * a.at(j, i);
-        return std::sqrt(sum);
+        return math::Sqrt(sum);
     }
 
     template<typename T, std::size_t Rows, std::size_t Cols>
@@ -42,7 +42,7 @@ namespace math
         {
             T colSum{};
             for (std::size_t i = 0; i < Rows; ++i)
-                colSum += std::abs(a.at(i, j));
+                colSum += math::Abs(a.at(i, j));
             if (colSum > maxColSum)
                 maxColSum = colSum;
         }
@@ -58,7 +58,7 @@ namespace math
         {
             T rowSum{};
             for (std::size_t j = 0; j < Cols; ++j)
-                rowSum += std::abs(a.at(i, j));
+                rowSum += math::Abs(a.at(i, j));
             if (rowSum > maxRowSum)
                 maxRowSum = rowSum;
         }
@@ -79,7 +79,7 @@ namespace math
     [[nodiscard]] OPTIMIZE_FOR_SPEED T VectorNorm(const Vector<T, Size>& v)
     {
         static_assert(std::is_floating_point_v<T>, "MatrixNorms supports floating-point types");
-        return std::sqrt(DotProduct(v, v));
+        return math::Sqrt(DotProduct(v, v));
     }
 
     template<typename T, std::size_t Size>

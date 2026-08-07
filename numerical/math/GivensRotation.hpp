@@ -5,7 +5,7 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
-#include <cmath>
+#include "numerical/math/Math.hpp"
 #include <type_traits>
 
 namespace math
@@ -22,7 +22,7 @@ namespace math
     {
         static_assert(std::is_floating_point_v<T>, "ComputeGivens supports floating-point types only");
 
-        T r = std::sqrt(a * a + b * b);
+        T r = math::Sqrt(a * a + b * b);
         if (r < T{ 1e-30f })
             return { T{ 1 }, T{} };
 
@@ -38,8 +38,8 @@ namespace math
             return { T{ 1 }, T{} };
 
         T theta = (aqq - app) / (T{ 2 } * apq);
-        T t = ((theta >= T{}) ? T{ 1 } : T{ -1 }) / (std::abs(theta) + std::sqrt(theta * theta + T{ 1 }));
-        T c = T{ 1 } / std::sqrt(t * t + T{ 1 });
+        T t = ((theta >= T{}) ? T{ 1 } : T{ -1 }) / (math::Abs(theta) + math::Sqrt(theta * theta + T{ 1 }));
+        T c = T{ 1 } / math::Sqrt(t * t + T{ 1 });
 
         return { c, t * c };
     }

@@ -6,10 +6,10 @@
 
 #include "infra/util/BoundedVector.hpp"
 #include "infra/util/ReallyAssert.hpp"
-#include "numerical/math/ComplexNumber.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/ComplexNumber.hpp"
+#include "numerical/math/Math.hpp"
 #include <algorithm>
-#include <cmath>
 #include <cstddef>
 #include <numbers>
 #include <span>
@@ -103,7 +103,7 @@ namespace solvers
         if (order == 0)
             return roots;
 
-        really_assert(std::abs(coefficients[0]) > T(0));
+        really_assert(math::Abs(coefficients[0]) > T(0));
         really_assert(order <= MaxOrder);
 
         if (order == 1)
@@ -112,7 +112,7 @@ namespace solvers
             return roots;
         }
 
-        T radius = std::pow(std::abs(coefficients[order] / coefficients[0]),
+        T radius = math::Pow(math::Abs(coefficients[order] / coefficients[0]),
             T(1) / static_cast<T>(order));
         if (radius < T(0.1))
             radius = T(1);
@@ -120,7 +120,7 @@ namespace solvers
         for (std::size_t r = 0; r < order; ++r)
         {
             T angle = T(2) * std::numbers::pi_v<T> * static_cast<T>(r) / static_cast<T>(order) + T(0.4);
-            roots.emplace_back(radius * std::cos(angle), radius * std::sin(angle));
+            roots.emplace_back(radius * math::Cos(angle), radius * math::Sin(angle));
         }
 
         for (std::size_t iter = 0; iter < maxIterations; ++iter)
@@ -132,7 +132,7 @@ namespace solvers
         std::ranges::sort(roots,
             [](const math::Complex<T>& a, const math::Complex<T>& b)
             {
-                if (std::abs(a.Real() - b.Real()) > T(0.01))
+                if (math::Abs(a.Real() - b.Real()) > T(0.01))
                     return a.Real() < b.Real();
                 return a.Imaginary() < b.Imaginary();
             });

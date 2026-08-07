@@ -6,9 +6,9 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/GivensRotation.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/MatrixNorms.hpp"
-#include <cmath>
 #include <cstddef>
 #include <type_traits>
 
@@ -118,7 +118,7 @@ namespace solvers
 
         T scale = math::OffDiagonalFrobeniusNorm(a);
         for (std::size_t i = 0; i < N; ++i)
-            scale += std::abs(a.at(i, i));
+            scale += math::Abs(a.at(i, i));
 
         T threshold = ((scale > T{}) ? scale : T{ 1 }) * T{ 1e-7f };
 

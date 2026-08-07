@@ -5,8 +5,8 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Math.hpp"
 #include <algorithm>
-#include <cmath>
 #include <type_traits>
 
 namespace analysis
@@ -24,14 +24,14 @@ namespace analysis
         static_assert(std::is_floating_point_v<T>, "ToDecibels supports floating-point types only");
         if (ratio <= T{ 0 })
             return DecibelFloor<T>::value;
-        return std::max(T{ 20 } * std::log10(ratio), DecibelFloor<T>::value);
+        return std::max(T{ 20 } * math::Log10(ratio), DecibelFloor<T>::value);
     }
 
     template<typename T>
     OPTIMIZE_FOR_SPEED T FromDecibels(T db)
     {
         static_assert(std::is_floating_point_v<T>, "FromDecibels supports floating-point types only");
-        return std::pow(T{ 10 }, db / T{ 20 });
+        return math::Pow(T{ 10 }, db / T{ 20 });
     }
 
     template<typename T>

@@ -5,8 +5,8 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
-#include <cmath>
 
 namespace math
 {
@@ -42,8 +42,8 @@ namespace math
     template<typename T>
     ALWAYS_INLINE_HOT Matrix3<T> RotationAboutAxis(const Vector3<T>& axis, T angle)
     {
-        T c = std::cos(angle);
-        T s = std::sin(angle);
+        T c = math::Cos(angle);
+        T s = math::Sin(angle);
         T t = T(1) - c;
 
         T x = axis.at(0, 0);
@@ -86,6 +86,6 @@ namespace math
     template<typename T>
     ALWAYS_INLINE_HOT T VectorNorm(const Vector3<T>& v)
     {
-        return std::sqrt(DotProduct(v, v));
+        return math::Sqrt(DotProduct(v, v));
     }
 }

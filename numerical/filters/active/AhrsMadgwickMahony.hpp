@@ -6,8 +6,8 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Geometry3D.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Quaternion.hpp"
-#include <cmath>
 #include <type_traits>
 
 namespace filters
@@ -68,7 +68,7 @@ namespace filters
     template<typename T, AhrsMode M>
     T AhrsFilter<T, M>::SafeInvSqrt(T x)
     {
-        return (x > T{}) ? T(1) / std::sqrt(x) : T{};
+        return (x > T{}) ? T(1) / math::Sqrt(x) : T{};
     }
 
     template<typename T, AhrsMode M>
@@ -240,7 +240,7 @@ namespace filters
         mag = NormalizeVec(mag, mNorm);
 
         math::Vector3<T> h{ q.Rotate(mag) };
-        T bx{ std::sqrt(h.at(0, 0) * h.at(0, 0) + h.at(1, 0) * h.at(1, 0)) };
+        T bx{ math::Sqrt(h.at(0, 0) * h.at(0, 0) + h.at(1, 0) * h.at(1, 0)) };
         T bz{ h.at(2, 0) };
 
         if constexpr (M == AhrsMode::Mahony)

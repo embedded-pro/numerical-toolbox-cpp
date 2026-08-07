@@ -54,6 +54,16 @@ resource-constrained embedded systems. Real-time, deterministic, no heap.
 `neural_network`, `optimization`, `regularization`, `solvers`, and new:
 `robust_control`, `nonlinear_control`.
 
+## Math functions
+
+- **Production code** calls `math::Sin`, `math::Cos`, `math::Abs`, etc. from
+  `numerical/math/Math.hpp`. Never call `std::` cmath functions directly in production.
+- If a needed `<cmath>` function is missing from `Math.hpp`, add a `constexpr` wrapper there first,
+  then use `math::FunctionName` at the call site.
+- Each function is individually overridable at compile time via `#ifndef MATH_<NAME>_OVERRIDE`
+  (e.g. `MATH_SIN_OVERRIDE`). Define the macro in CMake and supply your own template definition.
+- **Unit tests** call `std::sin`, `std::cos`, `std::abs`, etc. directly. Never use `math::` in tests.
+
 ## Testing
 
 - GoogleTest. **`TEST_F` on `float`** — no `TYPED_TEST`, no multi-type. **Never plain `TEST()`**.

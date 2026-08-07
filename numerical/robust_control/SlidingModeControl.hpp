@@ -7,9 +7,9 @@
 #include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
-#include <cmath>
 #include <cstddef>
 #include <type_traits>
 

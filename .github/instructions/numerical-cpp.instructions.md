@@ -27,6 +27,18 @@ Write generic `template<typename T[, std::size_t N]>` with
 Do not implement `Q15`/`Q31` — the generic `T` keeps that a cheap future add.
 Use `std::numbers::pi_v<float>` — never hardcode `3.14159265f`.
 
+## Math Functions
+
+Use `math::Sin`, `math::Cos`, `math::Abs`, `math::Sqrt`, etc. from
+`numerical/math/Math.hpp` in all production code.
+Never call `std::sin`, `std::cos`, `std::abs`, `std::sqrt`, or any other `<cmath>` function directly in production headers or source files.
+If a required `<cmath>` function is not yet wrapped in `Math.hpp`, add it there first — then use `math::FunctionName` at the call site.
+
+Each function is guarded by `#ifndef MATH_<NAME>_OVERRIDE` (e.g. `MATH_SIN_OVERRIDE`).
+To replace a function with a platform-specific implementation, define the corresponding macro
+(e.g. `add_compile_definitions(MATH_SIN_OVERRIDE)` in CMake) and provide your own
+`template<typename T> constexpr T math::Sin(T x)` in a header that is included before any call site.
+
 ## Embedded Optimizations
 
 Every algorithm header MUST include:

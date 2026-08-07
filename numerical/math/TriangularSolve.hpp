@@ -5,9 +5,9 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/QNumber.hpp"
-#include <cmath>
 #include <cstddef>
 
 namespace math
@@ -16,11 +16,11 @@ namespace math
     [[nodiscard]] OPTIMIZE_FOR_SPEED std::size_t FindPartialPivotRow(const Matrix<T, N, N>& matrix, std::size_t col)
     {
         std::size_t pivotRow = col;
-        float maxVal = std::abs(ToFloat(matrix.at(col, col)));
+        float maxVal = math::Abs(ToFloat(matrix.at(col, col)));
 
         for (std::size_t row = col + 1; row < N; ++row)
         {
-            float absVal = std::abs(ToFloat(matrix.at(row, col)));
+            float absVal = math::Abs(ToFloat(matrix.at(row, col)));
             if (absVal > maxVal)
             {
                 maxVal = absVal;

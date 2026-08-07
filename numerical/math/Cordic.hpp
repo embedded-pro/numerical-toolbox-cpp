@@ -5,8 +5,8 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Math.hpp"
 #include <array>
-#include <cmath>
 #include <cstddef>
 #include <numbers>
 #include <type_traits>
@@ -63,7 +63,7 @@ namespace math
         {
             std::array<T, Iterations> table{};
             for (std::size_t i = 0; i < Iterations; ++i)
-                table[i] = static_cast<T>(std::atan(std::pow(T(2), -static_cast<T>(i))));
+                table[i] = static_cast<T>(math::Atan(math::Pow(T(2), -static_cast<T>(i))));
             return table;
         }
 
@@ -71,7 +71,7 @@ namespace math
         {
             T k{ T(1) };
             for (std::size_t i = 0; i < Iterations; ++i)
-                k *= static_cast<T>(std::cos(std::atan(std::pow(T(2), -static_cast<T>(i)))));
+                k *= static_cast<T>(math::Cos(math::Atan(math::Pow(T(2), -static_cast<T>(i)))));
             return k;
         }
 
