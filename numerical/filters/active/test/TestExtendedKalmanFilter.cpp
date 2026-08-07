@@ -1,5 +1,4 @@
 #include "numerical/filters/active/ExtendedKalmanFilter.hpp"
-#include "numerical/math/Tolerance.hpp"
 #include "numerical/math/test_doubles/MatrixTestSupport.hpp"
 #include <gtest/gtest.h>
 
@@ -8,17 +7,17 @@ namespace
     using math::test::AreVectorsNear;
 
     using StateVec2 = math::Vector<float, 2>;
-    using StateVec2 = math::Vector<float, 2>;
     using MeasVec1 = math::Vector<float, 1>;
     using StateMat2 = math::SquareMatrix<float, 2>;
     using MeasMat2x1 = math::Matrix<float, 1, 2>;
+    using ControlVec1 = math::Vector<float, 1>;
 
-    constexpr float dt = 0.1f;
+    constexpr float kDt = 0.1f;
 
     StateVec2 LinearStateTransition(const StateVec2& x)
     {
         return StateVec2{
-            { float(x.at(0, 0) + dt * x.at(1, 0)) },
+            { x.at(0, 0) + kDt * x.at(1, 0) },
             { x.at(1, 0) }
         };
     }
@@ -26,7 +25,7 @@ namespace
     StateMat2 LinearStateJacobian(const StateVec2& /*x*/)
     {
         return StateMat2{
-            { 1.0f, dt },
+            { 1.0f, kDt },
             { 0.0f, 1.0f }
         };
     }
@@ -41,14 +40,13 @@ namespace
         return MeasMat2x1{ { 1.0f, 0.0f } };
     }
 
-    // Nonlinear state transition: position += velocity*dt, velocity += -sin(position)*dt
     StateVec2 NonlinearStateTransition(const StateVec2& x)
     {
         float pos = x.at(0, 0);
         float vel = x.at(1, 0);
         return StateVec2{
-            { pos + vel * dt },
-            { vel - std::sin(pos) * dt }
+            { pos + vel * kDt },
+            { vel - std::sin(pos) * kDt }
         };
     }
 
@@ -56,289 +54,250 @@ namespace
     {
         float pos = x.at(0, 0);
         return StateMat2{
-            { 1.0f, dt },
-            { -std::cos(pos) * dt, 1.0f }
+            { 1.0f, kDt },
+            { -std::cos(pos) * kDt, 1.0f }
         };
     }
-
-    // State transition with control input
-    using ControlVec1 = math::Vector<float, 1>;
 
     StateVec2 StateTransitionWithControl(const StateVec2& x, const ControlVec1& u)
     {
         float pos = x.at(0, 0);
         float vel = x.at(1, 0);
         return StateVec2{
-            { pos + vel * dt },
-            { vel + u.at(0, 0) * dt }
+            { pos + vel * kDt },
+            { vel + u.at(0, 0) * kDt }
         };
     }
 
     StateMat2 StateJacobianWithControl(const StateVec2& /*x*/, const ControlVec1& /*u*/)
     {
         return StateMat2{
-            { 1.0f, dt },
+            { 1.0f, kDt },
             { 0.0f, 1.0f }
         };
     }
 
-    template<typename T>
-    class ExtendedKalmanFilterTest
-        : public ::testing::Test
+    class ExtendedKalmanFilterTest : public ::testing::Test
     {
     protected:
-        float tolerance = math::Tolerance<T>();
+        using EkfType = filters::ExtendedKalmanFilter<float, 2, 1, 0>;
+        using EkfWithControlType = filters::ExtendedKalmanFilter<float, 2, 1, 1>;
 
-        using EkfType = filters::ExtendedKalmanFilter<T, 2, 1, 0>;
-        using EkfWithControlType = filters::ExtendedKalmanFilter<T, 2, 1, 1>;
-        using StateVector = typename EkfType::StateVector;
-        using StateMatrix = typename EkfType::StateMatrix;
-        using MeasurementVector = typename EkfType::MeasurementVector;
-        using MeasurementCovariance = typename EkfType::MeasurementCovariance;
+        StateVec2 initialState{};
+        StateMat2 initialP{
+            { 0.5f, 0.0f },
+            { 0.0f, 0.5f }
+        };
+
+        std::optional<EkfType> ekf;
+        std::optional<EkfWithControlType> ekfCtrl;
+
+        void SetUpLinear()
+        {
+            ekf.emplace(initialState, initialP,
+                LinearStateTransition, LinearStateJacobian,
+                LinearMeasurement, LinearMeasurementJacobian);
+            ekf->SetProcessNoise(StateMat2{
+                { 0.01f, 0.0f },
+                { 0.0f, 0.01f } });
+            ekf->SetMeasurementNoise(math::SquareMatrix<float, 1>{ { 0.5f } });
+        }
+
+        void SetUpNonlinear()
+        {
+            ekf.emplace(initialState, initialP,
+                NonlinearStateTransition, NonlinearStateJacobian,
+                LinearMeasurement, LinearMeasurementJacobian);
+        }
+
+        void SetUpControl()
+        {
+            ekfCtrl.emplace(initialState, initialP,
+                StateTransitionWithControl, StateJacobianWithControl,
+                LinearMeasurement, LinearMeasurementJacobian);
+            ekfCtrl->SetProcessNoise(StateMat2{
+                { 0.01f, 0.0f },
+                { 0.0f, 0.01f } });
+            ekfCtrl->SetMeasurementNoise(math::SquareMatrix<float, 1>{ { 0.5f } });
+        }
     };
 
-    using TestTypes = ::testing::Types<float>;
-    TYPED_TEST_SUITE(ExtendedKalmanFilterTest, TestTypes);
+    class ExtendedKalmanFilter3StateTest : public ::testing::Test
+    {
+    protected:
+        using StateVec3 = math::Vector<float, 3>;
+        using StateMat3 = math::SquareMatrix<float, 3>;
+        using MeasVec = math::Vector<float, 1>;
+        using MeasCov = math::SquareMatrix<float, 1>;
+        using MeasMat = math::Matrix<float, 1, 3>;
+        using Ekf3 = filters::ExtendedKalmanFilter<float, 3, 1, 0>;
+
+        std::optional<Ekf3> ekf;
+
+        void SetUp() override
+        {
+            auto transition = [](const StateVec3& x) -> StateVec3
+            {
+                return StateVec3{
+                    { x.at(0, 0) + x.at(1, 0) * kDt },
+                    { x.at(1, 0) + x.at(2, 0) * kDt },
+                    { x.at(2, 0) }
+                };
+            };
+
+            auto jacobian = [](const StateVec3& /*x*/) -> StateMat3
+            {
+                return StateMat3{
+                    { 1.0f, kDt, 0.0f },
+                    { 0.0f, 1.0f, kDt },
+                    { 0.0f, 0.0f, 1.0f }
+                };
+            };
+
+            auto measurementFn = [](const StateVec3& x) -> MeasVec
+            {
+                return MeasVec{ { x.at(0, 0) } };
+            };
+
+            auto measurementJac = [](const StateVec3& /*x*/) -> MeasMat
+            {
+                return MeasMat{ { 1.0f, 0.0f, 0.0f } };
+            };
+
+            StateVec3 initialState3{};
+            StateMat3 initialP3{
+                { 1.0f, 0.0f, 0.0f },
+                { 0.0f, 1.0f, 0.0f },
+                { 0.0f, 0.0f, 1.0f }
+            };
+
+            ekf.emplace(initialState3, initialP3, transition, jacobian, measurementFn, measurementJac);
+            ekf->SetProcessNoise(StateMat3{
+                { 0.01f, 0.0f, 0.0f },
+                { 0.0f, 0.01f, 0.0f },
+                { 0.0f, 0.0f, 0.01f } });
+            ekf->SetMeasurementNoise(MeasCov{ { 0.1f } });
+        }
+    };
 }
 
-TYPED_TEST(ExtendedKalmanFilterTest, LinearSystemMatchesKalmanFilter)
+TEST_F(ExtendedKalmanFilterTest, LinearSystemMatchesKalmanFilter)
 {
-    using StateVector = typename TestFixture::StateVector;
-    using StateMatrix = typename TestFixture::StateMatrix;
-    using MeasurementCovariance = typename TestFixture::MeasurementCovariance;
-
-    auto initialState = StateVector{ { TypeParam(0.0f) }, { TypeParam(0.0f) } };
-    auto initialP = StateMatrix{
-        { TypeParam(0.5f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.5f) }
-    };
-
-    typename TestFixture::EkfType ekf(initialState, initialP,
-        LinearStateTransition, LinearStateJacobian,
-        LinearMeasurement, LinearMeasurementJacobian);
-
-    ekf.SetProcessNoise(StateMatrix{
-        { TypeParam(0.01f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.01f) } });
-    ekf.SetMeasurementNoise(MeasurementCovariance{ { TypeParam(0.5f) } });
+    SetUpLinear();
 
     float truePos = 0.0f;
-    float trueVel = 0.5f;
+    constexpr float trueVel = 0.5f;
 
     for (int i = 0; i < 10; ++i)
     {
-        truePos += trueVel * dt;
-        ekf.Predict();
-        ekf.Update(typename TestFixture::MeasurementVector{ { TypeParam(truePos) } });
+        truePos += trueVel * kDt;
+        ekf->Predict();
+        ekf->Update(MeasVec1{ { truePos } });
     }
 
-    auto finalState = ekf.GetState();
-    EXPECT_NEAR(math::ToFloat(finalState.at(0, 0)), truePos, 0.2f);
-    EXPECT_NEAR(math::ToFloat(finalState.at(1, 0)), trueVel, 0.4f);
+    auto finalState = ekf->GetState();
+    EXPECT_NEAR(finalState.at(0, 0), truePos, 0.2f);
+    EXPECT_NEAR(finalState.at(1, 0), trueVel, 0.4f);
 }
 
-TYPED_TEST(ExtendedKalmanFilterTest, ThreeStateSystemTracksAcceleration)
+TEST_F(ExtendedKalmanFilterTest, NonlinearPredictionUpdatesState)
 {
-    using StateVec3 = math::Vector<TypeParam, 3>;
-    using StateMat3 = math::SquareMatrix<TypeParam, 3>;
-    using MeasVec = math::Vector<TypeParam, 1>;
-    using MeasCov = math::SquareMatrix<TypeParam, 1>;
-    using MeasMat = math::Matrix<TypeParam, 1, 3>;
-    using Ekf3 = filters::ExtendedKalmanFilter<TypeParam, 3, 1, 0>;
+    ekf.emplace(
+        StateVec2{ { 0.1f }, { 0.0f } },
+        StateMat2{
+            { 0.5f, 0.0f },
+            { 0.0f, 0.5f } },
+        NonlinearStateTransition, NonlinearStateJacobian,
+        LinearMeasurement, LinearMeasurementJacobian);
+    ekf->SetProcessNoise(StateMat2{
+        { 0.01f, 0.0f },
+        { 0.0f, 0.01f } });
 
-    auto transition = [](const StateVec3& x) -> StateVec3
+    ekf->Predict();
+
+    auto predicted = ekf->GetState();
+    EXPECT_NEAR(predicted.at(0, 0), 0.1f, 0.05f);
+    EXPECT_LT(predicted.at(1, 0), 0.0f);
+}
+
+TEST_F(ExtendedKalmanFilterTest, UpdateReducesCovariance)
+{
+    SetUpNonlinear();
+    ekf->SetMeasurementNoise(math::SquareMatrix<float, 1>{ { 0.5f } });
+
+    auto covBefore = ekf->GetCovariance();
+    ekf->Update(MeasVec1{ { 0.5f } });
+    auto covAfter = ekf->GetCovariance();
+
+    EXPECT_LT(covAfter.at(0, 0), covBefore.at(0, 0));
+}
+
+TEST_F(ExtendedKalmanFilterTest, NonlinearTrackingConverges)
+{
+    SetUpNonlinear();
+    ekf->SetProcessNoise(StateMat2{
+        { 0.001f, 0.0f },
+        { 0.0f, 0.001f } });
+    ekf->SetMeasurementNoise(math::SquareMatrix<float, 1>{ { 0.1f } });
+
+    float truePos = 0.3f;
+    float trueVel = 0.0f;
+
+    for (int i = 0; i < 50; ++i)
     {
-        return StateVec3{
-            { TypeParam(math::ToFloat(x.at(0, 0)) + math::ToFloat(x.at(1, 0)) * dt) },
-            { TypeParam(math::ToFloat(x.at(1, 0)) + math::ToFloat(x.at(2, 0)) * dt) },
-            { x.at(2, 0) }
-        };
-    };
+        float newVel = trueVel - std::sin(truePos) * kDt;
+        float newPos = truePos + trueVel * kDt;
+        truePos = newPos;
+        trueVel = newVel;
 
-    auto jacobian = [](const StateVec3& /*x*/) -> StateMat3
+        ekf->Predict();
+        ekf->Update(MeasVec1{ { truePos } });
+    }
+
+    auto finalState = ekf->GetState();
+    EXPECT_NEAR(finalState.at(0, 0), truePos, 0.1f);
+    EXPECT_NEAR(finalState.at(1, 0), trueVel, 0.2f);
+}
+
+TEST_F(ExtendedKalmanFilterTest, WithControlInput)
+{
+    SetUpControl();
+
+    ControlVec1 controlInput{ { 1.0f } };
+    float truePos = 0.0f;
+    float trueVel = 0.0f;
+
+    for (int i = 0; i < 10; ++i)
     {
-        return StateMat3{
-            { TypeParam(1.0f), TypeParam(dt), TypeParam(0.0f) },
-            { TypeParam(0.0f), TypeParam(1.0f), TypeParam(dt) },
-            { TypeParam(0.0f), TypeParam(0.0f), TypeParam(1.0f) }
-        };
-    };
+        trueVel += 1.0f * kDt;
+        truePos += trueVel * kDt;
 
-    auto measurementFn = [](const StateVec3& x) -> MeasVec
-    {
-        return MeasVec{ { x.at(0, 0) } };
-    };
+        ekfCtrl->Predict(controlInput);
+        ekfCtrl->Update(MeasVec1{ { truePos } });
+    }
 
-    auto measurementJac = [](const StateVec3& /*x*/) -> MeasMat
-    {
-        return MeasMat{ { TypeParam(1.0f), TypeParam(0.0f), TypeParam(0.0f) } };
-    };
+    auto finalState = ekfCtrl->GetState();
+    EXPECT_NEAR(finalState.at(0, 0), truePos, 0.2f);
+    EXPECT_NEAR(finalState.at(1, 0), trueVel, 0.4f);
+}
 
-    auto initialState = StateVec3{ { TypeParam(0.0f) }, { TypeParam(0.0f) }, { TypeParam(0.0f) } };
-    auto initialP = StateMat3{
-        { TypeParam(1.0f), TypeParam(0.0f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(1.0f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.0f), TypeParam(1.0f) }
-    };
-
-    Ekf3 ekf(initialState, initialP, transition, jacobian, measurementFn, measurementJac);
-    ekf.SetProcessNoise(StateMat3{
-        { TypeParam(0.01f), TypeParam(0.0f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.01f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.0f), TypeParam(0.01f) } });
-    ekf.SetMeasurementNoise(MeasCov{ { TypeParam(0.1f) } });
-
+TEST_F(ExtendedKalmanFilter3StateTest, ThreeStateSystemTracksAcceleration)
+{
     float trueAcc = 0.5f;
     float trueVel3 = 0.0f;
     float truePos3 = 0.0f;
 
     for (int i = 0; i < 30; ++i)
     {
-        trueVel3 += trueAcc * dt;
-        truePos3 += trueVel3 * dt;
+        trueVel3 += trueAcc * kDt;
+        truePos3 += trueVel3 * kDt;
 
-        ekf.Predict();
-        ekf.Update(MeasVec{ { TypeParam(truePos3) } });
+        ekf->Predict();
+        ekf->Update(math::Vector<float, 1>{ { truePos3 } });
     }
 
-    auto finalState3 = ekf.GetState();
-    EXPECT_NEAR(math::ToFloat(finalState3.at(0, 0)), truePos3, 0.15f);
-    EXPECT_NEAR(math::ToFloat(finalState3.at(1, 0)), trueVel3, 0.3f);
-    EXPECT_NEAR(math::ToFloat(finalState3.at(2, 0)), trueAcc, 0.5f);
-}
-
-TYPED_TEST(ExtendedKalmanFilterTest, NonlinearPredictionUpdatesState)
-{
-    using StateVector = typename TestFixture::StateVector;
-    using StateMatrix = typename TestFixture::StateMatrix;
-    using MeasurementCovariance = typename TestFixture::MeasurementCovariance;
-
-    auto initialState = StateVector{ { TypeParam(0.1f) }, { TypeParam(0.0f) } };
-    auto initialP = StateMatrix{
-        { TypeParam(0.5f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.5f) }
-    };
-
-    typename TestFixture::EkfType ekf(initialState, initialP,
-        NonlinearStateTransition, NonlinearStateJacobian,
-        LinearMeasurement, LinearMeasurementJacobian);
-
-    ekf.SetProcessNoise(StateMatrix{
-        { TypeParam(0.01f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.01f) } });
-
-    ekf.Predict();
-
-    auto predicted = ekf.GetState();
-    // Position should increase slightly (initial velocity is 0, small position)
-    // Velocity should become slightly negative (restoring force: -sin(0.1)*dt ≈ -0.01)
-    EXPECT_NEAR(math::ToFloat(predicted.at(0, 0)), 0.1f, 0.05f);
-    EXPECT_LT(math::ToFloat(predicted.at(1, 0)), 0.0f);
-}
-
-TYPED_TEST(ExtendedKalmanFilterTest, UpdateReducesCovariance)
-{
-    using StateVector = typename TestFixture::StateVector;
-    using StateMatrix = typename TestFixture::StateMatrix;
-    using MeasurementCovariance = typename TestFixture::MeasurementCovariance;
-
-    auto initialState = StateVector{ { TypeParam(0.0f) }, { TypeParam(0.0f) } };
-    auto initialP = StateMatrix{
-        { TypeParam(0.5f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.5f) }
-    };
-
-    typename TestFixture::EkfType ekf(initialState, initialP,
-        LinearStateTransition, LinearStateJacobian,
-        LinearMeasurement, LinearMeasurementJacobian);
-
-    ekf.SetMeasurementNoise(MeasurementCovariance{ { TypeParam(0.5f) } });
-
-    auto covBefore = ekf.GetCovariance();
-    ekf.Update(typename TestFixture::MeasurementVector{ { TypeParam(0.5f) } });
-    auto covAfter = ekf.GetCovariance();
-
-    EXPECT_LT(math::ToFloat(covAfter.at(0, 0)), math::ToFloat(covBefore.at(0, 0)));
-}
-
-TYPED_TEST(ExtendedKalmanFilterTest, NonlinearTrackingConverges)
-{
-    using StateVector = typename TestFixture::StateVector;
-    using StateMatrix = typename TestFixture::StateMatrix;
-    using MeasurementCovariance = typename TestFixture::MeasurementCovariance;
-
-    auto initialState = StateVector{ { TypeParam(0.0f) }, { TypeParam(0.0f) } };
-    auto initialP = StateMatrix{
-        { TypeParam(0.5f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.5f) }
-    };
-
-    typename TestFixture::EkfType ekf(initialState, initialP,
-        NonlinearStateTransition, NonlinearStateJacobian,
-        LinearMeasurement, LinearMeasurementJacobian);
-
-    ekf.SetProcessNoise(StateMatrix{
-        { TypeParam(0.001f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.001f) } });
-    ekf.SetMeasurementNoise(MeasurementCovariance{ { TypeParam(0.1f) } });
-
-    // Simulate a pendulum-like system
-    float truePos = 0.3f;
-    float trueVel = 0.0f;
-
-    for (int i = 0; i < 50; ++i)
-    {
-        float newVel = trueVel - std::sin(truePos) * dt;
-        float newPos = truePos + trueVel * dt;
-        truePos = newPos;
-        trueVel = newVel;
-
-        ekf.Predict();
-        ekf.Update(typename TestFixture::MeasurementVector{ { TypeParam(truePos) } });
-    }
-
-    auto finalState = ekf.GetState();
-    EXPECT_NEAR(math::ToFloat(finalState.at(0, 0)), truePos, 0.1f);
-    EXPECT_NEAR(math::ToFloat(finalState.at(1, 0)), trueVel, 0.2f);
-}
-
-TYPED_TEST(ExtendedKalmanFilterTest, WithControlInput)
-{
-    using StateVector = typename TestFixture::StateVector;
-    using StateMatrix = typename TestFixture::StateMatrix;
-    using MeasurementCovariance = typename TestFixture::MeasurementCovariance;
-
-    auto initialState = StateVector{ { TypeParam(0.0f) }, { TypeParam(0.0f) } };
-    auto initialP = StateMatrix{
-        { TypeParam(0.5f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.5f) }
-    };
-
-    typename TestFixture::EkfWithControlType ekf(initialState, initialP,
-        StateTransitionWithControl, StateJacobianWithControl,
-        LinearMeasurement, LinearMeasurementJacobian);
-
-    ekf.SetProcessNoise(StateMatrix{
-        { TypeParam(0.01f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.01f) } });
-    ekf.SetMeasurementNoise(MeasurementCovariance{ { TypeParam(0.5f) } });
-
-    // Apply constant acceleration
-    ControlVec1 controlInput{ { 1.0f } };
-
-    float truePos = 0.0f;
-    float trueVel = 0.0f;
-
-    for (int i = 0; i < 10; ++i)
-    {
-        trueVel += 1.0f * dt;
-        truePos += trueVel * dt;
-
-        ekf.Predict(controlInput);
-        ekf.Update(typename TestFixture::MeasurementVector{ { TypeParam(truePos) } });
-    }
-
-    auto finalState = ekf.GetState();
-    EXPECT_NEAR(math::ToFloat(finalState.at(0, 0)), truePos, 0.2f);
-    EXPECT_NEAR(math::ToFloat(finalState.at(1, 0)), trueVel, 0.4f);
+    auto finalState3 = ekf->GetState();
+    EXPECT_NEAR(finalState3.at(0, 0), truePos3, 0.15f);
+    EXPECT_NEAR(finalState3.at(1, 0), trueVel3, 0.3f);
+    EXPECT_NEAR(finalState3.at(2, 0), trueAcc, 0.5f);
 }

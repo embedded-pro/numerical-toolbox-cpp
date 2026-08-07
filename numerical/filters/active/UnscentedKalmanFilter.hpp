@@ -26,6 +26,7 @@ namespace filters
     class UnscentedKalmanFilter
         : public KalmanFilterBase<QNumberType, StateSize, MeasurementSize, ControlSize>
     {
+        static_assert(std::is_floating_point_v<QNumberType>, "UnscentedKalmanFilter only supports floating-point types");
         using Base = KalmanFilterBase<QNumberType, StateSize, MeasurementSize, ControlSize>;
 
         static constexpr std::size_t SigmaPointCount = 2 * StateSize + 1;
@@ -63,19 +64,19 @@ namespace filters
 
     private:
         void ComputeWeights();
-        void GenerateSigmaPoints(std::array<StateVector, SigmaPointCount>& sigmaPoints) const;
-        void PredictFromPropagatedSigmaPoints(const std::array<StateVector, SigmaPointCount>& sigmaPoints);
+        OPTIMIZE_FOR_SPEED void GenerateSigmaPoints(std::array<StateVector, SigmaPointCount>& sigmaPoints) const;
+        OPTIMIZE_FOR_SPEED void PredictFromPropagatedSigmaPoints(const std::array<StateVector, SigmaPointCount>& sigmaPoints);
 
         template<std::size_t VectorSize>
-        math::Vector<QNumberType, VectorSize> ComputeWeightedMean(
+        OPTIMIZE_FOR_SPEED math::Vector<QNumberType, VectorSize> ComputeWeightedMean(
             const std::array<math::Vector<QNumberType, VectorSize>, SigmaPointCount>& points) const;
 
         template<std::size_t Size>
-        math::SquareMatrix<QNumberType, Size> ComputeWeightedCovariance(
+        OPTIMIZE_FOR_SPEED math::SquareMatrix<QNumberType, Size> ComputeWeightedCovariance(
             const std::array<math::Vector<QNumberType, Size>, SigmaPointCount>& points,
             const math::Vector<QNumberType, Size>& mean) const;
 
-        math::Matrix<QNumberType, StateSize, MeasurementSize> ComputeWeightedCrossCovariance(
+        OPTIMIZE_FOR_SPEED math::Matrix<QNumberType, StateSize, MeasurementSize> ComputeWeightedCrossCovariance(
             const std::array<StateVector, SigmaPointCount>& statePoints,
             const StateVector& stateMean,
             const std::array<MeasurementVector, SigmaPointCount>& measurementPoints,
@@ -90,8 +91,6 @@ namespace filters
         std::array<float, SigmaPointCount> weightsMean;
         std::array<float, SigmaPointCount> weightsCovariance;
     };
-
-    // Implementation //
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
     UnscentedKalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::UnscentedKalmanFilter(
@@ -136,7 +135,7 @@ namespace filters
     }
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
-    void UnscentedKalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::GenerateSigmaPoints(
+    OPTIMIZE_FOR_SPEED void UnscentedKalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::GenerateSigmaPoints(
         std::array<StateVector, SigmaPointCount>& sigmaPoints) const
     {
         constexpr auto n = static_cast<float>(StateSize);
@@ -145,7 +144,6 @@ namespace filters
 
         sigmaPoints[0] = this->state();
 
-        // σᵢ = x̂ ± √(n+λ) · column_i(L)
         for (std::size_t i = 0; i < StateSize; ++i)
         {
             auto column = L.GetColumn(i) * QNumberType(scaleFactor);
@@ -156,7 +154,7 @@ namespace filters
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
     template<std::size_t VectorSize>
-    math::Vector<QNumberType, VectorSize>
+    OPTIMIZE_FOR_SPEED math::Vector<QNumberType, VectorSize>
     UnscentedKalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::ComputeWeightedMean(
         const std::array<math::Vector<QNumberType, VectorSize>, SigmaPointCount>& points) const
     {
@@ -168,7 +166,7 @@ namespace filters
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
     template<std::size_t Size>
-    math::SquareMatrix<QNumberType, Size>
+    OPTIMIZE_FOR_SPEED math::SquareMatrix<QNumberType, Size>
     UnscentedKalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::ComputeWeightedCovariance(
         const std::array<math::Vector<QNumberType, Size>, SigmaPointCount>& points,
         const math::Vector<QNumberType, Size>& mean) const
@@ -184,7 +182,7 @@ namespace filters
     }
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
-    math::Matrix<QNumberType, StateSize, MeasurementSize>
+    OPTIMIZE_FOR_SPEED math::Matrix<QNumberType, StateSize, MeasurementSize>
     UnscentedKalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::ComputeWeightedCrossCovariance(
         const std::array<StateVector, SigmaPointCount>& statePoints,
         const StateVector& stateMean,
@@ -203,7 +201,7 @@ namespace filters
     }
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
-    void UnscentedKalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::PredictFromPropagatedSigmaPoints(
+    OPTIMIZE_FOR_SPEED void UnscentedKalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::PredictFromPropagatedSigmaPoints(
         const std::array<StateVector, SigmaPointCount>& sigmaPoints)
     {
         this->state() = ComputeWeightedMean<StateSize>(sigmaPoints);
@@ -250,7 +248,6 @@ namespace filters
         auto S = ComputeWeightedCovariance<MeasurementSize>(measurementSigmaPoints, predictedMeasurement) + this->measurementNoise();
         auto Pxz = ComputeWeightedCrossCovariance(sigmaPoints, this->state(), measurementSigmaPoints, predictedMeasurement);
 
-        // Solve K via Sᵀ Kᵀ = Pxzᵀ (avoids explicit S⁻¹)
         auto K = solvers::SolveSystem<QNumberType, MeasurementSize, StateSize>(S, Pxz.Transpose()).Transpose();
 
         auto innovation = measurement - predictedMeasurement;

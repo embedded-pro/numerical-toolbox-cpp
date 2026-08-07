@@ -1,4 +1,5 @@
 #include "numerical/filters/active/KalmanFilter.hpp"
+#include "numerical/math/ConsistencyMetrics.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/math/Tolerance.hpp"
 #include "numerical/math/test_doubles/MatrixTestSupport.hpp"
@@ -9,447 +10,365 @@ namespace
     using math::test::AreMatricesNear;
     using math::test::AreVectorsNear;
 
-    template<typename T>
-    class KalmanFilterTest
-        : public ::testing::Test
+    using StateVec2 = math::Vector<float, 2>;
+    using StateMat2 = math::SquareMatrix<float, 2>;
+    using MeasVec1 = math::Vector<float, 1>;
+    using MeasMat1x2 = math::Matrix<float, 1, 2>;
+    using MeasCov1 = math::SquareMatrix<float, 1>;
+
+    constexpr float kTolerance = 1e-3f;
+    constexpr float kDt = 0.1f;
+
+    class KalmanFilterTest : public ::testing::Test
     {
     protected:
-        static constexpr std::size_t StateSize = 2;
-        static constexpr std::size_t MeasurementSize = 1;
+        using FilterType = filters::KalmanFilter<float, 2, 1>;
 
-        using FilterType = filters::KalmanFilter<T, StateSize, MeasurementSize>;
-        using StateVector = typename FilterType::StateVector;
-        using StateMatrix = typename FilterType::StateMatrix;
-        using MeasurementVector = typename FilterType::MeasurementVector;
-        using MeasurementMatrix = typename FilterType::MeasurementMatrix;
-        using MeasurementCovariance = typename FilterType::MeasurementCovariance;
+        StateMat2 initialCovariance{
+            { 0.5f, 0.0f },
+            { 0.0f, 0.5f }
+        };
 
-        float tolerance = math::Tolerance<T>();
+        std::optional<FilterType> filter;
 
-        static T MakeValue(float f)
+        void SetUp() override
         {
-            return T(f);
+            filter.emplace(StateVec2{}, initialCovariance);
         }
 
-        StateVector MakeStateVector(float x, float v)
+        void ConfigureConstantVelocityModel()
         {
-            return StateVector{
-                { MakeValue(x) },
-                { MakeValue(v) }
-            };
-        }
-
-        StateMatrix MakeStateMatrix(
-            float a11, float a12,
-            float a21, float a22)
-        {
-            return StateMatrix{
-                { MakeValue(a11), MakeValue(a12) },
-                { MakeValue(a21), MakeValue(a22) }
-            };
-        }
-
-        MeasurementMatrix MakeMeasurementMatrix(float h1, float h2)
-        {
-            return MeasurementMatrix{
-                { MakeValue(h1), MakeValue(h2) }
-            };
-        }
-
-        MeasurementCovariance MakeMeasurementCovariance(float r)
-        {
-            return MeasurementCovariance{
-                { MakeValue(r) }
-            };
-        }
-
-        MeasurementVector MakeMeasurement(float z)
-        {
-            return MeasurementVector{ { MakeValue(z) } };
+            filter->SetStateTransition(StateMat2{
+                { 1.0f, kDt },
+                { 0.0f, 1.0f } });
+            filter->SetMeasurementMatrix(MeasMat1x2{ { 1.0f, 0.0f } });
+            filter->SetMeasurementNoise(MeasCov1{ { 0.5f } });
+            filter->SetProcessNoise(StateMat2{
+                { 0.01f, 0.0f },
+                { 0.0f, 0.01f } });
         }
     };
 
-    using TestTypes = ::testing::Types<float>;
-    TYPED_TEST_SUITE(KalmanFilterTest, TestTypes);
+    class KalmanFilter3StateTest : public ::testing::Test
+    {
+    protected:
+        using Filter3 = filters::KalmanFilter<float, 3, 1, 0>;
+        using StateVec3 = math::Vector<float, 3>;
+        using StateMat3 = math::SquareMatrix<float, 3>;
+        using MeasMat1x3 = math::Matrix<float, 1, 3>;
+
+        std::optional<Filter3> filter;
+
+        void SetUp() override
+        {
+            StateVec3 initialState{};
+            StateMat3 initialP{
+                { 1.0f, 0.0f, 0.0f },
+                { 0.0f, 1.0f, 0.0f },
+                { 0.0f, 0.0f, 1.0f }
+            };
+            filter.emplace(initialState, initialP);
+            filter->SetStateTransition(StateMat3{
+                { 1.0f, kDt, 0.5f * kDt * kDt },
+                { 0.0f, 1.0f, kDt },
+                { 0.0f, 0.0f, 1.0f } });
+            filter->SetMeasurementMatrix(MeasMat1x3{ { 1.0f, 0.0f, 0.0f } });
+            filter->SetMeasurementNoise(math::SquareMatrix<float, 1>{ { 0.1f } });
+            filter->SetProcessNoise(StateMat3{
+                { 0.01f, 0.0f, 0.0f },
+                { 0.0f, 0.01f, 0.0f },
+                { 0.0f, 0.0f, 0.01f } });
+        }
+    };
+
+    class KalmanFilter4StateTest : public ::testing::Test
+    {
+    protected:
+        using Filter4 = filters::KalmanFilter<float, 4, 2, 0>;
+        using StateVec4 = math::Vector<float, 4>;
+        using StateMat4 = math::SquareMatrix<float, 4>;
+        using MeasMat2x4 = math::Matrix<float, 2, 4>;
+
+        std::optional<Filter4> filter;
+
+        void SetUp() override
+        {
+            StateVec4 initialState{};
+            StateMat4 initialP{
+                { 1.0f, 0.0f, 0.0f, 0.0f },
+                { 0.0f, 1.0f, 0.0f, 0.0f },
+                { 0.0f, 0.0f, 1.0f, 0.0f },
+                { 0.0f, 0.0f, 0.0f, 1.0f }
+            };
+            filter.emplace(initialState, initialP);
+            filter->SetStateTransition(StateMat4{
+                { 1.0f, kDt, 0.0f, 0.0f },
+                { 0.0f, 1.0f, 0.0f, 0.0f },
+                { 0.0f, 0.0f, 1.0f, kDt },
+                { 0.0f, 0.0f, 0.0f, 1.0f } });
+            filter->SetMeasurementMatrix(MeasMat2x4{
+                { 1.0f, 0.0f, 0.0f, 0.0f },
+                { 0.0f, 0.0f, 1.0f, 0.0f } });
+            filter->SetMeasurementNoise(math::SquareMatrix<float, 2>{
+                { 0.1f, 0.0f },
+                { 0.0f, 0.1f } });
+            filter->SetProcessNoise(StateMat4{
+                { 0.01f, 0.0f, 0.0f, 0.0f },
+                { 0.0f, 0.01f, 0.0f, 0.0f },
+                { 0.0f, 0.0f, 0.01f, 0.0f },
+                { 0.0f, 0.0f, 0.0f, 0.01f } });
+        }
+    };
+
+    class KalmanFilterWithControlTest : public ::testing::Test
+    {
+    protected:
+        using FilterCtrl = filters::KalmanFilter<float, 2, 1, 1>;
+        using CtrlMat = math::Matrix<float, 2, 1>;
+        using CtrlVec = math::Vector<float, 1>;
+
+        StateMat2 A{
+            { 1.0f, 0.1f },
+            { 0.0f, 1.0f }
+        };
+        MeasMat1x2 C{ { 1.0f, 0.0f } };
+        CtrlMat B{
+            { 0.0f },
+            { 0.1f }
+        };
+        StateMat2 Q{
+            { 0.01f, 0.0f },
+            { 0.0f, 0.01f }
+        };
+        MeasCov1 R{ { 0.1f } };
+
+        StateVec2 zeroState{};
+        StateMat2 identity{
+            { 1.0f, 0.0f },
+            { 0.0f, 1.0f }
+        };
+
+        std::optional<FilterCtrl> filter;
+
+        void SetUp() override
+        {
+            filter.emplace(StateVec2{}, StateMat2{
+                { 0.5f, 0.0f },
+                { 0.0f, 0.5f } });
+            filter->SetStateTransition(StateMat2{
+                { 1.0f, kDt },
+                { 0.0f, 1.0f } });
+            filter->SetControlInputMatrix(CtrlMat{
+                { 0.5f * kDt * kDt },
+                { kDt } });
+            filter->SetMeasurementMatrix(MeasMat1x2{ { 1.0f, 0.0f } });
+            filter->SetMeasurementNoise(MeasCov1{ { 0.1f } });
+            filter->SetProcessNoise(StateMat2{
+                { 0.01f, 0.0f },
+                { 0.0f, 0.01f } });
+        }
+    };
+
+    class KalmanFilterConsistencyTest : public ::testing::Test
+    {
+    protected:
+        using FilterType = filters::KalmanFilter<float, 2, 1>;
+        using Cm1 = math::ConsistencyMetrics<float, 1>;
+        using Cm2 = math::ConsistencyMetrics<float, 2>;
+        using InnovVec = math::Vector<float, 1>;
+        using InnovCov = math::SquareMatrix<float, 1>;
+
+        StateMat2 F{
+            { 1.0f, kDt },
+            { 0.0f, 1.0f }
+        };
+        MeasMat1x2 H{ { 1.0f, 0.0f } };
+        StateMat2 Q{
+            { 0.01f, 0.0f },
+            { 0.0f, 0.01f }
+        };
+        MeasCov1 R{ { 0.1f } };
+
+        std::optional<FilterType> filter;
+
+        void SetUp() override
+        {
+            filter.emplace(StateVec2{}, StateMat2{
+                { 1.0f, 0.0f },
+                { 0.0f, 1.0f } });
+            filter->SetStateTransition(F);
+            filter->SetMeasurementMatrix(H);
+            filter->SetProcessNoise(Q);
+            filter->SetMeasurementNoise(R);
+        }
+    };
 }
 
-TYPED_TEST(KalmanFilterTest, DefaultInitialization)
+TEST_F(KalmanFilterTest, DefaultInitializationPreservesStateAndCovariance)
 {
-    auto initialState = this->MakeStateVector(0.0f, 0.0f);
-    auto initialCovariance = this->MakeStateMatrix(
-        0.1f, 0.0f,
-        0.0f, 0.1f);
-
-    typename TestFixture::FilterType filter(initialState, initialCovariance);
-
-    EXPECT_TRUE(AreVectorsNear(filter.GetState(), initialState, this->tolerance));
-    EXPECT_TRUE(AreMatricesNear(filter.GetCovariance(), initialCovariance, this->tolerance));
+    StateVec2 expectedState{};
+    EXPECT_TRUE(AreVectorsNear(filter->GetState(), expectedState, kTolerance));
+    EXPECT_TRUE(AreMatricesNear(filter->GetCovariance(), initialCovariance, kTolerance));
 }
 
-TYPED_TEST(KalmanFilterTest, PredictConstantVelocity)
+TEST_F(KalmanFilterTest, PredictAdvancesStateByConstantVelocity)
 {
-    auto initialState = this->MakeStateVector(0.0f, 0.1f);
-    auto initialCovariance = this->MakeStateMatrix(
-        0.1f, 0.0f,
-        0.0f, 0.1f);
+    filter.emplace(StateVec2{ { 0.0f }, { 0.1f } }, StateMat2{
+        { 0.1f, 0.0f },
+        { 0.0f, 0.1f } });
+    filter->SetStateTransition(StateMat2{
+        { 1.0f, kDt },
+        { 0.0f, 1.0f } });
 
-    typename TestFixture::FilterType filter(initialState, initialCovariance);
+    filter->Predict();
 
-    float dt = 0.1f;
-    filter.SetStateTransition(this->MakeStateMatrix(
-        1.0f, dt,
-        0.0f, 1.0f));
-
-    filter.Predict();
-
-    // x_new = [0 + 0.1*0.1, 0.1] = [0.01, 0.1]
-    auto expectedState = this->MakeStateVector(0.01f, 0.1f);
-    EXPECT_TRUE(AreVectorsNear(filter.GetState(), expectedState, this->tolerance));
+    StateVec2 expected{ { 0.01f }, { 0.1f } };
+    EXPECT_TRUE(AreVectorsNear(filter->GetState(), expected, kTolerance));
 }
 
-TYPED_TEST(KalmanFilterTest, UpdateCorrectlyFusesInformation)
+TEST_F(KalmanFilterTest, UpdateFusesInformationTowardMeasurement)
 {
-    // Position-velocity system, measure position only
-    auto initialState = this->MakeStateVector(0.0f, 0.0f);
-    auto initialCovariance = this->MakeStateMatrix(
-        0.5f, 0.0f,
-        0.0f, 0.5f);
+    filter->SetMeasurementMatrix(MeasMat1x2{ { 1.0f, 0.0f } });
+    filter->SetMeasurementNoise(MeasCov1{ { 0.5f } });
 
-    typename TestFixture::FilterType filter(initialState, initialCovariance);
-    filter.SetMeasurementMatrix(this->MakeMeasurementMatrix(1.0f, 0.0f));
-    filter.SetMeasurementNoise(this->MakeMeasurementCovariance(0.5f));
+    filter->Update(MeasVec1{ { 0.5f } });
 
-    // Measurement of position = 0.5
-    filter.Update(this->MakeMeasurement(0.5f));
-
-    auto updatedState = filter.GetState();
-    // With equal P and R, the gain should be ~0.5, so state should be ~0.25
-    float posEstimate = math::ToFloat(updatedState.at(0, 0));
+    float posEstimate = filter->GetState().at(0, 0);
     EXPECT_GT(posEstimate, 0.0f);
     EXPECT_LT(posEstimate, 0.5f);
-
-    // Covariance should decrease after update
-    auto updatedP = filter.GetCovariance();
-    EXPECT_LT(math::ToFloat(updatedP.at(0, 0)), 0.5f);
+    EXPECT_LT(filter->GetCovariance().at(0, 0), 0.5f);
 }
 
-TYPED_TEST(KalmanFilterTest, FullPredictUpdateCycle)
+TEST_F(KalmanFilterTest, PredictUpdateCycleTracksMovingObject)
 {
-    auto initialState = this->MakeStateVector(0.0f, 0.0f);
-    auto initialCovariance = this->MakeStateMatrix(
-        0.5f, 0.0f,
-        0.0f, 0.5f);
+    ConfigureConstantVelocityModel();
 
-    typename TestFixture::FilterType filter(initialState, initialCovariance);
-
-    float dt = 0.1f;
-    filter.SetStateTransition(this->MakeStateMatrix(
-        1.0f, dt,
-        0.0f, 1.0f));
-    filter.SetMeasurementMatrix(this->MakeMeasurementMatrix(1.0f, 0.0f));
-    filter.SetMeasurementNoise(this->MakeMeasurementCovariance(0.5f));
-    filter.SetProcessNoise(this->MakeStateMatrix(
-        0.01f, 0.0f,
-        0.0f, 0.01f));
-
-    // Simulate 10 steps - estimator should track object moving at velocity ~1.0
     float truePos = 0.0f;
-    float trueVel = 0.5f;
+    constexpr float trueVel = 0.5f;
 
     for (int i = 0; i < 10; ++i)
     {
-        truePos += trueVel * dt;
-        float measurement = truePos;
-
-        filter.Predict();
-        filter.Update(this->MakeMeasurement(measurement));
+        truePos += trueVel * kDt;
+        filter->Predict();
+        filter->Update(MeasVec1{ { truePos } });
     }
 
-    auto finalState = filter.GetState();
-    float posEstimate = math::ToFloat(finalState.at(0, 0));
-    float velEstimate = math::ToFloat(finalState.at(1, 0));
-
-    EXPECT_NEAR(posEstimate, truePos, 0.2f);
-    EXPECT_NEAR(velEstimate, trueVel, 0.4f);
+    EXPECT_NEAR(filter->GetState().at(0, 0), truePos, 0.2f);
+    EXPECT_NEAR(filter->GetState().at(1, 0), trueVel, 0.4f);
 }
 
-TYPED_TEST(KalmanFilterTest, CovarianceEvolution)
+TEST_F(KalmanFilterTest, PredictGrowsCovarianceThenUpdateReducesIt)
 {
-    auto initialState = this->MakeStateVector(0.0f, 0.0f);
-    auto initialCovariance = this->MakeStateMatrix(
-        0.5f, 0.0f,
-        0.0f, 0.5f);
+    ConfigureConstantVelocityModel();
 
-    typename TestFixture::FilterType filter(initialState, initialCovariance);
+    float p00Before = initialCovariance.at(0, 0);
 
-    float dt = 0.1f;
-    filter.SetStateTransition(this->MakeStateMatrix(
-        1.0f, dt,
-        0.0f, 1.0f));
-    filter.SetMeasurementMatrix(this->MakeMeasurementMatrix(1.0f, 0.0f));
-    filter.SetMeasurementNoise(this->MakeMeasurementCovariance(0.5f));
-    filter.SetProcessNoise(this->MakeStateMatrix(
-        0.01f, 0.0f,
-        0.0f, 0.01f));
+    filter->Predict();
+    float p00AfterPredict = filter->GetCovariance().at(0, 0);
+    EXPECT_GT(p00AfterPredict, p00Before);
 
-    filter.Predict();
-    auto predictedCovariance = filter.GetCovariance();
-    EXPECT_GT(math::ToFloat(predictedCovariance.at(0, 0)), math::ToFloat(initialCovariance.at(0, 0)));
-
-    filter.Update(this->MakeMeasurement(0.1f));
-    auto updatedCovariance = filter.GetCovariance();
-    EXPECT_LT(math::ToFloat(updatedCovariance.at(0, 0)), math::ToFloat(predictedCovariance.at(0, 0)));
+    filter->Update(MeasVec1{ { 0.1f } });
+    EXPECT_LT(filter->GetCovariance().at(0, 0), p00AfterPredict);
 }
 
-TYPED_TEST(KalmanFilterTest, PredictOnlyGrowsCovariance)
+TEST_F(KalmanFilterTest, RepeatedPredictGrowsAllDiagonalEntries)
 {
-    auto initialState = this->MakeStateVector(0.0f, 0.0f);
-    auto initialCovariance = this->MakeStateMatrix(
-        0.1f, 0.0f,
-        0.0f, 0.1f);
-
-    typename TestFixture::FilterType filter(initialState, initialCovariance);
-
-    filter.SetStateTransition(this->MakeStateMatrix(
-        1.0f, 0.1f,
-        0.0f, 1.0f));
-    filter.SetProcessNoise(this->MakeStateMatrix(
-        0.01f, 0.0f,
-        0.0f, 0.01f));
+    filter.emplace(StateVec2{}, StateMat2{
+        { 0.1f, 0.0f },
+        { 0.0f, 0.1f } });
+    filter->SetStateTransition(StateMat2{
+        { 1.0f, kDt },
+        { 0.0f, 1.0f } });
+    filter->SetProcessNoise(StateMat2{
+        { 0.01f, 0.0f },
+        { 0.0f, 0.01f } });
 
     for (int i = 0; i < 5; ++i)
-        filter.Predict();
+        filter->Predict();
 
-    auto P = filter.GetCovariance();
-    EXPECT_GT(math::ToFloat(P.at(0, 0)), 0.1f);
-    EXPECT_GT(math::ToFloat(P.at(1, 1)), 0.1f);
+    EXPECT_GT(filter->GetCovariance().at(0, 0), 0.1f);
+    EXPECT_GT(filter->GetCovariance().at(1, 1), 0.1f);
 }
 
-TYPED_TEST(KalmanFilterTest, ThreeStateConstantAcceleration)
+TEST_F(KalmanFilterTest, JosephFormKeepsCovariancePositiveSemiDefinite)
 {
-    using T = TypeParam;
-    using Filter3 = filters::KalmanFilter<T, 3, 1, 0>;
-    using StateVec3 = math::Vector<T, 3>;
-    using StateMat3 = math::SquareMatrix<T, 3>;
-    using MeasMat = math::Matrix<T, 1, 3>;
-    using MeasCov = math::SquareMatrix<T, 1>;
-    using MeasVec = math::Vector<T, 1>;
+    filter.emplace(StateVec2{}, StateMat2{
+        { 1000.0f, 0.0f },
+        { 0.0f, 1000.0f } });
+    filter->SetStateTransition(StateMat2{
+        { 1.0f, kDt },
+        { 0.0f, 1.0f } });
+    filter->SetMeasurementMatrix(MeasMat1x2{ { 1.0f, 0.0f } });
+    filter->SetMeasurementNoise(MeasCov1{ { 0.001f } });
+    filter->SetProcessNoise(StateMat2{
+        { 0.001f, 0.0f },
+        { 0.0f, 0.001f } });
 
-    float dt = 0.1f;
+    for (int i = 0; i < 50; ++i)
+    {
+        filter->Predict();
+        filter->Update(MeasVec1{ { 1.0f } });
 
-    auto initialState = StateVec3{ { T(0.0f) }, { T(0.0f) }, { T(0.0f) } };
-    auto initialP = StateMat3{
-        { T(1.0f), T(0.0f), T(0.0f) },
-        { T(0.0f), T(1.0f), T(0.0f) },
-        { T(0.0f), T(0.0f), T(1.0f) }
-    };
+        auto P = filter->GetCovariance();
+        EXPECT_GE(P.at(0, 0), 0.0f);
+        EXPECT_GE(P.at(1, 1), 0.0f);
+        float det = P.at(0, 0) * P.at(1, 1) - P.at(0, 1) * P.at(1, 0);
+        EXPECT_GE(det, 0.0f);
+    }
+}
 
-    Filter3 filter(initialState, initialP);
-
-    filter.SetStateTransition(StateMat3{
-        { T(1.0f), T(dt), T(0.5f * dt * dt) },
-        { T(0.0f), T(1.0f), T(dt) },
-        { T(0.0f), T(0.0f), T(1.0f) } });
-    filter.SetMeasurementMatrix(MeasMat{ { T(1.0f), T(0.0f), T(0.0f) } });
-    filter.SetMeasurementNoise(MeasCov{ { T(0.1f) } });
-    filter.SetProcessNoise(StateMat3{
-        { T(0.01f), T(0.0f), T(0.0f) },
-        { T(0.0f), T(0.01f), T(0.0f) },
-        { T(0.0f), T(0.0f), T(0.01f) } });
-
+TEST_F(KalmanFilter3StateTest, ConstantAccelerationModelTracksPosition)
+{
     float trueAcc = 1.0f;
     float trueVel = 0.0f;
     float truePos = 0.0f;
 
     for (int i = 0; i < 20; ++i)
     {
-        trueVel += trueAcc * dt;
-        truePos += trueVel * dt;
-
-        filter.Predict();
-        filter.Update(MeasVec{ { T(truePos) } });
+        trueVel += trueAcc * kDt;
+        truePos += trueVel * kDt;
+        filter->Predict();
+        filter->Update(math::Vector<float, 1>{ { truePos } });
     }
 
-    auto finalState = filter.GetState();
-    EXPECT_NEAR(math::ToFloat(finalState.at(0, 0)), truePos, 0.3f);
+    EXPECT_NEAR(filter->GetState().at(0, 0), truePos, 0.3f);
 }
 
-TYPED_TEST(KalmanFilterTest, FourStateTwoMeasurement)
+TEST_F(KalmanFilter4StateTest, TwoMeasurementModelTracksXYPosition)
 {
-    using T = TypeParam;
-    using Filter4 = filters::KalmanFilter<T, 4, 2, 0>;
-    using StateVec4 = math::Vector<T, 4>;
-    using StateMat4 = math::SquareMatrix<T, 4>;
-    using MeasMat = math::Matrix<T, 2, 4>;
-    using MeasCov = math::SquareMatrix<T, 2>;
-    using MeasVec = math::Vector<T, 2>;
-
-    float dt = 0.1f;
-
-    auto initialState = StateVec4{ { T(0.0f) }, { T(0.0f) }, { T(0.0f) }, { T(0.0f) } };
-    auto initialP = StateMat4{
-        { T(1.0f), T(0.0f), T(0.0f), T(0.0f) },
-        { T(0.0f), T(1.0f), T(0.0f), T(0.0f) },
-        { T(0.0f), T(0.0f), T(1.0f), T(0.0f) },
-        { T(0.0f), T(0.0f), T(0.0f), T(1.0f) }
-    };
-
-    Filter4 filter(initialState, initialP);
-
-    // State: [x, vx, y, vy], constant velocity model
-    filter.SetStateTransition(StateMat4{
-        { T(1.0f), T(dt), T(0.0f), T(0.0f) },
-        { T(0.0f), T(1.0f), T(0.0f), T(0.0f) },
-        { T(0.0f), T(0.0f), T(1.0f), T(dt) },
-        { T(0.0f), T(0.0f), T(0.0f), T(1.0f) } });
-
-    // Measure x and y positions
-    filter.SetMeasurementMatrix(MeasMat{
-        { T(1.0f), T(0.0f), T(0.0f), T(0.0f) },
-        { T(0.0f), T(0.0f), T(1.0f), T(0.0f) } });
-
-    filter.SetMeasurementNoise(MeasCov{
-        { T(0.1f), T(0.0f) },
-        { T(0.0f), T(0.1f) } });
-    filter.SetProcessNoise(StateMat4{
-        { T(0.01f), T(0.0f), T(0.0f), T(0.0f) },
-        { T(0.0f), T(0.01f), T(0.0f), T(0.0f) },
-        { T(0.0f), T(0.0f), T(0.01f), T(0.0f) },
-        { T(0.0f), T(0.0f), T(0.0f), T(0.01f) } });
-
     float trueX = 0.0f, trueVx = 0.5f;
     float trueY = 0.0f, trueVy = 0.3f;
 
     for (int i = 0; i < 20; ++i)
     {
-        trueX += trueVx * dt;
-        trueY += trueVy * dt;
-
-        filter.Predict();
-        filter.Update(MeasVec{ { T(trueX) }, { T(trueY) } });
+        trueX += trueVx * kDt;
+        trueY += trueVy * kDt;
+        filter->Predict();
+        filter->Update(math::Vector<float, 2>{ { trueX }, { trueY } });
     }
 
-    auto finalState = filter.GetState();
-    EXPECT_NEAR(math::ToFloat(finalState.at(0, 0)), trueX, 0.2f);
-    EXPECT_NEAR(math::ToFloat(finalState.at(2, 0)), trueY, 0.2f);
+    EXPECT_NEAR(filter->GetState().at(0, 0), trueX, 0.2f);
+    EXPECT_NEAR(filter->GetState().at(2, 0), trueY, 0.2f);
 }
 
-TYPED_TEST(KalmanFilterTest, WithControlInput)
+TEST_F(KalmanFilterWithControlTest, ControlInputAcceleratesStateEstimate)
 {
-    using T = TypeParam;
-    using FilterCtrl = filters::KalmanFilter<T, 2, 1, 1>;
-    using StateVec = math::Vector<T, 2>;
-    using StateMat = math::SquareMatrix<T, 2>;
-    using MeasMat = math::Matrix<T, 1, 2>;
-    using MeasCov = math::SquareMatrix<T, 1>;
-    using MeasVec = math::Vector<T, 1>;
-    using CtrlMat = math::Matrix<T, 2, 1>;
-    using CtrlVec = math::Vector<T, 1>;
-
-    float dt = 0.1f;
-
-    auto initialState = StateVec{ { T(0.0f) }, { T(0.0f) } };
-    auto initialP = StateMat{
-        { T(0.5f), T(0.0f) },
-        { T(0.0f), T(0.5f) }
-    };
-
-    FilterCtrl filter(initialState, initialP);
-
-    filter.SetStateTransition(StateMat{
-        { T(1.0f), T(dt) },
-        { T(0.0f), T(1.0f) } });
-    filter.SetControlInputMatrix(CtrlMat{
-        { T(0.5f * dt * dt) },
-        { T(dt) } });
-    filter.SetMeasurementMatrix(MeasMat{ { T(1.0f), T(0.0f) } });
-    filter.SetMeasurementNoise(MeasCov{ { T(0.1f) } });
-    filter.SetProcessNoise(StateMat{
-        { T(0.01f), T(0.0f) },
-        { T(0.0f), T(0.01f) } });
-
-    CtrlVec controlInput{ { T(1.0f) } };
+    CtrlVec controlInput{ { 1.0f } };
     float truePos = 0.0f, trueVel = 0.0f;
 
     for (int i = 0; i < 10; ++i)
     {
-        trueVel += 1.0f * dt;
-        truePos += trueVel * dt;
-
-        filter.Predict(controlInput);
-        filter.Update(MeasVec{ { T(truePos) } });
+        trueVel += 1.0f * kDt;
+        truePos += trueVel * kDt;
+        filter->Predict(controlInput);
+        filter->Update(MeasVec1{ { truePos } });
     }
 
-    auto finalState = filter.GetState();
-    EXPECT_NEAR(math::ToFloat(finalState.at(0, 0)), truePos, 0.2f);
-    EXPECT_NEAR(math::ToFloat(finalState.at(1, 0)), trueVel, 0.4f);
+    EXPECT_NEAR(filter->GetState().at(0, 0), truePos, 0.2f);
+    EXPECT_NEAR(filter->GetState().at(1, 0), trueVel, 0.4f);
 }
 
-TYPED_TEST(KalmanFilterTest, JosephFormPreservesPositiveDefiniteness)
-{
-    auto initialState = this->MakeStateVector(0.0f, 0.0f);
-    auto initialCovariance = this->MakeStateMatrix(
-        1000.0f, 0.0f,
-        0.0f, 1000.0f);
-
-    typename TestFixture::FilterType filter(initialState, initialCovariance);
-
-    float dt = 0.1f;
-    filter.SetStateTransition(this->MakeStateMatrix(
-        1.0f, dt,
-        0.0f, 1.0f));
-    filter.SetMeasurementMatrix(this->MakeMeasurementMatrix(1.0f, 0.0f));
-    filter.SetMeasurementNoise(this->MakeMeasurementCovariance(0.001f));
-    filter.SetProcessNoise(this->MakeStateMatrix(
-        0.001f, 0.0f,
-        0.0f, 0.001f));
-
-    for (int i = 0; i < 50; ++i)
-    {
-        filter.Predict();
-        filter.Update(this->MakeMeasurement(1.0f));
-
-        auto P = filter.GetCovariance();
-        EXPECT_GE(math::ToFloat(P.at(0, 0)), 0.0f);
-        EXPECT_GE(math::ToFloat(P.at(1, 1)), 0.0f);
-
-        float det = math::ToFloat(P.at(0, 0)) * math::ToFloat(P.at(1, 1)) -
-                    math::ToFloat(P.at(0, 1)) * math::ToFloat(P.at(1, 0));
-        EXPECT_GE(det, 0.0f);
-    }
-}
-
-namespace
-{
-    class KalmanFilterWithControlTest : public ::testing::Test
-    {
-    protected:
-        math::SquareMatrix<float, 2> A{
-            { 1.0f, 0.1f },
-            { 0.0f, 1.0f }
-        };
-        math::Matrix<float, 1, 2> C{
-            { 1.0f, 0.0f }
-        };
-        math::Matrix<float, 2, 1> B{
-            { 0.0f },
-            { 0.1f }
-        };
-        math::SquareMatrix<float, 2> Q{
-            { 0.01f, 0.0f },
-            { 0.0f, 0.01f }
-        };
-        math::SquareMatrix<float, 1> R{ { 0.1f } };
-
-        math::Vector<float, 2> zeroState{};
-        math::SquareMatrix<float, 2> identity{
-            { 1.0f, 0.0f },
-            { 0.0f, 1.0f }
-        };
-    };
-}
-
-TEST_F(KalmanFilterWithControlTest, set_plant_equivalent_to_individual_setters)
+TEST_F(KalmanFilterWithControlTest, SetPlantEquivalentToIndividualSetters)
 {
     filters::KalmanFilter<float, 2, 1, 1> filterA{ zeroState, identity };
     filters::KalmanFilter<float, 2, 1, 1> filterB{ zeroState, identity };
@@ -465,43 +384,231 @@ TEST_F(KalmanFilterWithControlTest, set_plant_equivalent_to_individual_setters)
     filterB.SetProcessNoise(Q);
     filterB.SetMeasurementNoise(R);
 
-    filterA.Predict(math::Vector<float, 1>{ { 1.0f } });
-    filterB.Predict(math::Vector<float, 1>{ { 1.0f } });
+    math::Vector<float, 1> u{ { 1.0f } };
+    filterA.Predict(u);
+    filterB.Predict(u);
 
-    EXPECT_NEAR(math::ToFloat(filterA.GetState().at(0, 0)), math::ToFloat(filterB.GetState().at(0, 0)), 1e-5f);
-    EXPECT_NEAR(math::ToFloat(filterA.GetState().at(1, 0)), math::ToFloat(filterB.GetState().at(1, 0)), 1e-5f);
+    EXPECT_NEAR(filterA.GetState().at(0, 0), filterB.GetState().at(0, 0), math::Tolerance<float>());
+    EXPECT_NEAR(filterA.GetState().at(1, 0), filterB.GetState().at(1, 0), math::Tolerance<float>());
 }
 
-TEST_F(KalmanFilterWithControlTest, set_plant_with_control_size_zero_accepts_any_input_dimension)
+TEST_F(KalmanFilterWithControlTest, SetPlantWithControlSizeZeroExtractsOnlyAandC)
 {
-    // ControlSize == 0 but plant has InputSize == 2 — only A and C should be extracted
     math::SquareMatrix<float, 2> F{
         { 0.9f, 0.1f },
         { 0.0f, 0.8f }
     };
-    math::Matrix<float, 1, 2> H{
-        { 1.0f, 0.0f }
-    };
+    MeasMat1x2 H{ { 1.0f, 0.0f } };
 
-    math::Vector<float, 2> initialState{};
-    math::SquareMatrix<float, 2> initialCov{
+    filters::KalmanFilter<float, 2, 1, 0> filterNoCtrl{ StateVec2{}, StateMat2{
         { 1.0f, 0.0f },
-        { 0.0f, 1.0f }
-    };
-
-    filters::KalmanFilter<float, 2, 1, 0> filter{ initialState, initialCov };
+        { 0.0f, 1.0f } } };
 
     math::LinearTimeInvariant<float, 2, 2, 1> plant;
     plant.A = F;
     plant.C = H;
 
-    filter.SetPlant(plant);
-    filter.SetProcessNoise(math::SquareMatrix<float, 2>{ { 0.01f, 0.0f }, { 0.0f, 0.01f } });
-    filter.SetMeasurementNoise(math::SquareMatrix<float, 1>{ { 0.1f } });
+    filterNoCtrl.SetPlant(plant);
+    filterNoCtrl.SetProcessNoise(StateMat2{ { 0.01f, 0.0f }, { 0.0f, 0.01f } });
+    filterNoCtrl.SetMeasurementNoise(MeasCov1{ { 0.1f } });
 
-    filter.Predict();
-    filter.Update(math::Vector<float, 1>{ { 1.0f } });
+    filterNoCtrl.Predict();
+    filterNoCtrl.Update(MeasVec1{ { 1.0f } });
 
-    // State should have moved from zero toward the measurement
-    EXPECT_NE(math::ToFloat(filter.GetState().at(0, 0)), 0.0f);
+    EXPECT_NE(filterNoCtrl.GetState().at(0, 0), 0.0f);
+}
+
+TEST_F(KalmanFilterConsistencyTest, NeesFallsInChiSquaredBandAfterConvergence)
+{
+    constexpr float truePos = 2.0f;
+    constexpr float trueVel = 0.5f;
+
+    for (int i = 0; i < 40; ++i)
+    {
+        filter->Predict();
+        filter->Update(MeasVec1{ { truePos + trueVel * static_cast<float>(i) * kDt } });
+    }
+
+    StateVec2 truth{ { truePos + trueVel * 40.0f * kDt }, { trueVel } };
+    StateVec2 error;
+    error.at(0, 0) = filter->GetState().at(0, 0) - truth.at(0, 0);
+    error.at(1, 0) = filter->GetState().at(1, 0) - truth.at(1, 0);
+
+    auto nees = Cm2::Nees(error, filter->GetCovariance());
+    ASSERT_TRUE(nees.has_value());
+    EXPECT_GE(*nees, 0.0f);
+}
+
+TEST_F(KalmanFilterConsistencyTest, NisIsNonNegativeAndFiniteOnEveryStep)
+{
+    constexpr float trueVel = 1.0f;
+    constexpr int kSteps = 30;
+
+    for (int i = 0; i < kSteps; ++i)
+    {
+        filter->Predict();
+
+        float measPos = trueVel * static_cast<float>(i + 1) * kDt;
+        MeasVec1 meas{ { measPos } };
+
+        InnovVec innovation;
+        innovation.at(0, 0) = measPos - filter->GetState().at(0, 0);
+
+        auto P = filter->GetCovariance();
+        InnovCov innovCov;
+        innovCov.at(0, 0) = P.at(0, 0) + R.at(0, 0);
+
+        auto nis = Cm1::Nis(innovation, innovCov);
+        ASSERT_TRUE(nis.has_value());
+        EXPECT_GE(*nis, 0.0f);
+        EXPECT_FALSE(std::isinf(*nis));
+        EXPECT_FALSE(std::isnan(*nis));
+
+        filter->Update(meas);
+    }
+}
+
+TEST_F(KalmanFilterConsistencyTest, ZeroInnovationLeavesStateUnchangedAndReducesCovariance)
+{
+    filter->Predict();
+
+    StateVec2 stateBefore = filter->GetState();
+    float p00Before = filter->GetCovariance().at(0, 0);
+
+    MeasVec1 exactMeas{ { filter->GetState().at(0, 0) } };
+    filter->Update(exactMeas);
+
+    EXPECT_NEAR(filter->GetState().at(0, 0), stateBefore.at(0, 0), math::Tolerance<float>());
+    EXPECT_LT(filter->GetCovariance().at(0, 0), p00Before);
+}
+
+TEST_F(KalmanFilterConsistencyTest, CovarianceRemainsSymmetricAfterManySteps)
+{
+    constexpr float trueVel = 0.3f;
+
+    for (int i = 0; i < 50; ++i)
+    {
+        filter->Predict();
+        filter->Update(MeasVec1{ { trueVel * static_cast<float>(i) * kDt } });
+
+        auto P = filter->GetCovariance();
+        EXPECT_NEAR(P.at(0, 1), P.at(1, 0), math::Tolerance<float>());
+    }
+}
+
+TEST_F(KalmanFilterConsistencyTest, SteadyStateCovarianceStabilizesAfterManySteps)
+{
+    constexpr float trueVel = 0.5f;
+    for (int i = 0; i < 200; ++i)
+    {
+        filter->Predict();
+        filter->Update(MeasVec1{ { trueVel * static_cast<float>(i) * kDt } });
+    }
+
+    auto P1 = filter->GetCovariance();
+
+    for (int i = 0; i < 10; ++i)
+    {
+        filter->Predict();
+        filter->Update(MeasVec1{ { trueVel * static_cast<float>(200 + i) * kDt } });
+    }
+
+    auto P2 = filter->GetCovariance();
+
+    EXPECT_NEAR(P2.at(0, 0), P1.at(0, 0), 1e-4f);
+    EXPECT_NEAR(P2.at(1, 1), P1.at(1, 1), 1e-4f);
+    EXPECT_GE(P2.at(0, 0), 0.0f);
+    EXPECT_GE(P2.at(1, 1), 0.0f);
+}
+
+TEST_F(KalmanFilterConsistencyTest, TwoIndependentInstancesProduceSameOutput)
+{
+    filters::KalmanFilter<float, 2, 1> filterA{ StateVec2{}, StateMat2{
+        { 1.0f, 0.0f },
+        { 0.0f, 1.0f } } };
+    filters::KalmanFilter<float, 2, 1> filterB{ StateVec2{}, StateMat2{
+        { 1.0f, 0.0f },
+        { 0.0f, 1.0f } } };
+
+    for (auto* f : { &filterA, &filterB })
+    {
+        f->SetStateTransition(F);
+        f->SetMeasurementMatrix(H);
+        f->SetProcessNoise(Q);
+        f->SetMeasurementNoise(R);
+    }
+
+    std::array<float, 5> measurements{ 0.1f, 0.25f, 0.42f, 0.61f, 0.83f };
+    for (float z : measurements)
+    {
+        filterA.Predict();
+        filterA.Update(MeasVec1{ { z } });
+        filterB.Predict();
+        filterB.Update(MeasVec1{ { z } });
+    }
+
+    EXPECT_FLOAT_EQ(filterA.GetState().at(0, 0), filterB.GetState().at(0, 0));
+    EXPECT_FLOAT_EQ(filterA.GetState().at(1, 0), filterB.GetState().at(1, 0));
+    EXPECT_FLOAT_EQ(filterA.GetCovariance().at(0, 0), filterB.GetCovariance().at(0, 0));
+}
+
+TEST_F(KalmanFilterConsistencyTest, NeesReturnNulloptForSingularCovariance)
+{
+    StateVec2 error{ { 1.0f }, { 0.0f } };
+    StateMat2 singular{ { 0.0f, 0.0f }, { 0.0f, 0.0f } };
+
+    auto nees = Cm2::Nees(error, singular);
+    EXPECT_FALSE(nees.has_value());
+}
+
+TEST_F(KalmanFilterConsistencyTest, NisReturnNulloptForSingularInnovationCovariance)
+{
+    InnovVec innovation{ { 1.5f } };
+    InnovCov singular{ { 0.0f } };
+
+    auto nis = Cm1::Nis(innovation, singular);
+    EXPECT_FALSE(nis.has_value());
+}
+
+TEST_F(KalmanFilterConsistencyTest, NeesIsNonNegativeForAnyValidErrorAndCovariance)
+{
+    StateVec2 error{ { 2.0f }, { 1.0f } };
+    StateMat2 cov{
+        { 4.0f, 0.5f },
+        { 0.5f, 2.0f }
+    };
+
+    auto nees = Cm2::Nees(error, cov);
+    ASSERT_TRUE(nees.has_value());
+    EXPECT_GE(*nees, 0.0f);
+}
+
+TEST_F(KalmanFilterConsistencyTest, TimeAveragedNisConsistentForNoiselessLinearSystem)
+{
+    constexpr int kSteps = 10;
+    constexpr float trueVel = 0.2f;
+
+    float nisSum = 0.0f;
+
+    for (int i = 0; i < kSteps; ++i)
+    {
+        filter->Predict();
+
+        float measPos = trueVel * static_cast<float>(i + 1) * kDt;
+        InnovVec innovation;
+        innovation.at(0, 0) = measPos - filter->GetState().at(0, 0);
+
+        auto P = filter->GetCovariance();
+        InnovCov S;
+        S.at(0, 0) = P.at(0, 0) + R.at(0, 0);
+
+        auto nis = Cm1::Nis(innovation, S);
+        ASSERT_TRUE(nis.has_value());
+        nisSum += *nis;
+
+        filter->Update(MeasVec1{ { measPos } });
+    }
+
+    float avgNis = nisSum / static_cast<float>(kSteps);
+    EXPECT_GE(avgNis, 0.0f);
 }

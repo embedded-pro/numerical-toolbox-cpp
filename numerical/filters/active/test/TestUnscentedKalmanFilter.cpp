@@ -1,20 +1,23 @@
 #include "numerical/filters/active/UnscentedKalmanFilter.hpp"
-#include "numerical/math/Tolerance.hpp"
+#include "numerical/math/test_doubles/MatrixTestSupport.hpp"
 #include <gtest/gtest.h>
 
 namespace
 {
+    using math::test::AreVectorsNear;
+
     using StateVec2 = math::Vector<float, 2>;
     using MeasVec1 = math::Vector<float, 1>;
     using StateMat2 = math::SquareMatrix<float, 2>;
+    using MeasCov1 = math::SquareMatrix<float, 1>;
+    using ControlVec1 = math::Vector<float, 1>;
 
-    constexpr float dt = 0.1f;
+    constexpr float kDt = 0.1f;
 
-    // Linear state transition for comparison with KF
     StateVec2 LinearStateTransition(const StateVec2& x)
     {
         return StateVec2{
-            { float(x.at(0, 0) + dt * x.at(1, 0)) },
+            { x.at(0, 0) + kDt * x.at(1, 0) },
             { x.at(1, 0) }
         };
     }
@@ -24,287 +27,211 @@ namespace
         return MeasVec1{ { x.at(0, 0) } };
     }
 
-    // Nonlinear pendulum-like system: position += velocity*dt, velocity += -sin(position)*dt
     StateVec2 NonlinearStateTransition(const StateVec2& x)
     {
         float pos = x.at(0, 0);
         float vel = x.at(1, 0);
         return StateVec2{
-            { pos + vel * dt },
-            { vel - std::sin(pos) * dt }
+            { pos + vel * kDt },
+            { vel - std::sin(pos) * kDt }
         };
     }
-
-    // State transition with control input
-    using ControlVec1 = math::Vector<float, 1>;
 
     StateVec2 StateTransitionWithControl(const StateVec2& x, const ControlVec1& u)
     {
         float pos = x.at(0, 0);
         float vel = x.at(1, 0);
         return StateVec2{
-            { pos + vel * dt },
-            { vel + u.at(0, 0) * dt }
+            { pos + vel * kDt },
+            { vel + u.at(0, 0) * kDt }
         };
     }
 
-    template<typename T>
-    class UnscentedKalmanFilterTest
-        : public ::testing::Test
+    class UnscentedKalmanFilterTest : public ::testing::Test
     {
     protected:
-        float tolerance = math::Tolerance<T>();
+        using UkfType = filters::UnscentedKalmanFilter<float, 2, 1, 0>;
+        using UkfWithControlType = filters::UnscentedKalmanFilter<float, 2, 1, 1>;
 
-        using UkfType = filters::UnscentedKalmanFilter<T, 2, 1, 0>;
-        using UkfWithControlType = filters::UnscentedKalmanFilter<T, 2, 1, 1>;
-        using StateVector = typename UkfType::StateVector;
-        using StateMatrix = typename UkfType::StateMatrix;
-        using MeasurementVector = typename UkfType::MeasurementVector;
-        using MeasurementCovariance = typename UkfType::MeasurementCovariance;
+        StateMat2 initialCovariance{
+            { 0.5f, 0.0f },
+            { 0.0f, 0.5f }
+        };
+
+        filters::UkfParameters params;
+        std::optional<UkfType> ukf;
+        std::optional<UkfWithControlType> ukfCtrl;
+
+        void SetUp() override
+        {
+            params.alpha = 1e-1f;
+            params.beta = 2.0f;
+            params.kappa = 0.0f;
+        }
+
+        void BuildLinearUkf()
+        {
+            ukf.emplace(StateVec2{}, initialCovariance, LinearStateTransition, LinearMeasurement, params);
+            ukf->SetProcessNoise(StateMat2{
+                { 0.01f, 0.0f },
+                { 0.0f, 0.01f } });
+            ukf->SetMeasurementNoise(MeasCov1{ { 0.5f } });
+        }
+
+        void BuildControlUkf()
+        {
+            ukfCtrl.emplace(StateVec2{}, initialCovariance, StateTransitionWithControl, LinearMeasurement, params);
+            ukfCtrl->SetProcessNoise(StateMat2{
+                { 0.01f, 0.0f },
+                { 0.0f, 0.01f } });
+            ukfCtrl->SetMeasurementNoise(MeasCov1{ { 0.5f } });
+        }
     };
-
-    using TestTypes = ::testing::Types<float>;
-    TYPED_TEST_SUITE(UnscentedKalmanFilterTest, TestTypes);
 }
 
-TYPED_TEST(UnscentedKalmanFilterTest, LinearSystemTracksConstantVelocity)
+TEST_F(UnscentedKalmanFilterTest, LinearSystemTracksConstantVelocity)
 {
-    using StateVector = typename TestFixture::StateVector;
-    using StateMatrix = typename TestFixture::StateMatrix;
-    using MeasurementCovariance = typename TestFixture::MeasurementCovariance;
-
-    auto initialState = StateVector{ { TypeParam(0.0f) }, { TypeParam(0.0f) } };
-    auto initialP = StateMatrix{
-        { TypeParam(0.5f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.5f) }
-    };
-
-    filters::UkfParameters params;
-    params.alpha = 1e-1f;
-    params.beta = 2.0f;
-    params.kappa = 0.0f;
-
-    typename TestFixture::UkfType ukf(initialState, initialP,
-        LinearStateTransition, LinearMeasurement, params);
-
-    ukf.SetProcessNoise(StateMatrix{
-        { TypeParam(0.01f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.01f) } });
-    ukf.SetMeasurementNoise(MeasurementCovariance{ { TypeParam(0.5f) } });
+    BuildLinearUkf();
 
     float truePos = 0.0f;
-    float trueVel = 0.5f;
+    constexpr float trueVel = 0.5f;
 
     for (int i = 0; i < 10; ++i)
     {
-        truePos += trueVel * dt;
-        ukf.Predict();
-        ukf.Update(typename TestFixture::MeasurementVector{ { TypeParam(truePos) } });
+        truePos += trueVel * kDt;
+        ukf->Predict();
+        ukf->Update(MeasVec1{ { truePos } });
     }
 
-    auto finalState = ukf.GetState();
-    EXPECT_NEAR(math::ToFloat(finalState.at(0, 0)), truePos, 0.2f);
-    EXPECT_NEAR(math::ToFloat(finalState.at(1, 0)), trueVel, 0.5f);
+    auto finalState = ukf->GetState();
+    EXPECT_NEAR(finalState.at(0, 0), truePos, 0.2f);
+    EXPECT_NEAR(finalState.at(1, 0), trueVel, 0.5f);
 }
 
-TYPED_TEST(UnscentedKalmanFilterTest, PredictGrowsCovariance)
+TEST_F(UnscentedKalmanFilterTest, PredictGrowsCovariance)
 {
-    using StateVector = typename TestFixture::StateVector;
-    using StateMatrix = typename TestFixture::StateMatrix;
+    ukf.emplace(StateVec2{ { 0.0f }, { 0.1f } }, StateMat2{
+        { 0.1f, 0.0f },
+        { 0.0f, 0.1f } }, LinearStateTransition, LinearMeasurement, params);
+    ukf->SetProcessNoise(StateMat2{
+        { 0.01f, 0.0f },
+        { 0.0f, 0.01f } });
 
-    auto initialState = StateVector{ { TypeParam(0.0f) }, { TypeParam(0.1f) } };
-    auto initialP = StateMatrix{
-        { TypeParam(0.1f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.1f) }
-    };
+    auto covBefore = ukf->GetCovariance();
+    ukf->Predict();
+    auto covAfter = ukf->GetCovariance();
 
-    filters::UkfParameters params;
-    params.alpha = 1e-1f;
-
-    typename TestFixture::UkfType ukf(initialState, initialP,
-        LinearStateTransition, LinearMeasurement, params);
-
-    ukf.SetProcessNoise(StateMatrix{
-        { TypeParam(0.01f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.01f) } });
-
-    auto covBefore = ukf.GetCovariance();
-    ukf.Predict();
-    auto covAfter = ukf.GetCovariance();
-
-    EXPECT_GT(math::ToFloat(covAfter.at(0, 0)), math::ToFloat(covBefore.at(0, 0)));
+    EXPECT_GT(covAfter.at(0, 0), covBefore.at(0, 0));
 }
 
-TYPED_TEST(UnscentedKalmanFilterTest, UpdateReducesCovariance)
+TEST_F(UnscentedKalmanFilterTest, UpdateReducesCovariance)
 {
-    using StateVector = typename TestFixture::StateVector;
-    using StateMatrix = typename TestFixture::StateMatrix;
-    using MeasurementCovariance = typename TestFixture::MeasurementCovariance;
+    ukf.emplace(StateVec2{}, initialCovariance, LinearStateTransition, LinearMeasurement, params);
+    ukf->SetMeasurementNoise(MeasCov1{ { 0.5f } });
 
-    auto initialState = StateVector{ { TypeParam(0.0f) }, { TypeParam(0.0f) } };
-    auto initialP = StateMatrix{
-        { TypeParam(0.5f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.5f) }
-    };
+    auto covBefore = ukf->GetCovariance();
+    ukf->Update(MeasVec1{ { 0.5f } });
+    auto covAfter = ukf->GetCovariance();
 
-    filters::UkfParameters params;
-    params.alpha = 1e-1f;
-
-    typename TestFixture::UkfType ukf(initialState, initialP,
-        LinearStateTransition, LinearMeasurement, params);
-
-    ukf.SetMeasurementNoise(MeasurementCovariance{ { TypeParam(0.5f) } });
-
-    auto covBefore = ukf.GetCovariance();
-    ukf.Update(typename TestFixture::MeasurementVector{ { TypeParam(0.5f) } });
-    auto covAfter = ukf.GetCovariance();
-
-    EXPECT_LT(math::ToFloat(covAfter.at(0, 0)), math::ToFloat(covBefore.at(0, 0)));
+    EXPECT_LT(covAfter.at(0, 0), covBefore.at(0, 0));
 }
 
-TYPED_TEST(UnscentedKalmanFilterTest, NonlinearTrackingConverges)
+TEST_F(UnscentedKalmanFilterTest, NonlinearTrackingConverges)
 {
-    using StateVector = typename TestFixture::StateVector;
-    using StateMatrix = typename TestFixture::StateMatrix;
-    using MeasurementCovariance = typename TestFixture::MeasurementCovariance;
+    ukf.emplace(StateVec2{}, initialCovariance, NonlinearStateTransition, LinearMeasurement, params);
+    ukf->SetProcessNoise(StateMat2{
+        { 0.001f, 0.0f },
+        { 0.0f, 0.001f } });
+    ukf->SetMeasurementNoise(MeasCov1{ { 0.1f } });
 
-    auto initialState = StateVector{ { TypeParam(0.0f) }, { TypeParam(0.0f) } };
-    auto initialP = StateMatrix{
-        { TypeParam(0.5f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.5f) }
-    };
-
-    filters::UkfParameters params;
-    params.alpha = 1e-1f;
-    params.beta = 2.0f;
-    params.kappa = 0.0f;
-
-    typename TestFixture::UkfType ukf(initialState, initialP,
-        NonlinearStateTransition, LinearMeasurement, params);
-
-    ukf.SetProcessNoise(StateMatrix{
-        { TypeParam(0.001f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.001f) } });
-    ukf.SetMeasurementNoise(MeasurementCovariance{ { TypeParam(0.1f) } });
-
-    // Simulate a pendulum-like system
     float truePos = 0.3f;
     float trueVel = 0.0f;
 
     for (int i = 0; i < 50; ++i)
     {
-        float newVel = trueVel - std::sin(truePos) * dt;
-        float newPos = truePos + trueVel * dt;
+        float newVel = trueVel - std::sin(truePos) * kDt;
+        float newPos = truePos + trueVel * kDt;
         truePos = newPos;
         trueVel = newVel;
 
-        ukf.Predict();
-        ukf.Update(typename TestFixture::MeasurementVector{ { TypeParam(truePos) } });
+        ukf->Predict();
+        ukf->Update(MeasVec1{ { truePos } });
     }
 
-    auto finalState = ukf.GetState();
-    EXPECT_NEAR(math::ToFloat(finalState.at(0, 0)), truePos, 0.1f);
-    EXPECT_NEAR(math::ToFloat(finalState.at(1, 0)), trueVel, 0.2f);
+    auto finalState = ukf->GetState();
+    EXPECT_NEAR(finalState.at(0, 0), truePos, 0.1f);
+    EXPECT_NEAR(finalState.at(1, 0), trueVel, 0.2f);
 }
 
-TYPED_TEST(UnscentedKalmanFilterTest, WithControlInput)
+TEST_F(UnscentedKalmanFilterTest, WithControlInputTracksAcceleratingObject)
 {
-    using StateVector = typename TestFixture::StateVector;
-    using StateMatrix = typename TestFixture::StateMatrix;
-    using MeasurementCovariance = typename TestFixture::MeasurementCovariance;
-
-    auto initialState = StateVector{ { TypeParam(0.0f) }, { TypeParam(0.0f) } };
-    auto initialP = StateMatrix{
-        { TypeParam(0.5f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.5f) }
-    };
-
-    filters::UkfParameters params;
-    params.alpha = 1e-1f;
-
-    typename TestFixture::UkfWithControlType ukf(initialState, initialP,
-        StateTransitionWithControl, LinearMeasurement, params);
-
-    ukf.SetProcessNoise(StateMatrix{
-        { TypeParam(0.01f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.01f) } });
-    ukf.SetMeasurementNoise(MeasurementCovariance{ { TypeParam(0.5f) } });
+    BuildControlUkf();
 
     ControlVec1 controlInput{ { 1.0f } };
-
     float truePos = 0.0f;
     float trueVel = 0.0f;
 
     for (int i = 0; i < 10; ++i)
     {
-        trueVel += 1.0f * dt;
-        truePos += trueVel * dt;
+        trueVel += 1.0f * kDt;
+        truePos += trueVel * kDt;
 
-        ukf.Predict(controlInput);
-        ukf.Update(typename TestFixture::MeasurementVector{ { TypeParam(truePos) } });
+        ukfCtrl->Predict(controlInput);
+        ukfCtrl->Update(MeasVec1{ { truePos } });
     }
 
-    auto finalState = ukf.GetState();
-    EXPECT_NEAR(math::ToFloat(finalState.at(0, 0)), truePos, 0.2f);
-    EXPECT_NEAR(math::ToFloat(finalState.at(1, 0)), trueVel, 0.5f);
+    auto finalState = ukfCtrl->GetState();
+    EXPECT_NEAR(finalState.at(0, 0), truePos, 0.2f);
+    EXPECT_NEAR(finalState.at(1, 0), trueVel, 0.5f);
 }
 
-TYPED_TEST(UnscentedKalmanFilterTest, ThreeStateConstantAcceleration)
+TEST_F(UnscentedKalmanFilterTest, ThreeStateConstantAccelerationConverges)
 {
-    using StateVec3 = math::Vector<TypeParam, 3>;
-    using StateMat3 = math::SquareMatrix<TypeParam, 3>;
-    using MeasVec = math::Vector<TypeParam, 1>;
-    using MeasCov = math::SquareMatrix<TypeParam, 1>;
-    using Ukf3 = filters::UnscentedKalmanFilter<TypeParam, 3, 1, 0>;
+    using StateVec3 = math::Vector<float, 3>;
+    using StateMat3 = math::SquareMatrix<float, 3>;
+    using Ukf3 = filters::UnscentedKalmanFilter<float, 3, 1, 0>;
 
     auto transition = [](const StateVec3& x) -> StateVec3
     {
         return StateVec3{
-            { TypeParam(math::ToFloat(x.at(0, 0)) + math::ToFloat(x.at(1, 0)) * dt) },
-            { TypeParam(math::ToFloat(x.at(1, 0)) + math::ToFloat(x.at(2, 0)) * dt) },
+            { x.at(0, 0) + x.at(1, 0) * kDt },
+            { x.at(1, 0) + x.at(2, 0) * kDt },
             { x.at(2, 0) }
         };
     };
 
-    auto measurementFn = [](const StateVec3& x) -> MeasVec
+    auto measurementFn = [](const StateVec3& x) -> MeasVec1
     {
-        return MeasVec{ { x.at(0, 0) } };
+        return MeasVec1{ { x.at(0, 0) } };
     };
 
-    auto initialState = StateVec3{ { TypeParam(0.0f) }, { TypeParam(0.0f) }, { TypeParam(0.0f) } };
-    auto initialP = StateMat3{
-        { TypeParam(1.0f), TypeParam(0.0f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(1.0f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.0f), TypeParam(1.0f) }
+    StateMat3 initialP{
+        { 1.0f, 0.0f, 0.0f },
+        { 0.0f, 1.0f, 0.0f },
+        { 0.0f, 0.0f, 1.0f }
     };
 
-    filters::UkfParameters params;
-    params.alpha = 1e-1f;
-    params.beta = 2.0f;
-    params.kappa = 0.0f;
+    Ukf3 ukf3(StateVec3{}, initialP, transition, measurementFn, params);
+    ukf3.SetProcessNoise(StateMat3{
+        { 0.01f, 0.0f, 0.0f },
+        { 0.0f, 0.01f, 0.0f },
+        { 0.0f, 0.0f, 0.01f } });
+    ukf3.SetMeasurementNoise(math::SquareMatrix<float, 1>{ { 0.1f } });
 
-    Ukf3 ukf(initialState, initialP, transition, measurementFn, params);
-
-    ukf.SetProcessNoise(StateMat3{
-        { TypeParam(0.01f), TypeParam(0.0f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.01f), TypeParam(0.0f) },
-        { TypeParam(0.0f), TypeParam(0.0f), TypeParam(0.01f) } });
-    ukf.SetMeasurementNoise(MeasCov{ { TypeParam(0.1f) } });
-
-    float trueAcc = 0.5f;
+    constexpr float trueAcc = 0.5f;
     float trueVel3 = 0.0f;
     float truePos3 = 0.0f;
 
     for (int i = 0; i < 30; ++i)
     {
-        trueVel3 += trueAcc * dt;
-        truePos3 += trueVel3 * dt;
+        trueVel3 += trueAcc * kDt;
+        truePos3 += trueVel3 * kDt;
 
-        ukf.Predict();
-        ukf.Update(MeasVec{ { TypeParam(truePos3) } });
+        ukf3.Predict();
+        ukf3.Update(MeasVec1{ { truePos3 } });
     }
 
-    auto finalState3 = ukf.GetState();
-    EXPECT_NEAR(math::ToFloat(finalState3.at(0, 0)), truePos3, 0.15f);
-    EXPECT_NEAR(math::ToFloat(finalState3.at(1, 0)), trueVel3, 0.3f);
+    auto finalState3 = ukf3.GetState();
+    EXPECT_NEAR(finalState3.at(0, 0), truePos3, 0.15f);
+    EXPECT_NEAR(finalState3.at(1, 0), trueVel3, 0.3f);
 }
