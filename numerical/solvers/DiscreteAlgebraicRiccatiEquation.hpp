@@ -9,7 +9,6 @@
 #include "numerical/math/QNumber.hpp"
 #include "numerical/math/Tolerance.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
-#include "numerical/math/Math.hpp"
 
 namespace solvers
 {

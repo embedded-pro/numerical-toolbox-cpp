@@ -9,7 +9,6 @@
 #include "numerical/solvers/DiscreteAlgebraicRiccatiEquation.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 #include "numerical/solvers/SpectralRadius.hpp"
-#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <type_traits>
 

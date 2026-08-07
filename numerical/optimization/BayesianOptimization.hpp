@@ -5,10 +5,10 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 #include <array>
-#include "numerical/math/Math.hpp"
 #include <cstdint>
 #include <numbers>
 #include <utility>

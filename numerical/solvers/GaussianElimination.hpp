@@ -10,7 +10,6 @@
 #include "numerical/math/QNumber.hpp"
 #include "numerical/math/TriangularSolve.hpp"
 #include "numerical/solvers/Solver.hpp"
-#include "numerical/math/Math.hpp"
 
 namespace solvers
 {

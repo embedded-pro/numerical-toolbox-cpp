@@ -6,10 +6,10 @@
 
 #include "infra/util/BoundedVector.hpp"
 #include "infra/util/ReallyAssert.hpp"
-#include "numerical/math/ComplexNumber.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
-#include <algorithm>
+#include "numerical/math/ComplexNumber.hpp"
 #include "numerical/math/Math.hpp"
+#include <algorithm>
 #include <cstddef>
 #include <numbers>
 #include <span>

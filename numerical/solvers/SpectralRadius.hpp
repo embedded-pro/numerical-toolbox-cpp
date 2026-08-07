@@ -5,10 +5,10 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/solvers/DurandKerner.hpp"
 #include <array>
-#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <span>
 #include <type_traits>

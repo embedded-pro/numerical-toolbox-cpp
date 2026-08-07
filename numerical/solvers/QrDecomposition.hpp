@@ -7,9 +7,9 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/GivensRotation.hpp"
 #include "numerical/math/HouseholderTransform.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/TriangularSolve.hpp"
-#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <type_traits>
 
