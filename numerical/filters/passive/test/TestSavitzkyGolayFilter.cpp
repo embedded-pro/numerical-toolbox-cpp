@@ -17,7 +17,7 @@ namespace
 
 TEST_F(TestSavitzkyGolayFilter, coefficients_sum_to_one)
 {
-    constexpr auto coeffs = filters::passive::SavitzkyGolayFilter<float, 5, 2, 0>::Coefficients();
+    auto coeffs = filters::passive::SavitzkyGolayFilter<float, 5, 2, 0>::Coefficients();
     float sum{};
     for (float c : coeffs)
         sum += c;
@@ -26,7 +26,7 @@ TEST_F(TestSavitzkyGolayFilter, coefficients_sum_to_one)
 
 TEST_F(TestSavitzkyGolayFilter, known_5pt_quadratic_kernel)
 {
-    constexpr auto coeffs = filters::passive::SavitzkyGolayFilter<float, 5, 2, 0>::Coefficients();
+    auto coeffs = filters::passive::SavitzkyGolayFilter<float, 5, 2, 0>::Coefficients();
     constexpr std::array<float, 5> expected{ -3.0f / 35.0f, 12.0f / 35.0f, 17.0f / 35.0f, 12.0f / 35.0f, -3.0f / 35.0f };
     constexpr float tol = 1e-5f;
     for (std::size_t i = 0; i < 5; ++i)
@@ -99,7 +99,7 @@ TEST_F(TestSavitzkyGolayFilter, reset_clears_line)
     constexpr float x = 1.0f;
     float out = sg.Filter(x);
 
-    constexpr auto coeffs = filters::passive::SavitzkyGolayFilter<float, 5, 2, 0>::Coefficients();
+    auto coeffs = filters::passive::SavitzkyGolayFilter<float, 5, 2, 0>::Coefficients();
     float expected = coeffs[4] * x;
 
     EXPECT_NEAR(out, expected, tol);
@@ -107,7 +107,7 @@ TEST_F(TestSavitzkyGolayFilter, reset_clears_line)
 
 TEST_F(TestSavitzkyGolayFilter, smoothing_kernel_is_symmetric)
 {
-    constexpr auto coeffs = filters::passive::SavitzkyGolayFilter<float, 5, 2, 0>::Coefficients();
+    auto coeffs = filters::passive::SavitzkyGolayFilter<float, 5, 2, 0>::Coefficients();
     constexpr float tol = 1e-6f;
     for (std::size_t i = 0; i < 5 / 2; ++i)
         EXPECT_NEAR(coeffs[i], coeffs[4 - i], tol);
@@ -115,7 +115,7 @@ TEST_F(TestSavitzkyGolayFilter, smoothing_kernel_is_symmetric)
 
 TEST_F(TestSavitzkyGolayFilter, derivative_kernel_is_antisymmetric)
 {
-    constexpr auto coeffs = filters::passive::SavitzkyGolayFilter<float, 5, 2, 1>::Coefficients();
+    auto coeffs = filters::passive::SavitzkyGolayFilter<float, 5, 2, 1>::Coefficients();
     constexpr float tol = 1e-6f;
     for (std::size_t i = 0; i < 5 / 2; ++i)
         EXPECT_NEAR(coeffs[i], -coeffs[4 - i], tol);
@@ -124,7 +124,7 @@ TEST_F(TestSavitzkyGolayFilter, derivative_kernel_is_antisymmetric)
 
 TEST_F(TestSavitzkyGolayFilter, derivative_kernel_sums_to_zero)
 {
-    constexpr auto coeffs = filters::passive::SavitzkyGolayFilter<float, 5, 2, 1>::Coefficients();
+    auto coeffs = filters::passive::SavitzkyGolayFilter<float, 5, 2, 1>::Coefficients();
     float sum{};
     for (float c : coeffs)
         sum += c;
@@ -170,7 +170,7 @@ TEST_F(TestSavitzkyGolayFilter, reset_to_nonzero_fills_buffer)
 
 TEST_F(TestSavitzkyGolayFilter, seven_point_cubic_kernel_matches_reference)
 {
-    constexpr auto coeffs = filters::passive::SavitzkyGolayFilter<float, 7, 3, 0>::Coefficients();
+    auto coeffs = filters::passive::SavitzkyGolayFilter<float, 7, 3, 0>::Coefficients();
     constexpr std::array<float, 7> expected{
         -2.0f / 21.0f,
         1.0f / 7.0f,
