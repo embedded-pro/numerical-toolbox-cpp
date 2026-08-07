@@ -10,6 +10,7 @@ option(NUMERICAL_TOOLBOX_BUILD_SIMULATOR "Enable build of the Qt simulator appli
 option(NUMERICAL_TOOLBOX_BUILD_TESTS "Enable build of the tests" Off)
 option(NUMERICAL_TOOLBOX_BUILD_INTEGRATION_TESTS "Enable build of the cucumber integration tests" Off)
 option(NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS "Enable compiler optimizations for numerical routines" On)
+option(NUMERICAL_TOOLBOX_ENABLE_CUSTOM_MATH "Enable platform-specific math overrides (e.g. MathArm.hpp for ARM targets)" Off)
 
 if (NUMERICAL_TOOLBOX_BUILD_TESTS)
     # CTest cannot be included before the first project() statement, but Embedded Infastructure
