@@ -12,47 +12,47 @@ extern "C"
     static void Default_Handler();
 
     void Reset_Handler();
-    void NMI_Handler()        __attribute__((weak, alias("Default_Handler")));
-    void HardFault_Handler()  __attribute__((weak, alias("Default_Handler")));
-    void MemManage_Handler()  __attribute__((weak, alias("Default_Handler")));
-    void BusFault_Handler()   __attribute__((weak, alias("Default_Handler")));
+    void NMI_Handler() __attribute__((weak, alias("Default_Handler")));
+    void HardFault_Handler() __attribute__((weak, alias("Default_Handler")));
+    void MemManage_Handler() __attribute__((weak, alias("Default_Handler")));
+    void BusFault_Handler() __attribute__((weak, alias("Default_Handler")));
     void UsageFault_Handler() __attribute__((weak, alias("Default_Handler")));
-    void SVC_Handler()        __attribute__((weak, alias("Default_Handler")));
-    void DebugMon_Handler()   __attribute__((weak, alias("Default_Handler")));
-    void PendSV_Handler()     __attribute__((weak, alias("Default_Handler")));
-    void SysTick_Handler()    __attribute__((weak, alias("Default_Handler")));
-    void IRQ0_Handler()       __attribute__((weak, alias("Default_Handler")));
-    void IRQ1_Handler()       __attribute__((weak, alias("Default_Handler")));
-    void IRQ2_Handler()       __attribute__((weak, alias("Default_Handler")));
-    void IRQ3_Handler()       __attribute__((weak, alias("Default_Handler")));
-    void IRQ4_Handler()       __attribute__((weak, alias("Default_Handler")));
-    void IRQ5_Handler()       __attribute__((weak, alias("Default_Handler")));
-    void IRQ6_Handler()       __attribute__((weak, alias("Default_Handler")));
-    void IRQ7_Handler()       __attribute__((weak, alias("Default_Handler")));
-    void IRQ8_Handler()       __attribute__((weak, alias("Default_Handler")));
-    void IRQ9_Handler()       __attribute__((weak, alias("Default_Handler")));
-    void IRQ10_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ11_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ12_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ13_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ14_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ15_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ16_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ17_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ18_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ19_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ20_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ21_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ22_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ23_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ24_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ25_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ26_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ27_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ28_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ29_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ30_Handler()      __attribute__((weak, alias("Default_Handler")));
-    void IRQ31_Handler()      __attribute__((weak, alias("Default_Handler")));
+    void SVC_Handler() __attribute__((weak, alias("Default_Handler")));
+    void DebugMon_Handler() __attribute__((weak, alias("Default_Handler")));
+    void PendSV_Handler() __attribute__((weak, alias("Default_Handler")));
+    void SysTick_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ0_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ1_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ2_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ3_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ4_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ5_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ6_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ7_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ8_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ9_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ10_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ11_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ12_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ13_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ14_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ15_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ16_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ17_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ18_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ19_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ20_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ21_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ22_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ23_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ24_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ25_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ26_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ27_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ28_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ29_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ30_Handler() __attribute__((weak, alias("Default_Handler")));
+    void IRQ31_Handler() __attribute__((weak, alias("Default_Handler")));
 }
 
 extern "C" uint32_t _estack;
@@ -64,7 +64,7 @@ extern "C" uint32_t _ebss;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
-static void (* const g_pfnVectors[])(void) __attribute__((section(".isr_vector"), used)) = {
+static void (*const g_pfnVectors[])(void) __attribute__((section(".isr_vector"), used)) = {
     reinterpret_cast<void (*)()>(&_estack),
     Reset_Handler,
     NMI_Handler,

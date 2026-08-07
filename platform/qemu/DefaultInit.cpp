@@ -47,7 +47,13 @@ extern "C"
 
     int _write(int, const char* ptr, int len)
     {
-        struct { int handle; const void* ptr; unsigned len; } block = { 1, ptr, static_cast<unsigned>(len) };
+        struct
+        {
+            int handle;
+            const void* ptr;
+            unsigned len;
+        } block = { 1, ptr, static_cast<unsigned>(len) };
+
         int result;
         __asm volatile(
             "mov r0, #5\n"
@@ -56,8 +62,7 @@ extern "C"
             "mov %[r], r0\n"
             : [r] "=r"(result)
             : [b] "r"(&block)
-            : "r0", "r1", "memory"
-        );
+            : "r0", "r1", "memory");
         return len - result;
     }
 
