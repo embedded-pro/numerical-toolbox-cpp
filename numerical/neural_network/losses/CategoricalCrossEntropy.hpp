@@ -5,10 +5,10 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/neural_network/activation/Softmax.hpp"
 #include "numerical/neural_network/losses/Loss.hpp"
 #include "numerical/regularization/Regularization.hpp"
-#include "numerical/math/Math.hpp"
 
 namespace neural_network
 {

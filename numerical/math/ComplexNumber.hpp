@@ -1,6 +1,6 @@
 #pragma once
-#include "numerical/math/QNumber.hpp"
 #include "numerical/math/Math.hpp"
+#include "numerical/math/QNumber.hpp"
 #include <type_traits>
 
 namespace math

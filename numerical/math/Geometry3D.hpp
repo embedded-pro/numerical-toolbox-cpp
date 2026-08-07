@@ -5,8 +5,8 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
-#include "numerical/math/Matrix.hpp"
 #include "numerical/math/Math.hpp"
+#include "numerical/math/Matrix.hpp"
 
 namespace math
 {

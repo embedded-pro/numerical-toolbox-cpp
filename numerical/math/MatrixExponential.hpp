@@ -7,7 +7,6 @@
 #include "numerical/math/MatrixNorms.hpp"
 #include "numerical/math/TriangularSolve.hpp"
 #include <array>
-#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <type_traits>
 

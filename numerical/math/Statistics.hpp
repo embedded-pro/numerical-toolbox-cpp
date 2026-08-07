@@ -1,7 +1,7 @@
 #pragma once
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/QNumber.hpp"
-#include "numerical/math/Math.hpp"
 
 namespace math
 {

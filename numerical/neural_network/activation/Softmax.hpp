@@ -5,8 +5,8 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
-#include "numerical/neural_network/activation/ActivationFunction.hpp"
 #include "numerical/math/Math.hpp"
+#include "numerical/neural_network/activation/ActivationFunction.hpp"
 #include <span>
 
 namespace neural_network
