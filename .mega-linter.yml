@@ -26,3 +26,4 @@ SARIF_REPORTER: true
 SHOW_SKIPPED_LINTERS: false
 JSON_JSONLINT_ARGUMENTS: --mode cjson
 CPP_CPPCHECK_ARGUMENTS: --suppress=normalCheckLevelMaxBranches --library=qt
+CPP_CPPCHECK_FILTER_REGEX_EXCLUDE: platform/qemu

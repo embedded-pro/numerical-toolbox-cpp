@@ -18,7 +18,6 @@ target_sources(numerical.math PRIVATE
     Geometry3D.hpp
     GivensRotation.hpp
     HouseholderTransform.hpp
-    HyperbolicFunctions.hpp
     LinearTimeInvariant.hpp
     Matrix.hpp
     MatrixExponential.hpp
@@ -33,7 +32,6 @@ target_sources(numerical.math PRIVATE
     Tolerance.hpp
     Math.hpp
     TriangularSolve.hpp
-    TrigonometricFunctions.hpp
 )
 
 numerical_add_coverage_sources(numerical.math
@@ -52,3 +50,4 @@ numerical_add_coverage_sources(numerical.math
 
 add_subdirectory(test)
 add_subdirectory(test_doubles)
+add_subdirectory(platform)

@@ -7,6 +7,8 @@ target_link_libraries(numerical.solvers_test PUBLIC
     numerical.solver
 )
 
+numerical_add_qemu_test(numerical.solvers_test)
+
 target_sources(numerical.solvers_test PRIVATE
     TestConditionNumber.cpp
     TestDiscreteAlgebraicRiccatiEquation.cpp

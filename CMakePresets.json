@@ -56,6 +56,34 @@
         "NUMERICAL_TOOLBOX_BUILD_TESTS": false,
         "NUMERICAL_TOOLBOX_BUILD_SIMULATOR": false
       }
+    },
+    {
+      "name": "qemu-cortex-m4",
+      "displayName": "QEMU Cortex-M4 Tests",
+      "inherits": "defaults",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
+      "generator": "Ninja Multi-Config",
+      "cacheVariables": {
+        "CMAKE_CONFIGURATION_TYPES": "RelWithDebInfo",
+        "NUMERICAL_TOOLBOX_BUILD_TESTS": "On",
+        "NUMERICAL_TOOLBOX_BUILD_SIMULATOR": "Off",
+        "QEMU_MACHINE": "mps2-an386",
+        "CMAKE_CXX_FLAGS": "-DGTEST_HAS_STREAM_REDIRECTION=0 -DGTEST_HAS_POSIX_RE=0 -D_POSIX_C_SOURCE=200112L"
+      }
+    },
+    {
+      "name": "qemu-cortex-m7",
+      "displayName": "QEMU Cortex-M7 Tests",
+      "inherits": "defaults",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m7-fpv5-d16.cmake",
+      "generator": "Ninja Multi-Config",
+      "cacheVariables": {
+        "CMAKE_CONFIGURATION_TYPES": "RelWithDebInfo",
+        "NUMERICAL_TOOLBOX_BUILD_TESTS": "On",
+        "NUMERICAL_TOOLBOX_BUILD_SIMULATOR": "Off",
+        "QEMU_MACHINE": "mps2-an500",
+        "CMAKE_CXX_FLAGS": "-DGTEST_HAS_STREAM_REDIRECTION=0 -DGTEST_HAS_POSIX_RE=0 -D_POSIX_C_SOURCE=200112L"
+      }
     }
   ],
   "buildPresets": [
@@ -92,6 +120,56 @@
       "name": "integration-Debug",
       "configuration": "Debug",
       "configurePreset": "integration"
+    },
+    {
+      "name": "qemu-cortex-m4-RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "configurePreset": "qemu-cortex-m4",
+      "targets": [
+        "numerical.analysis_test",
+        "numerical.analysis.windowing_test",
+        "numerical.control_analysis_test",
+        "numerical.controllers_test",
+        "numerical.estimators.offline_test",
+        "numerical.estimators.online_test",
+        "numerical.filters.active_test",
+        "numerical.filters.passive_test",
+        "numerical.math_test",
+        "numerical.neural_network.activation_test",
+        "numerical.neural_network.layer_test",
+        "numerical.neural_network.losses_test",
+        "numerical.neural_network.model_test",
+        "numerical.nonlinear_control_test",
+        "numerical.optimization_test",
+        "numerical.regularization_test",
+        "numerical.robust_control_test",
+        "numerical.solvers_test"
+      ]
+    },
+    {
+      "name": "qemu-cortex-m7-RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "configurePreset": "qemu-cortex-m7",
+      "targets": [
+        "numerical.analysis_test",
+        "numerical.analysis.windowing_test",
+        "numerical.control_analysis_test",
+        "numerical.controllers_test",
+        "numerical.estimators.offline_test",
+        "numerical.estimators.online_test",
+        "numerical.filters.active_test",
+        "numerical.filters.passive_test",
+        "numerical.math_test",
+        "numerical.neural_network.activation_test",
+        "numerical.neural_network.layer_test",
+        "numerical.neural_network.losses_test",
+        "numerical.neural_network.model_test",
+        "numerical.nonlinear_control_test",
+        "numerical.optimization_test",
+        "numerical.regularization_test",
+        "numerical.robust_control_test",
+        "numerical.solvers_test"
+      ]
     }
   ],
   "testPresets": [
@@ -128,6 +206,18 @@
       "name": "integration",
       "configurePreset": "integration",
       "configuration": "Debug",
+      "inherits": "defaults"
+    },
+    {
+      "name": "qemu-cortex-m4",
+      "configurePreset": "qemu-cortex-m4",
+      "configuration": "RelWithDebInfo",
+      "inherits": "defaults"
+    },
+    {
+      "name": "qemu-cortex-m7",
+      "configurePreset": "qemu-cortex-m7",
+      "configuration": "RelWithDebInfo",
       "inherits": "defaults"
     }
   ]

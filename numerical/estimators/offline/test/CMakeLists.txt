@@ -7,6 +7,8 @@ target_link_libraries(numerical.estimators.offline_test PUBLIC
     numerical.estimators.offline
 )
 
+numerical_add_qemu_test(numerical.estimators.offline_test)
+
 target_sources(numerical.estimators.offline_test PRIVATE
     TestExpectationMaximization.cpp
     TestLinearRegression.cpp

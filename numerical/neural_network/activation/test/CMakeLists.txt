@@ -7,6 +7,8 @@ target_link_libraries(numerical.neural_network.activation_test PUBLIC
     numerical.neural_network.activation
 )
 
+numerical_add_qemu_test(numerical.neural_network.activation_test)
+
 target_sources(numerical.neural_network.activation_test PRIVATE
     TestLeakyReLU.cpp
     TestReLU.cpp
