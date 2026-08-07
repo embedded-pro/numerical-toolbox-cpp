@@ -20,13 +20,9 @@ namespace filters::passive
         Iir(const math::RecursiveBuffer<QNumberType, P>& b, const math::RecursiveBuffer<QNumberType, Q>& a) noexcept;
 
         QNumberType Filter(QNumberType input) noexcept;
-        void Enable() noexcept;
-        void Disable() noexcept;
         void Reset() noexcept;
 
     private:
-        bool enabled = true;
-
         [[no_unique_address]] math::Index n;
         math::RecursiveBuffer<QNumberType, Q> a;
         math::RecursiveBuffer<QNumberType, P> b;
@@ -47,9 +43,6 @@ namespace filters::passive
     template<typename QNumberType, std::size_t P, std::size_t Q>
     OPTIMIZE_FOR_SPEED QNumberType Iir<QNumberType, P, Q>::Filter(QNumberType input) noexcept
     {
-        if (!enabled) [[unlikely]]
-            return input;
-
         x.Update(input);
 
         QNumberType feedforward{};
@@ -64,18 +57,6 @@ namespace filters::passive
         y.Update(output);
 
         return output;
-    }
-
-    template<typename QNumberType, std::size_t P, std::size_t Q>
-    void Iir<QNumberType, P, Q>::Enable() noexcept
-    {
-        enabled = true;
-    }
-
-    template<typename QNumberType, std::size_t P, std::size_t Q>
-    void Iir<QNumberType, P, Q>::Disable() noexcept
-    {
-        enabled = false;
     }
 
     template<typename QNumberType, std::size_t P, std::size_t Q>
