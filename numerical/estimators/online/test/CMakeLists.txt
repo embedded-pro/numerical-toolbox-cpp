@@ -7,6 +7,8 @@ target_link_libraries(numerical.estimators.online_test PUBLIC
     numerical.estimators.online
 )
 
+numerical_add_qemu_test(numerical.estimators.online_test)
+
 target_sources(numerical.estimators.online_test PRIVATE
     TestRecursiveLeastSquares.cpp
     TestLmsAdaptiveFilter.cpp

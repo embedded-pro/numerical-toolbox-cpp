@@ -315,5 +315,5 @@ TYPED_TEST(QNumberTest, DivideByZeroDies)
     TypeParam a(0.10f);
     TypeParam zero(0.0f);
 
-    EXPECT_DEATH({ TypeParam result = a / zero; }, ""); // NOLINT
+    EXPECT_DEATH_IF_SUPPORTED({ TypeParam result = a / zero; }, ""); // NOLINT
 }

@@ -8,6 +8,8 @@ target_link_libraries(numerical.filters.active_test PUBLIC
     numerical.math_test_helper
 )
 
+numerical_add_qemu_test(numerical.filters.active_test)
+
 target_sources(numerical.filters.active_test PRIVATE
     TestAhrsMadgwickMahony.cpp
     TestAlphaBetaFilter.cpp

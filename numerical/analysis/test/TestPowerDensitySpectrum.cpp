@@ -60,7 +60,7 @@ TYPED_TEST(TestPowerSpectralDensity, when_input_smaller_than_fft_size_throws_ass
     for (std::size_t i = 0; i < this->length - 1; ++i)
         input.push_back(TypeParam(0.1f));
 
-    EXPECT_DEATH(this->powerDensitySpectrum->Calculate(input), "");
+    EXPECT_DEATH_IF_SUPPORTED(this->powerDensitySpectrum->Calculate(input), "");
 }
 
 TYPED_TEST(TestPowerSpectralDensity, output_size_equals_half_segment_size_plus_one)

@@ -8,6 +8,8 @@ target_link_libraries(numerical.analysis_test PUBLIC
     numerical.math_test_helper
 )
 
+numerical_add_qemu_test(numerical.analysis_test)
+
 target_sources(numerical.analysis_test PRIVATE
     TestConvolutionCorrelation.cpp
     TestDecibels.cpp

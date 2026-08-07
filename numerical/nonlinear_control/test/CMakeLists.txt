@@ -7,6 +7,8 @@ target_link_libraries(numerical.nonlinear_control_test PUBLIC
     numerical.nonlinear_control
 )
 
+numerical_add_qemu_test(numerical.nonlinear_control_test)
+
 target_sources(numerical.nonlinear_control_test PRIVATE
     TestBacksteppingControl.cpp
     TestFeedbackLinearization.cpp

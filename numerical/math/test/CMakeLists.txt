@@ -8,6 +8,8 @@ target_link_libraries(numerical.math_test PUBLIC
     numerical.math_test_helper
 )
 
+numerical_add_qemu_test(numerical.math_test)
+
 target_sources(numerical.math_test PRIVATE
     TestComplexNumber.cpp
     TestConsistencyMetrics.cpp

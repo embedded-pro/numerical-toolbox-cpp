@@ -7,6 +7,8 @@ target_link_libraries(numerical.neural_network.model_test PUBLIC
     numerical.neural_network.model
 )
 
+numerical_add_qemu_test(numerical.neural_network.model_test)
+
 target_sources(numerical.neural_network.model_test PRIVATE
     TestModel.cpp
 )

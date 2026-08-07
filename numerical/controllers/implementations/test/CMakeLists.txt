@@ -8,6 +8,8 @@ target_link_libraries(numerical.controllers_test PUBLIC
     numerical.math_test_helper
 )
 
+numerical_add_qemu_test(numerical.controllers_test)
+
 target_sources(numerical.controllers_test PRIVATE
     TestBangBangHysteresis.cpp
     TestFeedforward2Dof.cpp

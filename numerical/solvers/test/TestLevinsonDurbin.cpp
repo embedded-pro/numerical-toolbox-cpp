@@ -50,7 +50,7 @@ TEST_F(TestLevinsonDurbin, solve_asserts_on_non_toeplitz_matrix)
     };
     math::Vector<float, 2> b{ { 0.01f }, { 0.005f } };
 
-    EXPECT_DEATH(solver.Solve(A, b), "");
+    EXPECT_DEATH_IF_SUPPORTED(solver.Solve(A, b), "");
 }
 
 TEST_F(TestLevinsonDurbin3, solve_n3_doc_reference_example)

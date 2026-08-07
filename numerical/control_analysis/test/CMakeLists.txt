@@ -8,6 +8,8 @@ target_link_libraries(numerical.control_analysis_test PUBLIC
     numerical.math_test_helper
 )
 
+numerical_add_qemu_test(numerical.control_analysis_test)
+
 target_sources(numerical.control_analysis_test PRIVATE
     TestContinuousToDiscrete.cpp
     TestControllabilityObservability.cpp

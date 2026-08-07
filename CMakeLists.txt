@@ -46,7 +46,16 @@ if (NUMERICAL_TOOLBOX_STANDALONE)
     set(EMIL_BUILD_ECHO_COMPILERS Off CACHE BOOL "" FORCE)
     set(EMIL_ENABLE_DOCKER_TOOLS Off CACHE BOOL "" FORCE)
 
+    if(DEFINED QEMU_MACHINE)
+        set(gtest_disable_pthreads ON CACHE BOOL "" FORCE)
+    endif()
+
     FetchContent_MakeAvailable(emil)
+
+    if(DEFINED QEMU_MACHINE)
+        function(emil_add_test target)
+        endfunction()
+    endif()
 endif()
 
 project(numerical-toolbox LANGUAGES C CXX ASM VERSION 2.0.0) # x-release-please-version
@@ -83,6 +92,12 @@ if (NUMERICAL_TOOLBOX_BUILD_TESTS)
     emil_enable_testing()
 elseif (NUMERICAL_TOOLBOX_BUILD_INTEGRATION_TESTS)
     include(CTest)
+endif()
+
+include(QemuHelpers)
+
+if(DEFINED QEMU_MACHINE)
+    add_subdirectory(platform/qemu)
 endif()
 
 add_subdirectory(numerical)
