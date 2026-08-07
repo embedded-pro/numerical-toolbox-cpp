@@ -5,8 +5,8 @@
 #endif
 
 #include "numerical/estimators/Estimator.hpp"
-#include "numerical/math/Math.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Math.hpp"
 
 namespace estimators
 {

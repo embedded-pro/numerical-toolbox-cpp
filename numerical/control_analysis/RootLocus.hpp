@@ -8,9 +8,9 @@
 #include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/ComplexNumber.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/solvers/DurandKerner.hpp"
 #include <array>
-#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <numbers>
 #include <span>

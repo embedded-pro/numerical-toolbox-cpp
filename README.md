@@ -129,32 +129,32 @@ target_compile_options(your_target PRIVATE -include platform/PlatformMath.hpp)
 
 ### Available override macros
 
-| Macro | Function |
-|---|---|
-| `MATH_ABS_OVERRIDE` | `math::Abs` |
-| `MATH_SQRT_OVERRIDE` | `math::Sqrt` |
-| `MATH_SIN_OVERRIDE` | `math::Sin` |
-| `MATH_COS_OVERRIDE` | `math::Cos` |
-| `MATH_TAN_OVERRIDE` | `math::Tan` |
-| `MATH_ASIN_OVERRIDE` | `math::Asin` |
-| `MATH_ACOS_OVERRIDE` | `math::Acos` |
-| `MATH_ATAN_OVERRIDE` | `math::Atan` |
-| `MATH_ATAN2_OVERRIDE` | `math::Atan2` |
-| `MATH_EXP_OVERRIDE` | `math::Exp` |
-| `MATH_LOG_OVERRIDE` | `math::Log` |
-| `MATH_LOG10_OVERRIDE` | `math::Log10` |
-| `MATH_LOG2_OVERRIDE` | `math::Log2` |
-| `MATH_POW_OVERRIDE` | `math::Pow` |
-| `MATH_SINH_OVERRIDE` | `math::Sinh` |
-| `MATH_COSH_OVERRIDE` | `math::Cosh` |
-| `MATH_TANH_OVERRIDE` | `math::Tanh` |
-| `MATH_HYPOT_OVERRIDE` | `math::Hypot` |
+| Macro                    | Function         |
+|--------------------------|------------------|
+| `MATH_ABS_OVERRIDE`      | `math::Abs`      |
+| `MATH_SQRT_OVERRIDE`     | `math::Sqrt`     |
+| `MATH_SIN_OVERRIDE`      | `math::Sin`      |
+| `MATH_COS_OVERRIDE`      | `math::Cos`      |
+| `MATH_TAN_OVERRIDE`      | `math::Tan`      |
+| `MATH_ASIN_OVERRIDE`     | `math::Asin`     |
+| `MATH_ACOS_OVERRIDE`     | `math::Acos`     |
+| `MATH_ATAN_OVERRIDE`     | `math::Atan`     |
+| `MATH_ATAN2_OVERRIDE`    | `math::Atan2`    |
+| `MATH_EXP_OVERRIDE`      | `math::Exp`      |
+| `MATH_LOG_OVERRIDE`      | `math::Log`      |
+| `MATH_LOG10_OVERRIDE`    | `math::Log10`    |
+| `MATH_LOG2_OVERRIDE`     | `math::Log2`     |
+| `MATH_POW_OVERRIDE`      | `math::Pow`      |
+| `MATH_SINH_OVERRIDE`     | `math::Sinh`     |
+| `MATH_COSH_OVERRIDE`     | `math::Cosh`     |
+| `MATH_TANH_OVERRIDE`     | `math::Tanh`     |
+| `MATH_HYPOT_OVERRIDE`    | `math::Hypot`    |
 | `MATH_COPYSIGN_OVERRIDE` | `math::Copysign` |
-| `MATH_FMOD_OVERRIDE` | `math::Fmod` |
-| `MATH_CEIL_OVERRIDE` | `math::Ceil` |
-| `MATH_FLOOR_OVERRIDE` | `math::Floor` |
-| `MATH_ROUND_OVERRIDE` | `math::Round` |
-| `MATH_ERFC_OVERRIDE` | `math::Erfc` |
+| `MATH_FMOD_OVERRIDE`     | `math::Fmod`     |
+| `MATH_CEIL_OVERRIDE`     | `math::Ceil`     |
+| `MATH_FLOOR_OVERRIDE`    | `math::Floor`    |
+| `MATH_ROUND_OVERRIDE`    | `math::Round`    |
+| `MATH_ERFC_OVERRIDE`     | `math::Erfc`     |
 
 Overrides are fully compile-time: the default body is excluded from the translation unit, so the
 replacement is used even for inlined calls. Non-overridden functions continue to use the `std::`

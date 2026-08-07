@@ -5,8 +5,8 @@
 #endif
 
 #include "numerical/math/CompilerOptimizations.hpp"
-#include <array>
 #include "numerical/math/Math.hpp"
+#include <array>
 #include <cstddef>
 #include <numbers>
 #include <type_traits>

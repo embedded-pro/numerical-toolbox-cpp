@@ -11,7 +11,6 @@
 #include "numerical/math/MatrixOperations.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 #include <array>
-#include "numerical/math/Math.hpp"
 #include <numbers>
 
 namespace filters

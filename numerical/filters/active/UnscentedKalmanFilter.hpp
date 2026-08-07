@@ -4,10 +4,10 @@
 #include "numerical/filters/active/KalmanFilterBase.hpp"
 #include "numerical/math/CholeskyDecomposition.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/MatrixOperations.hpp"
 #include <algorithm>
 #include <array>
-#include "numerical/math/Math.hpp"
 
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC optimize("O3", "fast-math")

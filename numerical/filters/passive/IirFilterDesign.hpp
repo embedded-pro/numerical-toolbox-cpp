@@ -7,8 +7,8 @@
 #include "numerical/filters/passive/BiquadCascade.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/ComplexNumber.hpp"
-#include <array>
 #include "numerical/math/Math.hpp"
+#include <array>
 #include <cstddef>
 #include <numbers>
 #include <type_traits>

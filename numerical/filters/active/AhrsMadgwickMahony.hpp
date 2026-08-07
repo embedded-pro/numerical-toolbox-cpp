@@ -6,8 +6,8 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Geometry3D.hpp"
-#include "numerical/math/Quaternion.hpp"
 #include "numerical/math/Math.hpp"
+#include "numerical/math/Quaternion.hpp"
 #include <type_traits>
 
 namespace filters
