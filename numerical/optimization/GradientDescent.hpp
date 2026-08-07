@@ -19,7 +19,7 @@ namespace optimization
 
     public:
         using Result = typename Optimizer<QNumberType, NumberOfFeatures>::Result;
-        using Vector = typename neural_network::Loss<QNumberType, NumberOfFeatures>::Vector;
+        using Vector = typename Optimizer<QNumberType, NumberOfFeatures>::Vector;
 
         struct Parameters
         {
@@ -28,7 +28,7 @@ namespace optimization
         };
 
         explicit GradientDescent(const Parameters& params);
-        const Result& Minimize(const Vector& initialGuess, neural_network::Loss<QNumberType, NumberOfFeatures>& loss) override;
+        const Result& Minimize(const Vector& initialGuess, ObjectiveFunction<QNumberType, NumberOfFeatures>& objective) override;
 
     private:
         Parameters parameters;
@@ -46,10 +46,10 @@ namespace optimization
     }
 
     template<typename QNumberType, size_t NumberOfFeatures>
-    OPTIMIZE_FOR_SPEED const typename GradientDescent<QNumberType, NumberOfFeatures>::Result& GradientDescent<QNumberType, NumberOfFeatures>::Minimize(const Vector& initialGuess, neural_network::Loss<QNumberType, NumberOfFeatures>& loss)
+    OPTIMIZE_FOR_SPEED const typename GradientDescent<QNumberType, NumberOfFeatures>::Result& GradientDescent<QNumberType, NumberOfFeatures>::Minimize(const Vector& initialGuess, ObjectiveFunction<QNumberType, NumberOfFeatures>& objective)
     {
         auto currentParams = initialGuess;
-        auto currentCost = loss.Cost(currentParams);
+        auto currentCost = objective.Cost(currentParams);
         Vector previousParams;
         size_t iteration = 0;
 
@@ -57,10 +57,10 @@ namespace optimization
         {
             previousParams = currentParams;
 
-            auto gradient = loss.Gradient(currentParams);
+            auto gradient = objective.Gradient(currentParams);
             currentParams = currentParams - (gradient * parameters.learningRate);
 
-            currentCost = loss.Cost(currentParams);
+            currentCost = objective.Cost(currentParams);
             ++iteration;
         }
 

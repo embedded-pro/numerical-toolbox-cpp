@@ -5,8 +5,8 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
+#include "numerical/math/CholeskyDecomposition.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
-#include "numerical/math/Matrix.hpp"
 #include <array>
 #include <cstddef>
 #include <type_traits>
@@ -15,47 +15,10 @@ namespace filters::passive
 {
     namespace detail
     {
-        template<typename T, std::size_t N>
-        constexpr math::Matrix<T, N, N> InvertLu(math::Matrix<T, N, N> M)
-        {
-            math::Matrix<T, N, N> inv{};
-            for (std::size_t i = 0; i < N; ++i)
-                inv.at(i, i) = T{ 1 };
-
-            for (std::size_t col = 0; col < N; ++col)
-            {
-                T pivot = M.at(col, col);
-                for (std::size_t r = col + 1; r < N; ++r)
-                {
-                    T factor = M.at(r, col) / pivot;
-                    for (std::size_t c = 0; c < N; ++c)
-                    {
-                        M.at(r, c) -= factor * M.at(col, c);
-                        inv.at(r, c) -= factor * inv.at(col, c);
-                    }
-                }
-            }
-
-            for (std::size_t col2 = N; col2-- > 0;)
-            {
-                T pivot = M.at(col2, col2);
-                for (std::size_t c = 0; c < N; ++c)
-                    inv.at(col2, c) /= pivot;
-                for (std::size_t r2 = col2; r2-- > 0;)
-                {
-                    T factor = M.at(r2, col2);
-                    for (std::size_t c = 0; c < N; ++c)
-                        inv.at(r2, c) -= factor * inv.at(col2, c);
-                }
-            }
-            return inv;
-        }
-
-        template<typename T, std::size_t Window, std::size_t Order, std::size_t Deriv>
-        constexpr std::array<T, Window> ComputeKernel()
+        template<typename T, std::size_t Window, std::size_t Order>
+        constexpr math::Matrix<T, Window, Order + 1> BuildVandermonde()
         {
             constexpr std::size_t half = (Window - 1) / 2;
-
             math::Matrix<T, Window, Order + 1> A{};
             for (std::size_t row = 0; row < Window; ++row)
             {
@@ -67,24 +30,24 @@ namespace filters::passive
                     power *= offset;
                 }
             }
+            return A;
+        }
 
-            math::Matrix<T, Order + 1, Order + 1> AtA{};
-            for (std::size_t i = 0; i < Order + 1; ++i)
-                for (std::size_t j = 0; j < Order + 1; ++j)
-                    for (std::size_t k = 0; k < Window; ++k)
-                        AtA.at(i, j) += A.at(k, i) * A.at(k, j);
+        template<typename T, std::size_t Window, std::size_t Order, std::size_t Deriv>
+        constexpr std::array<T, Window> ComputeKernel()
+        {
+            auto A = BuildVandermonde<T, Window, Order>();
+            auto AtA = A.Transpose() * A;
 
-            auto AtAinv = InvertLu<T, Order + 1>(AtA);
+            math::Vector<T, Order + 1> eDeriv{};
+            eDeriv.at(Deriv, 0) = T{ 1 };
 
-            math::Matrix<T, Order + 1, Window> C{};
-            for (std::size_t i = 0; i < Order + 1; ++i)
-                for (std::size_t j = 0; j < Window; ++j)
-                    for (std::size_t k = 0; k < Order + 1; ++k)
-                        C.at(i, j) += AtAinv.at(i, k) * A.at(j, k);
+            auto z = math::CholeskyDecomposition<T, Order + 1>::Solve(AtA, eDeriv);
 
             std::array<T, Window> coeffs{};
-            for (std::size_t j = 0; j < Window; ++j)
-                coeffs[j] = C.at(Deriv, j);
+            for (std::size_t k = 0; k < Window; ++k)
+                for (std::size_t d = 0; d < Order + 1; ++d)
+                    coeffs[k] += A.at(k, d) * z->at(d, 0);
 
             return coeffs;
         }

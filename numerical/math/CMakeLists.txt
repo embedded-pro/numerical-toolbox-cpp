@@ -11,6 +11,7 @@ target_link_libraries(numerical.math ${NUMERICAL_VISIBILITY}
 
 target_sources(numerical.math PRIVATE
     CholeskyDecomposition.hpp
+    ConstexprMath.hpp
     ComplexNumber.hpp
     ConsistencyMetrics.hpp
     Cordic.hpp

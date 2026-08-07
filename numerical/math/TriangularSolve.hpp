@@ -4,7 +4,6 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
-#include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/QNumber.hpp"
@@ -35,7 +34,7 @@ namespace math
     namespace detail
     {
         template<bool Unit, typename T, std::size_t N>
-        [[nodiscard]] OPTIMIZE_FOR_SPEED Vector<T, N> ForwardSubstitute(const Matrix<T, N, N>& l, const Vector<T, N>& c)
+        [[nodiscard]] OPTIMIZE_FOR_SPEED constexpr Vector<T, N> ForwardSubstitute(const Matrix<T, N, N>& l, const Vector<T, N>& c)
         {
             Vector<T, N> x{};
 
@@ -46,14 +45,9 @@ namespace math
                     sum = sum - l.at(i, j) * x.at(j, 0);
 
                 if constexpr (Unit)
-                {
                     x.at(i, 0) = sum;
-                }
                 else
-                {
-                    really_assert(math::Abs(ToFloat(l.at(i, i))) > 0.0f);
                     x.at(i, 0) = sum / l.at(i, i);
-                }
             }
 
             return x;
@@ -61,19 +55,19 @@ namespace math
     }
 
     template<typename T, std::size_t N>
-    [[nodiscard]] OPTIMIZE_FOR_SPEED Vector<T, N> SolveUnitLowerTriangular(const Matrix<T, N, N>& l, const Vector<T, N>& c)
+    [[nodiscard]] OPTIMIZE_FOR_SPEED constexpr Vector<T, N> SolveUnitLowerTriangular(const Matrix<T, N, N>& l, const Vector<T, N>& c)
     {
         return detail::ForwardSubstitute<true>(l, c);
     }
 
     template<typename T, std::size_t N>
-    [[nodiscard]] OPTIMIZE_FOR_SPEED Vector<T, N> SolveLowerTriangular(const Matrix<T, N, N>& l, const Vector<T, N>& c)
+    [[nodiscard]] OPTIMIZE_FOR_SPEED constexpr Vector<T, N> SolveLowerTriangular(const Matrix<T, N, N>& l, const Vector<T, N>& c)
     {
         return detail::ForwardSubstitute<false>(l, c);
     }
 
     template<typename T, std::size_t N>
-    [[nodiscard]] OPTIMIZE_FOR_SPEED Vector<T, N> SolveUpperTriangular(const Matrix<T, N, N>& r, const Vector<T, N>& c)
+    [[nodiscard]] OPTIMIZE_FOR_SPEED constexpr Vector<T, N> SolveUpperTriangular(const Matrix<T, N, N>& r, const Vector<T, N>& c)
     {
         Vector<T, N> x{};
 
@@ -84,7 +78,6 @@ namespace math
             for (std::size_t j = row + 1; j < N; ++j)
                 sum = sum - r.at(row, j) * x.at(j, 0);
 
-            really_assert(math::Abs(ToFloat(r.at(row, row))) > 0.0f);
             x.at(row, 0) = sum / r.at(row, row);
         }
 

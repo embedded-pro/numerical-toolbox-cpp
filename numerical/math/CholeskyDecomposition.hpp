@@ -16,7 +16,7 @@ namespace math
     namespace detail
     {
         template<typename T, std::size_t N>
-        [[nodiscard]] OPTIMIZE_FOR_SPEED float CholeskyInnerProduct(const SquareMatrix<T, N>& l, std::size_t i, std::size_t j)
+        [[nodiscard]] OPTIMIZE_FOR_SPEED constexpr float CholeskyInnerProduct(const SquareMatrix<T, N>& l, std::size_t i, std::size_t j)
         {
             float sum = 0.0f;
             for (std::size_t k = 0; k < j; ++k)
@@ -32,13 +32,13 @@ namespace math
             "CholeskyDecomposition only supports float or QNumber types");
 
     public:
-        [[nodiscard]] static OPTIMIZE_FOR_SPEED SquareMatrix<T, N> Factor(const SquareMatrix<T, N>& a);
-        [[nodiscard]] static OPTIMIZE_FOR_SPEED std::optional<SquareMatrix<T, N>> TryFactor(const SquareMatrix<T, N>& a);
-        [[nodiscard]] static OPTIMIZE_FOR_SPEED std::optional<Vector<T, N>> Solve(const SquareMatrix<T, N>& a, const Vector<T, N>& b);
+        [[nodiscard]] static OPTIMIZE_FOR_SPEED constexpr SquareMatrix<T, N> Factor(const SquareMatrix<T, N>& a);
+        [[nodiscard]] static OPTIMIZE_FOR_SPEED constexpr std::optional<SquareMatrix<T, N>> TryFactor(const SquareMatrix<T, N>& a);
+        [[nodiscard]] static OPTIMIZE_FOR_SPEED constexpr std::optional<Vector<T, N>> Solve(const SquareMatrix<T, N>& a, const Vector<T, N>& b);
     };
 
     template<typename T, std::size_t N>
-    OPTIMIZE_FOR_SPEED std::optional<SquareMatrix<T, N>> CholeskyDecomposition<T, N>::TryFactor(const SquareMatrix<T, N>& a)
+    OPTIMIZE_FOR_SPEED constexpr std::optional<SquareMatrix<T, N>> CholeskyDecomposition<T, N>::TryFactor(const SquareMatrix<T, N>& a)
     {
         SquareMatrix<T, N> l{};
 
@@ -61,13 +61,13 @@ namespace math
     }
 
     template<typename T, std::size_t N>
-    OPTIMIZE_FOR_SPEED SquareMatrix<T, N> CholeskyDecomposition<T, N>::Factor(const SquareMatrix<T, N>& a)
+    OPTIMIZE_FOR_SPEED constexpr SquareMatrix<T, N> CholeskyDecomposition<T, N>::Factor(const SquareMatrix<T, N>& a)
     {
         return TryFactor(a).value_or(SquareMatrix<T, N>{});
     }
 
     template<typename T, std::size_t N>
-    OPTIMIZE_FOR_SPEED std::optional<Vector<T, N>> CholeskyDecomposition<T, N>::Solve(const SquareMatrix<T, N>& a, const Vector<T, N>& b)
+    OPTIMIZE_FOR_SPEED constexpr std::optional<Vector<T, N>> CholeskyDecomposition<T, N>::Solve(const SquareMatrix<T, N>& a, const Vector<T, N>& b)
     {
         auto l = TryFactor(a);
         if (!l.has_value())

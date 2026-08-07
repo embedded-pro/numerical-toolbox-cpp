@@ -6,7 +6,6 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
-#include "numerical/optimization/BlackBoxObjective.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 #include <array>
 #include "numerical/math/Math.hpp"
@@ -16,6 +15,19 @@
 
 namespace optimization
 {
+    namespace detail
+    {
+        [[nodiscard]] inline float NormalCdf(float z)
+        {
+            return 0.5f * std::erfc(-z * std::numbers::sqrt2_v<float> * 0.5f);
+        }
+
+        [[nodiscard]] inline float NormalPdf(float z)
+        {
+            return std::exp(-0.5f * z * z) / std::sqrt(2.0f * std::numbers::pi_v<float>);
+        }
+    }
+
     struct GpHyperparameters
     {
         float lengthScale = 1.0f;
@@ -41,6 +53,13 @@ namespace optimization
             std::size_t evaluations;
         };
 
+        class BlackBoxObjective
+        {
+        public:
+            virtual ~BlackBoxObjective() = default;
+            virtual float Evaluate(const ParameterVector& params) = 0;
+        };
+
         BayesianOptimization(const BoundsArray& bounds,
             const GpHyperparameters& hyperparameters,
             uint64_t seed = 42ULL);
@@ -53,7 +72,7 @@ namespace optimization
 
         OPTIMIZE_FOR_SPEED ParameterVector MaximizeAcquisition(float bestValue);
 
-        OPTIMIZE_FOR_SPEED Result Optimize(BlackBoxObjective<NumParams>& objective,
+        OPTIMIZE_FOR_SPEED Result Optimize(BlackBoxObjective& objective,
             std::size_t numIterations);
 
         [[nodiscard]] const std::array<float, MaxObservations>& GetObservedValues() const;
@@ -64,12 +83,13 @@ namespace optimization
             const ParameterVector& b,
             const GpHyperparameters& hp);
 
+        void InitKernelMatrix();
         void RebuildKernelMatrix();
 
+        OPTIMIZE_FOR_SPEED float LcgStep();
         OPTIMIZE_FOR_SPEED ParameterVector LcgSample();
 
-        [[nodiscard]] static float NormalCdf(float z);
-        [[nodiscard]] static float NormalPdf(float z);
+        [[nodiscard]] std::size_t FindBestIndex() const;
 
         BoundsArray bounds_;
         GpHyperparameters hyperparameters_;
@@ -96,7 +116,7 @@ namespace optimization
         for (std::size_t d = 0; d < NumParams; ++d)
             really_assert(bounds_[d].first < bounds_[d].second);
 
-        kernelMatrix_ = math::SquareMatrix<float, MaxObservations>::Identity();
+        InitKernelMatrix();
     }
 
     template<std::size_t NumParams, std::size_t MaxObservations, std::size_t NumCandidates>
@@ -111,23 +131,24 @@ namespace optimization
     }
 
     template<std::size_t NumParams, std::size_t MaxObservations, std::size_t NumCandidates>
-    void BayesianOptimization<NumParams, MaxObservations, NumCandidates>::RebuildKernelMatrix()
+    void BayesianOptimization<NumParams, MaxObservations, NumCandidates>::InitKernelMatrix()
     {
         for (std::size_t i = 0; i < MaxObservations; ++i)
-        {
             for (std::size_t j = 0; j < MaxObservations; ++j)
+                kernelMatrix_.at(i, j) = (i == j) ? 1.0f : 0.0f;
+    }
+
+    template<std::size_t NumParams, std::size_t MaxObservations, std::size_t NumCandidates>
+    void BayesianOptimization<NumParams, MaxObservations, NumCandidates>::RebuildKernelMatrix()
+    {
+        for (std::size_t i = 0; i < numObservations_; ++i)
+        {
+            for (std::size_t j = 0; j < numObservations_; ++j)
             {
-                if (i < numObservations_ && j < numObservations_)
-                {
-                    float k = SquaredExpKernel(observedPoints_[i], observedPoints_[j], hyperparameters_);
-                    if (i == j)
-                        k += hyperparameters_.noiseVariance * hyperparameters_.noiseVariance;
-                    kernelMatrix_.at(i, j) = k;
-                }
-                else
-                {
-                    kernelMatrix_.at(i, j) = (i == j) ? 1.0f : 0.0f;
-                }
+                float k = SquaredExpKernel(observedPoints_[i], observedPoints_[j], hyperparameters_);
+                if (i == j)
+                    k += hyperparameters_.noiseVariance * hyperparameters_.noiseVariance;
+                kernelMatrix_.at(i, j) = k;
             }
         }
 
@@ -148,14 +169,14 @@ namespace optimization
             kStar.at(i, 0) = SquaredExpKernel(query, observedPoints_[i], hyperparameters_);
 
         float mu = 0.0f;
-        for (std::size_t i = 0; i < MaxObservations; ++i)
+        for (std::size_t i = 0; i < numObservations_; ++i)
             mu += kStar.at(i, 0) * alpha_.at(i, 0);
 
         const auto v = solvers::SolveSystem<float, MaxObservations, 1>(kernelMatrix_, kStar);
 
         const float kSS = hyperparameters_.signalVariance * hyperparameters_.signalVariance;
         float vDotKStar = 0.0f;
-        for (std::size_t i = 0; i < MaxObservations; ++i)
+        for (std::size_t i = 0; i < numObservations_; ++i)
             vDotKStar += v.at(i, 0) * kStar.at(i, 0);
 
         const float sigma2 = std::max(0.0f, kSS - vDotKStar);
@@ -175,7 +196,7 @@ namespace optimization
             return 0.0f;
 
         const float z = (bestValue - mu) / sigma;
-        return (bestValue - mu) * NormalCdf(z) + sigma * NormalPdf(z);
+        return (bestValue - mu) * detail::NormalCdf(z) + sigma * detail::NormalPdf(z);
     }
 
     template<std::size_t NumParams, std::size_t MaxObservations, std::size_t NumCandidates>
@@ -204,7 +225,7 @@ namespace optimization
     OPTIMIZE_FOR_SPEED
         typename BayesianOptimization<NumParams, MaxObservations, NumCandidates>::Result
         BayesianOptimization<NumParams, MaxObservations, NumCandidates>::Optimize(
-            BlackBoxObjective<NumParams>& objective,
+            BlackBoxObjective& objective,
             std::size_t numIterations)
     {
         really_assert(numIterations > 0 && numObservations_ + numIterations <= MaxObservations);
@@ -220,20 +241,13 @@ namespace optimization
 
         for (std::size_t i = explorationCount; i < numIterations; ++i)
         {
-            float bestValue = observedValues_[0];
-            for (std::size_t j = 1; j < numObservations_; ++j)
-                bestValue = std::min(bestValue, observedValues_[j]);
-
+            const float bestValue = observedValues_[FindBestIndex()];
             const auto next = MaximizeAcquisition(bestValue);
             const float val = objective.Evaluate(next);
             AddObservation(next, val);
         }
 
-        std::size_t bestIdx = 0;
-        for (std::size_t j = 1; j < numObservations_; ++j)
-            if (observedValues_[j] < observedValues_[bestIdx])
-                bestIdx = j;
-
+        const std::size_t bestIdx = FindBestIndex();
         return Result{ observedPoints_[bestIdx], observedValues_[bestIdx], numObservations_ };
     }
 
@@ -267,30 +281,31 @@ namespace optimization
     }
 
     template<std::size_t NumParams, std::size_t MaxObservations, std::size_t NumCandidates>
+    OPTIMIZE_FOR_SPEED float BayesianOptimization<NumParams, MaxObservations, NumCandidates>::LcgStep()
+    {
+        lcgState_ = lcgState_ * 6364136223846793005ULL + 1442695040888963407ULL;
+        return static_cast<float>(lcgState_ >> 11) * (1.0f / static_cast<float>(1ULL << 53));
+    }
+
+    template<std::size_t NumParams, std::size_t MaxObservations, std::size_t NumCandidates>
     OPTIMIZE_FOR_SPEED
         typename BayesianOptimization<NumParams, MaxObservations, NumCandidates>::ParameterVector
         BayesianOptimization<NumParams, MaxObservations, NumCandidates>::LcgSample()
     {
         ParameterVector result{};
         for (std::size_t d = 0; d < NumParams; ++d)
-        {
-            lcgState_ = lcgState_ * 6364136223846793005ULL + 1442695040888963407ULL;
-            const float t = static_cast<float>(lcgState_ >> 11) * (1.0f / static_cast<float>(1ULL << 53));
-            result.at(d, 0) = bounds_[d].first + t * (bounds_[d].second - bounds_[d].first);
-        }
+            result.at(d, 0) = bounds_[d].first + LcgStep() * (bounds_[d].second - bounds_[d].first);
         return result;
     }
 
     template<std::size_t NumParams, std::size_t MaxObservations, std::size_t NumCandidates>
-    float BayesianOptimization<NumParams, MaxObservations, NumCandidates>::NormalCdf(float z)
+    std::size_t BayesianOptimization<NumParams, MaxObservations, NumCandidates>::FindBestIndex() const
     {
-        return 0.5f * math::Erfc(-z * std::numbers::sqrt2_v<float> * 0.5f);
-    }
-
-    template<std::size_t NumParams, std::size_t MaxObservations, std::size_t NumCandidates>
-    float BayesianOptimization<NumParams, MaxObservations, NumCandidates>::NormalPdf(float z)
-    {
-        return math::Exp(-0.5f * z * z) / math::Sqrt(2.0f * std::numbers::pi_v<float>);
+        std::size_t bestIdx = 0;
+        for (std::size_t j = 1; j < numObservations_; ++j)
+            if (observedValues_[j] < observedValues_[bestIdx])
+                bestIdx = j;
+        return bestIdx;
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD

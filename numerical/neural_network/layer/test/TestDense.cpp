@@ -1,6 +1,6 @@
-#include "numerical/math/QNumber.hpp"
 #include "numerical/neural_network/activation/ActivationFunction.hpp"
 #include "numerical/neural_network/layer/Dense.hpp"
+#include "numerical/neural_network/losses/Loss.hpp"
 #include "numerical/optimization/Optimizer.hpp"
 #include "gmock/gmock.h"
 
@@ -32,9 +32,9 @@ namespace
     {
     public:
         using Result = typename optimization::Optimizer<T, Features>::Result;
-        using Vector = typename neural_network::Loss<T, Features>::Vector;
+        using Vector = typename optimization::Optimizer<T, Features>::Vector;
 
-        const Result& Minimize(const Vector& initialGuess, neural_network::Loss<T, Features>& loss) override
+        const Result& Minimize(const Vector& initialGuess, optimization::ObjectiveFunction<T, Features>& objective) override
         {
             return result;
         }

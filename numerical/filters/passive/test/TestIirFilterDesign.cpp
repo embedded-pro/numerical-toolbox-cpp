@@ -205,3 +205,117 @@ TEST_F(TestIirFilterDesign, design_is_stable)
         }
     }
 }
+
+TEST_F(TestIirFilterDesign, design_rejects_order_zero)
+{
+    const std::size_t n{ designer.Design(filters::passive::Prototype::Butterworth, filters::passive::Kind::LowPass, 0, 100.0f, 1000.0f) };
+    EXPECT_EQ(n, 0u);
+}
+
+TEST_F(TestIirFilterDesign, design_rejects_cutoff_at_nyquist)
+{
+    const std::size_t n{ designer.Design(filters::passive::Prototype::Butterworth, filters::passive::Kind::LowPass, 2, 500.0f, 1000.0f) };
+    EXPECT_EQ(n, 0u);
+}
+
+TEST_F(TestIirFilterDesign, design_rejects_cutoff_above_nyquist)
+{
+    const std::size_t n{ designer.Design(filters::passive::Prototype::Butterworth, filters::passive::Kind::LowPass, 2, 600.0f, 1000.0f) };
+    EXPECT_EQ(n, 0u);
+}
+
+TEST_F(TestIirFilterDesign, design_rejects_zero_sample_rate)
+{
+    const std::size_t n{ designer.Design(filters::passive::Prototype::Butterworth, filters::passive::Kind::LowPass, 2, 100.0f, 0.0f) };
+    EXPECT_EQ(n, 0u);
+}
+
+TEST_F(TestIirFilterDesign, highpass_passes_nyquist)
+{
+    constexpr float fs{ 1000.0f };
+    const std::size_t n{ designer.Design(filters::passive::Prototype::Butterworth, filters::passive::Kind::HighPass, 2, 100.0f, fs) };
+    ASSERT_GT(n, 0u);
+
+    const float mag{ MeasureMagnitude(designer, 450.0f, fs, n) };
+    EXPECT_GT(mag, 0.9f);
+}
+
+TEST_F(TestIirFilterDesign, lowpass_attenuates_stopband)
+{
+    constexpr float fs{ 1000.0f };
+    constexpr float fc{ 100.0f };
+    const std::size_t n{ designer.Design(filters::passive::Prototype::Butterworth, filters::passive::Kind::LowPass, 4, fc, fs) };
+    ASSERT_GT(n, 0u);
+
+    const float mag{ MeasureMagnitude(designer, 300.0f, fs, n) };
+    EXPECT_LT(mag, 0.2f);
+}
+
+TEST_F(TestIirFilterDesign, chebyshev_hp_blocks_dc)
+{
+    constexpr float fs{ 1000.0f };
+    const std::size_t n{ designer.Design(filters::passive::Prototype::ChebyshevI, filters::passive::Kind::HighPass, 2, 100.0f, fs, 1.0f) };
+    ASSERT_GT(n, 0u);
+
+    const float dcMag{ MeasureMagnitude(designer, 0.5f, fs, n) };
+    EXPECT_LT(dcMag, 0.05f);
+}
+
+TEST_F(TestIirFilterDesign, design_stable_highpass)
+{
+    constexpr float fs{ 1000.0f };
+    constexpr std::array<std::size_t, 2> orders{ 2u, 4u };
+
+    for (const std::size_t ord : orders)
+    {
+        const std::size_t n{ designer.Design(filters::passive::Prototype::Butterworth, filters::passive::Kind::HighPass, ord, 100.0f, fs) };
+        ASSERT_GT(n, 0u);
+
+        for (std::size_t s{ 0 }; s < n; ++s)
+        {
+            const auto c{ designer.Section(s) };
+            if (c.a2 != 0.0f)
+            {
+                EXPECT_LT(c.a2, 1.0f);
+                EXPECT_GT(c.a2, -1.0f);
+            }
+        }
+    }
+}
+
+TEST_F(TestIirFilterDesign, bibo_stability_impulse_decays)
+{
+    constexpr float fs{ 1000.0f };
+    const std::size_t n{ designer.Design(filters::passive::Prototype::Butterworth, filters::passive::Kind::LowPass, 4, 100.0f, fs) };
+    ASSERT_GT(n, 0u);
+
+    std::array<filters::passive::BiquadCoeffs<float>, 4> coeffs{};
+    for (std::size_t i{ 0 }; i < n && i < 4; ++i)
+        coeffs[i] = designer.Section(i);
+
+    std::array<float, 4> z1{};
+    std::array<float, 4> z2{};
+
+    auto filterSample = [&](float x) -> float
+    {
+        for (std::size_t s{ 0 }; s < n && s < 4; ++s)
+        {
+            const auto& c{ coeffs[s] };
+            const float y{ c.b0 * x + z1[s] };
+            z1[s] = c.b1 * x - c.a1 * y + z2[s];
+            z2[s] = c.b2 * x - c.a2 * y;
+            x = y;
+        }
+        return x;
+    };
+
+    filterSample(1.0f);
+
+    float lastAmp{ 0.0f };
+    for (int i{ 0 }; i < 500; ++i)
+    {
+        const float y{ filterSample(0.0f) };
+        lastAmp = y < 0.0f ? -y : y;
+    }
+    EXPECT_LT(lastAmp, 0.01f);
+}

@@ -18,7 +18,7 @@ namespace math
     inline constexpr double pi_4 = std::numbers::pi / 4.0;
 
     template<typename T>
-    OPTIMIZE_FOR_SPEED float ToFloat(T value)
+    OPTIMIZE_FOR_SPEED constexpr float ToFloat(T value)
     {
         if constexpr (std::is_same_v<T, float>)
             return value;
@@ -61,7 +61,7 @@ namespace math
         explicit constexpr QNumber(float f);
         explicit QNumber(IntType rawValue);
 
-        float ToFloat() const;
+        constexpr float ToFloat() const;
         IntType RawValue() const;
 
         OPTIMIZE_FOR_SPEED friend QNumber operator+(const QNumber& lhs, const QNumber& rhs)
@@ -172,7 +172,7 @@ namespace math
     {}
 
     template<typename IntType, int FractionalBits>
-    OPTIMIZE_FOR_SPEED float QNumber<IntType, FractionalBits>::ToFloat() const
+    OPTIMIZE_FOR_SPEED constexpr float QNumber<IntType, FractionalBits>::ToFloat() const
     {
         return static_cast<float>(value) / (1LL << FractionalBits);
     }

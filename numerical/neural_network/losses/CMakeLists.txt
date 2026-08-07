@@ -9,6 +9,7 @@ target_link_libraries(numerical.neural_network.losses ${NUMERICAL_VISIBILITY}
     infra.util
     numerical.math
     numerical.neural_network.activation
+    numerical.optimization
     numerical.regularization
 )
 
