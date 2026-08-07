@@ -2,7 +2,6 @@
 
 #include "numerical/math/Matrix.hpp"
 #include "numerical/optimization/BayesianOptimization.hpp"
-#include "numerical/optimization/BlackBoxObjective.hpp"
 #include <cstddef>
 #include <cstdint>
 #include <vector>
@@ -44,7 +43,7 @@ namespace simulator::controllers
             const MpcBoCalibratorConfig& config);
 
     private:
-        class IseObjective : public optimization::BlackBoxObjective<BoNumParams>
+        class IseObjective : public Bo::BlackBoxObjective
         {
         public:
             IseObjective(
