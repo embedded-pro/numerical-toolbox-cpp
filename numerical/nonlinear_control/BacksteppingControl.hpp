@@ -7,6 +7,7 @@
 #include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Math.hpp"
+#include <array>
 #include <cstddef>
 #include <type_traits>
 

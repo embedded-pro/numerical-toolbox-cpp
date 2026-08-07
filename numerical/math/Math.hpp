@@ -23,7 +23,7 @@ namespace math
     constexpr T Sqrt(T x)
     {
         static_assert(std::is_floating_point_v<T>, "T must be a floating-point type");
-        return std::sqrtf(x);
+        return std::sqrt(x);
     }
 #endif
 
