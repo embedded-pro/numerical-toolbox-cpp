@@ -77,16 +77,16 @@ TEST_F(TestL1, gradient_mixed_signs_follow_signum)
 {
     Vec params{ 1.0f, -1.0f, 0.0f, 2.0f };
     auto gradient = reg.Gradient(params);
-    EXPECT_NEAR(gradient[0],  0.1f, math::Tolerance<float>());
+    EXPECT_NEAR(gradient[0], 0.1f, math::Tolerance<float>());
     EXPECT_NEAR(gradient[1], -0.1f, math::Tolerance<float>());
-    EXPECT_NEAR(gradient[2],  0.0f, math::Tolerance<float>());
-    EXPECT_NEAR(gradient[3],  0.1f, math::Tolerance<float>());
+    EXPECT_NEAR(gradient[2], 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(gradient[3], 0.1f, math::Tolerance<float>());
 }
 
 TEST_F(TestL1, gradient_magnitude_is_lambda_independent_of_magnitude)
 {
     Vec small{ 1e-5f, 2e-5f, 3e-5f, 4e-5f };
-    Vec large{ 1e3f,  2e3f,  3e3f,  4e3f  };
+    Vec large{ 1e3f, 2e3f, 3e3f, 4e3f };
     auto gSmall = reg.Gradient(small);
     auto gLarge = reg.Gradient(large);
     for (std::size_t i = 0; i < Size; ++i)
@@ -99,7 +99,7 @@ TEST_F(TestL1, gradient_magnitude_is_lambda_independent_of_magnitude)
 TEST_F(TestL1, calculate_deterministic_same_input_same_output)
 {
     Vec params{ 0.3f, -0.7f, 1.2f, -0.9f };
-    float first  = reg.Calculate(params);
+    float first = reg.Calculate(params);
     float second = reg.Calculate(params);
     EXPECT_FLOAT_EQ(first, second);
 }

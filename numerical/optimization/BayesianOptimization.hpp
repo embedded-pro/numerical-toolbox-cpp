@@ -281,8 +281,7 @@ namespace optimization
     }
 
     template<std::size_t NumParams, std::size_t MaxObservations, std::size_t NumCandidates>
-    OPTIMIZE_FOR_SPEED
-        float BayesianOptimization<NumParams, MaxObservations, NumCandidates>::LcgStep()
+    OPTIMIZE_FOR_SPEED float BayesianOptimization<NumParams, MaxObservations, NumCandidates>::LcgStep()
     {
         lcgState_ = lcgState_ * 6364136223846793005ULL + 1442695040888963407ULL;
         return static_cast<float>(lcgState_ >> 11) * (1.0f / static_cast<float>(1ULL << 53));

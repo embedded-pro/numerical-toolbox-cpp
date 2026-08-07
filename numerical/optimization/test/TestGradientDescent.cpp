@@ -58,7 +58,10 @@ namespace
         : public optimization::ObjectiveFunction<float, 2>
     {
     public:
-        float Cost(const Vector2f&) override { return 42.0f; }
+        float Cost(const Vector2f&) override
+        {
+            return 42.0f;
+        }
 
         Vector2f Gradient(const Vector2f&) override
         {

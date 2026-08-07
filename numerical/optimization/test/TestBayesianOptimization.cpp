@@ -1,5 +1,5 @@
-#include "numerical/optimization/BayesianOptimization.hpp"
 #include "numerical/math/Tolerance.hpp"
+#include "numerical/optimization/BayesianOptimization.hpp"
 #include <cmath>
 #include <gtest/gtest.h>
 
