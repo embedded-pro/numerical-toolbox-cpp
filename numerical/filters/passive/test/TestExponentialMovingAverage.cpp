@@ -11,7 +11,7 @@ namespace
     class TestExponentialMovingAverage
         : public ::testing::Test
     {
-    protected:
+    public:
         filters::passive::ExponentialMovingAverage<float> ema{ 0.5f };
     };
 }
