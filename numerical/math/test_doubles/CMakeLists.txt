@@ -7,8 +7,6 @@ target_link_libraries(numerical.math_test_helper INTERFACE
 )
 
 target_sources(numerical.math_test_helper PRIVATE
-    HyperbolicFunctionsStub.hpp
     MatrixTestSupport.hpp
     SingleInstructionMultipleDataStub.hpp
-    TrigonometricFunctionsStub.hpp
 )
