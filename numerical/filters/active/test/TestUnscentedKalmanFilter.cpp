@@ -2,8 +2,8 @@
 #include "numerical/math/ConsistencyMetrics.hpp"
 #include "numerical/math/Tolerance.hpp"
 #include "numerical/math/test_doubles/MatrixTestSupport.hpp"
-#include <gtest/gtest.h>
 #include <cmath>
+#include <gtest/gtest.h>
 
 namespace
 {
@@ -101,9 +101,7 @@ namespace
 
         void SetUp() override
         {
-            ukf.emplace(StateVec2{}, StateMat2{
-                { 1.0f, 0.0f },
-                { 0.0f, 1.0f } },
+            ukf.emplace(StateVec2{}, StateMat2{ { 1.0f, 0.0f }, { 0.0f, 1.0f } },
                 ConstantVelocityTransition, PositionMeasurement,
                 DefaultParams());
             ukf->SetProcessNoise(Q);

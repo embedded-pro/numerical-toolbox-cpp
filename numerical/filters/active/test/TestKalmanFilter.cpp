@@ -153,8 +153,8 @@ namespace
         void SetUp() override
         {
             filter.emplace(StateVec2{}, StateMat2{
-                { 0.5f, 0.0f },
-                { 0.0f, 0.5f } });
+                                            { 0.5f, 0.0f },
+                                            { 0.0f, 0.5f } });
             filter->SetStateTransition(StateMat2{
                 { 1.0f, kDt },
                 { 0.0f, 1.0f } });
@@ -194,8 +194,8 @@ namespace
         void SetUp() override
         {
             filter.emplace(StateVec2{}, StateMat2{
-                { 1.0f, 0.0f },
-                { 0.0f, 1.0f } });
+                                            { 1.0f, 0.0f },
+                                            { 0.0f, 1.0f } });
             filter->SetStateTransition(F);
             filter->SetMeasurementMatrix(H);
             filter->SetProcessNoise(Q);
@@ -214,8 +214,8 @@ TEST_F(KalmanFilterTest, DefaultInitializationPreservesStateAndCovariance)
 TEST_F(KalmanFilterTest, PredictAdvancesStateByConstantVelocity)
 {
     filter.emplace(StateVec2{ { 0.0f }, { 0.1f } }, StateMat2{
-        { 0.1f, 0.0f },
-        { 0.0f, 0.1f } });
+                                                        { 0.1f, 0.0f },
+                                                        { 0.0f, 0.1f } });
     filter->SetStateTransition(StateMat2{
         { 1.0f, kDt },
         { 0.0f, 1.0f } });
@@ -274,8 +274,8 @@ TEST_F(KalmanFilterTest, PredictGrowsCovarianceThenUpdateReducesIt)
 TEST_F(KalmanFilterTest, RepeatedPredictGrowsAllDiagonalEntries)
 {
     filter.emplace(StateVec2{}, StateMat2{
-        { 0.1f, 0.0f },
-        { 0.0f, 0.1f } });
+                                    { 0.1f, 0.0f },
+                                    { 0.0f, 0.1f } });
     filter->SetStateTransition(StateMat2{
         { 1.0f, kDt },
         { 0.0f, 1.0f } });
@@ -293,8 +293,8 @@ TEST_F(KalmanFilterTest, RepeatedPredictGrowsAllDiagonalEntries)
 TEST_F(KalmanFilterTest, JosephFormKeepsCovariancePositiveSemiDefinite)
 {
     filter.emplace(StateVec2{}, StateMat2{
-        { 1000.0f, 0.0f },
-        { 0.0f, 1000.0f } });
+                                    { 1000.0f, 0.0f },
+                                    { 0.0f, 1000.0f } });
     filter->SetStateTransition(StateMat2{
         { 1.0f, kDt },
         { 0.0f, 1.0f } });
