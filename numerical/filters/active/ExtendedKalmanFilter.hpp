@@ -15,6 +15,9 @@ namespace filters
     class ExtendedKalmanFilter
         : public KalmanFilterBase<QNumberType, StateSize, MeasurementSize, ControlSize>
     {
+        static_assert(std::is_floating_point_v<QNumberType>,
+            "ExtendedKalmanFilter only supports floating-point types");
+
         using Base = KalmanFilterBase<QNumberType, StateSize, MeasurementSize, ControlSize>;
 
     public:
