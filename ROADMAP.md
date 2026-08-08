@@ -43,7 +43,7 @@ magnitude/phase. The items below are the missing pieces. All are **float-only**,
 on bounded `math::Vector`/`math::Matrix` inputs; tests are `TEST_F` on `float`.
 
 > **Test-only helpers (not production components).** A ULP/relative-error comparator and a
-> finite-difference **gradient check** (for `neural_network/` and `optimization/`) are pure test
+> finite-difference **gradient check** (for `optimization/`) are pure test
 > utilities — add them to the `numerical.math_test_helper` INTERFACE library
 > ([`numerical/math/test_doubles/`](numerical/math/test_doubles/)), not to `numerical/` production code.
 

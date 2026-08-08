@@ -115,7 +115,7 @@ graph LR
 |-----------------------------------------------------------|--------------------------------------------------------------------------------------------|
 | [Gaussian Elimination](../solvers/GaussianElimination.md) | Used to solve the normal equation system                                                   |
 | [Yule-Walker](YuleWalker.md)                              | Structurally similar — also solves a linear system derived from correlations               |
-| [Neural Network](../neural_network/NeuralNetwork.md)      | A single-layer neural network with no activation and MSE loss reduces to linear regression |
+| Neural Network (neural-network-toobox-cpp)                | A single-layer neural network with no activation and MSE loss reduces to linear regression |
 
 ## References & Further Reading
 
