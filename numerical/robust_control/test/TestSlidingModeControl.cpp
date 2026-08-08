@@ -31,6 +31,8 @@ namespace
         math::Vector<float, 1> K{ { kK } };
         robust_control::SlidingModeControl<float, 2, 1> smc{ plant, S, K, kPhi };
     };
+
+    using Smc = robust_control::SlidingModeControl<float, 2, 1>;
 }
 
 TEST_F(TestSlidingModeControl, reaches_sliding_surface)
@@ -191,4 +193,65 @@ TEST_F(TestSlidingModeControl, set_boundary_layer_matches_constructed_phi)
     auto uRef = reference.ComputeControl(x);
 
     EXPECT_NEAR(uSet.at(0, 0), uRef.at(0, 0), math::Tolerance<float>());
+}
+
+TEST_F(TestSlidingModeControl, sat_clamps_positive_above_phi)
+{
+    EXPECT_FLOAT_EQ(Smc::Sat(0.1f, 0.05f), 1.0f);
+}
+
+TEST_F(TestSlidingModeControl, sat_clamps_negative_below_neg_phi)
+{
+    EXPECT_FLOAT_EQ(Smc::Sat(-0.1f, 0.05f), -1.0f);
+}
+
+TEST_F(TestSlidingModeControl, sat_linear_region_half_phi)
+{
+    EXPECT_FLOAT_EQ(Smc::Sat(0.025f, 0.05f), 0.5f);
+}
+
+TEST_F(TestSlidingModeControl, sat_linear_region_negative_half_phi)
+{
+    EXPECT_FLOAT_EQ(Smc::Sat(-0.025f, 0.05f), -0.5f);
+}
+
+TEST_F(TestSlidingModeControl, sat_zero_input_returns_zero)
+{
+    EXPECT_FLOAT_EQ(Smc::Sat(0.0f, 0.05f), 0.0f);
+}
+
+TEST_F(TestSlidingModeControl, surface_exact_value_for_known_state)
+{
+    math::Vector<float, 2> x{ { 0.3f }, { 0.7f } };
+    auto sv = smc.Surface(x);
+    EXPECT_NEAR(sv.at(0, 0), 1.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestSlidingModeControl, control_exact_value_zero_state)
+{
+    math::Vector<float, 2> x{ { 0.0f }, { 0.0f } };
+    auto u = smc.ComputeControl(x);
+    EXPECT_NEAR(u.at(0, 0), 0.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestSlidingModeControl, control_exact_value_on_surface)
+{
+    math::Vector<float, 2> x{ { 1.0f }, { -1.0f } };
+    auto u = smc.ComputeControl(x);
+    EXPECT_NEAR(u.at(0, 0), 0.9950249f, math::Tolerance<float>());
+}
+
+TEST_F(TestSlidingModeControl, control_exact_value_outside_boundary)
+{
+    math::Vector<float, 2> x{ { 0.1f }, { 0.0f } };
+    auto u = smc.ComputeControl(x);
+    EXPECT_NEAR(u.at(0, 0), -13.9303f, 1e-2f);
+}
+
+TEST_F(TestSlidingModeControl, determinism_same_input_same_output)
+{
+    math::Vector<float, 2> x{ { 0.5f }, { 0.2f } };
+    auto u1 = smc.ComputeControl(x);
+    auto u2 = smc.ComputeControl(x);
+    EXPECT_FLOAT_EQ(u1.at(0, 0), u2.at(0, 0));
 }

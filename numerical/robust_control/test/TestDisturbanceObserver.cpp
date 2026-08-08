@@ -1,4 +1,3 @@
-// Copyright (c) 2024, Numerical Toolbox Contributors. All rights reserved.
 #include "numerical/filters/passive/BiquadCascade.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/math/Matrix.hpp"
@@ -23,6 +22,18 @@ namespace
         plant.A.at(0, 0) = kPlantA;
         plant.B.at(0, 0) = kPlantB;
         plant.C.at(0, 0) = kPlantC;
+        return plant;
+    }
+
+    math::LinearTimeInvariant<float, 2, 2, 2> MakeTwoChannelPlant()
+    {
+        math::LinearTimeInvariant<float, 2, 2, 2> plant{};
+        plant.A.at(0, 0) = kPlantA;
+        plant.A.at(1, 1) = kPlantA;
+        plant.B.at(0, 0) = kPlantB;
+        plant.B.at(1, 1) = kPlantB;
+        plant.C.at(0, 0) = kPlantC;
+        plant.C.at(1, 1) = kPlantC;
         return plant;
     }
 
@@ -240,4 +251,148 @@ TEST_F(TestDisturbanceObserver, robust_to_small_model_mismatch)
     }
 
     EXPECT_LT(std::abs(dob.Disturbance().at(0, 0) - kDisturbance), kDisturbance);
+}
+
+TEST_F(TestDisturbanceObserver, zero_disturbance_passthrough)
+{
+    static constexpr int kSteps{ 4000 };
+
+    math::Vector<float, 1> x{};
+    math::Vector<float, 1> u{};
+
+    math::Vector<float, 1> c{};
+    c.at(0, 0) = 0.7f;
+
+    for (int k{ 0 }; k < kSteps; ++k)
+    {
+        const math::Vector<float, 1> y{ nominal.Output(x, u) };
+        u = dob.Compute(c, y);
+        x = nominal.Step(x, u);
+    }
+
+    EXPECT_NEAR(u.at(0, 0), c.at(0, 0), 1e-2f);
+}
+
+TEST_F(TestDisturbanceObserver, initial_disturbance_is_zero)
+{
+    EXPECT_NEAR(dob.Disturbance().at(0, 0), 0.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestDisturbanceObserver, reset_then_reconverge)
+{
+    static constexpr float kDisturbance{ 0.5f };
+    static constexpr int kWarmup{ 4000 };
+
+    math::Vector<float, 1> x{};
+    math::Vector<float, 1> c{};
+    math::Vector<float, 1> u{};
+
+    for (int k{ 0 }; k < kWarmup; ++k)
+    {
+        const math::Vector<float, 1> y{ nominal.Output(x, u) };
+        u = dob.Compute(c, y);
+        math::Vector<float, 1> uActual{};
+        uActual.at(0, 0) = u.at(0, 0) + kDisturbance;
+        x = nominal.Step(x, uActual);
+    }
+
+    dob.Reset();
+    x = math::Vector<float, 1>{};
+    u = math::Vector<float, 1>{};
+
+    for (int k{ 0 }; k < kWarmup; ++k)
+    {
+        const math::Vector<float, 1> y{ nominal.Output(x, u) };
+        u = dob.Compute(c, y);
+        math::Vector<float, 1> uActual{};
+        uActual.at(0, 0) = u.at(0, 0) + kDisturbance;
+        x = nominal.Step(x, uActual);
+    }
+
+    EXPECT_NEAR(dob.Disturbance().at(0, 0), kDisturbance, 1e-2f);
+}
+
+TEST_F(TestDisturbanceObserver, determinism_two_instances_agree)
+{
+    static constexpr float kDisturbance{ 0.3f };
+    static constexpr int kSteps{ 2000 };
+
+    robust_control::DisturbanceObserver<float, 1, 1, 1> dob2{ nominal, qCoeffs };
+
+    math::Vector<float, 1> x1{};
+    math::Vector<float, 1> x2{};
+    math::Vector<float, 1> c{};
+    math::Vector<float, 1> u1{};
+    math::Vector<float, 1> u2{};
+
+    for (int k{ 0 }; k < kSteps; ++k)
+    {
+        const math::Vector<float, 1> y1{ nominal.Output(x1, u1) };
+        const math::Vector<float, 1> y2{ nominal.Output(x2, u2) };
+        u1 = dob.Compute(c, y1);
+        u2 = dob2.Compute(c, y2);
+        math::Vector<float, 1> ua1{};
+        math::Vector<float, 1> ua2{};
+        ua1.at(0, 0) = u1.at(0, 0) + kDisturbance;
+        ua2.at(0, 0) = u2.at(0, 0) + kDisturbance;
+        x1 = nominal.Step(x1, ua1);
+        x2 = nominal.Step(x2, ua2);
+    }
+
+    EXPECT_FLOAT_EQ(dob.Disturbance().at(0, 0), dob2.Disturbance().at(0, 0));
+}
+
+TEST_F(TestDisturbanceObserver, two_channel_independent_disturbance_estimation)
+{
+    static constexpr float kDist0{ 0.4f };
+    static constexpr float kDist1{ 0.8f };
+    static constexpr int kSteps{ 4000 };
+
+    const math::LinearTimeInvariant<float, 2, 2, 2> plant2ch{ MakeTwoChannelPlant() };
+    filters::passive::BiquadCoeffs<float> q2{ MakeLowPassQ() };
+    robust_control::DisturbanceObserver<float, 2, 2, 2> dob2ch{ plant2ch, q2 };
+
+    math::Vector<float, 2> x{};
+    math::Vector<float, 2> c{};
+    math::Vector<float, 2> u{};
+
+    for (int k{ 0 }; k < kSteps; ++k)
+    {
+        const math::Vector<float, 2> y{ plant2ch.Output(x, u) };
+        u = dob2ch.Compute(c, y);
+        math::Vector<float, 2> uActual{};
+        uActual.at(0, 0) = u.at(0, 0) + kDist0;
+        uActual.at(1, 0) = u.at(1, 0) + kDist1;
+        x = plant2ch.Step(x, uActual);
+    }
+
+    EXPECT_NEAR(dob2ch.Disturbance().at(0, 0), kDist0, 1e-2f);
+    EXPECT_NEAR(dob2ch.Disturbance().at(1, 0), kDist1, 1e-2f);
+}
+
+TEST_F(TestDisturbanceObserver, step_disturbance_transient_crosses_half_value)
+{
+    static constexpr float kDisturbance{ 1.0f };
+    static constexpr int kMaxTransientSteps{ 500 };
+
+    math::Vector<float, 1> x{};
+    math::Vector<float, 1> c{};
+    math::Vector<float, 1> u{};
+
+    bool crossedHalf{ false };
+    for (int k{ 0 }; k < kMaxTransientSteps; ++k)
+    {
+        const math::Vector<float, 1> y{ nominal.Output(x, u) };
+        u = dob.Compute(c, y);
+        math::Vector<float, 1> uActual{};
+        uActual.at(0, 0) = u.at(0, 0) + kDisturbance;
+        x = nominal.Step(x, uActual);
+        if (dob.Disturbance().at(0, 0) >= 0.5f * kDisturbance)
+        {
+            crossedHalf = true;
+            break;
+        }
+    }
+
+    EXPECT_TRUE(crossedHalf);
 }
