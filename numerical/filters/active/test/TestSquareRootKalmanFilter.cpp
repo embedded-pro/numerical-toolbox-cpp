@@ -1,6 +1,7 @@
 #include "numerical/filters/active/KalmanFilter.hpp"
 #include "numerical/filters/active/SquareRootKalmanFilter.hpp"
 #include "numerical/math/CholeskyDecomposition.hpp"
+#include "numerical/math/ConsistencyMetrics.hpp"
 #include "numerical/math/Tolerance.hpp"
 #include <cmath>
 #include <gtest/gtest.h>
@@ -16,6 +17,10 @@ namespace
     using MeasVec = math::Vector<float, 1>;
     using MeasMat = math::Matrix<float, 1, 2>;
     using MeasCov = math::SquareMatrix<float, 1>;
+    using Cm2 = math::ConsistencyMetrics<float, 2>;
+    using Cm1 = math::ConsistencyMetrics<float, 1>;
+    using InnovVec = math::Vector<float, 1>;
+    using InnovCov = math::SquareMatrix<float, 1>;
 
     StateMat MakeF()
     {
@@ -88,6 +93,30 @@ namespace
             reference.SetMeasurementMatrix(MakeH());
             reference.SetProcessNoise(MakeQ());
             reference.SetMeasurementNoise(MakeR());
+        }
+    };
+
+    class TestSquareRootKalmanFilterConsistency
+        : public ::testing::Test
+    {
+    protected:
+        StateMat S0 = math::CholeskyDecomposition<float, 2>::Factor(StateMat{
+            { 1.0f, 0.0f },
+            { 0.0f, 1.0f } });
+        StateMat Q{
+            { 0.01f, 0.0f },
+            { 0.0f, 0.01f }
+        };
+        MeasCov R{ { 0.1f } };
+
+        SrkfType filter{ MakeX0(), S0 };
+
+        void SetUp() override
+        {
+            filter.SetStateTransition(MakeF());
+            filter.SetMeasurementMatrix(MakeH());
+            filter.SetProcessNoiseFactor(math::CholeskyDecomposition<float, 2>::Factor(Q));
+            filter.SetMeasurementNoiseFactor(math::CholeskyDecomposition<float, 1>::Factor(R));
         }
     };
 }
@@ -346,4 +375,243 @@ TEST_F(TestSquareRootKalmanFilter, reset_and_getters)
     EXPECT_NEAR(S.at(1, 0), S0.at(1, 0), math::Tolerance<float>());
     EXPECT_NEAR(S.at(0, 1), S0.at(0, 1), math::Tolerance<float>());
     EXPECT_NEAR(S.at(1, 1), S0.at(1, 1), math::Tolerance<float>());
+}
+
+TEST_F(TestSquareRootKalmanFilter, identity_transition_predict_preserves_state)
+{
+    StateMat identity{
+        { 1.0f, 0.0f },
+        { 0.0f, 1.0f }
+    };
+    StateVec x0{ { 3.0f }, { -1.5f } };
+    SrkfType f2{ x0, S0 };
+    f2.SetStateTransition(identity);
+    f2.SetProcessNoiseFactor(StateMat{});
+
+    f2.Predict();
+
+    EXPECT_NEAR(f2.GetState().at(0, 0), 3.0f, math::Tolerance<float>());
+    EXPECT_NEAR(f2.GetState().at(1, 0), -1.5f, math::Tolerance<float>());
+}
+
+TEST_F(TestSquareRootKalmanFilter, zero_innovation_leaves_state_unchanged_and_reduces_covariance)
+{
+    SetupBothFilters();
+    filter.Predict();
+
+    StateVec stateBefore = filter.GetState();
+    float p00Before = filter.GetCovariance().at(0, 0);
+
+    MeasVec exactMeas{ { filter.GetState().at(0, 0) } };
+    filter.Update(exactMeas);
+
+    EXPECT_NEAR(filter.GetState().at(0, 0), stateBefore.at(0, 0), math::Tolerance<float>());
+    EXPECT_LT(filter.GetCovariance().at(0, 0), p00Before);
+}
+
+TEST_F(TestSquareRootKalmanFilter, covariance_remains_symmetric_after_many_steps)
+{
+    SetupBothFilters();
+
+    float pos = 0.0f;
+    constexpr float vel = 0.3f;
+
+    for (int step = 0; step < 50; ++step)
+    {
+        pos += vel * dt;
+        filter.Predict();
+        filter.Update(MeasVec{ { pos } });
+
+        auto P = filter.GetCovariance();
+        EXPECT_NEAR(P.at(0, 1), P.at(1, 0), math::Tolerance<float>());
+    }
+}
+
+TEST_F(TestSquareRootKalmanFilter, two_independent_instances_produce_same_output)
+{
+    StateMat S0a = math::CholeskyDecomposition<float, 2>::Factor(MakeP0());
+    StateMat S0b = math::CholeskyDecomposition<float, 2>::Factor(MakeP0());
+
+    SrkfType filterA{ MakeX0(), S0a };
+    SrkfType filterB{ MakeX0(), S0b };
+
+    for (auto* f : { &filterA, &filterB })
+    {
+        f->SetStateTransition(MakeF());
+        f->SetMeasurementMatrix(MakeH());
+        f->SetProcessNoiseFactor(math::CholeskyDecomposition<float, 2>::Factor(MakeQ()));
+        f->SetMeasurementNoiseFactor(math::CholeskyDecomposition<float, 1>::Factor(MakeR()));
+    }
+
+    std::array<float, 5> measurements{ 0.1f, 0.25f, 0.42f, 0.61f, 0.83f };
+    for (float z : measurements)
+    {
+        filterA.Predict();
+        filterA.Update(MeasVec{ { z } });
+        filterB.Predict();
+        filterB.Update(MeasVec{ { z } });
+    }
+
+    EXPECT_FLOAT_EQ(filterA.GetState().at(0, 0), filterB.GetState().at(0, 0));
+    EXPECT_FLOAT_EQ(filterA.GetState().at(1, 0), filterB.GetState().at(1, 0));
+    EXPECT_FLOAT_EQ(filterA.GetCovariance().at(0, 0), filterB.GetCovariance().at(0, 0));
+}
+
+TEST_F(TestSquareRootKalmanFilter, long_horizon_no_nan_inf_drift)
+{
+    SetupBothFilters();
+
+    float pos = 0.0f;
+    constexpr float vel = 0.5f;
+
+    for (int step = 0; step < 500; ++step)
+    {
+        pos += vel * dt;
+        filter.Predict();
+        filter.Update(MeasVec{ { pos } });
+    }
+
+    auto x = filter.GetState();
+    auto P = filter.GetCovariance();
+
+    EXPECT_TRUE(std::isfinite(x.at(0, 0)));
+    EXPECT_TRUE(std::isfinite(x.at(1, 0)));
+    EXPECT_TRUE(std::isfinite(P.at(0, 0)));
+    EXPECT_TRUE(std::isfinite(P.at(1, 1)));
+    EXPECT_GE(P.at(0, 0), 0.0f);
+    EXPECT_GE(P.at(1, 1), 0.0f);
+}
+
+TEST_F(TestSquareRootKalmanFilter, estimate_converges_to_ground_truth)
+{
+    SetupBothFilters();
+
+    float truePos = 0.0f;
+    constexpr float trueVel = 0.5f;
+
+    for (int step = 0; step < 50; ++step)
+    {
+        truePos += trueVel * dt;
+        filter.Predict();
+        filter.Update(MeasVec{ { truePos } });
+    }
+
+    auto x = filter.GetState();
+    EXPECT_NEAR(x.at(0, 0), truePos, 0.15f);
+    EXPECT_NEAR(x.at(1, 0), trueVel, 0.3f);
+}
+
+TEST_F(TestSquareRootKalmanFilterConsistency, nees_is_nonnegative_after_convergence)
+{
+    constexpr float truePos = 2.0f;
+    constexpr float trueVel = 0.5f;
+
+    for (int i = 0; i < 40; ++i)
+    {
+        filter.Predict();
+        filter.Update(MeasVec{ { truePos + trueVel * static_cast<float>(i) * dt } });
+    }
+
+    StateVec truth{ { truePos + trueVel * 40.0f * dt }, { trueVel } };
+    StateVec error;
+    error.at(0, 0) = filter.GetState().at(0, 0) - truth.at(0, 0);
+    error.at(1, 0) = filter.GetState().at(1, 0) - truth.at(1, 0);
+
+    auto nees = Cm2::Nees(error, filter.GetCovariance());
+    ASSERT_TRUE(nees.has_value());
+    EXPECT_GE(*nees, 0.0f);
+}
+
+TEST_F(TestSquareRootKalmanFilterConsistency, nis_is_nonnegative_and_finite_on_every_step)
+{
+    constexpr float trueVel = 1.0f;
+    constexpr int kSteps = 30;
+
+    for (int i = 0; i < kSteps; ++i)
+    {
+        filter.Predict();
+
+        float measPos = trueVel * static_cast<float>(i + 1) * dt;
+        MeasVec meas{ { measPos } };
+
+        InnovVec innovation;
+        innovation.at(0, 0) = measPos - filter.GetState().at(0, 0);
+
+        auto P = filter.GetCovariance();
+        InnovCov innovCov;
+        innovCov.at(0, 0) = P.at(0, 0) + R.at(0, 0);
+
+        auto nis = Cm1::Nis(innovation, innovCov);
+        ASSERT_TRUE(nis.has_value());
+        EXPECT_GE(*nis, 0.0f);
+        EXPECT_FALSE(std::isinf(*nis));
+        EXPECT_FALSE(std::isnan(*nis));
+
+        filter.Update(meas);
+    }
+}
+
+TEST_F(TestSquareRootKalmanFilterConsistency, factor_is_lower_triangular_after_update)
+{
+    filter.Predict();
+    filter.Update(MeasVec{ { 0.3f } });
+
+    auto S = filter.GetCovarianceFactor();
+    EXPECT_NEAR(S.at(0, 1), 0.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestSquareRootKalmanFilterConsistency, factor_diagonal_is_positive)
+{
+    filter.Predict();
+    filter.Update(MeasVec{ { 0.3f } });
+
+    auto S = filter.GetCovarianceFactor();
+    EXPECT_GT(S.at(0, 0), 0.0f);
+    EXPECT_GT(S.at(1, 1), 0.0f);
+}
+
+TEST_F(TestSquareRootKalmanFilterConsistency, three_state_position_velocity_acceleration_tracking)
+{
+    using Srkf3 = filters::SquareRootKalmanFilter<float, 3, 1>;
+    using StateVec3 = math::Vector<float, 3>;
+    using StateMat3 = math::SquareMatrix<float, 3>;
+    using MeasMat3 = math::Matrix<float, 1, 3>;
+
+    StateMat3 P03{
+        { 1.0f, 0.0f, 0.0f },
+        { 0.0f, 1.0f, 0.0f },
+        { 0.0f, 0.0f, 1.0f }
+    };
+    StateMat3 S03 = math::CholeskyDecomposition<float, 3>::Factor(P03);
+    StateVec3 x03{};
+
+    Srkf3 f3{ x03, S03 };
+    f3.SetStateTransition(StateMat3{
+        { 1.0f, dt, 0.5f * dt * dt },
+        { 0.0f, 1.0f, dt },
+        { 0.0f, 0.0f, 1.0f } });
+    f3.SetMeasurementMatrix(MeasMat3{ { 1.0f, 0.0f, 0.0f } });
+    f3.SetProcessNoiseFactor(math::CholeskyDecomposition<float, 3>::Factor(StateMat3{
+        { 0.01f, 0.0f, 0.0f },
+        { 0.0f, 0.01f, 0.0f },
+        { 0.0f, 0.0f, 0.01f } }));
+    f3.SetMeasurementNoiseFactor(math::CholeskyDecomposition<float, 1>::Factor(MeasCov{ { 0.1f } }));
+
+    float trueAcc = 0.5f;
+    float trueVel3 = 0.0f;
+    float truePos3 = 0.0f;
+
+    for (int i = 0; i < 30; ++i)
+    {
+        trueVel3 += trueAcc * dt;
+        truePos3 += trueVel3 * dt;
+
+        f3.Predict();
+        f3.Update(MeasVec{ { truePos3 } });
+    }
+
+    auto finalState3 = f3.GetState();
+    EXPECT_NEAR(finalState3.at(0, 0), truePos3, 0.15f);
+    EXPECT_NEAR(finalState3.at(1, 0), trueVel3, 0.3f);
+    EXPECT_NEAR(finalState3.at(2, 0), trueAcc, 0.5f);
 }

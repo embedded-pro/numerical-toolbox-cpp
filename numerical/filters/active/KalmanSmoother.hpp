@@ -34,8 +34,6 @@ namespace filters
         {
             std::array<StateVector, MaxSteps> smoothedMeans{};
             std::array<StateMatrix, MaxSteps> smoothedCovariances{};
-            // lagCrossCovariances[t] = P_{t, t-1 | T}
-            // Index 0 is always zero (undefined); indices 1..numSteps-1 are valid
             std::array<StateMatrix, MaxSteps> lagCrossCovariances{};
             float logLikelihood{};
         };
@@ -52,8 +50,6 @@ namespace filters
             const StateVector& initialState,
             const StateMatrix& initialCovariance);
 
-        // Convenience overload: extracts F = plant.A, H = plant.C from the LTI model.
-        // InputSize is not used; any plant input dimension is accepted.
         template<std::size_t PlantInputSize>
         OPTIMIZE_FOR_SPEED SmootherOutput Smooth(
             const math::LinearTimeInvariant<float, StateSize, PlantInputSize, MeasurementSize>& plant,
@@ -96,8 +92,6 @@ namespace filters
             const StateMatrix& stateTransition,
             const StateMatrix& predictedCovariance) const;
     };
-
-    // Implementation //
 
     template<std::size_t StateSize, std::size_t MeasurementSize, std::size_t MaxSteps>
     OPTIMIZE_FOR_SPEED
@@ -142,14 +136,12 @@ namespace filters
             const auto nu = observations[t] - H * predictedMeans_[t];
             const auto S = math::CongruenceTransform(H, predictedCovariances_[t]) + R;
 
-            // Kalman gain: K = P H^T S^{-1}  via SolveSystem(S, H*P)^T
             const auto K = solvers::SolveSystem<float, MeasurementSize, StateSize>(
                 S, H * predictedCovariances_[t])
                                .Transpose();
 
             filteredMeans_[t] = predictedMeans_[t] + K * nu;
 
-            // Joseph-form covariance update for numerical PD-preservation
             const auto IminusKH = StateMatrix::Identity() - K * H;
             filteredCovariances_[t] =
                 math::CongruenceTransform(IminusKH, predictedCovariances_[t]) + math::CongruenceTransform(K, R);
@@ -183,24 +175,20 @@ namespace filters
 
         for (std::size_t t = numSteps - 2;; --t)
         {
-            // RTS smoother gain: G_t = P_{t|t} F^T (P_{t+1|t})^{-1}
             const auto G_t = ComputeSmootherGain(filteredCovariances_[t], F, predictedCovariances_[t + 1]);
 
             const auto deltaP = output.smoothedCovariances[t + 1] - predictedCovariances_[t + 1];
             output.smoothedMeans[t] = filteredMeans_[t] + G_t * (output.smoothedMeans[t + 1] - predictedMeans_[t + 1]);
             output.smoothedCovariances[t] = filteredCovariances_[t] + math::CongruenceTransform(G_t, deltaP);
 
-            // Lag-1 cross-covariance: P_{t+1, t | T}
             if (t == numSteps - 2)
             {
-                // Initialization: P_{T-1, T-2 | T} = (I - K_{T-1} H) F P_{T-2 | T-2}
                 const auto IminusKH = StateMatrix::Identity() - kalmanGains_[numSteps - 1] * H;
                 output.lagCrossCovariances[numSteps - 1] =
                     IminusKH * F * filteredCovariances_[numSteps - 2];
             }
             else
             {
-                // Recursion: P_{t+2, t+1 | T} = P_{t+1|t+1} G_t^T + G_{t+1} (P_{t+2,t+1|T} - F P_{t+1|t+1}) G_t^T
                 const auto crossDiff = output.lagCrossCovariances[t + 2] - F * filteredCovariances_[t + 1];
                 output.lagCrossCovariances[t + 1] =
                     filteredCovariances_[t + 1] * G_t.Transpose() + G_prev * crossDiff * G_t.Transpose();

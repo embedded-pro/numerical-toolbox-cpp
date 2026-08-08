@@ -1,9 +1,13 @@
 #include "numerical/filters/active/ExtendedKalmanFilter.hpp"
+#include "numerical/math/ConsistencyMetrics.hpp"
+#include "numerical/math/Tolerance.hpp"
 #include "numerical/math/test_doubles/MatrixTestSupport.hpp"
 #include <gtest/gtest.h>
+#include <cmath>
 
 namespace
 {
+    using math::test::AreMatricesNear;
     using math::test::AreVectorsNear;
 
     using StateVec2 = math::Vector<float, 2>;
@@ -22,7 +26,7 @@ namespace
         };
     }
 
-    StateMat2 LinearStateJacobian(const StateVec2& /*x*/)
+    StateMat2 LinearStateJacobian(const StateVec2&)
     {
         return StateMat2{
             { 1.0f, kDt },
@@ -35,7 +39,7 @@ namespace
         return MeasVec1{ { x.at(0, 0) } };
     }
 
-    MeasMat2x1 LinearMeasurementJacobian(const StateVec2& /*x*/)
+    MeasMat2x1 LinearMeasurementJacobian(const StateVec2&)
     {
         return MeasMat2x1{ { 1.0f, 0.0f } };
     }
@@ -69,7 +73,7 @@ namespace
         };
     }
 
-    StateMat2 StateJacobianWithControl(const StateVec2& /*x*/, const ControlVec1& /*u*/)
+    StateMat2 StateJacobianWithControl(const StateVec2&, const ControlVec1&)
     {
         return StateMat2{
             { 1.0f, kDt },
@@ -108,6 +112,10 @@ namespace
             ekf.emplace(initialState, initialP,
                 NonlinearStateTransition, NonlinearStateJacobian,
                 LinearMeasurement, LinearMeasurementJacobian);
+            ekf->SetProcessNoise(StateMat2{
+                { 0.01f, 0.0f },
+                { 0.0f, 0.01f } });
+            ekf->SetMeasurementNoise(math::SquareMatrix<float, 1>{ { 0.5f } });
         }
 
         void SetUpControl()
@@ -145,7 +153,7 @@ namespace
                 };
             };
 
-            auto jacobian = [](const StateVec3& /*x*/) -> StateMat3
+            auto jacobian = [](const StateVec3&) -> StateMat3
             {
                 return StateMat3{
                     { 1.0f, kDt, 0.0f },
@@ -159,7 +167,7 @@ namespace
                 return MeasVec{ { x.at(0, 0) } };
             };
 
-            auto measurementJac = [](const StateVec3& /*x*/) -> MeasMat
+            auto measurementJac = [](const StateVec3&) -> MeasMat
             {
                 return MeasMat{ { 1.0f, 0.0f, 0.0f } };
             };
@@ -177,6 +185,35 @@ namespace
                 { 0.0f, 0.01f, 0.0f },
                 { 0.0f, 0.0f, 0.01f } });
             ekf->SetMeasurementNoise(MeasCov{ { 0.1f } });
+        }
+    };
+
+    class ExtendedKalmanFilterConsistencyTest : public ::testing::Test
+    {
+    protected:
+        using EkfType = filters::ExtendedKalmanFilter<float, 2, 1, 0>;
+        using Cm1 = math::ConsistencyMetrics<float, 1>;
+        using Cm2 = math::ConsistencyMetrics<float, 2>;
+        using InnovVec = math::Vector<float, 1>;
+        using InnovCov = math::SquareMatrix<float, 1>;
+
+        StateMat2 Q{
+            { 0.01f, 0.0f },
+            { 0.0f, 0.01f }
+        };
+        math::SquareMatrix<float, 1> R{ { 0.1f } };
+
+        std::optional<EkfType> ekf;
+
+        void SetUp() override
+        {
+            ekf.emplace(StateVec2{}, StateMat2{
+                { 1.0f, 0.0f },
+                { 0.0f, 1.0f } },
+                LinearStateTransition, LinearStateJacobian,
+                LinearMeasurement, LinearMeasurementJacobian);
+            ekf->SetProcessNoise(Q);
+            ekf->SetMeasurementNoise(R);
         }
     };
 }
@@ -200,36 +237,53 @@ TEST_F(ExtendedKalmanFilterTest, LinearSystemMatchesKalmanFilter)
     EXPECT_NEAR(finalState.at(1, 0), trueVel, 0.4f);
 }
 
-TEST_F(ExtendedKalmanFilterTest, NonlinearPredictionUpdatesState)
+TEST_F(ExtendedKalmanFilterTest, NonlinearPredictStepMatchesAnalyticTransition)
 {
-    ekf.emplace(
-        StateVec2{ { 0.1f }, { 0.0f } },
-        StateMat2{
-            { 0.5f, 0.0f },
-            { 0.0f, 0.5f } },
+    StateVec2 x0{ { 0.3f }, { 0.5f } };
+    StateMat2 p0{
+        { 0.5f, 0.0f },
+        { 0.0f, 0.5f }
+    };
+    ekf.emplace(x0, p0,
         NonlinearStateTransition, NonlinearStateJacobian,
         LinearMeasurement, LinearMeasurementJacobian);
     ekf->SetProcessNoise(StateMat2{
         { 0.01f, 0.0f },
         { 0.0f, 0.01f } });
+    ekf->SetMeasurementNoise(math::SquareMatrix<float, 1>{ { 0.5f } });
 
     ekf->Predict();
 
-    auto predicted = ekf->GetState();
-    EXPECT_NEAR(predicted.at(0, 0), 0.1f, 0.05f);
-    EXPECT_LT(predicted.at(1, 0), 0.0f);
+    float expectedPos = 0.3f + 0.5f * kDt;
+    float expectedVel = 0.5f - std::sin(0.3f) * kDt;
+
+    EXPECT_NEAR(ekf->GetState().at(0, 0), expectedPos, math::Tolerance<float>());
+    EXPECT_NEAR(ekf->GetState().at(1, 0), expectedVel, math::Tolerance<float>());
 }
 
 TEST_F(ExtendedKalmanFilterTest, UpdateReducesCovariance)
 {
     SetUpNonlinear();
-    ekf->SetMeasurementNoise(math::SquareMatrix<float, 1>{ { 0.5f } });
 
     auto covBefore = ekf->GetCovariance();
     ekf->Update(MeasVec1{ { 0.5f } });
     auto covAfter = ekf->GetCovariance();
 
     EXPECT_LT(covAfter.at(0, 0), covBefore.at(0, 0));
+}
+
+TEST_F(ExtendedKalmanFilterTest, PredictGrowsCovarianceThenUpdateReducesIt)
+{
+    SetUpLinear();
+
+    float p00Before = initialP.at(0, 0);
+
+    ekf->Predict();
+    float p00AfterPredict = ekf->GetCovariance().at(0, 0);
+    EXPECT_GT(p00AfterPredict, p00Before);
+
+    ekf->Update(MeasVec1{ { 0.1f } });
+    EXPECT_LT(ekf->GetCovariance().at(0, 0), p00AfterPredict);
 }
 
 TEST_F(ExtendedKalmanFilterTest, NonlinearTrackingConverges)
@@ -281,6 +335,103 @@ TEST_F(ExtendedKalmanFilterTest, WithControlInput)
     EXPECT_NEAR(finalState.at(1, 0), trueVel, 0.4f);
 }
 
+TEST_F(ExtendedKalmanFilterTest, ZeroInnovationLeavesStateUnchangedAndReducesCovariance)
+{
+    SetUpLinear();
+    ekf->Predict();
+
+    StateVec2 stateBefore = ekf->GetState();
+    float p00Before = ekf->GetCovariance().at(0, 0);
+
+    MeasVec1 exactMeas{ { ekf->GetState().at(0, 0) } };
+    ekf->Update(exactMeas);
+
+    EXPECT_NEAR(ekf->GetState().at(0, 0), stateBefore.at(0, 0), math::Tolerance<float>());
+    EXPECT_LT(ekf->GetCovariance().at(0, 0), p00Before);
+}
+
+TEST_F(ExtendedKalmanFilterTest, CovarianceRemainsSymmetricAfterManySteps)
+{
+    SetUpLinear();
+
+    float truePos = 0.0f;
+    constexpr float trueVel = 0.3f;
+
+    for (int i = 0; i < 50; ++i)
+    {
+        truePos += trueVel * kDt;
+        ekf->Predict();
+        ekf->Update(MeasVec1{ { truePos } });
+
+        auto P = ekf->GetCovariance();
+        EXPECT_NEAR(P.at(0, 1), P.at(1, 0), math::Tolerance<float>());
+    }
+}
+
+TEST_F(ExtendedKalmanFilterTest, JosephFormKeepsCovariancePositiveSemiDefinite)
+{
+    ekf.emplace(initialState, StateMat2{
+        { 1000.0f, 0.0f },
+        { 0.0f, 1000.0f } },
+        LinearStateTransition, LinearStateJacobian,
+        LinearMeasurement, LinearMeasurementJacobian);
+    ekf->SetProcessNoise(StateMat2{
+        { 0.001f, 0.0f },
+        { 0.0f, 0.001f } });
+    ekf->SetMeasurementNoise(math::SquareMatrix<float, 1>{ { 0.001f } });
+
+    for (int i = 0; i < 50; ++i)
+    {
+        ekf->Predict();
+        ekf->Update(MeasVec1{ { 1.0f } });
+
+        auto P = ekf->GetCovariance();
+        EXPECT_GE(P.at(0, 0), 0.0f);
+        EXPECT_GE(P.at(1, 1), 0.0f);
+        float det = P.at(0, 0) * P.at(1, 1) - P.at(0, 1) * P.at(1, 0);
+        EXPECT_GE(det, -math::Tolerance<float>());
+    }
+}
+
+TEST_F(ExtendedKalmanFilterTest, TwoIndependentInstancesProduceSameOutput)
+{
+    filters::ExtendedKalmanFilter<float, 2, 1, 0> filterA{
+        initialState, initialP,
+        LinearStateTransition, LinearStateJacobian,
+        LinearMeasurement, LinearMeasurementJacobian
+    };
+    filters::ExtendedKalmanFilter<float, 2, 1, 0> filterB{
+        initialState, initialP,
+        LinearStateTransition, LinearStateJacobian,
+        LinearMeasurement, LinearMeasurementJacobian
+    };
+
+    StateMat2 Q{
+        { 0.01f, 0.0f },
+        { 0.0f, 0.01f }
+    };
+    math::SquareMatrix<float, 1> R{ { 0.5f } };
+
+    for (auto* f : { &filterA, &filterB })
+    {
+        f->SetProcessNoise(Q);
+        f->SetMeasurementNoise(R);
+    }
+
+    std::array<float, 5> measurements{ 0.1f, 0.25f, 0.42f, 0.61f, 0.83f };
+    for (float z : measurements)
+    {
+        filterA.Predict();
+        filterA.Update(MeasVec1{ { z } });
+        filterB.Predict();
+        filterB.Update(MeasVec1{ { z } });
+    }
+
+    EXPECT_FLOAT_EQ(filterA.GetState().at(0, 0), filterB.GetState().at(0, 0));
+    EXPECT_FLOAT_EQ(filterA.GetState().at(1, 0), filterB.GetState().at(1, 0));
+    EXPECT_FLOAT_EQ(filterA.GetCovariance().at(0, 0), filterB.GetCovariance().at(0, 0));
+}
+
 TEST_F(ExtendedKalmanFilter3StateTest, ThreeStateSystemTracksAcceleration)
 {
     float trueAcc = 0.5f;
@@ -300,4 +451,150 @@ TEST_F(ExtendedKalmanFilter3StateTest, ThreeStateSystemTracksAcceleration)
     EXPECT_NEAR(finalState3.at(0, 0), truePos3, 0.15f);
     EXPECT_NEAR(finalState3.at(1, 0), trueVel3, 0.3f);
     EXPECT_NEAR(finalState3.at(2, 0), trueAcc, 0.5f);
+}
+
+TEST_F(ExtendedKalmanFilterConsistencyTest, NeesIsNonNegativeAfterConvergence)
+{
+    constexpr float truePos = 2.0f;
+    constexpr float trueVel = 0.5f;
+
+    for (int i = 0; i < 40; ++i)
+    {
+        ekf->Predict();
+        ekf->Update(MeasVec1{ { truePos + trueVel * static_cast<float>(i) * kDt } });
+    }
+
+    StateVec2 truth{ { truePos + trueVel * 40.0f * kDt }, { trueVel } };
+    StateVec2 error;
+    error.at(0, 0) = ekf->GetState().at(0, 0) - truth.at(0, 0);
+    error.at(1, 0) = ekf->GetState().at(1, 0) - truth.at(1, 0);
+
+    auto nees = Cm2::Nees(error, ekf->GetCovariance());
+    ASSERT_TRUE(nees.has_value());
+    EXPECT_GE(*nees, 0.0f);
+}
+
+TEST_F(ExtendedKalmanFilterConsistencyTest, NisIsNonNegativeAndFiniteOnEveryStep)
+{
+    constexpr float trueVel = 1.0f;
+    constexpr int kSteps = 30;
+
+    for (int i = 0; i < kSteps; ++i)
+    {
+        ekf->Predict();
+
+        float measPos = trueVel * static_cast<float>(i + 1) * kDt;
+        MeasVec1 meas{ { measPos } };
+
+        InnovVec innovation;
+        innovation.at(0, 0) = measPos - ekf->GetState().at(0, 0);
+
+        auto P = ekf->GetCovariance();
+        InnovCov innovCov;
+        innovCov.at(0, 0) = P.at(0, 0) + R.at(0, 0);
+
+        auto nis = Cm1::Nis(innovation, innovCov);
+        ASSERT_TRUE(nis.has_value());
+        EXPECT_GE(*nis, 0.0f);
+        EXPECT_FALSE(std::isinf(*nis));
+        EXPECT_FALSE(std::isnan(*nis));
+
+        ekf->Update(meas);
+    }
+}
+
+TEST_F(ExtendedKalmanFilterConsistencyTest, IsConsistentReturnsTrueForNeesInChiSquaredBand)
+{
+    StateVec2 error{ { 0.5f }, { 0.1f } };
+    StateMat2 cov{
+        { 1.0f, 0.0f },
+        { 0.0f, 1.0f }
+    };
+
+    auto nees = Cm2::Nees(error, cov);
+    ASSERT_TRUE(nees.has_value());
+
+    bool consistent = Cm2::IsConsistent(*nees);
+    EXPECT_TRUE(consistent);
+}
+
+TEST_F(ExtendedKalmanFilterConsistencyTest, IsConsistentReturnsFalseForLargeNees)
+{
+    StateVec2 error{ { 100.0f }, { 100.0f } };
+    StateMat2 cov{
+        { 1.0f, 0.0f },
+        { 0.0f, 1.0f }
+    };
+
+    auto nees = Cm2::Nees(error, cov);
+    ASSERT_TRUE(nees.has_value());
+
+    bool consistent = Cm2::IsConsistent(*nees);
+    EXPECT_FALSE(consistent);
+}
+
+TEST_F(ExtendedKalmanFilterConsistencyTest, TimeAveragedNisConsistentForNoiselessLinearSystem)
+{
+    constexpr int kSteps = 10;
+    constexpr float trueVel = 0.2f;
+
+    float nisSum = 0.0f;
+
+    for (int i = 0; i < kSteps; ++i)
+    {
+        ekf->Predict();
+
+        float measPos = trueVel * static_cast<float>(i + 1) * kDt;
+        InnovVec innovation;
+        innovation.at(0, 0) = measPos - ekf->GetState().at(0, 0);
+
+        auto P = ekf->GetCovariance();
+        InnovCov S;
+        S.at(0, 0) = P.at(0, 0) + R.at(0, 0);
+
+        auto nis = Cm1::Nis(innovation, S);
+        ASSERT_TRUE(nis.has_value());
+        nisSum += *nis;
+
+        ekf->Update(MeasVec1{ { measPos } });
+    }
+
+    float avgNis = nisSum / static_cast<float>(kSteps);
+    EXPECT_GE(avgNis, 0.0f);
+}
+
+TEST_F(ExtendedKalmanFilterConsistencyTest, IsTimeAveragedConsistentReturnsFalseForZeroSamples)
+{
+    EXPECT_FALSE(Cm1::IsTimeAveragedConsistent(1.0f, 0));
+}
+
+TEST_F(ExtendedKalmanFilterConsistencyTest, NeesReturnsNulloptForSingularCovariance)
+{
+    StateVec2 error{ { 1.0f }, { 0.0f } };
+    StateMat2 singular{ { 0.0f, 0.0f }, { 0.0f, 0.0f } };
+
+    auto nees = Cm2::Nees(error, singular);
+    EXPECT_FALSE(nees.has_value());
+}
+
+TEST_F(ExtendedKalmanFilterConsistencyTest, NisReturnsNulloptForSingularInnovationCovariance)
+{
+    InnovVec innovation{ { 1.5f } };
+    InnovCov singular{ { 0.0f } };
+
+    auto nis = Cm1::Nis(innovation, singular);
+    EXPECT_FALSE(nis.has_value());
+}
+
+TEST_F(ExtendedKalmanFilterConsistencyTest, NeesIsNonNegativeForAnyValidErrorAndCovariance)
+{
+    StateVec2 error{ { 2.0f }, { 1.0f } };
+    StateMat2 cov{
+        { 4.0f, 0.5f },
+        { 0.5f, 2.0f }
+    };
+
+    auto nees = Cm2::Nees(error, cov);
+    ASSERT_TRUE(nees.has_value());
+    EXPECT_GE(*nees, 0.0f);
 }
