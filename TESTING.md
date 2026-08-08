@@ -61,7 +61,6 @@ Canonical rules still apply ([AGENTS.md](AGENTS.md), [testing.instructions.md](.
 | Optimization                                    | ●  |    |    |    | ●  | ●  |    |    |    |
 | Regularization                                  | ●  |    |    |    |    | ●  | ●  |    |    |
 | Solvers (linear / ODE / roots)                  | ●  |    | ○  | ●  | ●  | ●  | ●  |    | ●  |
-| Neural network                                  | ●  |    |    |    | ○  | ●  | ●  |    |    |
 | Math foundation                                 | ●  |    |    |    |    | ●  | ●  |    | ●  |
 
 ● primary   ○ situational
@@ -89,8 +88,6 @@ implementation against its own prior output.
 - **Transforms / filters** — known pairs (δ, sinusoid, DC); Butterworth/Chebyshev vs `scipy.signal`.
 - **Estimators / regression** — simulated known linear-Gaussian systems, AR processes with known
   coefficients, data on a known line/polynomial. Assert RMSE vs truth, NEES/NIS in χ² band, R².
-- **Neural network** — hand-computed forward/backward passes; finite-difference gradient checks.
-
 ### R2 — Unhappy flow (no exceptions here — errors are `std::optional`/status enums)
 Force **every** failure return and assert the *failure* value, not just success: non-SPD Cholesky,
 singular/rank-deficient solve, non-convergence at `maxIterations`, rank-deficient
@@ -257,18 +254,7 @@ final value.
   within the requested tolerance.
 - **M7 conservation** — energy drift bounded for a conservative system over many steps.
 
-### 10. Neural network — `neural_network/`
-`activation/*`, `layer/Dense`, `losses/*`, `model/Model`.
-
-- **M1 activation values** — reference points: `sigmoid(0)=0.5`, `tanh(0)=0`, `relu(−x)=0`,
-  `leaky_relu` slope; output range bounds; monotonicity where expected.
-- **M7 softmax** — outputs sum to 1 and are non-negative; shift-invariance.
-- **M1 loss values & gradients** — MSE of identical vectors = 0; loss non-negative; analytic gradient
-  matches finite-difference (M1 gradient check).
-- **M1 dense layer** — `output = W·x + b`; back-prop gradient check.
-- **Model (M6)** — forward pass is deterministic and equals the manual layer composition.
-
-### 11. Math foundation — `math/`
+### 10. Math foundation — `math/`
 `Matrix`, `ComplexNumber`, `Quaternion`, `Cordic`, `TrigonometricFunctions`, `HyperbolicFunctions`,
 `AdvancedFunctions`, `Statistics`, `LinearTimeInvariant`, `Toeplitz`, `QNumber`.
 

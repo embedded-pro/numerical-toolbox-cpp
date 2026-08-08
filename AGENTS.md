@@ -51,7 +51,7 @@ resource-constrained embedded systems. Real-time, deterministic, no heap.
 
 `analysis`, `windowing`, `control_analysis`, `controllers`, `estimators`,
 `filters` (active Kalman family — **not** `filters::active`), `filters::passive`, `math`,
-`neural_network`, `optimization`, `regularization`, `solvers`, and new:
+`optimization`, `regularization`, `solvers`, and new:
 `robust_control`, `nonlinear_control`.
 
 ## Math functions
