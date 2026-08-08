@@ -29,11 +29,36 @@ namespace
         }
     };
 
+    struct FirstOrderPlant
+    {
+        float y{ 0.0f };
+        float bTrue;
+
+        explicit FirstOrderPlant(float b)
+            : bTrue{ b }
+        {}
+
+        float Step(float u, float disturbance = 0.0f)
+        {
+            y += kTs * (bTrue * u + disturbance);
+            return y;
+        }
+    };
+
     class TestActiveDisturbanceRejection : public ::testing::Test
     {
     protected:
         robust_control::ActiveDisturbanceRejectionControl<float, 2> adrc{ kWo, kWc, kB0, kTs };
         SecondOrderPlant plant{ kB0 };
+    };
+
+    class TestActiveDisturbanceRejectionOrder1 : public ::testing::Test
+    {
+    protected:
+        static constexpr float kWo1{ 20.0f };
+        static constexpr float kWc1{ 5.0f };
+        robust_control::ActiveDisturbanceRejectionControl<float, 1> adrc{ kWo1, kWc1, kB0, kTs };
+        FirstOrderPlant plant{ kB0 };
     };
 }
 
@@ -135,4 +160,65 @@ TEST_F(TestActiveDisturbanceRejection, near_model_free_robustness)
         mismatchedPlant.Step(controller.Compute(reference, mismatchedPlant.y));
 
     EXPECT_NEAR(mismatchedPlant.y, reference, 0.1f);
+}
+
+TEST_F(TestActiveDisturbanceRejectionOrder1, bandwidth_gain_mapping_order1)
+{
+    const auto og = robust_control::ActiveDisturbanceRejectionControl<float, 1>::ObserverGainFromBandwidth(kWo1);
+    const auto cg = robust_control::ActiveDisturbanceRejectionControl<float, 1>::ControlGainFromBandwidth(kWc1);
+
+    EXPECT_NEAR(og.at(0, 0), 2.0f * kWo1, math::Tolerance<float>());
+    EXPECT_NEAR(og.at(1, 0), 1.0f * kWo1 * kWo1, math::Tolerance<float>());
+
+    EXPECT_NEAR(cg.at(0, 0), 1.0f * kWc1, math::Tolerance<float>());
+}
+
+TEST_F(TestActiveDisturbanceRejection, zero_input_zero_output_first_call)
+{
+    const float u = adrc.Compute(0.0f, 0.0f);
+    EXPECT_NEAR(u, 0.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestActiveDisturbanceRejection, long_horizon_bounded_output)
+{
+    const float reference{ 1.0f };
+    float maxOutput{ 0.0f };
+
+    for (int i = 0; i < 20000; ++i)
+    {
+        const float u = adrc.Compute(reference, plant.y);
+        plant.Step(u);
+        const float absY = std::abs(plant.y);
+        if (absY > maxOutput)
+            maxOutput = absY;
+    }
+
+    EXPECT_LT(maxOutput, 10.0f);
+    EXPECT_FALSE(std::isnan(plant.y));
+    EXPECT_FALSE(std::isinf(plant.y));
+}
+
+TEST_F(TestActiveDisturbanceRejection, reset_mid_run_matches_fresh_instance)
+{
+    const float reference{ 1.0f };
+
+    for (int i = 0; i < 500; ++i)
+        plant.Step(adrc.Compute(reference, plant.y));
+
+    adrc.Reset();
+    plant = SecondOrderPlant{ kB0 };
+
+    robust_control::ActiveDisturbanceRejectionControl<float, 2> fresh{ kWo, kWc, kB0, kTs };
+    SecondOrderPlant freshPlant{ kB0 };
+
+    for (int i = 0; i < 200; ++i)
+    {
+        const float uReset = adrc.Compute(reference, plant.y);
+        const float uFresh = fresh.Compute(reference, freshPlant.y);
+        plant.Step(uReset);
+        freshPlant.Step(uFresh);
+    }
+
+    EXPECT_FLOAT_EQ(plant.y, freshPlant.y);
+    EXPECT_FLOAT_EQ(adrc.AppliedPrev(), fresh.AppliedPrev());
 }
