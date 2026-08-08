@@ -2,8 +2,8 @@
 #include "numerical/math/ConsistencyMetrics.hpp"
 #include "numerical/math/Tolerance.hpp"
 #include "numerical/math/test_doubles/MatrixTestSupport.hpp"
-#include <gtest/gtest.h>
 #include <cmath>
+#include <gtest/gtest.h>
 
 namespace
 {
@@ -207,9 +207,7 @@ namespace
 
         void SetUp() override
         {
-            ekf.emplace(StateVec2{}, StateMat2{
-                { 1.0f, 0.0f },
-                { 0.0f, 1.0f } },
+            ekf.emplace(StateVec2{}, StateMat2{ { 1.0f, 0.0f }, { 0.0f, 1.0f } },
                 LinearStateTransition, LinearStateJacobian,
                 LinearMeasurement, LinearMeasurementJacobian);
             ekf->SetProcessNoise(Q);
@@ -370,9 +368,7 @@ TEST_F(ExtendedKalmanFilterTest, CovarianceRemainsSymmetricAfterManySteps)
 
 TEST_F(ExtendedKalmanFilterTest, JosephFormKeepsCovariancePositiveSemiDefinite)
 {
-    ekf.emplace(initialState, StateMat2{
-        { 1000.0f, 0.0f },
-        { 0.0f, 1000.0f } },
+    ekf.emplace(initialState, StateMat2{ { 1000.0f, 0.0f }, { 0.0f, 1000.0f } },
         LinearStateTransition, LinearStateJacobian,
         LinearMeasurement, LinearMeasurementJacobian);
     ekf->SetProcessNoise(StateMat2{
