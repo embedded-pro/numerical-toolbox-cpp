@@ -46,7 +46,9 @@ TEST_F(TestFeedforward2Dof, passes_correct_error_to_feedback)
     EXPECT_CALL(ff, Evaluate(0.4f)).WillOnce(testing::Return(0.0f));
     EXPECT_CALL(fb, Process(0.3f)).WillOnce(testing::Return(0.3f));
 
-    controller.Compute(0.4f, 0.1f);
+    float result{ controller.Compute(0.4f, 0.1f) };
+
+    EXPECT_NEAR(result, 0.3f, math::Tolerance<float>());
 }
 
 TEST_F(TestFeedforward2Dof, passes_reference_to_feedforward)
@@ -87,6 +89,26 @@ TEST_F(TestFeedforward2Dof, perfect_feedforward_zero_error)
     EXPECT_NEAR(result, 0.7f, math::Tolerance<float>());
 }
 
+TEST_F(TestFeedforward2Dof, output_is_clamped_negative)
+{
+    EXPECT_CALL(ff, Evaluate(testing::_)).WillOnce(testing::Return(-0.9f));
+    EXPECT_CALL(fb, Process(testing::_)).WillOnce(testing::Return(-0.9f));
+
+    float result{ controller.Compute(-1.0f, 0.0f) };
+
+    EXPECT_NEAR(result, -1.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestFeedforward2Dof, zero_feedback_reduces_to_feedforward)
+{
+    EXPECT_CALL(ff, Evaluate(0.5f)).WillOnce(testing::Return(0.4f));
+    EXPECT_CALL(fb, Process(testing::_)).WillOnce(testing::Return(0.0f));
+
+    float result{ controller.Compute(0.5f, 0.1f) };
+
+    EXPECT_NEAR(result, 0.4f, math::Tolerance<float>());
+}
+
 TEST_F(TestFeedforward2Dof, reset_delegates_to_feedback)
 {
     EXPECT_CALL(fb, Reset()).Times(1);
@@ -97,7 +119,7 @@ TEST_F(TestFeedforward2Dof, reset_delegates_to_feedback)
 TEST_F(TestFeedforward2Dof, negative_reference_handled)
 {
     EXPECT_CALL(ff, Evaluate(-0.3f)).WillOnce(testing::Return(-0.2f));
-    EXPECT_CALL(fb, Process(testing::_)).WillOnce(testing::Return(-0.1f));
+    EXPECT_CALL(fb, Process(-0.3f)).WillOnce(testing::Return(-0.1f));
 
     float result{ controller.Compute(-0.3f, 0.0f) };
 

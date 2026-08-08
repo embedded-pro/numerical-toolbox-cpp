@@ -1,5 +1,6 @@
 #include "numerical/controllers/implementations/Mpc.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
+#include "numerical/math/Tolerance.hpp"
 #include <gtest/gtest.h>
 
 namespace
@@ -34,7 +35,7 @@ TEST_F(TestMpc, compute_control_returns_zero_for_zero_state)
     math::Vector<float, 2> zeroState{ 0.0f, 0.0f };
     auto u = mpc.ComputeControl(zeroState);
 
-    EXPECT_NEAR(u.at(0, 0), 0.0f, 1e-4f);
+    EXPECT_NEAR(u.at(0, 0), 0.0f, math::Tolerance<float>());
 }
 
 TEST_F(TestMpc, compute_control_produces_nonzero_for_nonzero_state)
@@ -199,14 +200,11 @@ TEST_F(TestMpc, precomputed_constructor_matches_online_computation)
     auto uOnline = mpcOnline.ComputeControl(state);
     auto uPrecomputed = mpcPrecomputed.ComputeControl(state);
 
-    EXPECT_NEAR(uOnline.at(0, 0), uPrecomputed.at(0, 0), 1e-4f);
+    EXPECT_NEAR(uOnline.at(0, 0), uPrecomputed.at(0, 0), math::Tolerance<float>());
 }
 
 TEST_F(TestMpc, double_integrator_regulation)
 {
-    // Double integrator: x1 = position, x2 = velocity
-    // x1[k+1] = x1[k] + dt * x2[k]
-    // x2[k+1] = x2[k] + dt * u[k]
     float dt = 0.1f;
 
     math::SquareMatrix<float, 2> A{
@@ -351,7 +349,7 @@ TEST_F(TestMpc, clear_reference_reverts_to_origin_regulation)
     mpc.ClearReference();
 
     auto u2 = mpc.ComputeControl(state);
-    EXPECT_NEAR(u2.at(0, 0), 0.0f, 1e-4f);
+    EXPECT_NEAR(u2.at(0, 0), 0.0f, math::Tolerance<float>());
 }
 
 TEST_F(TestMpc, three_state_system_regulation)
@@ -501,7 +499,7 @@ TEST_F(TestMpc, three_state_precomputed_constructor)
     auto uOnline = mpcOnline.ComputeControl(state);
     auto uPrecomputed = mpcPrecomputed.ComputeControl(state);
 
-    EXPECT_NEAR(uOnline.at(0, 0), uPrecomputed.at(0, 0), 1e-3f);
+    EXPECT_NEAR(uOnline.at(0, 0), uPrecomputed.at(0, 0), math::Tolerance<float>());
 }
 
 TEST_F(TestMpc, different_prediction_and_control_horizons_with_constraints)
@@ -607,7 +605,7 @@ TEST_F(TestMpc, different_prediction_and_control_horizons_precomputed)
     auto uOnline = mpcOnline.ComputeControl(state);
     auto uPrecomputed = mpcPrecomputed.ComputeControl(state);
 
-    EXPECT_NEAR(uOnline.at(0, 0), uPrecomputed.at(0, 0), 1e-3f);
+    EXPECT_NEAR(uOnline.at(0, 0), uPrecomputed.at(0, 0), math::Tolerance<float>());
 }
 
 TEST_F(TestMpc, ten_horizon_precomputed_with_constraints)
@@ -686,7 +684,7 @@ TEST_F(TestMpc, three_state_clear_reference_and_get_sequence)
     mpc.ClearReference();
 
     auto u2 = mpc.ComputeControl(state);
-    EXPECT_NEAR(u2.at(0, 0), 0.0f, 1e-4f);
+    EXPECT_NEAR(u2.at(0, 0), 0.0f, math::Tolerance<float>());
 
     auto seq = mpc.GetControlSequence();
     EXPECT_EQ(seq.size(), 10u);
@@ -724,7 +722,7 @@ TEST_F(TestMpc, different_horizons_clear_reference)
     mpc.ClearReference();
 
     auto u2 = mpc.ComputeControl(state);
-    EXPECT_NEAR(u2.at(0, 0), 0.0f, 1e-4f);
+    EXPECT_NEAR(u2.at(0, 0), 0.0f, math::Tolerance<float>());
 }
 
 TEST_F(TestMpc, mpc_from_lti_matches_mpc_from_matrices)
@@ -754,7 +752,7 @@ TEST_F(TestMpc, mpc_from_lti_matches_mpc_from_matrices)
     auto uMatrices = mpcFromMatrices.ComputeControl(state);
     auto uLti = mpcFromLti.ComputeControl(state);
 
-    EXPECT_NEAR(uMatrices.at(0, 0), uLti.at(0, 0), 1e-4f);
+    EXPECT_NEAR(uMatrices.at(0, 0), uLti.at(0, 0), math::Tolerance<float>());
 }
 
 TEST_F(TestMpc, umin_only_constraint_clamps_lower_bound)
@@ -774,11 +772,9 @@ TEST_F(TestMpc, umin_only_constraint_clamps_lower_bound)
 
     controllers::MpcConstraints<float, 1> constraints;
     constraints.uMin = math::Vector<float, 1>{ -0.3f };
-    // uMax intentionally not set
 
     controllers::Mpc<float, 2, 1, 5, 5> mpc(A, B, weights, constraints);
 
-    // Negative state drives control negative; clamp should enforce lower bound
     math::Vector<float, 2> state{ -10.0f, 0.0f };
     auto u = mpc.ComputeControl(state);
 
@@ -806,11 +802,9 @@ TEST_F(TestMpc, umax_only_constraint_clamps_upper_bound)
 
     controllers::MpcConstraints<float, 1> constraints;
     constraints.uMax = math::Vector<float, 1>{ 0.3f };
-    // uMin intentionally not set
 
     controllers::Mpc<float, 2, 1, 5, 5> mpc(A, B, weights, constraints);
 
-    // Positive state drives control positive; clamp should enforce upper bound
     math::Vector<float, 2> state{ 10.0f, 0.0f };
     auto u = mpc.ComputeControl(state);
 
@@ -819,4 +813,67 @@ TEST_F(TestMpc, umax_only_constraint_clamps_upper_bound)
     auto seq = mpc.GetControlSequence();
     for (std::size_t k = 0; k < seq.size(); ++k)
         EXPECT_LE(seq[k].at(0, 0), 0.3f);
+}
+
+TEST_F(TestMpc, compute_control_is_deterministic)
+{
+    float dt = 0.1f;
+
+    math::SquareMatrix<float, 2> A{
+        { 1.0f, dt },
+        { 0.0f, 1.0f }
+    };
+    math::Matrix<float, 2, 1> B{
+        { 0.5f * dt * dt },
+        { dt }
+    };
+
+    controllers::MpcWeights<float, 2, 1> weights;
+    weights.Q = math::SquareMatrix<float, 2>{
+        { 10.0f, 0.0f },
+        { 0.0f, 1.0f }
+    };
+    weights.R = math::SquareMatrix<float, 1>{
+        { 0.1f }
+    };
+
+    controllers::Mpc<float, 2, 1, 5, 5> mpc(A, B, weights);
+
+    math::Vector<float, 2> state{ 1.5f, -0.5f };
+    auto u1 = mpc.ComputeControl(state);
+    auto u2 = mpc.ComputeControl(state);
+
+    EXPECT_FLOAT_EQ(u1.at(0, 0), u2.at(0, 0));
+}
+
+TEST_F(TestMpc, no_constraints_does_not_clamp_output)
+{
+    math::SquareMatrix<float, 2> A{
+        { 1.0f, 1.0f },
+        { 0.0f, 1.0f }
+    };
+    math::Matrix<float, 2, 1> B{
+        { 0.5f },
+        { 1.0f }
+    };
+
+    controllers::MpcWeights<float, 2, 1> weights;
+    weights.Q = math::SquareMatrix<float, 2>{
+        { 100.0f, 0.0f },
+        { 0.0f, 100.0f }
+    };
+    weights.R = math::SquareMatrix<float, 1>{
+        { 0.01f }
+    };
+
+    controllers::Mpc<float, 2, 1, 5, 5> mpcUnconstrained(A, B, weights);
+
+    controllers::MpcConstraints<float, 1> constraints;
+    controllers::Mpc<float, 2, 1, 5, 5> mpcDefaultConstraints(A, B, weights, constraints);
+
+    math::Vector<float, 2> state{ 10.0f, 0.0f };
+    auto uUnconstrained = mpcUnconstrained.ComputeControl(state);
+    auto uDefault = mpcDefaultConstraints.ComputeControl(state);
+
+    EXPECT_FLOAT_EQ(uUnconstrained.at(0, 0), uDefault.at(0, 0));
 }
