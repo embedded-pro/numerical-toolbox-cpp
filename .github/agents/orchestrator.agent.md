@@ -33,7 +33,7 @@ Triage requests and route to the right specialist. Do NOT implement or plan your
 
 ## Context to gather
 - Module: `analysis`, `windowing`, `control_analysis`, `controllers`, `dynamics`,
-  `estimators`, `filters`, `filters::passive`, `math`, `neural_network`,
+  `estimators`, `filters`, `filters::passive`, `math`,
   `optimization`, `regularization`, `solvers`
 - Existing patterns to follow?
 - Documentation update needed?
