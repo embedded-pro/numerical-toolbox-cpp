@@ -203,19 +203,65 @@ TEST_F(TestFeedbackLinearization, closed_loop_error_decays)
     EXPECT_LT(finalNorm, prevErrorNorm);
 }
 
-TEST_F(TestFeedbackLinearization, reference_feedforward_used)
+TEST_F(TestFeedbackLinearization, superposition_all_terms_active)
+{
+    const math::SquareMatrix<float, 2> B{ 2.0f, 1.0f, 0.5f, 3.0f };
+    const math::Vector<float, 2> drift{ { 4.0f }, { -1.0f } };
+    const math::Vector<float, 2> x{ { 1.0f }, { -1.0f } };
+    const math::Vector<float, 2> xDot{ { 0.5f }, { 0.25f } };
+    const math::Vector<float, 2> yd{ { 3.0f }, { 1.0f } };
+    const math::Vector<float, 2> ydDot{ { 1.5f }, { -0.5f } };
+    const math::Vector<float, 2> ydDdot{ { 0.2f }, { -0.3f } };
+
+    EXPECT_CALL(model, DecouplingMatrixAt(::testing::_)).WillOnce(::testing::Return(B));
+    EXPECT_CALL(model, DriftTerm(::testing::_)).WillOnce(::testing::Return(drift));
+
+    const auto u{ controller.ComputeInput(x, xDot, yd, ydDot, ydDdot) };
+
+    const math::Vector<float, 2> e{ yd - x };
+    const math::Vector<float, 2> eDot{ ydDot - xDot };
+    const math::Vector<float, 2> v{ ydDdot + kd * eDot + kp * e };
+    const math::Vector<float, 2> expected{ B * v + drift };
+
+    EXPECT_NEAR(u.at(0, 0), expected.at(0, 0), math::Tolerance<float>());
+    EXPECT_NEAR(u.at(1, 0), expected.at(1, 0), math::Tolerance<float>());
+}
+
+TEST_F(TestFeedbackLinearization, off_diagonal_decoupling_matrix_couples_axes)
+{
+    const math::SquareMatrix<float, 2> B{ 0.0f, 1.0f, 1.0f, 0.0f };
+    const math::Vector<float, 2> a{ { 0.0f }, { 0.0f } };
+    const math::Vector<float, 2> v{ { 5.0f }, { 7.0f } };
+
+    EXPECT_CALL(model, DecouplingMatrixAt(::testing::_)).WillOnce(::testing::Return(B));
+    EXPECT_CALL(model, DriftTerm(::testing::_)).WillOnce(::testing::Return(a));
+
+    const auto u{ controller.ComputeInput(zero, zero, zero, zero, v) };
+
+    EXPECT_NEAR(u.at(0, 0), 7.0f, math::Tolerance<float>());
+    EXPECT_NEAR(u.at(1, 0), 5.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestFeedbackLinearization, model_queried_with_exact_state)
 {
     const math::SquareMatrix<float, 2> identity{ math::SquareMatrix<float, 2>::Identity() };
     const math::Vector<float, 2> a{ { 0.0f }, { 0.0f } };
-    const math::Vector<float, 2> c{ { 7.0f }, { -4.0f } };
+    const math::Vector<float, 2> xQuery{ { 2.5f }, { -3.1f } };
 
-    EXPECT_CALL(model, DecouplingMatrixAt(::testing::_)).WillOnce(::testing::Return(identity));
-    EXPECT_CALL(model, DriftTerm(::testing::_)).WillOnce(::testing::Return(a));
+    math::Vector<float, 2> capturedB{};
+    math::Vector<float, 2> capturedA{};
 
-    const auto u{ controller.ComputeInput(zero, zero, zero, zero, c) };
+    EXPECT_CALL(model, DecouplingMatrixAt(::testing::_))
+        .WillOnce(::testing::DoAll(::testing::SaveArg<0>(&capturedB), ::testing::Return(identity)));
+    EXPECT_CALL(model, DriftTerm(::testing::_))
+        .WillOnce(::testing::DoAll(::testing::SaveArg<0>(&capturedA), ::testing::Return(a)));
 
-    EXPECT_NEAR(u.at(0, 0), c.at(0, 0), math::Tolerance<float>());
-    EXPECT_NEAR(u.at(1, 0), c.at(1, 0), math::Tolerance<float>());
+    controller.ComputeInput(xQuery, zero, zero, zero, zero);
+
+    EXPECT_FLOAT_EQ(capturedB.at(0, 0), xQuery.at(0, 0));
+    EXPECT_FLOAT_EQ(capturedB.at(1, 0), xQuery.at(1, 0));
+    EXPECT_FLOAT_EQ(capturedA.at(0, 0), xQuery.at(0, 0));
+    EXPECT_FLOAT_EQ(capturedA.at(1, 0), xQuery.at(1, 0));
 }
 
 namespace
