@@ -110,9 +110,7 @@ TEST_F(UnscentedKalmanFilterTest, LinearSystemTracksConstantVelocity)
 
 TEST_F(UnscentedKalmanFilterTest, PredictGrowsCovariance)
 {
-    ukf.emplace(StateVec2{ { 0.0f }, { 0.1f } }, StateMat2{
-        { 0.1f, 0.0f },
-        { 0.0f, 0.1f } }, LinearStateTransition, LinearMeasurement, params);
+    ukf.emplace(StateVec2{ { 0.0f }, { 0.1f } }, StateMat2{ { 0.1f, 0.0f }, { 0.0f, 0.1f } }, LinearStateTransition, LinearMeasurement, params);
     ukf->SetProcessNoise(StateMat2{
         { 0.01f, 0.0f },
         { 0.0f, 0.01f } });
