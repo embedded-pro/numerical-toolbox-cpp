@@ -116,7 +116,6 @@ namespace simulator::controllers
         response.error.resize(numSamples, 0.0f);
 
         ::controllers::PidIncrementalSynchronous<float> pid(configuration.tunings, configuration.limits);
-        pid.Enable();
 
         plant->Reset();
 
