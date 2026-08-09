@@ -45,7 +45,7 @@ namespace controllers
 
         Plant plant;
         GainMatrix L;
-        StateVector xhat;
+        StateVector xhat{};
     };
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t OutputSize>
@@ -53,7 +53,6 @@ namespace controllers
         const Plant& plantModel, const GainMatrix& observerGain)
         : plant{ plantModel }
         , L{ observerGain }
-        , xhat{}
     {}
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t OutputSize>

@@ -109,7 +109,7 @@ namespace robust_control
         T woPow{ wo };
         for (std::size_t i = 0; i < n; ++i)
         {
-            const T coeff = static_cast<T>(detail::BinomialCoeff(n, i + 1));
+            const auto coeff = static_cast<T>(detail::BinomialCoeff(n, i + 1));
             gains.at(i, 0) = coeff * woPow;
             woPow *= wo;
         }
@@ -124,7 +124,7 @@ namespace robust_control
         T wcPow{ wc };
         for (std::size_t i = 0; i < Order; ++i)
         {
-            const T coeff = static_cast<T>(detail::BinomialCoeff(Order, i + 1));
+            const auto coeff = static_cast<T>(detail::BinomialCoeff(Order, i + 1));
             gains.at(Order - 1 - i, 0) = coeff * wcPow;
             wcPow *= wc;
         }

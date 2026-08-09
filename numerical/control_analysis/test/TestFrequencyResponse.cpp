@@ -317,3 +317,18 @@ TEST_F(TestFrequencyResponseHighpass, magnitude_at_quarter_nyquist_is_minus_3db)
 
     EXPECT_NEAR(bestMag, -3.0103f, 0.5f);
 }
+
+TEST_F(TestFrequencyResponseUnity, zero_denominator_coefficients_produce_finite_output)
+{
+    std::array<float, 1> bz{ 1.0f };
+    std::array<float, 1> az{ 0.0f };
+    control_analysis::FrequencyResponse<float, 64> frZeroDenom{ bz, az, kSampleFrequency };
+
+    auto [frequencies, magnitudes, phases] = frZeroDenom.Calculate();
+
+    for (const auto& m : magnitudes)
+    {
+        EXPECT_FALSE(std::isnan(m));
+        EXPECT_FALSE(std::isinf(m));
+    }
+}

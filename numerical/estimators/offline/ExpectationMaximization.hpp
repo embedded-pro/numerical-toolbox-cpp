@@ -104,8 +104,7 @@ namespace estimators
         while (iter < maxIterations)
         {
             const auto smootherOutput = smoother_.Smooth(
-                currentParams.F, currentParams.H,
-                currentParams.Q, currentParams.R,
+                { currentParams.F, currentParams.H, currentParams.Q, currentParams.R },
                 observations, numSteps,
                 currentParams.initialState, currentParams.initialCovariance);
 

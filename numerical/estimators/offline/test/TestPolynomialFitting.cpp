@@ -180,6 +180,24 @@ TEST_F(TestPolynomialFitting, determinism_identical_fit_produces_identical_coeff
     EXPECT_FLOAT_EQ(c1.at(2, 0), c2.at(2, 0));
 }
 
+TEST_F(TestPolynomialFitting, predict_evaluates_fitted_polynomial)
+{
+    math::Matrix<float, 8, 1> x;
+    math::Matrix<float, 8, 1> y;
+
+    for (std::size_t i = 0; i < 8; ++i)
+    {
+        float xi = static_cast<float>(i) * 0.25f;
+        x.at(i, 0) = xi;
+        y.at(i, 0) = 1.0f - 0.5f * xi + 0.25f * xi * xi;
+    }
+
+    fitter.Fit(x, y);
+
+    EXPECT_NEAR(fitter.Predict(0.5f), 1.0f - 0.5f * 0.5f + 0.25f * 0.25f, math::Tolerance<float>());
+    EXPECT_NEAR(fitter.Predict(1.0f), 1.0f - 0.5f * 1.0f + 0.25f * 1.0f,  math::Tolerance<float>());
+}
+
 TEST_F(TestPolynomialFitting, predict_all_coefficients_finite_on_far_from_origin_data)
 {
     math::Matrix<float, 8, 1> x;

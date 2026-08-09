@@ -123,3 +123,27 @@ TYPED_TEST(WindowingTest, WindowSymmetry)
         }
     }
 }
+
+TYPED_TEST(WindowingTest, HammingWindowPower)
+{
+    windowing::HammingWindow<TypeParam> w;
+    EXPECT_NEAR(math::ToFloat(w.Power(8)), 0.397f, this->kEpsilon);
+}
+
+TYPED_TEST(WindowingTest, HanningWindowPower)
+{
+    windowing::HanningWindow<TypeParam> w;
+    EXPECT_NEAR(math::ToFloat(w.Power(8)), 0.375f, this->kEpsilon);
+}
+
+TYPED_TEST(WindowingTest, BlackmanWindowPower)
+{
+    windowing::BlackmanWindow<TypeParam> w;
+    EXPECT_NEAR(math::ToFloat(w.Power(8)), 0.305f, this->kEpsilon);
+}
+
+TYPED_TEST(WindowingTest, RectangularWindowPower)
+{
+    windowing::RectangularWindow<TypeParam> w;
+    EXPECT_NEAR(math::ToFloat(w.Power(8)), 0.999f, this->kEpsilon);
+}

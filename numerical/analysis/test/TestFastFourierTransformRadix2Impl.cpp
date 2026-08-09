@@ -101,6 +101,13 @@ namespace
     };
 }
 
+TYPED_TEST(TestFastFourierTransform, log2_runtime_both_branches)
+{
+    auto& fftInst = *this->fft;
+    EXPECT_EQ(fftInst.Log2(1), 0u);
+    EXPECT_EQ(fftInst.Log2(8), 3u);
+}
+
 TYPED_TEST(TestFastFourierTransform, zero_input_produces_zero_output)
 {
     this->timeDomain.clear();

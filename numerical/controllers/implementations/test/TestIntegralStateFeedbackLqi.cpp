@@ -195,3 +195,32 @@ TEST_F(TestIntegralStateFeedbackLqi, control_uses_negative_feedback)
     EXPECT_NEAR(u.at(0, 0), expected, math::Tolerance<float>());
     EXPECT_LT(u.at(0, 0), 0.0f);
 }
+
+TEST_F(TestIntegralStateFeedbackLqi, direct_gain_constructor_matches_lqr_constructor)
+{
+    const auto kx = controller.GetGainState();
+    const auto ki = controller.GetGainIntegral();
+
+    Controller directController{ kx, ki, 0.01f };
+
+    math::Vector<float, 2> x{ { 0.5f }, { 0.1f } };
+    math::Vector<float, 1> reference{ { 1.0f } };
+    math::Vector<float, 1> measured{ { 0.3f } };
+
+    auto u1 = controller.ComputeControl(x, reference, measured);
+    auto u2 = directController.ComputeControl(x, reference, measured);
+
+    EXPECT_NEAR(u1.at(0, 0), u2.at(0, 0), math::Tolerance<float>());
+}
+
+TEST_F(TestIntegralStateFeedbackLqi, direct_gain_constructor_get_gains)
+{
+    math::Matrix<float, 1, 2> kx{ { 1.5f, 0.8f } };
+    math::Matrix<float, 1, 1> ki{ { 2.0f } };
+
+    Controller c{ kx, ki, 0.01f };
+
+    EXPECT_FLOAT_EQ(c.GetGainState().at(0, 0), 1.5f);
+    EXPECT_FLOAT_EQ(c.GetGainState().at(0, 1), 0.8f);
+    EXPECT_FLOAT_EQ(c.GetGainIntegral().at(0, 0), 2.0f);
+}

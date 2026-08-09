@@ -224,4 +224,79 @@ namespace math
         return std::erfc(x);
     }
 #endif
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+#ifndef MATH_ABS_OVERRIDE
+    extern template float Abs<float>(float);
+#endif
+#ifndef MATH_SQRT_OVERRIDE
+    extern template float Sqrt<float>(float);
+#endif
+#ifndef MATH_SIN_OVERRIDE
+    extern template float Sin<float>(float);
+#endif
+#ifndef MATH_COS_OVERRIDE
+    extern template float Cos<float>(float);
+#endif
+#ifndef MATH_TAN_OVERRIDE
+    extern template float Tan<float>(float);
+#endif
+#ifndef MATH_ASIN_OVERRIDE
+    extern template float Asin<float>(float);
+#endif
+#ifndef MATH_ACOS_OVERRIDE
+    extern template float Acos<float>(float);
+#endif
+#ifndef MATH_ATAN_OVERRIDE
+    extern template float Atan<float>(float);
+#endif
+#ifndef MATH_ATAN2_OVERRIDE
+    extern template float Atan2<float>(float, float);
+#endif
+#ifndef MATH_EXP_OVERRIDE
+    extern template float Exp<float>(float);
+#endif
+#ifndef MATH_LOG_OVERRIDE
+    extern template float Log<float>(float);
+#endif
+#ifndef MATH_LOG10_OVERRIDE
+    extern template float Log10<float>(float);
+#endif
+#ifndef MATH_LOG2_OVERRIDE
+    extern template float Log2<float>(float);
+#endif
+#ifndef MATH_POW_OVERRIDE
+    extern template float Pow<float>(float, float);
+#endif
+#ifndef MATH_SINH_OVERRIDE
+    extern template float Sinh<float>(float);
+#endif
+#ifndef MATH_COSH_OVERRIDE
+    extern template float Cosh<float>(float);
+#endif
+#ifndef MATH_TANH_OVERRIDE
+    extern template float Tanh<float>(float);
+#endif
+#ifndef MATH_HYPOT_OVERRIDE
+    extern template float Hypot<float>(float, float);
+#endif
+#ifndef MATH_COPYSIGN_OVERRIDE
+    extern template float Copysign<float>(float, float);
+#endif
+#ifndef MATH_FMOD_OVERRIDE
+    extern template float Fmod<float>(float, float);
+#endif
+#ifndef MATH_CEIL_OVERRIDE
+    extern template float Ceil<float>(float);
+#endif
+#ifndef MATH_FLOOR_OVERRIDE
+    extern template float Floor<float>(float);
+#endif
+#ifndef MATH_ROUND_OVERRIDE
+    extern template float Round<float>(float);
+#endif
+#ifndef MATH_ERFC_OVERRIDE
+    extern template float Erfc<float>(float);
+#endif
+#endif
 }

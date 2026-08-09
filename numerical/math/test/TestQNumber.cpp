@@ -317,3 +317,36 @@ TYPED_TEST(QNumberTest, DivideByZeroDies)
 
     EXPECT_DEATH_IF_SUPPORTED({ TypeParam result = a / zero; }, ""); // NOLINT
 }
+
+TYPED_TEST(QNumberTest, ToFloatFreeFunction_QNumber)
+{
+    TypeParam a(0.25f);
+    EXPECT_NEAR(math::ToFloat(a), 0.25f, math::Tolerance<float>());
+}
+
+TEST(QNumberUtilTest, ToFloatFreeFunction_Float)
+{
+    EXPECT_FLOAT_EQ(math::ToFloat(0.5f), 0.5f);
+    EXPECT_FLOAT_EQ(math::ToFloat(-0.3f), -0.3f);
+}
+
+TEST(QNumberUtilTest, MinMaxLowest_Float)
+{
+    EXPECT_GT(math::Min<float>(), 0.0f);
+    EXPECT_GT(math::Max<float>(), 1.0f);
+    EXPECT_LT(math::Lowest<float>(), 0.0f);
+}
+
+TEST(QNumberUtilTest, MinMaxLowest_Q31)
+{
+    EXPECT_NEAR(math::Min<math::Q31>(), -0.9999f, 1e-3f);
+    EXPECT_NEAR(math::Max<math::Q31>(), 0.9999f, 1e-3f);
+    EXPECT_NEAR(math::Lowest<math::Q31>(), -0.9999f, 1e-3f);
+}
+
+TEST(QNumberUtilTest, MinMaxLowest_Q15)
+{
+    EXPECT_NEAR(math::Min<math::Q15>(), -0.9999f, 1e-3f);
+    EXPECT_NEAR(math::Max<math::Q15>(), 0.9999f, 1e-3f);
+    EXPECT_NEAR(math::Lowest<math::Q15>(), -0.9999f, 1e-3f);
+}

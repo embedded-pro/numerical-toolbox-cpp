@@ -22,7 +22,7 @@ namespace filters::passive
             math::Matrix<T, Window, Order + 1> A{};
             for (std::size_t row = 0; row < Window; ++row)
             {
-                T offset = static_cast<T>(static_cast<int>(row) - static_cast<int>(half));
+                auto offset = static_cast<T>(static_cast<int>(row) - static_cast<int>(half));
                 T power = T{ 1 };
                 for (std::size_t col = 0; col < Order + 1; ++col)
                 {
@@ -73,12 +73,11 @@ namespace filters::passive
     private:
         static inline const std::array<T, Window> coeffs{ detail::ComputeKernel<T, Window, Order, Deriv>() };
         std::array<T, Window> line;
-        std::size_t head;
+        std::size_t head{ 0 };
     };
 
     template<typename T, std::size_t Window, std::size_t Order, std::size_t Deriv>
     SavitzkyGolayFilter<T, Window, Order, Deriv>::SavitzkyGolayFilter(T initial) noexcept
-        : head{ 0 }
     {
         line.fill(initial);
     }

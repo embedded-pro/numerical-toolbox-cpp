@@ -127,11 +127,8 @@ namespace analysis
         for (std::size_t i = 0; i < M + K - 1; ++i)
             y[i] = yFull[i];
     }
-}
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
-namespace analysis
-{
     extern template void LinearConvolution<float, 3, 3>(
         const infra::BoundedVector<float>::WithMaxSize<3>&,
         const infra::BoundedVector<float>::WithMaxSize<3>&,
@@ -159,5 +156,5 @@ namespace analysis
         const infra::BoundedVector<float>::WithMaxSize<3>&,
         infra::BoundedVector<float>::WithMaxSize<5>&,
         FastFourierTransform<float>&);
-}
 #endif
+}

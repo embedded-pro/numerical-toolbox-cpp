@@ -40,7 +40,7 @@ namespace solvers
         using Betas = std::array<T, Cols>;
 
         void Bidiagonalize(math::Matrix<T, Rows, Cols>& bidiag,
-            LeftVectors& leftVecs, Betas& leftBeta, RightVectors& rightVecs, Betas& rightBeta);
+            LeftVectors& leftVecs, Betas& leftBeta, RightVectors& rightVecs, Betas& rightBeta) const;
         void ExtractBidiagonal(const math::Matrix<T, Rows, Cols>& bidiag);
         void AccumulateU(const LeftVectors& leftVecs, const Betas& leftBeta);
         void AccumulateV(const RightVectors& rightVecs, const Betas& rightBeta);
@@ -61,7 +61,7 @@ namespace solvers
     template<typename T, std::size_t Rows, std::size_t Cols>
     void SingularValueDecomposition<T, Rows, Cols>::Bidiagonalize(
         math::Matrix<T, Rows, Cols>& bidiag,
-        LeftVectors& leftVecs, Betas& leftBeta, RightVectors& rightVecs, Betas& rightBeta)
+        LeftVectors& leftVecs, Betas& leftBeta, RightVectors& rightVecs, Betas& rightBeta) const
     {
         math::Vector<T, Rows> lvec{};
         math::Vector<T, Cols> rvec{};

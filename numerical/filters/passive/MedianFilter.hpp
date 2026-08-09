@@ -26,12 +26,11 @@ namespace filters::passive
     private:
         std::array<T, N> window;
         std::array<T, N> scratch;
-        std::size_t head;
+        std::size_t head{ 0 };
     };
 
     template<typename T, std::size_t N>
     MedianFilter<T, N>::MedianFilter(T initial) noexcept
-        : head{ 0 }
     {
         window.fill(initial);
         scratch.fill(T{});

@@ -40,11 +40,16 @@ namespace filters
 
         KalmanSmoother() = default;
 
+        struct SmootherParams
+        {
+            const StateMatrix& F;
+            const MeasurementMatrix& H;
+            const StateMatrix& Q;
+            const MeasurementCovariance& R;
+        };
+
         OPTIMIZE_FOR_SPEED SmootherOutput Smooth(
-            const StateMatrix& F,
-            const MeasurementMatrix& H,
-            const StateMatrix& Q,
-            const MeasurementCovariance& R,
+            const SmootherParams& params,
             const std::array<MeasurementVector, MaxSteps>& observations,
             std::size_t numSteps,
             const StateVector& initialState,
@@ -68,10 +73,7 @@ namespace filters
         std::array<KalmanGainMatrix, MaxSteps> kalmanGains_{};
 
         OPTIMIZE_FOR_SPEED float RunForwardPass(
-            const StateMatrix& F,
-            const MeasurementMatrix& H,
-            const StateMatrix& Q,
-            const MeasurementCovariance& R,
+            const SmootherParams& params,
             const std::array<MeasurementVector, MaxSteps>& observations,
             std::size_t numSteps,
             const StateVector& initialState,
@@ -97,10 +99,7 @@ namespace filters
     OPTIMIZE_FOR_SPEED
         typename KalmanSmoother<StateSize, MeasurementSize, MaxSteps>::SmootherOutput
         KalmanSmoother<StateSize, MeasurementSize, MaxSteps>::Smooth(
-            const StateMatrix& F,
-            const MeasurementMatrix& H,
-            const StateMatrix& Q,
-            const MeasurementCovariance& R,
+            const SmootherParams& params,
             const std::array<MeasurementVector, MaxSteps>& observations,
             std::size_t numSteps,
             const StateVector& initialState,
@@ -109,18 +108,15 @@ namespace filters
         really_assert(numSteps >= 2 && numSteps <= MaxSteps);
 
         SmootherOutput output;
-        output.logLikelihood = RunForwardPass(F, H, Q, R, observations, numSteps, initialState, initialCovariance);
-        RunBackwardPass(F, H, numSteps, output);
+        output.logLikelihood = RunForwardPass(params, observations, numSteps, initialState, initialCovariance);
+        RunBackwardPass(params.F, params.H, numSteps, output);
         return output;
     }
 
     template<std::size_t StateSize, std::size_t MeasurementSize, std::size_t MaxSteps>
     OPTIMIZE_FOR_SPEED float
     KalmanSmoother<StateSize, MeasurementSize, MaxSteps>::RunForwardPass(
-        const StateMatrix& F,
-        const MeasurementMatrix& H,
-        const StateMatrix& Q,
-        const MeasurementCovariance& R,
+        const SmootherParams& params,
         const std::array<MeasurementVector, MaxSteps>& observations,
         std::size_t numSteps,
         const StateVector& initialState,
@@ -133,18 +129,18 @@ namespace filters
 
         for (std::size_t t = 0; t < numSteps; ++t)
         {
-            const auto nu = observations[t] - H * predictedMeans_[t];
-            const auto S = math::CongruenceTransform(H, predictedCovariances_[t]) + R;
+            const auto nu = observations[t] - params.H * predictedMeans_[t];
+            const auto S = math::CongruenceTransform(params.H, predictedCovariances_[t]) + params.R;
 
             const auto K = solvers::SolveSystem<float, MeasurementSize, StateSize>(
-                S, H * predictedCovariances_[t])
+                S, params.H * predictedCovariances_[t])
                                .Transpose();
 
             filteredMeans_[t] = predictedMeans_[t] + K * nu;
 
-            const auto IminusKH = StateMatrix::Identity() - K * H;
+            const auto IminusKH = StateMatrix::Identity() - K * params.H;
             filteredCovariances_[t] =
-                math::CongruenceTransform(IminusKH, predictedCovariances_[t]) + math::CongruenceTransform(K, R);
+                math::CongruenceTransform(IminusKH, predictedCovariances_[t]) + math::CongruenceTransform(K, params.R);
 
             kalmanGains_[t] = K;
 
@@ -152,8 +148,8 @@ namespace filters
 
             if (t < numSteps - 1)
             {
-                predictedMeans_[t + 1] = F * filteredMeans_[t];
-                predictedCovariances_[t + 1] = math::CongruenceTransform(F, filteredCovariances_[t]) + Q;
+                predictedMeans_[t + 1] = params.F * filteredMeans_[t];
+                predictedCovariances_[t + 1] = math::CongruenceTransform(params.F, filteredCovariances_[t]) + params.Q;
             }
         }
 
@@ -244,7 +240,7 @@ namespace filters
             const StateVector& initialState,
             const StateMatrix& initialCovariance)
     {
-        return Smooth(plant.A, plant.C, Q, R, observations, numSteps, initialState, initialCovariance);
+        return Smooth({ plant.A, plant.C, Q, R }, observations, numSteps, initialState, initialCovariance);
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
