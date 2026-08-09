@@ -1,6 +1,7 @@
 #include "numerical/controllers/implementations/LeadLagCompensator.hpp"
 #include "numerical/math/Tolerance.hpp"
 #include "gtest/gtest.h"
+#include <array>
 #include <cmath>
 
 namespace
