@@ -1,6 +1,7 @@
 #include "numerical/math/Math.hpp"
 #include <cmath>
 #include <gtest/gtest.h>
+#include <numbers>
 
 namespace
 {
@@ -8,6 +9,9 @@ namespace
     {
     protected:
         static constexpr float kEps = 1e-5f;
+        static constexpr float kPi  = std::numbers::pi_v<float>;
+        static constexpr float kPi2 = std::numbers::pi_v<float> / 2.0f;
+        static constexpr float kPi4 = std::numbers::pi_v<float> / 4.0f;
     };
 }
 
@@ -25,42 +29,42 @@ TEST_F(TestMath, Sqrt_known_value)
 TEST_F(TestMath, Sin_known_values)
 {
     EXPECT_NEAR(math::Sin(0.0f), 0.0f, kEps);
-    EXPECT_NEAR(math::Sin(static_cast<float>(math::pi) / 2.0f), 1.0f, kEps);
+    EXPECT_NEAR(math::Sin(kPi2), 1.0f, kEps);
 }
 
 TEST_F(TestMath, Cos_known_values)
 {
     EXPECT_NEAR(math::Cos(0.0f), 1.0f, kEps);
-    EXPECT_NEAR(math::Cos(static_cast<float>(math::pi)), -1.0f, kEps);
+    EXPECT_NEAR(math::Cos(kPi), -1.0f, kEps);
 }
 
 TEST_F(TestMath, Tan_known_value)
 {
     EXPECT_NEAR(math::Tan(0.0f), 0.0f, kEps);
-    EXPECT_NEAR(math::Tan(static_cast<float>(math::pi_4)), 1.0f, 1e-4f);
+    EXPECT_NEAR(math::Tan(kPi4), 1.0f, 1e-4f);
 }
 
 TEST_F(TestMath, Asin_known_value)
 {
     EXPECT_NEAR(math::Asin(0.0f), 0.0f, kEps);
-    EXPECT_NEAR(math::Asin(1.0f), static_cast<float>(math::pi_2), kEps);
+    EXPECT_NEAR(math::Asin(1.0f), kPi2, kEps);
 }
 
 TEST_F(TestMath, Acos_known_value)
 {
     EXPECT_NEAR(math::Acos(1.0f), 0.0f, kEps);
-    EXPECT_NEAR(math::Acos(0.0f), static_cast<float>(math::pi_2), kEps);
+    EXPECT_NEAR(math::Acos(0.0f), kPi2, kEps);
 }
 
 TEST_F(TestMath, Atan_known_value)
 {
     EXPECT_NEAR(math::Atan(0.0f), 0.0f, kEps);
-    EXPECT_NEAR(math::Atan(1.0f), static_cast<float>(math::pi_4), kEps);
+    EXPECT_NEAR(math::Atan(1.0f), kPi4, kEps);
 }
 
 TEST_F(TestMath, Atan2_known_value)
 {
-    EXPECT_NEAR(math::Atan2(1.0f, 1.0f), static_cast<float>(math::pi_4), kEps);
+    EXPECT_NEAR(math::Atan2(1.0f, 1.0f), kPi4, kEps);
     EXPECT_NEAR(math::Atan2(0.0f, 1.0f), 0.0f, kEps);
 }
 
