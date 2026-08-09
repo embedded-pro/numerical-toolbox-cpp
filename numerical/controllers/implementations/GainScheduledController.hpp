@@ -35,13 +35,12 @@ namespace controllers
 
     private:
         std::array<SchedulePoint<T, GainSize>, N> table;
-        std::array<T, GainSize> active;
+        std::array<T, GainSize> active{};
     };
 
     template<typename T, std::size_t N, std::size_t GainSize>
     GainScheduledController<T, N, GainSize>::GainScheduledController(std::array<SchedulePoint<T, GainSize>, N> scheduleTable)
         : table{ scheduleTable }
-        , active{}
     {
         for (std::size_t i{ 0 }; i < N - 1; ++i)
             assert(table[i].breakpoint < table[i + 1].breakpoint);

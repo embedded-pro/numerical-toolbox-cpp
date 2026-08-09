@@ -123,8 +123,8 @@ namespace math
     }
 
     template<typename QNumberType>
-    std::enable_if_t<std::is_floating_point_v<QNumberType>, QNumberType>
-    Abs(const Complex<QNumberType>& c)
+    requires std::is_floating_point_v<QNumberType>
+    QNumberType Abs(const Complex<QNumberType>& c)
     {
         return math::Hypot(c.Real(), c.Imaginary());
     }

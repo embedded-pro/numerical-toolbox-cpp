@@ -131,8 +131,11 @@ namespace control_analysis
         std::size_t rank{ 0 };
         std::size_t pivotRow{ 0 };
 
-        for (std::size_t col = 0; col < Cols && pivotRow < Rows; ++col)
+        for (std::size_t col = 0; col < Cols; ++col)
         {
+            if (pivotRow >= Rows)
+                break;
+
             std::size_t maxRow{ pivotRow };
             T maxVal{ T(0) };
             for (std::size_t r = pivotRow; r < Rows; ++r)

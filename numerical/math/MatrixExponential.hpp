@@ -34,7 +34,7 @@ namespace math
 
         void PadeNumeratorDenominator(const SquareMatrix<T, N>& as,
             SquareMatrix<T, N>& num,
-            SquareMatrix<T, N>& den);
+            SquareMatrix<T, N>& den) const;
 
         SquareMatrix<T, N> SolvePade(const SquareMatrix<T, N>& den, const SquareMatrix<T, N>& num);
     };
@@ -42,7 +42,7 @@ namespace math
     template<typename T, std::size_t N>
     void MatrixExponential<T, N>::PadeNumeratorDenominator(const SquareMatrix<T, N>& as,
         SquareMatrix<T, N>& num,
-        SquareMatrix<T, N>& den)
+        SquareMatrix<T, N>& den) const
     {
         const auto identity = SquareMatrix<T, N>::Identity();
         const auto a2 = as * as;

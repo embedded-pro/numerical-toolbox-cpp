@@ -27,7 +27,15 @@ namespace math
         static Quaternion FromEulerZYX(T roll, T pitch, T yaw);
         static Quaternion Slerp(const Quaternion& a, const Quaternion& b, T t);
 
-        OPTIMIZE_FOR_SPEED Quaternion operator*(const Quaternion& rhs) const;
+        [[nodiscard]] OPTIMIZE_FOR_SPEED friend Quaternion operator*(const Quaternion& lhs, const Quaternion& rhs)
+        {
+            return Quaternion{
+                lhs.w * rhs.w - lhs.x * rhs.x - lhs.y * rhs.y - lhs.z * rhs.z,
+                lhs.w * rhs.x + lhs.x * rhs.w + lhs.y * rhs.z - lhs.z * rhs.y,
+                lhs.w * rhs.y - lhs.x * rhs.z + lhs.y * rhs.w + lhs.z * rhs.x,
+                lhs.w * rhs.z + lhs.x * rhs.y - lhs.y * rhs.x + lhs.z * rhs.w
+            };
+        }
         Quaternion operator-() const;
 
         Quaternion Conjugate() const;
@@ -134,17 +142,6 @@ namespace math
             sr * cp * cy - cr * sp * sy,
             cr * sp * cy + sr * cp * sy,
             cr * cp * sy - sr * sp * cy
-        };
-    }
-
-    template<typename T>
-    OPTIMIZE_FOR_SPEED Quaternion<T> Quaternion<T>::operator*(const Quaternion& rhs) const
-    {
-        return Quaternion<T>{
-            w * rhs.w - x * rhs.x - y * rhs.y - z * rhs.z,
-            w * rhs.x + x * rhs.w + y * rhs.z - z * rhs.y,
-            w * rhs.y - x * rhs.z + y * rhs.w + z * rhs.x,
-            w * rhs.z + x * rhs.y - y * rhs.x + z * rhs.w
         };
     }
 

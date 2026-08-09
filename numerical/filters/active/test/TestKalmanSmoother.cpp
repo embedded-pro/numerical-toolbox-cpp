@@ -47,7 +47,7 @@ namespace
 
         Smoother::SmootherOutput RunSmoother()
         {
-            return smoother.Smooth(F, H, Q, R, observations, T, x0, P0);
+            return smoother.Smooth({F, H, Q, R}, observations, T, x0, P0);
         }
     };
 
@@ -80,7 +80,7 @@ namespace
 
         Smoother::SmootherOutput RunSmoother()
         {
-            return smoother.Smooth(F, H, Q, R, obs, T, x0, P0);
+            return smoother.Smooth({F, H, Q, R}, obs, T, x0, P0);
         }
     };
 }
@@ -210,7 +210,7 @@ TEST_F(TestKalmanSmoother, smoothed_rmse_is_less_than_filtered_rmse)
     }
 
     Smoother synthSmoother;
-    const auto output = synthSmoother.Smooth(F, H, Q, R, syntheticObs, T, x0, P0);
+    const auto output = synthSmoother.Smooth({F, H, Q, R}, syntheticObs, T, x0, P0);
 
     float filteredMse = 0.0f;
     float smoothedMse = 0.0f;
@@ -270,7 +270,7 @@ TEST_F(TestKalmanSmoother, smoothed_covariance_at_final_step_equals_filtered_cov
 TEST_F(TestKalmanSmoother, minimum_steps_boundary_produces_finite_output)
 {
     constexpr std::size_t minSteps = 2;
-    const auto output = smoother.Smooth(F, H, Q, R, observations, minSteps, x0, P0);
+    const auto output = smoother.Smooth({F, H, Q, R}, observations, minSteps, x0, P0);
 
     EXPECT_TRUE(std::isfinite(output.logLikelihood));
     for (std::size_t t = 0; t < minSteps; ++t)
@@ -281,7 +281,7 @@ TEST_F(TestKalmanSmoother, minimum_steps_boundary_produces_finite_output)
 TEST_F(TestKalmanSmoother, near_zero_process_noise_produces_no_nan)
 {
     StateMatrix Qsmall{ { 1e-6f, 0.0f }, { 0.0f, 1e-6f } };
-    const auto output = smoother.Smooth(F, H, Qsmall, R, observations, T, x0, P0);
+    const auto output = smoother.Smooth({F, H, Qsmall, R}, observations, T, x0, P0);
 
     EXPECT_TRUE(std::isfinite(output.logLikelihood));
     for (std::size_t t = 0; t < T; ++t)
@@ -321,7 +321,7 @@ TEST_F(TestKalmanSmoother, nees_within_chi_squared_band_on_simulated_system)
             trialObs[t] = MeasurementVector{ { trialTrue[t].at(0, 0) + measNoise(rng) } };
 
         Smoother trialSmoother;
-        const auto out = trialSmoother.Smooth(F, H, Q, R, trialObs, T, x0, P0);
+        const auto out = trialSmoother.Smooth({F, H, Q, R}, trialObs, T, x0, P0);
 
         for (std::size_t t = 0; t < T; ++t)
         {

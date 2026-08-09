@@ -58,9 +58,7 @@ namespace filters
         : samplePeriod{ Ts }
         , gainAlpha{ alpha }
         , gainBeta{ beta }
-        , gainGamma{ T{} }
         , betaOverTs{ beta / Ts }
-        , twoGammaOverTs2{ T{} }
     {}
 
     template<typename T, std::size_t Order>
