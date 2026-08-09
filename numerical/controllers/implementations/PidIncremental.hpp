@@ -49,6 +49,10 @@ namespace controllers
     public:
         PidIncrementalAsynchronous(PidDriver<QNumberType>& driver, std::chrono::system_clock::duration sampleTime, PidTunings<QNumberType> tunnings, PidLimits<QNumberType> limits);
         ~PidIncrementalAsynchronous();
+        PidIncrementalAsynchronous(const PidIncrementalAsynchronous&) = delete;
+        PidIncrementalAsynchronous& operator=(const PidIncrementalAsynchronous&) = delete;
+        PidIncrementalAsynchronous(PidIncrementalAsynchronous&&) = delete;
+        PidIncrementalAsynchronous& operator=(PidIncrementalAsynchronous&&) = delete;
 
         void Reset() override;
         void SetPoint(QNumberType setPoint) override;
