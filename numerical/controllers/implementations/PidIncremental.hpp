@@ -14,11 +14,9 @@ namespace controllers
     class PidIncrementalBase
     {
     public:
+        void Reset();
         void SetPoint(QNumberType setPoint);
-        void SetLimits(PidLimits<QNumberType> limits);
         void SetTunings(PidTunings<QNumberType> tunnings);
-        void Enable();
-        void Disable();
         QNumberType Process(QNumberType processVariable);
 
     protected:
@@ -50,13 +48,15 @@ namespace controllers
     {
     public:
         PidIncrementalAsynchronous(PidDriver<QNumberType>& driver, std::chrono::system_clock::duration sampleTime, PidTunings<QNumberType> tunnings, PidLimits<QNumberType> limits);
+        ~PidIncrementalAsynchronous();
+        PidIncrementalAsynchronous(const PidIncrementalAsynchronous&) = delete;
+        PidIncrementalAsynchronous& operator=(const PidIncrementalAsynchronous&) = delete;
+        PidIncrementalAsynchronous(PidIncrementalAsynchronous&&) = delete;
+        PidIncrementalAsynchronous& operator=(PidIncrementalAsynchronous&&) = delete;
 
-        // Implementation of AsynchronousPidController
+        void Reset() override;
         void SetPoint(QNumberType setPoint) override;
-        void SetLimits(PidLimits<QNumberType> limits) override;
         void SetTunings(PidTunings<QNumberType> tunnings) override;
-        void Enable() override;
-        void Disable() override;
 
     private:
         PidDriver<QNumberType>& driver;
@@ -71,12 +71,9 @@ namespace controllers
     public:
         PidIncrementalSynchronous(PidTunings<QNumberType> tunnings, PidLimits<QNumberType> limits);
 
-        // Implementation of SynchronousPidController
+        void Reset() override;
         void SetPoint(QNumberType setPoint) override;
-        void SetLimits(PidLimits<QNumberType> limits) override;
         void SetTunings(PidTunings<QNumberType> tunnings) override;
-        void Enable() override;
-        void Disable() override;
         QNumberType Process(QNumberType processVariable) override;
     };
 
@@ -93,35 +90,20 @@ namespace controllers
     }
 
     template<class QNumberType>
-    void PidIncrementalBase<QNumberType>::SetPoint(QNumberType _setPoint)
-    {
-        this->setPointValue = _setPoint;
-        this->hasSetPoint = true;
-    }
-
-    template<class QNumberType>
-    void PidIncrementalBase<QNumberType>::Enable()
+    void PidIncrementalBase<QNumberType>::Reset()
     {
         u = QNumberType(0.0f);
         u_1 = QNumberType(0.0f);
-
         e = QNumberType(0.0f);
         e_1 = QNumberType(0.0f);
         e_2 = QNumberType(0.0f);
     }
 
     template<class QNumberType>
-    void PidIncrementalBase<QNumberType>::Disable()
+    void PidIncrementalBase<QNumberType>::SetPoint(QNumberType _setPoint)
     {
-        hasSetPoint = false;
-    }
-
-    template<class QNumberType>
-    void PidIncrementalBase<QNumberType>::SetLimits(PidLimits<QNumberType> _limits)
-    {
-        really_assert(_limits.max > _limits.min);
-
-        this->limits = _limits;
+        this->setPointValue = _setPoint;
+        this->hasSetPoint = true;
     }
 
     template<class QNumberType>
@@ -173,31 +155,25 @@ namespace controllers
             {
                 this->driver.ControlAction(this->PidIncrementalBase<QNumberType>::Process(processVariable));
             });
+        driver.Start(sampleTime);
+    }
+
+    template<typename QNumberType>
+    PidIncrementalAsynchronous<QNumberType>::~PidIncrementalAsynchronous()
+    {
+        driver.Stop();
+    }
+
+    template<class QNumberType>
+    void PidIncrementalAsynchronous<QNumberType>::Reset()
+    {
+        PidIncrementalBase<QNumberType>::Reset();
     }
 
     template<class QNumberType>
     void PidIncrementalAsynchronous<QNumberType>::SetPoint(QNumberType _setPoint)
     {
         PidIncrementalBase<QNumberType>::SetPoint(_setPoint);
-    }
-
-    template<class QNumberType>
-    void PidIncrementalAsynchronous<QNumberType>::Enable()
-    {
-        PidIncrementalBase<QNumberType>::Enable();
-        driver.Start(sampleTime);
-    }
-
-    template<typename QNumberType>
-    void PidIncrementalAsynchronous<QNumberType>::Disable()
-    {
-        driver.Stop();
-    }
-
-    template<class QNumberType>
-    void PidIncrementalAsynchronous<QNumberType>::SetLimits(PidLimits<QNumberType> limits)
-    {
-        PidIncrementalBase<QNumberType>::SetLimits(limits);
     }
 
     template<class QNumberType>
@@ -213,33 +189,21 @@ namespace controllers
     }
 
     template<class QNumberType>
+    void PidIncrementalSynchronous<QNumberType>::Reset()
+    {
+        PidIncrementalBase<QNumberType>::Reset();
+    }
+
+    template<class QNumberType>
     void PidIncrementalSynchronous<QNumberType>::SetPoint(QNumberType setPoint)
     {
         PidIncrementalBase<QNumberType>::SetPoint(setPoint);
     }
 
     template<class QNumberType>
-    void PidIncrementalSynchronous<QNumberType>::SetLimits(PidLimits<QNumberType> limits)
-    {
-        PidIncrementalBase<QNumberType>::SetLimits(limits);
-    }
-
-    template<class QNumberType>
     void PidIncrementalSynchronous<QNumberType>::SetTunings(PidTunings<QNumberType> tunnings)
     {
         PidIncrementalBase<QNumberType>::SetTunings(tunnings);
-    }
-
-    template<class QNumberType>
-    void PidIncrementalSynchronous<QNumberType>::Enable()
-    {
-        PidIncrementalBase<QNumberType>::Enable();
-    }
-
-    template<class QNumberType>
-    void PidIncrementalSynchronous<QNumberType>::Disable()
-    {
-        PidIncrementalBase<QNumberType>::Disable();
     }
 
     template<class QNumberType>

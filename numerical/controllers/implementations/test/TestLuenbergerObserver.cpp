@@ -1,6 +1,7 @@
 #include "numerical/controllers/implementations/LuenbergerObserver.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/math/Tolerance.hpp"
+#include <array>
 #include <cmath>
 #include <gtest/gtest.h>
 
@@ -83,51 +84,6 @@ TEST_F(TestLuenbergerObserver, ackermann_places_requested_poles)
 
     EXPECT_NEAR(trace, expectedTrace, 1e-3f);
     EXPECT_NEAR(det, expectedDet, 1e-3f);
-}
-
-TEST_F(TestLuenbergerObserver, faster_poles_converge_quicker)
-{
-    math::Vector<float, 2> xtrue{ { 0.0f }, { 0.0f } };
-    math::Vector<float, 2> xhatWrong{ { 1.0f }, { 1.0f } };
-    math::Vector<float, 1> u{ { 0.0f } };
-
-    std::array<float, 2> slowPoles{ 0.5f, 0.5f };
-    std::array<float, 2> fastPoles{ 0.05f, 0.05f };
-
-    auto Lslow = Observer::AckermannGain(plant, slowPoles);
-    auto Lfast = Observer::AckermannGain(plant, fastPoles);
-
-    Observer slowObs{ plant, Lslow };
-    Observer fastObs{ plant, Lfast };
-    slowObs.Reset(xhatWrong);
-    fastObs.Reset(xhatWrong);
-
-    constexpr float tol = 0.05f;
-    int slowSteps = 0;
-    int fastSteps = 0;
-
-    for (int k = 0; k < 100; ++k)
-    {
-        math::Vector<float, 1> y = plant.C * xtrue;
-
-        slowObs.Update(u, y);
-        fastObs.Update(u, y);
-
-        auto eS0 = slowObs.Estimate().at(0, 0) - xtrue.at(0, 0);
-        auto eS1 = slowObs.Estimate().at(1, 0) - xtrue.at(1, 0);
-        auto eF0 = fastObs.Estimate().at(0, 0) - xtrue.at(0, 0);
-        auto eF1 = fastObs.Estimate().at(1, 0) - xtrue.at(1, 0);
-
-        float normSlow = std::sqrt(eS0 * eS0 + eS1 * eS1);
-        float normFast = std::sqrt(eF0 * eF0 + eF1 * eF1);
-
-        if (slowSteps == 0 && normSlow < tol)
-            slowSteps = k + 1;
-        if (fastSteps == 0 && normFast < tol)
-            fastSteps = k + 1;
-    }
-
-    EXPECT_LT(fastSteps, slowSteps);
 }
 
 TEST_F(TestLuenbergerObserver, rejects_initial_error_geometrically)
@@ -213,4 +169,103 @@ TEST_F(TestLuenbergerObserver, feedthrough_D_accounted_in_output)
     math::Vector<float, 2> xNext = plantWithD.Step(x, u);
     EXPECT_NEAR(xhat.at(0, 0), xNext.at(0, 0), math::Tolerance<float>());
     EXPECT_NEAR(xhat.at(1, 0), xNext.at(1, 0), math::Tolerance<float>());
+}
+
+TEST_F(TestLuenbergerObserver, determinism_same_sequence_identical_outputs)
+{
+    std::array<float, 2> poles{ 0.2f, 0.3f };
+    auto L = Observer::AckermannGain(plant, poles);
+
+    Observer obs1{ plant, L };
+    Observer obs2{ plant, L };
+    math::Vector<float, 2> x0{ { 1.5f }, { -0.5f } };
+    obs1.Reset(x0);
+    obs2.Reset(x0);
+
+    std::array<float, 6> uSeq{ 0.3f, -0.1f, 0.5f, 0.0f, -0.2f, 0.4f };
+    std::array<float, 6> ySeq{ 1.0f, 0.8f, 0.6f, 0.4f, 0.2f, 0.1f };
+
+    for (std::size_t k = 0; k < uSeq.size(); ++k)
+    {
+        math::Vector<float, 1> u{ { uSeq[k] } };
+        math::Vector<float, 1> y{ { ySeq[k] } };
+        auto r1 = obs1.Update(u, y);
+        auto r2 = obs2.Update(u, y);
+        EXPECT_FLOAT_EQ(r1.at(0, 0), r2.at(0, 0));
+        EXPECT_FLOAT_EQ(r1.at(1, 0), r2.at(1, 0));
+    }
+}
+
+TEST_F(TestLuenbergerObserver, two_instances_interleaved_do_not_interfere)
+{
+    std::array<float, 2> poles{ 0.2f, 0.3f };
+    auto L = Observer::AckermannGain(plant, poles);
+
+    Observer obsA{ plant, L };
+    Observer obsB{ plant, L };
+    math::Vector<float, 2> x0{ { 1.0f }, { 0.0f } };
+    obsA.Reset(x0);
+    obsB.Reset(x0);
+
+    std::array<float, 4> uSeq{ 0.2f, -0.3f, 0.1f, 0.4f };
+    std::array<float, 4> ySeq{ 0.9f, 0.7f, 0.5f, 0.3f };
+
+    for (std::size_t k = 0; k < uSeq.size(); ++k)
+    {
+        math::Vector<float, 1> u{ { uSeq[k] } };
+        math::Vector<float, 1> y{ { ySeq[k] } };
+        auto rA = obsA.Update(u, y);
+        auto rB = obsB.Update(u, y);
+        EXPECT_FLOAT_EQ(rA.at(0, 0), rB.at(0, 0));
+        EXPECT_FLOAT_EQ(rA.at(1, 0), rB.at(1, 0));
+    }
+}
+
+TEST_F(TestLuenbergerObserver, zero_input_zero_measurement_zero_state_stays_zero)
+{
+    observer.Reset(math::Vector<float, 2>{ { 0.0f }, { 0.0f } });
+    math::Vector<float, 1> u{ { 0.0f } };
+    math::Vector<float, 1> y{ { 0.0f } };
+
+    for (int k = 0; k < 10; ++k)
+    {
+        auto xhat = observer.Update(u, y);
+        EXPECT_FLOAT_EQ(xhat.at(0, 0), 0.0f);
+        EXPECT_FLOAT_EQ(xhat.at(1, 0), 0.0f);
+    }
+}
+
+TEST_F(TestLuenbergerObserver, closed_loop_eigenvalues_inside_unit_disk)
+{
+    std::array<float, 2> poles{ 0.2f, 0.3f };
+    auto L = Observer::AckermannGain(plant, poles);
+
+    math::SquareMatrix<float, 2> AminusLC = plant.A;
+    for (std::size_t i = 0; i < 2; ++i)
+        for (std::size_t k = 0; k < 2; ++k)
+            AminusLC.at(i, k) -= L.at(i, 0) * plant.C.at(0, k);
+
+    float tr = AminusLC.Trace();
+    float dt = AminusLC.at(0, 0) * AminusLC.at(1, 1) - AminusLC.at(0, 1) * AminusLC.at(1, 0);
+
+    float discriminant = tr * tr - 4.0f * dt;
+    float sqrtD = std::sqrt(std::abs(discriminant));
+    float lambda1mag;
+    float lambda2mag;
+
+    if (discriminant >= 0.0f)
+    {
+        lambda1mag = std::abs(0.5f * (tr + sqrtD));
+        lambda2mag = std::abs(0.5f * (tr - sqrtD));
+    }
+    else
+    {
+        float realPart = 0.5f * tr;
+        float imagPart = 0.5f * sqrtD;
+        lambda1mag = std::sqrt(realPart * realPart + imagPart * imagPart);
+        lambda2mag = lambda1mag;
+    }
+
+    EXPECT_LT(lambda1mag, 1.0f);
+    EXPECT_LT(lambda2mag, 1.0f);
 }

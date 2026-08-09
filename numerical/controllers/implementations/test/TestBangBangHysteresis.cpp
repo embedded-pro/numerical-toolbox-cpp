@@ -91,3 +91,39 @@ TEST_F(TestBangBangHysteresis, custom_output_levels)
     EXPECT_FLOAT_EQ(customRelay.Update(0.0f), -1.0f);
     EXPECT_FLOAT_EQ(customRelay.Update(0.2f), 1.0f);
 }
+
+TEST_F(TestBangBangHysteresis, reset_to_high_state)
+{
+    relay.Reset(controllers::RelayState::High);
+
+    EXPECT_EQ(relay.State(), controllers::RelayState::High);
+    EXPECT_FLOAT_EQ(relay.Update(0.0f), 1.0f);
+    EXPECT_EQ(relay.State(), controllers::RelayState::High);
+}
+
+TEST_F(TestBangBangHysteresis, stays_low_inside_band)
+{
+    float output = relay.Update(0.1f);
+
+    EXPECT_EQ(relay.State(), controllers::RelayState::Low);
+    EXPECT_FLOAT_EQ(output, 0.0f);
+}
+
+TEST_F(TestBangBangHysteresis, does_not_switch_high_below_upper_threshold)
+{
+    float output = relay.Update(0.19f);
+
+    EXPECT_EQ(relay.State(), controllers::RelayState::Low);
+    EXPECT_FLOAT_EQ(output, 0.0f);
+}
+
+TEST_F(TestBangBangHysteresis, reset_then_update_matches_fresh_instance)
+{
+    relay.Update(0.3f);
+    relay.Reset();
+
+    controllers::BangBangHysteresis<float> fresh{ -0.2f, 0.2f, 0.0f, 1.0f };
+
+    EXPECT_FLOAT_EQ(relay.Update(0.1f), fresh.Update(0.1f));
+    EXPECT_EQ(relay.State(), fresh.State());
+}
