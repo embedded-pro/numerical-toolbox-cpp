@@ -115,9 +115,9 @@ TEST_F(TestLqg, noiseless_simulation_state_norm_decays_over_horizon)
         const auto u = lqg.ComputeControl(z);
 
         const float x0 = A.at(0, 0) * trueState.at(0, 0) + A.at(0, 1) * trueState.at(1, 0) +
-                          B.at(0, 0) * u.at(0, 0);
+                         B.at(0, 0) * u.at(0, 0);
         const float x1 = A.at(1, 0) * trueState.at(0, 0) + A.at(1, 1) * trueState.at(1, 0) +
-                          B.at(1, 0) * u.at(0, 0);
+                         B.at(1, 0) * u.at(0, 0);
         trueState = math::Vector<float, kState>{ { x0 }, { x1 } };
     }
 

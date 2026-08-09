@@ -20,13 +20,35 @@ namespace
             return controllers::PidIncrementalSynchronous<T>{ tunings, limits };
         }
 
-        controllers::PidTunings<T> PGains(float kp)   { return { T(kp), T(0.0f), T(0.0f) }; }
-        controllers::PidTunings<T> IGains(float ki)   { return { T(0.0f), T(ki), T(0.0f) }; }
-        controllers::PidTunings<T> DGains(float kd)   { return { T(0.0f), T(0.0f), T(kd) }; }
-        controllers::PidTunings<T> PIDGains(float kp, float ki, float kd) { return { T(kp), T(ki), T(kd) }; }
+        controllers::PidTunings<T> PGains(float kp)
+        {
+            return { T(kp), T(0.0f), T(0.0f) };
+        }
 
-        controllers::PidLimits<T> WideLimit()   { return { T(-0.9f), T(0.9f) }; }
-        controllers::PidLimits<T> NarrowLimit() { return { T(-0.1f), T(0.1f) }; }
+        controllers::PidTunings<T> IGains(float ki)
+        {
+            return { T(0.0f), T(ki), T(0.0f) };
+        }
+
+        controllers::PidTunings<T> DGains(float kd)
+        {
+            return { T(0.0f), T(0.0f), T(kd) };
+        }
+
+        controllers::PidTunings<T> PIDGains(float kp, float ki, float kd)
+        {
+            return { T(kp), T(ki), T(kd) };
+        }
+
+        controllers::PidLimits<T> WideLimit()
+        {
+            return { T(-0.9f), T(0.9f) };
+        }
+
+        controllers::PidLimits<T> NarrowLimit()
+        {
+            return { T(-0.1f), T(0.1f) };
+        }
     };
 
     TYPED_TEST_SUITE(TestPidIncrementalSynchronous, PidTypes);
