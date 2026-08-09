@@ -222,3 +222,24 @@ TEST_F(TestActiveDisturbanceRejection, reset_mid_run_matches_fresh_instance)
     EXPECT_FLOAT_EQ(plant.y, freshPlant.y);
     EXPECT_FLOAT_EQ(adrc.AppliedPrev(), fresh.AppliedPrev());
 }
+
+TEST(TestBinomialCoeff, k_zero_returns_one)
+{
+    EXPECT_EQ(robust_control::detail::BinomialCoeff(5, 0), 1u);
+}
+
+TEST(TestBinomialCoeff, k_equals_n_returns_one)
+{
+    EXPECT_EQ(robust_control::detail::BinomialCoeff(4, 4), 1u);
+}
+
+TEST(TestBinomialCoeff, k_greater_than_n_returns_zero)
+{
+    EXPECT_EQ(robust_control::detail::BinomialCoeff(3, 5), 0u);
+}
+
+TEST(TestBinomialCoeff, known_interior_values)
+{
+    EXPECT_EQ(robust_control::detail::BinomialCoeff(4, 2), 6u);
+    EXPECT_EQ(robust_control::detail::BinomialCoeff(5, 3), 10u);
+}

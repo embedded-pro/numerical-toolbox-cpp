@@ -8,12 +8,12 @@ namespace
     class TestIir : public ::testing::Test
     {
     protected:
-        static constexpr std::size_t Order = 2;
+        static constexpr std::size_t Order = 3;
 
-        math::RecursiveBuffer<float, Order> MakeCoeffs(float c0, float c1)
+        math::RecursiveBuffer<float, Order> MakeCoeffs(float c0, float c1, float c2 = 0.0f)
         {
             math::RecursiveBuffer<float, Order> buf{};
-            buf = { c0, c1 };
+            buf = { c0, c1, c2 };
             return buf;
         }
     };

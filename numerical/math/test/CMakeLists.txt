@@ -12,6 +12,7 @@ numerical_add_qemu_test(numerical.math_test)
 
 target_sources(numerical.math_test PRIVATE
     TestComplexNumber.cpp
+    TestMath.cpp
     TestConsistencyMetrics.cpp
     TestCordic.cpp
     TestGivensRotation.cpp
