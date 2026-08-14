@@ -104,7 +104,10 @@ namespace
         : public analysis::TwiddleFactors<float, 0>
     {
     public:
-        math::Complex<float>& operator[](std::size_t) override { return dummy; }
+        math::Complex<float>& operator[](std::size_t) override
+        {
+            return dummy;
+        }
 
     private:
         math::Complex<float> dummy{};
