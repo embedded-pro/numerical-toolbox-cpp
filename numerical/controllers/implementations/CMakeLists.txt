@@ -13,6 +13,7 @@ target_link_libraries(numerical.controllers.implementations ${NUMERICAL_VISIBILI
 
 target_sources(numerical.controllers.implementations PRIVATE
     BangBangHysteresis.hpp
+    DeadbeatControl.hpp
     Feedforward2Dof.hpp
     GainScheduledController.hpp
     IntegralStateFeedbackLqi.hpp
@@ -27,6 +28,7 @@ target_sources(numerical.controllers.implementations PRIVATE
 
 numerical_add_coverage_sources(numerical.controllers.implementations
     BangBangHysteresis.cpp
+    DeadbeatControl.cpp
     Feedforward2Dof.cpp
     GainScheduledController.cpp
     IntegralStateFeedbackLqi.cpp
