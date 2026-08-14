@@ -13,7 +13,7 @@
 
 namespace solvers
 {
-    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t MaxIterations = 100>
+    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t MaxIterations = 300>
     class DiscreteAlgebraicRiccatiEquation
     {
         static_assert(math::detail::is_supported_type_v<T>,
