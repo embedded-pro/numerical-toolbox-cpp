@@ -36,7 +36,7 @@ namespace controllers
         {};
 
         DeadbeatControl(const StateMatrix& A, const InputMatrix& B);
-        DeadbeatControl(const math::LinearTimeInvariant<T, StateSize, InputSize>& plant);
+        explicit DeadbeatControl(const math::LinearTimeInvariant<T, StateSize, InputSize>& plant);
         DeadbeatControl(PrecomputedGains, const GainMatrix& stateGain, const GainMatrix& refGain);
 
         OPTIMIZE_FOR_SPEED InputVector ComputeControl(const StateVector& state) override;
