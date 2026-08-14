@@ -4,11 +4,10 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
-#include "infra/util/ReallyAssert.hpp"
 #include "numerical/controllers/interfaces/StateFeedbackController.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
-#include "numerical/solvers/SingularValueDecomposition.hpp"
+#include "numerical/solvers/GaussianElimination.hpp"
 #include <type_traits>
 
 namespace controllers
@@ -125,12 +124,7 @@ namespace controllers
         for (std::size_t i = 0; i < Steps; ++i)
             AN = A * AN;
 
-        static constexpr T kSvdTol = T(1e-5f);
-        solvers::SingularValueDecomposition<T, StateSize, ReachSize> svd;
-        svd.Decompose(gamma);
-        really_assert(svd.Rank(kSvdTol) == StateSize);
-
-        auto gammaPinv = svd.PseudoInverse(kSvdTol);
+        auto gammaPinv = solvers::SolveSystem<T, StateSize, ReachSize>(gamma * gamma.Transpose(), gamma).Transpose();
 
         gainRef = gammaPinv.template GetBlock<InputSize, StateSize>(0, 0);
         gainState = gainRef * AN;
@@ -138,7 +132,9 @@ namespace controllers
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class DeadbeatControl<float, 1, 1, 1>;
+    extern template class DeadbeatControl<float, 1, 1, 2>;
     extern template class DeadbeatControl<float, 2, 1, 2>;
+    extern template class DeadbeatControl<float, 2, 1, 3>;
     extern template class DeadbeatControl<float, 2, 2, 1>;
 #endif
 }
