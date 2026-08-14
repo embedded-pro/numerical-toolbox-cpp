@@ -58,12 +58,12 @@ Under this law, the state satisfies $x[k+N] = r$ exactly (in exact arithmetic) f
 
 ## Complexity Analysis
 
-| Phase                    | Time                | Space               | Notes                                                             |
-|--------------------------|---------------------|---------------------|-------------------------------------------------------------------|
-| Build $\Gamma_N$ (init)  | $O(N \cdot n^2 m)$  | $O(n \cdot Nm)$     | $N$ matrix-matrix multiplies of size $n \times n$ by $n \times m$ |
-| SVD of $\Gamma_N$ (init) | $O(n^2 \cdot Nm)$   | $O(n \cdot Nm)$     | Golub-Kahan bidiagonalization + diagonalization                   |
-| Compute $A^N$ (init)     | $O(N \cdot n^3)$    | $O(n^2)$            | $N$ matrix-matrix multiplies                                      |
-| Control step (online)    | $O(n \cdot m)$      | $O(n \cdot m)$      | Two matrix-vector multiplies                                      |
+| Phase                    | Time               | Space           | Notes                                                             |
+|--------------------------|--------------------|-----------------|-------------------------------------------------------------------|
+| Build $\Gamma_N$ (init)  | $O(N \cdot n^2 m)$ | $O(n \cdot Nm)$ | $N$ matrix-matrix multiplies of size $n \times n$ by $n \times m$ |
+| SVD of $\Gamma_N$ (init) | $O(n^2 \cdot Nm)$  | $O(n \cdot Nm)$ | Golub-Kahan bidiagonalization + diagonalization                   |
+| Compute $A^N$ (init)     | $O(N \cdot n^3)$   | $O(n^2)$        | $N$ matrix-matrix multiplies                                      |
+| Control step (online)    | $O(n \cdot m)$     | $O(n \cdot m)$  | Two matrix-vector multiplies                                      |
 
 The initialization cost is negligible for the embedded use case: it is incurred once, and the gains are stored as constant matrices on the stack.
 
@@ -117,13 +117,13 @@ $$x[2] = Ax[1] + Bu[1] = [2.5 + 5,\; 50] + [-2.5,\; -50] = [5,\; 0]^T \checkmark
 
 ## Variants & Generalizations
 
-| Variant                         | Key Difference                                                                                          |
-|---------------------------------|---------------------------------------------------------------------------------------------------------|
-| **1-step deadbeat ($N = 1$)**   | Requires $B$ to be square and invertible; gain is simply $B^{-1}$ and $B^{-1}A$                        |
-| **N-step deadbeat ($N > 1$)**   | Handles systems where $m < n$; uses the reachability matrix pseudo-inverse                              |
-| **Receding-horizon deadbeat**   | Recomputes the full $N$-step sequence at every sample (equivalent to unconstrained MPC with finite horizon) |
-| **Robust deadbeat**             | Adds structured uncertainty to $A$, $B$ and minimizes worst-case settling time                          |
-| **Output deadbeat**             | Drives the output $y = Cx$ to target rather than the full state; requires an observer                   |
+| Variant                       | Key Difference                                                                                              |
+|-------------------------------|-------------------------------------------------------------------------------------------------------------|
+| **1-step deadbeat ($N = 1$)** | Requires $B$ to be square and invertible; gain is simply $B^{-1}$ and $B^{-1}A$                             |
+| **N-step deadbeat ($N > 1$)** | Handles systems where $m < n$; uses the reachability matrix pseudo-inverse                                  |
+| **Receding-horizon deadbeat** | Recomputes the full $N$-step sequence at every sample (equivalent to unconstrained MPC with finite horizon) |
+| **Robust deadbeat**           | Adds structured uncertainty to $A$, $B$ and minimizes worst-case settling time                              |
+| **Output deadbeat**           | Drives the output $y = Cx$ to target rather than the full state; requires an observer                       |
 
 ## Applications
 
@@ -148,12 +148,12 @@ graph LR
     DB -.->|"optimal alternative with noise"| LQR
 ```
 
-| Algorithm                                                            | Relationship                                                                                   |
-|----------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
-| [SVD Solver](../solvers/SingularValueDecomposition.md)               | Used to compute the pseudo-inverse of $\Gamma_N$ during gain initialization                    |
-| [LQR Controller](Lqr.md)                                             | LQR is the optimal alternative when measurement noise is present; places poles away from origin |
-| [MPC Controller](Mpc.md)                                             | Deadbeat is MPC with a finite horizon equal to $N$ and no inequality constraints               |
-| [LTI Plant Model](LinearTimeInvariant.md)                            | Provides $(A, B)$ matrices used to build $\Gamma_N$ and compute $A^N$                         |
+| Algorithm                                              | Relationship                                                                                    |
+|--------------------------------------------------------|-------------------------------------------------------------------------------------------------|
+| [SVD Solver](../solvers/SingularValueDecomposition.md) | Used to compute the pseudo-inverse of $\Gamma_N$ during gain initialization                     |
+| [LQR Controller](Lqr.md)                               | LQR is the optimal alternative when measurement noise is present; places poles away from origin |
+| [MPC Controller](Mpc.md)                               | Deadbeat is MPC with a finite horizon equal to $N$ and no inequality constraints                |
+| [LTI Plant Model](LinearTimeInvariant.md)              | Provides $(A, B)$ matrices used to build $\Gamma_N$ and compute $A^N$                           |
 
 ## References & Further Reading
 
