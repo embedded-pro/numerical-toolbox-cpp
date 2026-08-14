@@ -125,7 +125,7 @@ namespace math
         [[nodiscard]] constexpr Matrix<T, Rows, 1> GetColumn(size_type col) const;
 
     private:
-        std::array<T, Rows * Cols> data;
+        std::array<T, Rows * Cols> data = {};
     };
 
     template<typename T, typename... U>
@@ -145,13 +145,10 @@ namespace math
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr Matrix<T, Rows, Cols>::Matrix() noexcept
-        : data{}
-    {}
+    constexpr Matrix<T, Rows, Cols>::Matrix() noexcept = default;
 
     template<typename T, size_t Rows, size_t Cols>
     OPTIMIZE_FOR_SPEED constexpr Matrix<T, Rows, Cols>::Matrix(std::initializer_list<std::initializer_list<T>> init)
-        : data{}
     {
         size_t row = 0;
         for (const auto& row_list : init)

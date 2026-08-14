@@ -72,6 +72,7 @@ namespace controllers
 
         [[nodiscard]] const HessianMatrix& GetHessian() const;
         [[nodiscard]] const GradientMatrix& GetGradientMatrix() const;
+        [[nodiscard]] const GradientMatrix& GetReferenceGainMatrix() const;
 
     private:
         using PredictionStateMatrix = math::Matrix<T, TotalStateDim, StateSize>;
@@ -84,10 +85,11 @@ namespace controllers
         PredictionInputMatrix BuildTheta(const StateMatrix& A, const InputMatrix& B) const;
         void BuildCostMatrices(const MpcWeights<T, StateSize, InputSize>& weights,
             const StateMatrix& A, const InputMatrix& B);
-        void ApplyConstraints(ControlVector& u) const;
+        void ApplyConstraints(ControlVector& u, const ControlVector& negG) const;
 
         HessianMatrix hessian;
         GradientMatrix gradientMatrix;
+        GradientMatrix referenceGainMatrix;
         MpcConstraints<T, InputSize> constraints;
         ControlSequence controlSequence;
         std::optional<StateVector> reference;
@@ -182,37 +184,43 @@ namespace controllers
             rBar.SetBlock(weights.R, k * InputSize, k * InputSize);
 
         auto thetaT = theta.Transpose();
-        hessian = thetaT * qBar * theta + rBar;
-        gradientMatrix = thetaT * qBar * psi;
+        auto thetaTqBar = thetaT * qBar;
+        hessian = thetaTqBar * theta + rBar;
+        gradientMatrix = thetaTqBar * psi;
+
+        PredictionStateMatrix onesStack;
+        for (std::size_t k = 0; k < PredictionHorizon; ++k)
+            for (std::size_t i = 0; i < StateSize; ++i)
+                onesStack.at(k * StateSize + i, i) = T(1);
+        referenceGainMatrix = thetaTqBar * onesStack;
     }
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t PredictionHorizon, std::size_t ControlHorizon>
-    OPTIMIZE_FOR_SPEED void Mpc<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>::ApplyConstraints(ControlVector& u) const
+    OPTIMIZE_FOR_SPEED void Mpc<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>::ApplyConstraints(ControlVector& u, const ControlVector& negG) const
     {
         if (!constraints.uMin && !constraints.uMax)
             return;
 
-        if (constraints.uMin && constraints.uMax)
-        {
-            for (std::size_t k = 0; k < ControlHorizon; ++k)
-                for (std::size_t i = 0; i < InputSize; ++i)
-                {
-                    auto& val = u.at(k * InputSize + i, 0);
-                    val = std::max(std::min(val, constraints.uMax->at(i, 0)), constraints.uMin->at(i, 0));
-                }
-        }
-        else if (constraints.uMin)
-        {
-            for (std::size_t k = 0; k < ControlHorizon; ++k)
-                for (std::size_t i = 0; i < InputSize; ++i)
-                    u.at(k * InputSize + i, 0) = std::max(u.at(k * InputSize + i, 0), constraints.uMin->at(i, 0));
-        }
-        else
-        {
-            for (std::size_t k = 0; k < ControlHorizon; ++k)
-                for (std::size_t i = 0; i < InputSize; ++i)
-                    u.at(k * InputSize + i, 0) = std::min(u.at(k * InputSize + i, 0), constraints.uMax->at(i, 0));
-        }
+        constexpr std::size_t MaxIter = 20;
+
+        for (std::size_t iter = 0; iter < MaxIter; ++iter)
+            for (std::size_t j = 0; j < TotalControlDim; ++j)
+            {
+                T Hju = T{};
+                for (std::size_t l = 0; l < TotalControlDim; ++l)
+                    Hju += hessian.at(j, l) * u.at(l, 0);
+
+                const T uStar = u.at(j, 0) - (Hju - negG.at(j, 0)) / hessian.at(j, j);
+                const std::size_t i = j % InputSize;
+
+                T bounded = uStar;
+                if (constraints.uMin)
+                    bounded = std::max(bounded, constraints.uMin->at(i, 0));
+                if (constraints.uMax)
+                    bounded = std::min(bounded, constraints.uMax->at(i, 0));
+
+                u.at(j, 0) = bounded;
+            }
     }
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t PredictionHorizon, std::size_t ControlHorizon>
@@ -220,12 +228,13 @@ namespace controllers
         typename Mpc<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>::InputVector
         Mpc<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>::ComputeControl(const StateVector& state)
     {
-        auto effectiveState = reference ? state - *reference : state;
-        auto g = gradientMatrix * effectiveState;
+        auto g = gradientMatrix * state;
+        if (reference)
+            g = g - referenceGainMatrix * (*reference);
         auto negG = g * T(-1.0f);
 
         auto uOptimal = solvers::SolveSystem<T, TotalControlDim, 1>(hessian, negG);
-        ApplyConstraints(uOptimal);
+        ApplyConstraints(uOptimal, negG);
 
         for (std::size_t k = 0; k < ControlHorizon; ++k)
             controlSequence[k] = uOptimal.template GetBlock<InputSize, 1>(k * InputSize, 0);
@@ -264,6 +273,13 @@ namespace controllers
     Mpc<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>::GetGradientMatrix() const
     {
         return gradientMatrix;
+    }
+
+    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t PredictionHorizon, std::size_t ControlHorizon>
+    const typename Mpc<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>::GradientMatrix&
+    Mpc<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>::GetReferenceGainMatrix() const
+    {
+        return referenceGainMatrix;
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD

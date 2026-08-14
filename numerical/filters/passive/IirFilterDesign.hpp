@@ -309,7 +309,7 @@ namespace filters::passive
         for (std::size_t k{ 0 }; k < order; ++k)
         {
             const T mag2{ protoPoles[k].Real() * protoPoles[k].Real() + protoPoles[k].Imaginary() * protoPoles[k].Imaginary() };
-            const ComplexT hpPole{ wc / protoPoles[k].Real(), -wc * protoPoles[k].Imaginary() / mag2 };
+            const ComplexT hpPole{ wc * protoPoles[k].Real() / mag2, -wc * protoPoles[k].Imaginary() / mag2 };
             az[k] = BilinearS2Z(hpPole, fs);
             bz[k] = { T{ 1 }, T{ 0 } };
         }
