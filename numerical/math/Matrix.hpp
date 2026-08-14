@@ -145,8 +145,7 @@ namespace math
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr Matrix<T, Rows, Cols>::Matrix() noexcept
-    {}
+    constexpr Matrix<T, Rows, Cols>::Matrix() noexcept = default;
 
     template<typename T, size_t Rows, size_t Cols>
     OPTIMIZE_FOR_SPEED constexpr Matrix<T, Rows, Cols>::Matrix(std::initializer_list<std::initializer_list<T>> init)
