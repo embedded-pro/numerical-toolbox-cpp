@@ -40,11 +40,21 @@ where $\Gamma_N^+ = \Gamma_N^T (\Gamma_N \Gamma_N^T)^{-1}$ is the Moore-Penrose 
 
 ### Precomputed Gain Matrices
 
-Only the **first** $m$ elements of $\mathbf{u}^*$ are applied at each sample (the remaining elements are recomputed at the next step). Let $\Pi_0$ denote the operator that extracts the first $m$ rows of a matrix. Define:
+Only the **first** $m$ elements of $\mathbf{u}^*$ are applied at each sample (the remaining elements are recomputed at the next step). Let $\Pi_0$ denote the operator that extracts the first $m$ rows of a matrix. Define the open-loop state-feedback gain:
+
+$$K_x = \Pi_0 \left(\Gamma_N^+\right) \cdot A^N \in \mathbb{R}^{m \times n}$$
+
+For unity closed-loop DC gain in receding-horizon (closed-loop) operation, $K_r$ must satisfy:
+
+$$B \, K_r = I - A + B \, K_x$$
+
+For **square systems** ($m = n$), $B$ is invertible and the unique solution is:
+
+$$K_r = B^{-1}(I - A + B \, K_x) \in \mathbb{R}^{m \times n}$$
+
+For **non-square systems** ($m < n$), the open-loop first-step gain is used directly:
 
 $$K_r = \Pi_0 \left(\Gamma_N^+\right) \in \mathbb{R}^{m \times n}$$
-
-$$K_x = K_r \cdot A^N \in \mathbb{R}^{m \times n}$$
 
 The resulting **deadbeat control law** is:
 
