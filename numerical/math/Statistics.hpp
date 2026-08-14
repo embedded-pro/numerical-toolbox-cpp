@@ -18,11 +18,11 @@ namespace math
         static_assert(detail::is_supported_type_v<T>,
             "Statistical functions only support float or QNumber types");
 
-        T sum{};
+        float sum = 0.0f;
         for (size_t i = 0; i < data.size; ++i)
-            sum += data.begin()[i];
+            sum += math::ToFloat(data.begin()[i]);
 
-        return T{ math::ToFloat(sum) / static_cast<float>(data.size) };
+        return T{ sum / static_cast<float>(data.size) };
     }
 
     template<typename T, size_t Rows, size_t Cols>
