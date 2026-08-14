@@ -3,13 +3,11 @@
 #include <array>
 #include <cmath>
 #include <gtest/gtest.h>
-#include <numbers>
 #include <tuple>
 
 namespace
 {
     static constexpr float kSampleFrequency = 1000.0f;
-    static constexpr float kPi = std::numbers::pi_v<float>;
 
     class TestFrequencyResponseUnity : public ::testing::Test
     {
@@ -331,4 +329,71 @@ TEST_F(TestFrequencyResponseUnity, zero_denominator_coefficients_produce_finite_
         EXPECT_FALSE(std::isnan(m));
         EXPECT_FALSE(std::isinf(m));
     }
+}
+
+TEST_F(TestFrequencyResponseUnity, magnitude_output_size_matches_points_for_128_points)
+{
+    std::array<float, 1> b{ 1.0f };
+    std::array<float, 1> a{ 1.0f };
+    control_analysis::FrequencyResponse<float, 128> fr128{ b, a, kSampleFrequency };
+
+    auto [frequencies, magnitudes, phases] = fr128.Calculate();
+
+    EXPECT_EQ(magnitudes.size(), 128u);
+    EXPECT_EQ(phases.size(), 128u);
+    EXPECT_EQ(frequencies.size(), 128u);
+}
+
+TEST_F(TestFrequencyResponseHighpass, phase_is_positive_at_low_frequencies)
+{
+    auto [frequencies, magnitudes, phases] = freqResponse.Calculate();
+
+    ASSERT_FALSE(phases.empty());
+    EXPECT_GT(phases.front(), 0.0f);
+}
+
+TEST_F(TestFrequencyResponseBiquad, dc_gain_is_finite_and_nonnan)
+{
+    auto [frequencies, magnitudes, phases] = freqResponse.Calculate();
+
+    ASSERT_FALSE(magnitudes.empty());
+    EXPECT_FALSE(std::isnan(magnitudes.front()));
+    EXPECT_FALSE(std::isinf(magnitudes.front()));
+}
+
+TEST_F(TestFrequencyResponsePureDelay, phase_at_nyquist_is_minus_180_degrees)
+{
+    auto [frequencies, magnitudes, phases] = freqResponse.Calculate();
+
+    ASSERT_FALSE(phases.empty());
+    EXPECT_NEAR(std::abs(phases.back()), 180.0f, 5.0f);
+}
+
+TEST_F(TestFrequencyResponseFirstOrderIir, phase_is_negative_at_quarter_nyquist)
+{
+    auto [frequencies, magnitudes, phases] = freqResponse.Calculate();
+
+    float targetFreq = kSampleFrequency / 4.0f;
+    float bestPhase = 0.0f;
+    float minDiff = std::numeric_limits<float>::max();
+
+    for (std::size_t i = 0; i < frequencies.size(); ++i)
+    {
+        float diff = std::abs(frequencies[i] - targetFreq);
+        if (diff < minDiff)
+        {
+            minDiff = diff;
+            bestPhase = phases[i];
+        }
+    }
+
+    EXPECT_NEAR(bestPhase, -26.57f, 2.0f);
+}
+
+TEST_F(TestFrequencyResponseLowpass, lowpass_dc_gain_is_zero_db)
+{
+    auto [frequencies, magnitudes, phases] = freqResponse.Calculate();
+
+    ASSERT_FALSE(magnitudes.empty());
+    EXPECT_NEAR(magnitudes.front(), 0.0f, 0.1f);
 }

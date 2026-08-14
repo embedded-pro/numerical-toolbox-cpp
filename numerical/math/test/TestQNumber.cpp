@@ -353,3 +353,69 @@ TEST_F(QNumberUtilTest, MinMaxLowest_Q15)
     EXPECT_NEAR(math::Max<math::Q15>(), 0.9999f, 1e-3f);
     EXPECT_NEAR(math::Lowest<math::Q15>(), -0.9999f, 1e-3f);
 }
+
+TYPED_TEST(QNumberTest, FloatConstructorZeroIsZero)
+{
+    TypeParam num(0.0f);
+
+    EXPECT_EQ(num.RawValue(), 0);
+    EXPECT_FLOAT_EQ(num.ToFloat(), 0.0f);
+}
+
+TYPED_TEST(QNumberTest, NegativeTimesNegativeIsPositive)
+{
+    TypeParam a(-0.25f);
+    TypeParam b(-0.25f);
+
+    TypeParam result = a * b;
+
+    EXPECT_GT(result.ToFloat(), 0.0f);
+    EXPECT_NEAR(result.ToFloat(), 0.0625f, math::Tolerance<float>());
+}
+
+TYPED_TEST(QNumberTest, NegativeDividedByNegativeIsPositive)
+{
+    TypeParam a(-0.20f);
+    TypeParam b(-0.40f);
+
+    TypeParam result = a / b;
+
+    EXPECT_NEAR(result.ToFloat(), 0.50f, math::Tolerance<float>());
+}
+
+TYPED_TEST(QNumberTest, UnaryNegationOfZeroIsZero)
+{
+    TypeParam zero;
+
+    TypeParam result = -zero;
+
+    EXPECT_EQ(result.RawValue(), 0);
+}
+
+TYPED_TEST(QNumberTest, SubtractLargerFromSmallerIsNegative)
+{
+    TypeParam a(0.10f);
+    TypeParam b(0.30f);
+
+    TypeParam result = a - b;
+
+    EXPECT_LT(result.ToFloat(), 0.0f);
+    EXPECT_NEAR(result.ToFloat(), -0.20f, math::Tolerance<float>());
+}
+
+TYPED_TEST(QNumberTest, DoubleNegationIsIdentity)
+{
+    TypeParam a(0.20f);
+
+    TypeParam result = -(-a);
+
+    EXPECT_NEAR(result.ToFloat(), a.ToFloat(), math::Tolerance<float>());
+}
+
+TYPED_TEST(QNumberTest, CompoundDivideByZeroDies)
+{
+    TypeParam a(0.10f);
+    TypeParam zero(0.0f);
+
+    EXPECT_DEATH_IF_SUPPORTED({ a /= zero; }, ""); // NOLINT
+}

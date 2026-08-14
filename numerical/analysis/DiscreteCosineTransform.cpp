@@ -3,7 +3,7 @@
 
 namespace analysis
 {
-    template class DiscreteConsineTransform<float, 8>;
-    template class DiscreteConsineTransform<math::Q15, 8>;
-    template class DiscreteConsineTransform<math::Q31, 8>;
+    template class DiscreteCosineTransform<float, 8>;
+    template class DiscreteCosineTransform<math::Q15, 8>;
+    template class DiscreteCosineTransform<math::Q31, 8>;
 }

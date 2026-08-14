@@ -14,17 +14,17 @@
 namespace analysis
 {
     template<typename QNumberType, std::size_t Length>
-    class DiscreteConsineTransform
+    class DiscreteCosineTransform
     {
-        static_assert((Length & (Length - 1)) == 0, "DiscreteConsineTransform size must be a power of 2");
+        static_assert((Length & (Length - 1)) == 0, "DiscreteCosineTransform size must be a power of 2");
         static_assert(math::is_qnumber<QNumberType>::value || std::is_floating_point_v<QNumberType>,
-            "DiscreteConsineTransform can only be instantiated with math::QNumber types or floating point.");
+            "DiscreteCosineTransform can only be instantiated with math::QNumber types or floating point.");
 
     public:
         using VectorReal = typename FastFourierTransform<QNumberType>::VectorReal;
         using VectorComplex = typename FastFourierTransform<QNumberType>::VectorComplex;
 
-        explicit DiscreteConsineTransform(FastFourierTransform<QNumberType>& fft);
+        explicit DiscreteCosineTransform(FastFourierTransform<QNumberType>& fft);
         VectorReal& Forward(VectorReal& input);
         VectorReal& Inverse(VectorReal& input);
 
@@ -38,7 +38,7 @@ namespace analysis
     // Implementation //
 
     template<typename QNumberType, std::size_t Length>
-    DiscreteConsineTransform<QNumberType, Length>::DiscreteConsineTransform(FastFourierTransform<QNumberType>& fft)
+    DiscreteCosineTransform<QNumberType, Length>::DiscreteCosineTransform(FastFourierTransform<QNumberType>& fft)
         : fft(fft)
     {
         output.resize(Length);
@@ -48,8 +48,8 @@ namespace analysis
 
     template<typename QNumberType, std::size_t Length>
     OPTIMIZE_FOR_SPEED
-        typename DiscreteConsineTransform<QNumberType, Length>::VectorReal&
-        DiscreteConsineTransform<QNumberType, Length>::Forward(VectorReal& input)
+        typename DiscreteCosineTransform<QNumberType, Length>::VectorReal&
+        DiscreteCosineTransform<QNumberType, Length>::Forward(VectorReal& input)
     {
         for (std::size_t n = 0; n < Length / 2; ++n)
         {
@@ -64,7 +64,7 @@ namespace analysis
         for (std::size_t k = 1; k < Length; ++k)
         {
             float angle = -static_cast<float>(k) * std::numbers::pi_v<float> / (2.0f * Length);
-            float scale = 2.0f / math::Sqrt(static_cast<float>(Length));
+            float scale = math::Sqrt(2.0f / static_cast<float>(Length));
 
             float real = math::ToFloat(fftResult[k].Real());
             float imag = math::ToFloat(fftResult[k].Imaginary());
@@ -76,7 +76,9 @@ namespace analysis
     }
 
     template<typename QNumberType, std::size_t Length>
-    typename DiscreteConsineTransform<QNumberType, Length>::VectorReal& DiscreteConsineTransform<QNumberType, Length>::Inverse(VectorReal& input)
+    OPTIMIZE_FOR_SPEED
+        typename DiscreteCosineTransform<QNumberType, Length>::VectorReal&
+        DiscreteCosineTransform<QNumberType, Length>::Inverse(VectorReal& input)
     {
         float sqrtN = math::Sqrt(static_cast<float>(Length));
 
@@ -84,8 +86,8 @@ namespace analysis
 
         for (std::size_t k = 1; k < Length; ++k)
         {
-            float real = math::ToFloat(input[k]) * sqrtN / 2.0f;
-            float imag = -math::ToFloat(input[Length - k]) * sqrtN / 2.0f;
+            float real = math::ToFloat(input[k]) * sqrtN / math::Sqrt(2.0f);
+            float imag = -math::ToFloat(input[Length - k]) * sqrtN / math::Sqrt(2.0f);
 
             float angle = static_cast<float>(k) * std::numbers::pi_v<float> / (2.0f * static_cast<float>(Length));
             float cosine = math::Cos(angle);
@@ -106,8 +108,8 @@ namespace analysis
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
-    extern template class DiscreteConsineTransform<float, 8>;
-    extern template class DiscreteConsineTransform<math::Q15, 8>;
-    extern template class DiscreteConsineTransform<math::Q31, 8>;
+    extern template class DiscreteCosineTransform<float, 8>;
+    extern template class DiscreteCosineTransform<math::Q15, 8>;
+    extern template class DiscreteCosineTransform<math::Q31, 8>;
 #endif
 }

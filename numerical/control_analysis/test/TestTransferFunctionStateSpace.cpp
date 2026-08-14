@@ -166,3 +166,32 @@ TEST_F(TestTransferFunctionStateSpace, non_monic_round_trip_recovers_monic_tf)
     EXPECT_NEAR(tf2.denominator[1], 3.0f, math::Tolerance<float>());
     EXPECT_NEAR(tf2.denominator[2], 2.0f, math::Tolerance<float>());
 }
+
+TEST_F(TestTransferFunctionStateSpace, round_trip_with_nonzero_feedthrough_recovers_numerator)
+{
+    TF2 improper{};
+    improper.denominator = { 1.0f, 3.0f, 2.0f };
+    improper.numerator = { 2.0f, 7.0f, 9.0f };
+
+    auto tf2{ TFSS::ToTransferFunction(TFSS::ToControllableCanonical(improper)) };
+
+    EXPECT_NEAR(tf2.numerator[0], 2.0f, 1e-4f);
+    EXPECT_NEAR(tf2.numerator[1], 7.0f, 1e-4f);
+    EXPECT_NEAR(tf2.numerator[2], 9.0f, 1e-4f);
+    EXPECT_NEAR(tf2.denominator[0], 1.0f, 1e-4f);
+    EXPECT_NEAR(tf2.denominator[1], 3.0f, 1e-4f);
+    EXPECT_NEAR(tf2.denominator[2], 2.0f, 1e-4f);
+}
+
+TEST_F(TestTransferFunctionStateSpace, dc_gain_correct_for_system_with_feedthrough)
+{
+    TF2 improper{};
+    improper.denominator = { 1.0f, 1.0f, 0.0f };
+    improper.numerator = { 2.0f, 3.0f, 0.0f };
+
+    auto sys{ TFSS::ToControllableCanonical(improper) };
+    auto tf2{ TFSS::ToTransferFunction(sys) };
+
+    EXPECT_NEAR(tf2.numerator[0], 2.0f, 1e-4f);
+    EXPECT_NEAR(tf2.numerator[1], 3.0f, 1e-4f);
+}
