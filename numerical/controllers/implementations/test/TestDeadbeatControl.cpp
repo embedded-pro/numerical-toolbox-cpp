@@ -14,8 +14,6 @@ namespace
     protected:
         static constexpr float kScalarA = 0.9f;
         static constexpr float kScalarB = 0.5f;
-        static constexpr float kScalarGainRef = 2.0f;
-        static constexpr float kScalarGainState = 1.8f;
 
         static constexpr float kGainRefA = 100.0f;
         static constexpr float kGainRefB = -5.0f;
