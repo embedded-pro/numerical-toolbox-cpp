@@ -87,8 +87,8 @@ namespace math
         if (numSamples == 0)
             return false;
         const std::size_t dof = numSamples * Dim;
-        const float fdof = static_cast<float>(dof);
-        const float fsamples = static_cast<float>(numSamples);
+        const auto fdof = static_cast<float>(dof);
+        const auto fsamples = static_cast<float>(numSamples);
         const float lo_raw = (dof <= detail::kMaxChiSquareDim)
                                  ? detail::kChi2Lo95[dof - 1]
                                  : detail::Chi2QuantileApprox(-detail::kZ975, fdof);

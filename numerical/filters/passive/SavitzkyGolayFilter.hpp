@@ -54,7 +54,7 @@ namespace filters::passive
             if (!z.has_value())
                 return std::array<T, Window>{};
 
-            constexpr T scale = static_cast<T>(Factorial(Deriv));
+            constexpr auto scale = static_cast<T>(Factorial(Deriv));
             std::array<T, Window> coeffs{};
             for (std::size_t k = 0; k < Window; ++k)
                 for (std::size_t d = 0; d < Order + 1; ++d)
