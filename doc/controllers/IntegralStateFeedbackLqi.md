@@ -82,6 +82,7 @@ Consider a scalar plant ($n=1$, $m=1$, $p=1$, $T_s = 0.01$):
 - **Sample-time mismatch**: the discrete integral $x_i$ accumulates $T_s$-scaled errors.
   Using the wrong $T_s$ at run time shifts the effective integral gain and breaks zero-error
   convergence.
+- **Slow DARE convergence**: the augmented plant $(A_a, B_a)$ has eigenvalues at exactly 1, and at high sampling rates those eigenvalues approach 1 from many directions, requiring many more DARE iterations than the default 300. Raise the cap via the `MaxIterations` template parameter: `IntegralStateFeedbackLqi<float, StateSize, InputSize, OutputSize, 30000>`.
 
 ## Variants & Generalizations
 
