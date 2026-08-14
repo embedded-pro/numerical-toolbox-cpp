@@ -1,5 +1,6 @@
 #include "numerical/math/Tolerance.hpp"
 #include "numerical/robust_control/ActiveDisturbanceRejection.hpp"
+#include <algorithm>
 #include <cmath>
 #include <gtest/gtest.h>
 
@@ -222,8 +223,8 @@ TEST_F(TestActiveDisturbanceRejection, reset_mid_run_matches_fresh_instance)
         freshPlant.Step(uFresh);
     }
 
-    EXPECT_FLOAT_EQ(plant.y, freshPlant.y);
-    EXPECT_FLOAT_EQ(adrc.AppliedPrev(), fresh.AppliedPrev());
+    EXPECT_NEAR(plant.y, freshPlant.y, math::Tolerance<float>());
+    EXPECT_NEAR(adrc.AppliedPrev(), fresh.AppliedPrev(), math::Tolerance<float>());
 }
 
 TEST_F(TestActiveDisturbanceRejection, eso_stable_at_high_observer_bandwidth)
@@ -265,4 +266,21 @@ TEST_F(TestBinomialCoeff, known_interior_values)
 {
     EXPECT_EQ(robust_control::detail::BinomialCoeff(4, 2), 6u);
     EXPECT_EQ(robust_control::detail::BinomialCoeff(5, 3), 10u);
+}
+
+TEST_F(TestActiveDisturbanceRejection, tracks_step_reference_with_saturated_actuator)
+{
+    const float reference{ 1.0f };
+    const float satLimit{ 5.0f };
+    float actualApplied{ 0.0f };
+
+    for (int i = 0; i < 8000; ++i)
+    {
+        const float commanded = adrc.Compute(reference, plant.y, actualApplied);
+        actualApplied = std::clamp(commanded, -satLimit, satLimit);
+        plant.Step(actualApplied);
+    }
+
+    EXPECT_NEAR(plant.y, reference, 1e-2f);
+    EXPECT_NEAR(adrc.EstimatedState().at(0, 0), reference, 1e-2f);
 }

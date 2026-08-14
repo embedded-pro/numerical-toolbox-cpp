@@ -74,13 +74,15 @@ At sample $k$ with state $\hat{x} = [\hat{y}, \hat{\dot{y}}, \hat{f}]$, measurem
 
 1. Output error: $e = y[k] - \hat{y}$.
 2. Inject correction into all three states: $\hat{x}_i \mathrel{+}= T_s \beta_i e$.
-3. Chain integration: $\hat{y} \mathrel{+}= T_s \hat{\dot{y}}$; then $\hat{\dot{y}} \mathrel{+}= T_s b_0 u[k-1]$.
+3. Chain integration: $\hat{y} \mathrel{+}= T_s \hat{\dot{y}}$; then $\hat{\dot{y}} \mathrel{+}= T_s b_0 u_\text{applied}[k-1]$, where $u_\text{applied}$ is the value actually delivered by the actuator. When the actuator does not saturate this equals the commanded $u[k-1]$; when it does, pass the clipped value via the three-argument `Compute(reference, measuredOutput, actualApplied)` overload.
 4. PD law on integrator chain: $u_0 = k_p(r - \hat{y}) - k_d \hat{\dot{y}}$.
 5. Disturbance cancellation: $u = (u_0 - \hat{f}) / b_0$.
 
 After a transient of roughly $5/\omega_o \approx 0.17$ s the observer converges; the output tracks $r$ with bandwidth $\omega_c$.
 
 ## Pitfalls & Edge Cases
+
+**Actuator saturation (anti-windup).** When the downstream actuator clips the commanded value, the ESO integrates the wrong input and its disturbance estimate drifts, causing significant overshoot. Close the anti-windup loop by feeding the actually-applied signal back: `u_applied = clamp(Compute(r, y, u_applied_prev), lo, hi)`, then pass `u_applied` as the third argument on the next call. The two-argument `Compute(reference, measuredOutput)` is a convenience overload that assumes no saturation (commanded = applied) and is equivalent to passing the last commanded value.
 
 **ESO peaking.** Large initial estimation errors drive high-magnitude corrections, temporarily saturating the actuator. Mitigation: initialize the observer near the first measurement, or schedule $\omega_o$ upward from a low value during the first few samples.
 
