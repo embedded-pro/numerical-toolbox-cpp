@@ -88,7 +88,7 @@ After a transient of roughly $5/\omega_o \approx 0.17$ s the observer converges;
 
 **$b_0$ mismatch.** The ESO is robust to moderate mismatch (factor of 2–3), but large errors shrink the stability margin. If $b_0 \gg b_\text{true}$ the effective loop gain drops and response slows; if $b_0 \ll b_\text{true}$ the loop gain rises and may oscillate.
 
-**Euler discretization accuracy.** The forward-Euler ESO introduces phase lag proportional to $\omega_o T_s$. Keeping $\omega_o T_s \ll 1$ (e.g., $\omega_o T_s \leq 0.1$) maintains accuracy; at higher $\omega_o T_s$ a ZOH or bilinear discretization is preferred.
+**Euler discretization stability and accuracy.** The forward-Euler ESO is unconditionally unstable once $\omega_o T_s$ exceeds the stability boundary of the $(n+1)$-th order observer polynomial. For a first-order plant ($n=1$) this boundary is $\omega_o T_s \approx 0.83$; higher orders have progressively tighter boundaries (approximately $0.54$ for $n=2$, $0.40$ for $n=3$). The constructor enforces $\omega_o T_s < 0.5/n$ as a conservative order-aware hard precondition (aborts if violated). Keeping $\omega_o T_s \leq 0.1$ is further recommended for accuracy; beyond that a ZOH or bilinear discretization is preferred.
 
 **Integer overflow in gain computation.** Binomial coefficients are computed with integer arithmetic at compile time. For large orders or very high bandwidths the intermediate product may exceed `std::size_t` before the division; keep $n \leq 5$ in practice.
 

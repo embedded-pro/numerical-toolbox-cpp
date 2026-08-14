@@ -60,6 +60,9 @@ namespace
         robust_control::ActiveDisturbanceRejectionControl<float, 1> adrc{ kWo1, kWc1, kB0, kTs };
         FirstOrderPlant plant{ kB0 };
     };
+
+    class TestBinomialCoeff : public ::testing::Test
+    {};
 }
 
 TEST_F(TestActiveDisturbanceRejection, bandwidth_gain_mapping)
@@ -223,22 +226,42 @@ TEST_F(TestActiveDisturbanceRejection, reset_mid_run_matches_fresh_instance)
     EXPECT_FLOAT_EQ(adrc.AppliedPrev(), fresh.AppliedPrev());
 }
 
-TEST(TestBinomialCoeff, k_zero_returns_one)
+TEST_F(TestActiveDisturbanceRejection, eso_stable_at_high_observer_bandwidth)
+{
+    static constexpr float kWoHigh{ 200.0f };
+    robust_control::ActiveDisturbanceRejectionControl<float, 2> controller{ kWoHigh, kWc, kB0, kTs };
+    SecondOrderPlant highBwPlant{ kB0 };
+
+    for (int i = 0; i < 1000; ++i)
+        highBwPlant.Step(controller.Compute(1.0f, highBwPlant.y));
+
+    EXPECT_FALSE(std::isnan(highBwPlant.y));
+    EXPECT_FALSE(std::isinf(highBwPlant.y));
+}
+
+TEST_F(TestActiveDisturbanceRejection, constructor_aborts_on_unstable_wo_ts)
+{
+    EXPECT_DEATH_IF_SUPPORTED(
+        (robust_control::ActiveDisturbanceRejectionControl<float, 2>{ 300.0f, kWc, kB0, kTs }),
+        "");
+}
+
+TEST_F(TestBinomialCoeff, k_zero_returns_one)
 {
     EXPECT_EQ(robust_control::detail::BinomialCoeff(5, 0), 1u);
 }
 
-TEST(TestBinomialCoeff, k_equals_n_returns_one)
+TEST_F(TestBinomialCoeff, k_equals_n_returns_one)
 {
     EXPECT_EQ(robust_control::detail::BinomialCoeff(4, 4), 1u);
 }
 
-TEST(TestBinomialCoeff, k_greater_than_n_returns_zero)
+TEST_F(TestBinomialCoeff, k_greater_than_n_returns_zero)
 {
     EXPECT_EQ(robust_control::detail::BinomialCoeff(3, 5), 0u);
 }
 
-TEST(TestBinomialCoeff, known_interior_values)
+TEST_F(TestBinomialCoeff, known_interior_values)
 {
     EXPECT_EQ(robust_control::detail::BinomialCoeff(4, 2), 6u);
     EXPECT_EQ(robust_control::detail::BinomialCoeff(5, 3), 10u);
