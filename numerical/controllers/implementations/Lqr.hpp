@@ -48,7 +48,12 @@ namespace controllers
     template<typename T, std::size_t StateSize, std::size_t InputSize>
     Lqr<T, StateSize, InputSize>::Lqr(
         const StateMatrix& A, const InputMatrix& B, const StateMatrix& Q, const InputWeightMatrix& R)
-        : riccatiSolution([&A, &B, &Q, &R]{ auto r = solvers::DiscreteAlgebraicRiccatiEquation<T, StateSize, InputSize>{}.Solve(A, B, Q, R); really_assert(r.converged); return r.value; }())
+        : riccatiSolution([&A, &B, &Q, &R]
+              {
+                  auto r = solvers::DiscreteAlgebraicRiccatiEquation<T, StateSize, InputSize>{}.Solve(A, B, Q, R);
+                  really_assert(r.converged);
+                  return r.value;
+              }())
         , riccatiSolutionAvailable(true)
     {
         ComputeGain(A, B, riccatiSolution, R);
