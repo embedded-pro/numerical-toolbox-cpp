@@ -5,6 +5,13 @@
 
 namespace math
 {
+    template<typename V>
+    struct Result
+    {
+        V value{};
+        bool valid{ false };
+    };
+
     template<typename T, size_t Rows, size_t Cols>
     [[nodiscard]] constexpr T Mean(const Matrix<T, Rows, Cols>& data)
     {
@@ -33,7 +40,9 @@ namespace math
             sum_sq += diff * diff;
         }
 
-        return T{ sum_sq / static_cast<float>(sample ? data.size - 1 : data.size) };
+        const float divisor = sample ? static_cast<float>(data.size) - 1.0f : static_cast<float>(data.size);
+        really_assert(divisor > 0.0f);
+        return T{ sum_sq / divisor };
     }
 
     template<typename T, size_t Rows, size_t Cols>
@@ -85,7 +94,7 @@ namespace math
     }
 
     template<typename T, size_t Size>
-    [[nodiscard]] constexpr T RSquaredScore(const Vector<T, Size>& actual, const Vector<T, Size>& predicted)
+    [[nodiscard]] constexpr Result<T> RSquaredScore(const Vector<T, Size>& actual, const Vector<T, Size>& predicted)
     {
         static_assert(detail::is_supported_type_v<T>,
             "Statistical functions only support float or QNumber types");
@@ -104,11 +113,13 @@ namespace math
             residual_ss += diff_pred * diff_pred;
         }
 
-        return T{ 1.0f - (residual_ss / total_ss) };
+        if (total_ss == 0.0f)
+            return { T{}, false };
+        return { T{ 1.0f - (residual_ss / total_ss) }, true };
     }
 
     template<typename T, size_t Size>
-    [[nodiscard]] constexpr Matrix<T, Size, 1> AutoCorrelation(const Vector<T, Size>& data, size_t maxLag)
+    [[nodiscard]] constexpr Result<Matrix<T, Size, 1>> AutoCorrelation(const Vector<T, Size>& data, size_t maxLag)
     {
         static_assert(detail::is_supported_type_v<T>,
             "Statistical functions only support float or QNumber types");
@@ -124,6 +135,9 @@ namespace math
             sum_sq += diff * diff;
         }
 
+        if (sum_sq == 0.0f)
+            return { Matrix<T, Size, 1>{}, false };
+
         Matrix<T, Size, 1> result;
 
         for (size_t lag = 0; lag <= maxLag; ++lag)
@@ -133,12 +147,17 @@ namespace math
                 sum += (math::ToFloat(data.at(t, 0)) - mean_val) * (math::ToFloat(data.at(t + lag, 0)) - mean_val);
 
             if (lag == 0)
-                result.at(lag, 0) = T{ 0.9999f };
+            {
+                if constexpr (std::is_floating_point_v<T>)
+                    result.at(lag, 0) = T{ 1 };
+                else
+                    result.at(lag, 0) = T{ 0.9999f };
+            }
             else
                 result.at(lag, 0) = T{ sum / ((sum_sq / static_cast<float>(Size)) * static_cast<float>(Size - lag)) };
         }
 
-        return result;
+        return { result, true };
     }
 
     template<typename T, size_t Rows, size_t Cols>

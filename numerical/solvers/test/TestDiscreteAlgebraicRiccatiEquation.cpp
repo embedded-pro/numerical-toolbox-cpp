@@ -44,10 +44,11 @@ TEST_F(TestDiscreteAlgebraicRiccatiEquation, scalar_unit_system_matches_golden_r
     math::SquareMatrix<float, 1> Q{ { 1.0f } };
     math::SquareMatrix<float, 1> R{ { 1.0f } };
 
-    auto P = scalarSolver.Solve(A, B, Q, R);
+    auto result = scalarSolver.Solve(A, B, Q, R);
 
+    EXPECT_TRUE(result.converged);
     constexpr float expected = 1.6180339887f;
-    EXPECT_NEAR(P.at(0, 0), expected, 1e-3f);
+    EXPECT_NEAR(result.value.at(0, 0), expected, 1e-3f);
 }
 
 TEST_F(TestDiscreteAlgebraicRiccatiEquation, scalar_stable_system_matches_closed_form_quadratic_root)
@@ -57,10 +58,11 @@ TEST_F(TestDiscreteAlgebraicRiccatiEquation, scalar_stable_system_matches_closed
     math::SquareMatrix<float, 1> Q{ { 1.0f } };
     math::SquareMatrix<float, 1> R{ { 1.0f } };
 
-    auto P = scalarSolver.Solve(A, B, Q, R);
+    auto result = scalarSolver.Solve(A, B, Q, R);
 
+    EXPECT_TRUE(result.converged);
     constexpr float expected = 1.483901f;
-    EXPECT_NEAR(P.at(0, 0), expected, 1e-3f);
+    EXPECT_NEAR(result.value.at(0, 0), expected, 1e-3f);
 }
 
 TEST_F(TestDiscreteAlgebraicRiccatiEquation, zero_dynamics_converges_immediately_to_Q)
@@ -70,9 +72,10 @@ TEST_F(TestDiscreteAlgebraicRiccatiEquation, zero_dynamics_converges_immediately
     math::SquareMatrix<float, 1> Q{ { 2.0f } };
     math::SquareMatrix<float, 1> R{ { 1.0f } };
 
-    auto P = scalarSolver.Solve(A, B, Q, R);
+    auto result = scalarSolver.Solve(A, B, Q, R);
 
-    EXPECT_NEAR(P.at(0, 0), 2.0f, math::Tolerance<float>());
+    EXPECT_TRUE(result.converged);
+    EXPECT_NEAR(result.value.at(0, 0), 2.0f, math::Tolerance<float>());
 }
 
 TEST_F(TestDiscreteAlgebraicRiccatiEquation, two_by_one_solution_satisfies_dare_residual)
@@ -88,9 +91,10 @@ TEST_F(TestDiscreteAlgebraicRiccatiEquation, two_by_one_solution_satisfies_dare_
     auto Q = math::SquareMatrix<float, 2>::Identity();
     math::SquareMatrix<float, 1> R{ { 1.0f } };
 
-    auto P = twoByOneSolver.Solve(A, B, Q, R);
+    auto result = twoByOneSolver.Solve(A, B, Q, R);
 
-    float residual = DareResidual2x1(P, A, B, Q, R);
+    EXPECT_TRUE(result.converged);
+    float residual = DareResidual2x1(result.value, A, B, Q, R);
     EXPECT_NEAR(residual, 0.0f, 1e-2f);
 }
 
@@ -107,9 +111,10 @@ TEST_F(TestDiscreteAlgebraicRiccatiEquation, two_by_one_solution_is_symmetric)
     auto Q = math::SquareMatrix<float, 2>::Identity();
     math::SquareMatrix<float, 1> R{ { 1.0f } };
 
-    auto P = twoByOneSolver.Solve(A, B, Q, R);
+    auto result = twoByOneSolver.Solve(A, B, Q, R);
 
-    EXPECT_NEAR(P.at(0, 1), P.at(1, 0), math::Tolerance<float>());
+    EXPECT_TRUE(result.converged);
+    EXPECT_NEAR(result.value.at(0, 1), result.value.at(1, 0), math::Tolerance<float>());
 }
 
 TEST_F(TestDiscreteAlgebraicRiccatiEquation, two_by_one_solution_is_positive_definite)
@@ -125,10 +130,11 @@ TEST_F(TestDiscreteAlgebraicRiccatiEquation, two_by_one_solution_is_positive_def
     auto Q = math::SquareMatrix<float, 2>::Identity();
     math::SquareMatrix<float, 1> R{ { 1.0f } };
 
-    auto P = twoByOneSolver.Solve(A, B, Q, R);
+    auto result = twoByOneSolver.Solve(A, B, Q, R);
 
-    float det = P.at(0, 0) * P.at(1, 1) - P.at(0, 1) * P.at(1, 0);
-    EXPECT_GT(P.at(0, 0), 0.0f);
+    EXPECT_TRUE(result.converged);
+    float det = result.value.at(0, 0) * result.value.at(1, 1) - result.value.at(0, 1) * result.value.at(1, 0);
+    EXPECT_GT(result.value.at(0, 0), 0.0f);
     EXPECT_GT(det, 0.0f);
 }
 
@@ -145,10 +151,24 @@ TEST_F(TestDiscreteAlgebraicRiccatiEquation, two_by_two_full_input_solution_is_s
     auto Q = math::SquareMatrix<float, 2>::Identity();
     auto R = math::SquareMatrix<float, 2>::Identity();
 
-    auto P = twoByTwoSolver.Solve(A, B, Q, R);
+    auto result = twoByTwoSolver.Solve(A, B, Q, R);
 
-    float det = P.at(0, 0) * P.at(1, 1) - P.at(0, 1) * P.at(1, 0);
-    EXPECT_NEAR(P.at(0, 1), P.at(1, 0), math::Tolerance<float>());
-    EXPECT_GT(P.at(0, 0), 0.0f);
+    EXPECT_TRUE(result.converged);
+    float det = result.value.at(0, 0) * result.value.at(1, 1) - result.value.at(0, 1) * result.value.at(1, 0);
+    EXPECT_NEAR(result.value.at(0, 1), result.value.at(1, 0), math::Tolerance<float>());
+    EXPECT_GT(result.value.at(0, 0), 0.0f);
     EXPECT_GT(det, 0.0f);
+}
+
+TEST_F(TestDiscreteAlgebraicRiccatiEquation, solve_reports_not_converged_for_single_iteration_unstable_system)
+{
+    solvers::DiscreteAlgebraicRiccatiEquation<float, 2, 1, 1> singleIterSolver;
+    math::SquareMatrix<float, 2> A{ { 10.0f, 0.0f }, { 0.0f, 10.0f } };
+    math::Matrix<float, 2, 1> B{ { 1.0f }, { 1.0f } };
+    auto Q = math::SquareMatrix<float, 2>::Identity();
+    math::SquareMatrix<float, 1> R{ { 1.0f } };
+
+    auto result = singleIterSolver.Solve(A, B, Q, R);
+
+    EXPECT_FALSE(result.converged);
 }

@@ -41,13 +41,13 @@ Dormand and Prince (1980) selected a 7-stage Butcher tableau whose 5th-order pro
 The **5th-order** solution used to advance the state:
 
 $$
-y_5 = x_n + h\left(\frac{35}{384}k_1 + \frac{500}{1113}k_3 - \frac{125}{192}k_4 + \frac{2187}{6784}k_5 + \frac{11}{84}k_6\right)
+y_5 = x_n + h\left(\frac{35}{384}k_1 + \frac{500}{1113}k_3 + \frac{125}{192}k_4 - \frac{2187}{6784}k_5 + \frac{11}{84}k_6\right)
 $$
 
 The **4th-order** embedded solution used only for error estimation:
 
 $$
-y_4 = x_n + h\left(\frac{5179}{57600}k_1 + \frac{7571}{16695}k_3 - \frac{393}{640}k_4 + \frac{92097}{339200}k_5 + \frac{187}{2100}k_6 + \frac{1}{40}k_7\right)
+y_4 = x_n + h\left(\frac{5179}{57600}k_1 + \frac{7571}{16695}k_3 + \frac{393}{640}k_4 - \frac{92097}{339200}k_5 + \frac{187}{2100}k_6 + \frac{1}{40}k_7\right)
 $$
 
 ### Error Norm and Step-Size Control

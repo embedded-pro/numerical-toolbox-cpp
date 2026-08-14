@@ -6,6 +6,7 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
+#include "numerical/solvers/GaussianElimination.hpp"
 #include <cstddef>
 #include <type_traits>
 
@@ -66,7 +67,7 @@ namespace nonlinear_control
         const StateVector v{ ydDdot + kd * eDot + kp * e };
         const auto B{ model.DecouplingMatrixAt(x) };
         const StateVector a{ model.DriftTerm(x) };
-        return B * v + a;
+        return solvers::SolveSystem<T, Dim, 1>(B, v - a);
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD

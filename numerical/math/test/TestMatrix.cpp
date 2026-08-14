@@ -204,6 +204,18 @@ TYPED_TEST(MatrixTest, AdditionIsCommutative)
     EXPECT_TRUE(AreMatricesNear(m1 + m2, m2 + m1));
 }
 
+TYPED_TEST(MatrixTest, PartialInitializerListZeroFillsRemainder)
+{
+    typename TestFixture::MatrixType m{
+        { this->MakeValue(0.5f) }
+    };
+
+    EXPECT_NEAR(math::ToFloat(m.at(0, 0)), 0.5f, math::Tolerance<float>());
+    EXPECT_NEAR(math::ToFloat(m.at(0, 1)), 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(math::ToFloat(m.at(1, 0)), 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(math::ToFloat(m.at(1, 1)), 0.0f, math::Tolerance<float>());
+}
+
 TYPED_TEST(MatrixTest, MultiplicationByZeroMatrixYieldsZero)
 {
     auto m = this->MakeMatrix(0.5f, 0.3f, 0.2f, 0.4f);

@@ -122,7 +122,18 @@ TYPED_TEST(StatisticsTest, RSquaredScoreOfNearPerfectPredictions)
 
     auto result = math::RSquaredScore(actual, predicted);
 
-    EXPECT_NEAR(math::ToFloat(result), 0.8f, math::Tolerance<float>());
+    EXPECT_TRUE(result.valid);
+    EXPECT_NEAR(math::ToFloat(result.value), 0.8f, math::Tolerance<float>());
+}
+
+TYPED_TEST(StatisticsTest, RSquaredScoreConstantTargetIsInvalid)
+{
+    auto actual = this->MakeVector(0.5f, 0.5f, 0.5f, 0.5f);
+    auto predicted = this->MakeVector(0.3f, 0.6f, 0.4f, 0.7f);
+
+    auto result = math::RSquaredScore(actual, predicted);
+
+    EXPECT_FALSE(result.valid);
 }
 
 TYPED_TEST(StatisticsTest, AutoCorrelationLagZeroIsUnity)
@@ -131,7 +142,9 @@ TYPED_TEST(StatisticsTest, AutoCorrelationLagZeroIsUnity)
 
     auto result = math::AutoCorrelation(data, 2);
 
-    EXPECT_NEAR(math::ToFloat(result.at(0, 0)), 0.9999f, math::Tolerance<float>());
+    EXPECT_TRUE(result.valid);
+    constexpr float expectedLagZero = std::is_floating_point_v<TypeParam> ? 1.0f : 0.9999f;
+    EXPECT_NEAR(math::ToFloat(result.value.at(0, 0)), expectedLagZero, math::Tolerance<float>());
 }
 
 TYPED_TEST(StatisticsTest, AutoCorrelationLagOneValue)
@@ -140,7 +153,8 @@ TYPED_TEST(StatisticsTest, AutoCorrelationLagOneValue)
 
     auto result = math::AutoCorrelation(data, 2);
 
-    EXPECT_NEAR(math::ToFloat(result.at(1, 0)), 0.3333f, math::Tolerance<float>());
+    EXPECT_TRUE(result.valid);
+    EXPECT_NEAR(math::ToFloat(result.value.at(1, 0)), 0.3333f, math::Tolerance<float>());
 }
 
 TYPED_TEST(StatisticsTest, AutoCorrelationLagTwoValue)
@@ -149,7 +163,26 @@ TYPED_TEST(StatisticsTest, AutoCorrelationLagTwoValue)
 
     auto result = math::AutoCorrelation(data, 2);
 
-    EXPECT_NEAR(math::ToFloat(result.at(2, 0)), -0.6f, math::Tolerance<float>());
+    EXPECT_TRUE(result.valid);
+    EXPECT_NEAR(math::ToFloat(result.value.at(2, 0)), -0.6f, math::Tolerance<float>());
+}
+
+TYPED_TEST(StatisticsTest, AutoCorrelationConstantDataIsInvalid)
+{
+    auto data = this->MakeVector(0.3f, 0.3f, 0.3f, 0.3f);
+
+    auto result = math::AutoCorrelation(data, 2);
+
+    EXPECT_FALSE(result.valid);
+}
+
+TYPED_TEST(StatisticsTest, PopulationVarianceOfSingleElementIsZero)
+{
+    math::Vector<TypeParam, 1> single{ { TestFixture::MakeValue(0.5f) } };
+
+    auto result = math::Variance(single, false);
+
+    EXPECT_NEAR(math::ToFloat(result), 0.0f, math::Tolerance<float>());
 }
 
 TEST_F(StatisticsFloatTest, ZScoreNormalizesSymmetricData)

@@ -29,12 +29,17 @@ namespace
 
         [[nodiscard]] DecouplingMatrix DecouplingMatrixAt(const StateVector& q) const override
         {
-            return InertiaMatrix(q);
+            const auto M = InertiaMatrix(q);
+            const T det = M.at(0, 0) * M.at(1, 1) - M.at(0, 1) * M.at(1, 0);
+            return DecouplingMatrix{
+                M.at(1, 1) / det, -M.at(0, 1) / det,
+                -M.at(1, 0) / det, M.at(0, 0) / det
+            };
         }
 
         [[nodiscard]] StateVector DriftTerm(const StateVector& q) const override
         {
-            return GravityTerm(q);
+            return SolveSpd(InertiaMatrix(q), GravityTerm(q) * T{ -1 });
         }
 
         void Step(const StateVector& u, T dt)
@@ -120,8 +125,8 @@ TEST_F(TestFeedbackLinearization, adds_drift_compensation)
 
     const auto u{ controller.ComputeInput(zero, zero, zero, zero, zero) };
 
-    EXPECT_NEAR(u.at(0, 0), drift.at(0, 0), math::Tolerance<float>());
-    EXPECT_NEAR(u.at(1, 0), drift.at(1, 0), math::Tolerance<float>());
+    EXPECT_NEAR(u.at(0, 0), -drift.at(0, 0), math::Tolerance<float>());
+    EXPECT_NEAR(u.at(1, 0), -drift.at(1, 0), math::Tolerance<float>());
 }
 
 TEST_F(TestFeedbackLinearization, pd_law_drives_position_error)
@@ -171,8 +176,8 @@ TEST_F(TestFeedbackLinearization, decoupling_matrix_scales_virtual_input)
 
     const auto u{ controller.ComputeInput(zero, zero, zero, zero, v) };
 
-    EXPECT_NEAR(u.at(0, 0), 2.0f, math::Tolerance<float>());
-    EXPECT_NEAR(u.at(1, 0), 3.0f, math::Tolerance<float>());
+    EXPECT_NEAR(u.at(0, 0), 0.5f, math::Tolerance<float>());
+    EXPECT_NEAR(u.at(1, 0), 1.0f / 3.0f, math::Tolerance<float>());
 }
 
 TEST_F(TestFeedbackLinearization, closed_loop_error_decays)
@@ -221,7 +226,12 @@ TEST_F(TestFeedbackLinearization, superposition_all_terms_active)
     const math::Vector<float, 2> e{ yd - x };
     const math::Vector<float, 2> eDot{ ydDot - xDot };
     const math::Vector<float, 2> v{ ydDdot + kd * eDot + kp * e };
-    const math::Vector<float, 2> expected{ B * v + drift };
+    const math::Vector<float, 2> vMinusDrift{ v - drift };
+    const float det = B.at(0, 0) * B.at(1, 1) - B.at(0, 1) * B.at(1, 0);
+    const math::Vector<float, 2> expected{
+        { (B.at(1, 1) * vMinusDrift.at(0, 0) - B.at(0, 1) * vMinusDrift.at(1, 0)) / det },
+        { (B.at(0, 0) * vMinusDrift.at(1, 0) - B.at(1, 0) * vMinusDrift.at(0, 0)) / det }
+    };
 
     EXPECT_NEAR(u.at(0, 0), expected.at(0, 0), math::Tolerance<float>());
     EXPECT_NEAR(u.at(1, 0), expected.at(1, 0), math::Tolerance<float>());
