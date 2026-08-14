@@ -11,6 +11,8 @@ namespace estimators
             "OfflineEstimator only supports float or QNumber types");
 
     public:
+        virtual ~OfflineEstimator() = default;
+
         using CoefficientsMatrix = math::Matrix<T, Features + 1, 1>;
         using DesignMatrix = math::Matrix<T, Features + 1, Features + 1>;
         using InputMatrix = math::Matrix<T, Features, 1>;
@@ -27,6 +29,8 @@ namespace estimators
             "OnlineEstimator only supports float or QNumber types");
 
     public:
+        virtual ~OnlineEstimator() = default;
+
         using CoefficientsMatrix = math::Matrix<T, Features, 1>;
         using DesignMatrix = math::Matrix<T, Features, Features>;
         using InputMatrix = math::Matrix<T, Features, 1>;

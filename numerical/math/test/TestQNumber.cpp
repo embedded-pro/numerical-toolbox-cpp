@@ -15,6 +15,9 @@ namespace
 
     using QNumberTypes = ::testing::Types<math::Q31, math::Q15>;
     TYPED_TEST_SUITE(QNumberTest, QNumberTypes);
+
+    class QNumberUtilTest : public ::testing::Test
+    {};
 }
 
 TYPED_TEST(QNumberTest, DefaultConstructorIsZero)
@@ -324,27 +327,27 @@ TYPED_TEST(QNumberTest, ToFloatFreeFunction_QNumber)
     EXPECT_NEAR(math::ToFloat(a), 0.25f, math::Tolerance<float>());
 }
 
-TEST(QNumberUtilTest, ToFloatFreeFunction_Float)
+TEST_F(QNumberUtilTest, ToFloatFreeFunction_Float)
 {
     EXPECT_FLOAT_EQ(math::ToFloat(0.5f), 0.5f);
     EXPECT_FLOAT_EQ(math::ToFloat(-0.3f), -0.3f);
 }
 
-TEST(QNumberUtilTest, MinMaxLowest_Float)
+TEST_F(QNumberUtilTest, MinMaxLowest_Float)
 {
     EXPECT_GT(math::Min<float>(), 0.0f);
     EXPECT_GT(math::Max<float>(), 1.0f);
     EXPECT_LT(math::Lowest<float>(), 0.0f);
 }
 
-TEST(QNumberUtilTest, MinMaxLowest_Q31)
+TEST_F(QNumberUtilTest, MinMaxLowest_Q31)
 {
     EXPECT_NEAR(math::Min<math::Q31>(), -0.9999f, 1e-3f);
     EXPECT_NEAR(math::Max<math::Q31>(), 0.9999f, 1e-3f);
     EXPECT_NEAR(math::Lowest<math::Q31>(), -0.9999f, 1e-3f);
 }
 
-TEST(QNumberUtilTest, MinMaxLowest_Q15)
+TEST_F(QNumberUtilTest, MinMaxLowest_Q15)
 {
     EXPECT_NEAR(math::Min<math::Q15>(), -0.9999f, 1e-3f);
     EXPECT_NEAR(math::Max<math::Q15>(), 0.9999f, 1e-3f);

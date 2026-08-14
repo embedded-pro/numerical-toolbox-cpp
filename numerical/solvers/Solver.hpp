@@ -13,6 +13,8 @@ namespace solvers
             "Solver dimensions must be positive");
 
     public:
+        virtual ~Solver() = default;
+
         using SolutionVector = math::Vector<T, N>;
         using InputMatrix = math::Matrix<T, N, N>;
         using InputVector = math::Vector<T, N>;

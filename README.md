@@ -27,7 +27,7 @@ Refer to the documentation to quickly integrate and utilize the library's signal
 | [Solvers](doc/solvers/README.md)                                   | Gaussian Elimination, Levinson-Durbin, Durand-Kerner, Cholesky, DARE, Runge-Kutta ODE Integrators (RK4 + Dormand-Prince), Spectral Radius & Discrete Stability Margin, QR Decomposition (Householder / Givens), LU Decomposition with Partial Pivoting, Singular Value Decomposition (Golub-Kahan) |
 | [Nonlinear Control](doc/nonlinear_control/README.md)               | Feedback Linearization, Backstepping Control, Model Reference Adaptive Control (MRAC) |
 | [Robust Control](doc/robust_control/README.md)                     | Active Disturbance Rejection Control (ADRC + ESO), Sliding Mode Control (SMC), Disturbance Observer (DOB), H∞ State-Feedback Control |
-| [Performance Optimization](doc/performance-optimization/README.md) | Compiler optimizations, SIMD                                         |
+| [Performance Optimization](doc/performance-optimization/README.md) | Compiler optimizations                                               |
 
 Each category page lists its algorithms with a brief description and links to the detailed documentation.
 
