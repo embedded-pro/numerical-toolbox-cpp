@@ -19,8 +19,8 @@ namespace controllers
     {
         static_assert(std::is_floating_point_v<T>, "DeadbeatControl supports floating-point types");
         static_assert(Steps > 0, "Steps must be positive");
-        static_assert(StateSize >= Steps * InputSize,
-            "StateSize must be >= Steps * InputSize for SVD decomposition");
+        static_assert(StateSize <= Steps * InputSize,
+            "StateSize must be <= Steps * InputSize for full row rank reachability matrix");
 
         using Base = StateFeedbackController<T, StateSize, InputSize>;
         static constexpr std::size_t ReachSize = Steps * InputSize;
