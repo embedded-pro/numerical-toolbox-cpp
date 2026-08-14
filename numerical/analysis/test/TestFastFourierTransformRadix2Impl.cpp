@@ -99,13 +99,32 @@ namespace
         typename VectorReal::template WithMaxSize<Length> timeDomain;
         typename VectorComplex::template WithMaxSize<Length> frequencyDomain;
     };
+
+    class MockTwiddleFactorsDegenerate
+        : public analysis::TwiddleFactors<float, 0>
+    {
+    public:
+        math::Complex<float>& operator[](std::size_t) override { return dummy; }
+
+    private:
+        math::Complex<float> dummy{};
+    };
+
+    class TestFastFourierTransformCoverage : public ::testing::Test
+    {};
+
+    class TestFastFourierTransformSingleSample : public ::testing::Test
+    {
+    protected:
+        MockTwiddleFactorsDegenerate tw;
+        analysis::FastFourierTransformRadix2Impl<float, 1> fft{ tw };
+    };
 }
 
 TYPED_TEST(TestFastFourierTransform, log2_runtime_both_branches)
 {
-    auto& fftInst = *this->fft;
-    EXPECT_EQ(fftInst.Log2(1), 0u);
-    EXPECT_EQ(fftInst.Log2(8), 3u);
+    EXPECT_EQ(analysis::FastFourierTransform<TypeParam>::Log2(1), 0u);
+    EXPECT_EQ(analysis::FastFourierTransform<TypeParam>::Log2(8), 3u);
 }
 
 TYPED_TEST(TestFastFourierTransform, zero_input_produces_zero_output)
@@ -301,4 +320,38 @@ TEST_F(TestFastFourierTransformFloat, all_bins_match_direct_dft)
         EXPECT_NEAR(result[k].Real(), refReal, 1e-3f);
         EXPECT_NEAR(result[k].Imaginary(), refImag, 1e-3f);
     }
+}
+
+TEST_F(TestFastFourierTransformCoverage, twiddle_factors_virtual_destructor)
+{
+    MockTwiddleFactors<float> tf;
+    (void)tf;
+}
+
+TEST_F(TestFastFourierTransformCoverage, fft_base_virtual_destructor)
+{
+    MockTwiddleFactors<float> tw;
+    analysis::FastFourierTransformRadix2Impl<float, 8> fft{ tw };
+    (void)fft;
+}
+
+TEST_F(TestFastFourierTransformCoverage, log2_static_one_returns_zero)
+{
+    EXPECT_EQ(analysis::FastFourierTransform<float>::Log2(1), 0u);
+}
+
+TEST_F(TestFastFourierTransformCoverage, log2_static_eight_returns_three)
+{
+    EXPECT_EQ(analysis::FastFourierTransform<float>::Log2(8), 3u);
+}
+
+TEST_F(TestFastFourierTransformSingleSample, forward_single_sample_is_identity)
+{
+    typename analysis::FastFourierTransform<float>::VectorReal::template WithMaxSize<1> input;
+    input.push_back(0.5f);
+
+    auto& result = fft.Forward(input);
+
+    EXPECT_NEAR(result[0].Real(), 0.5f, 1e-5f);
+    EXPECT_NEAR(result[0].Imaginary(), 0.0f, 1e-5f);
 }
