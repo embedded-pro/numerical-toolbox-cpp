@@ -15,6 +15,14 @@ namespace filters::passive
 {
     namespace detail
     {
+        constexpr std::size_t Factorial(std::size_t n)
+        {
+            std::size_t result = 1;
+            for (std::size_t i = 2; i <= n; ++i)
+                result *= i;
+            return result;
+        }
+
         template<typename T, std::size_t Window, std::size_t Order>
         constexpr math::Matrix<T, Window, Order + 1> BuildVandermonde()
         {
@@ -43,11 +51,17 @@ namespace filters::passive
             eDeriv.at(Deriv, 0) = T{ 1 };
 
             auto z = math::CholeskyDecomposition<T, Order + 1>::Solve(AtA, eDeriv);
+            if (!z.has_value())
+                return std::array<T, Window>{};
 
+            constexpr auto scale = static_cast<T>(Factorial(Deriv));
             std::array<T, Window> coeffs{};
             for (std::size_t k = 0; k < Window; ++k)
                 for (std::size_t d = 0; d < Order + 1; ++d)
                     coeffs[k] += A.at(k, d) * z->at(d, 0);
+
+            for (std::size_t k = 0; k < Window; ++k)
+                coeffs[k] *= scale;
 
             return coeffs;
         }
