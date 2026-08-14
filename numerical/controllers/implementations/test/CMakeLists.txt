@@ -12,6 +12,7 @@ numerical_add_qemu_test(numerical.controllers_test)
 
 target_sources(numerical.controllers_test PRIVATE
     TestBangBangHysteresis.cpp
+    TestDeadbeatControl.cpp
     TestFeedforward2Dof.cpp
     TestGainScheduledController.cpp
     TestIntegralStateFeedbackLqi.cpp

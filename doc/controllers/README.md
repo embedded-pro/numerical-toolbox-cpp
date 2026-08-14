@@ -7,6 +7,7 @@ Feedback control algorithms for regulating dynamic systems in real time.
 | Algorithm                | Description                                                                             |
 |--------------------------|-----------------------------------------------------------------------------------------|
 | [Bang-Bang / Hysteresis Controller](BangBangHysteresis.md) | Two-state relay controller with Schmitt-trigger dead-band to prevent chatter |
+| [Deadbeat Control](DeadbeatControl.md) | Discrete-time N-step deadbeat controller — exact convergence in N samples via reachability pseudo-inverse |
 | [PID Controller](Pid.md) | Proportional-Integral-Derivative controller using a discrete recursive formulation      |
 | [LQR Controller](Lqr.md) | Linear Quadratic Regulator — optimal state-feedback control minimizing a quadratic cost |
 | [LQI / Servo Controller](IntegralStateFeedbackLqi.md) | Integral state feedback (LQI) — LQR augmented with integrators on the tracking error for zero steady-state offset |
