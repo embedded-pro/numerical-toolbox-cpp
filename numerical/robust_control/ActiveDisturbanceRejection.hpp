@@ -7,6 +7,7 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
+#include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
 #include <cstddef>
@@ -69,7 +70,9 @@ namespace robust_control
         , controlGain{ ControlGainFromBandwidth(controlBandwidth) }
         , b0{ b0 }
         , sampleTime{ sampleTime }
-    {}
+    {
+        really_assert(observerBandwidth * sampleTime < T{ 0.5 } / static_cast<T>(Order));
+    }
 
     template<typename T, std::size_t Order>
     OPTIMIZE_FOR_SPEED T ActiveDisturbanceRejectionControl<T, Order>::Compute(T reference, T measuredOutput)
