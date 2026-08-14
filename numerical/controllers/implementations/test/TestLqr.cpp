@@ -145,6 +145,30 @@ TEST_F(TestLqr, lti_constructor_produces_identical_gain_to_matrix_constructor)
     EXPECT_NEAR(lqrMat.GetGain().at(0, 1), lqrLti.GetGain().at(0, 1), math::Tolerance<float>());
 }
 
+TEST_F(TestLqr, high_frequency_plant_converges_with_raised_iteration_cap)
+{
+    math::SquareMatrix<float, 2> A{
+        { 1.0f, 0.001f },
+        { 0.0f, 1.0f }
+    };
+    math::Matrix<float, 2, 1> B{
+        { 0.0f },
+        { 0.001f }
+    };
+    math::SquareMatrix<float, 2> Q{
+        { 10.0f, 0.0f },
+        { 0.0f, 1.0f }
+    };
+    math::SquareMatrix<float, 1> R{ { 0.1f } };
+
+    controllers::Lqr<float, 2, 1, 30000> lqr{ A, B, Q, R };
+
+    EXPECT_NEAR(lqr.GetGain().at(0, 0), 9.972051f, 0.1f);
+    EXPECT_NEAR(lqr.GetGain().at(0, 1), 5.472012f, 0.1f);
+    EXPECT_NEAR(lqr.GetRiccatiSolution().at(0, 0), 5487.013672f, 5.0f);
+    EXPECT_NEAR(lqr.GetRiccatiSolution().at(1, 1), 549.203735f, 1.0f);
+}
+
 TEST_F(TestLqr, two_instances_with_same_matrices_produce_identical_gains)
 {
     controllers::Lqr<float, 2, 1> lqr1{ A2, B2, Q2, R2 };

@@ -13,7 +13,7 @@
 
 namespace controllers
 {
-    template<typename T, std::size_t StateSize, std::size_t InputSize>
+    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t MaxIterations = 300>
     class Lqr
         : public StateFeedbackController<T, StateSize, InputSize>
     {
@@ -45,12 +45,12 @@ namespace controllers
         bool riccatiSolutionAvailable = false;
     };
 
-    template<typename T, std::size_t StateSize, std::size_t InputSize>
-    Lqr<T, StateSize, InputSize>::Lqr(
+    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t MaxIterations>
+    Lqr<T, StateSize, InputSize, MaxIterations>::Lqr(
         const StateMatrix& A, const InputMatrix& B, const StateMatrix& Q, const InputWeightMatrix& R)
         : riccatiSolution([&A, &B, &Q, &R]
               {
-                  auto r = solvers::DiscreteAlgebraicRiccatiEquation<T, StateSize, InputSize>{}.Solve(A, B, Q, R);
+                  auto r = solvers::DiscreteAlgebraicRiccatiEquation<T, StateSize, InputSize, MaxIterations>{}.Solve(A, B, Q, R);
                   really_assert(r.converged);
                   return r.value;
               }())
@@ -59,43 +59,43 @@ namespace controllers
         ComputeGain(A, B, riccatiSolution, R);
     }
 
-    template<typename T, std::size_t StateSize, std::size_t InputSize>
-    Lqr<T, StateSize, InputSize>::Lqr(const GainMatrix& precomputedGain)
+    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t MaxIterations>
+    Lqr<T, StateSize, InputSize, MaxIterations>::Lqr(const GainMatrix& precomputedGain)
         : gain(precomputedGain)
     {}
 
-    template<typename T, std::size_t StateSize, std::size_t InputSize>
+    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t MaxIterations>
     OPTIMIZE_FOR_SPEED
-        typename Lqr<T, StateSize, InputSize>::InputVector
-        Lqr<T, StateSize, InputSize>::ComputeControl(const StateVector& state)
+        typename Lqr<T, StateSize, InputSize, MaxIterations>::InputVector
+        Lqr<T, StateSize, InputSize, MaxIterations>::ComputeControl(const StateVector& state)
     {
         return gain * state * T(-1.0f);
     }
 
-    template<typename T, std::size_t StateSize, std::size_t InputSize>
-    const typename Lqr<T, StateSize, InputSize>::GainMatrix&
-    Lqr<T, StateSize, InputSize>::GetGain() const
+    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t MaxIterations>
+    const typename Lqr<T, StateSize, InputSize, MaxIterations>::GainMatrix&
+    Lqr<T, StateSize, InputSize, MaxIterations>::GetGain() const
     {
         return gain;
     }
 
-    template<typename T, std::size_t StateSize, std::size_t InputSize>
-    const typename Lqr<T, StateSize, InputSize>::StateMatrix&
-    Lqr<T, StateSize, InputSize>::GetRiccatiSolution() const
+    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t MaxIterations>
+    const typename Lqr<T, StateSize, InputSize, MaxIterations>::StateMatrix&
+    Lqr<T, StateSize, InputSize, MaxIterations>::GetRiccatiSolution() const
     {
         really_assert(riccatiSolutionAvailable);
         return riccatiSolution;
     }
 
-    template<typename T, std::size_t StateSize, std::size_t InputSize>
-    Lqr<T, StateSize, InputSize>::Lqr(
+    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t MaxIterations>
+    Lqr<T, StateSize, InputSize, MaxIterations>::Lqr(
         const math::LinearTimeInvariant<T, StateSize, InputSize>& plant,
         const StateMatrix& Q, const InputWeightMatrix& R)
         : Lqr(plant.A, plant.B, Q, R)
     {}
 
-    template<typename T, std::size_t StateSize, std::size_t InputSize>
-    OPTIMIZE_FOR_SPEED void Lqr<T, StateSize, InputSize>::ComputeGain(
+    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t MaxIterations>
+    OPTIMIZE_FOR_SPEED void Lqr<T, StateSize, InputSize, MaxIterations>::ComputeGain(
         const StateMatrix& A, const InputMatrix& B, const StateMatrix& P, const InputWeightMatrix& R)
     {
         auto BtP = B.Transpose() * P;

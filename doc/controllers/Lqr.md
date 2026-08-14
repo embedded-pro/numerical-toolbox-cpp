@@ -87,6 +87,7 @@ $$Q = \begin{bmatrix} 100 & 0 \\ 0 & 1 \end{bmatrix}, \quad R = [1]$$
 - **Q/R scaling.** Only the *ratio* of $Q$ to $R$ matters. Scaling both by the same factor does not change $K$.
 - **Full state required.** LQR assumes all states are measured. If only partial measurements are available, combine LQR with a [Kalman Filter](../filters/active/KalmanFilter.md) to form an LQG controller.
 - **Fixed-point limitations.** The DARE involves matrix inversions and multiplications that can overflow Q15/Q31 ranges. Prefer floating-point for the offline solve; use the pre-computed $K$ constructor for fixed-point runtime.
+- **Slow DARE convergence.** Systems with eigenvalues near the unit circle (e.g., high-frequency sampling, integrating plants) may require far more than the default 300 iterations to converge. Use the `MaxIterations` template parameter to raise the cap: `Lqr<float, StateSize, InputSize, 30000>`. A hard-assert fires if the solver does not converge within the specified limit.
 
 ## Variants & Generalizations
 
