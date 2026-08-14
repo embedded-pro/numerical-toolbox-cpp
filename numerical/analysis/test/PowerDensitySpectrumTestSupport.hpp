@@ -70,4 +70,42 @@ namespace analysis::test
         typename VectorComplex::template WithMaxSize<Length> result;
         typename VectorReal::template WithMaxSize<Length> timeResult;
     };
+
+    template<typename QNumberType, std::size_t Length>
+    class FftStubInteriorBin
+        : public analysis::FastFourierTransform<QNumberType>
+    {
+    public:
+        using VectorComplex = typename analysis::FastFourierTransform<QNumberType>::VectorComplex;
+        using VectorReal = typename analysis::FastFourierTransform<QNumberType>::VectorReal;
+
+        explicit FftStubInteriorBin(analysis::TwiddleFactors<QNumberType, Length / 2>&)
+        {}
+
+        VectorComplex& Forward(VectorReal& input) override
+        {
+            result.clear();
+
+            for (std::size_t i = 0; i < Length; ++i)
+            {
+                if (i == 1)
+                    result.push_back(math::Complex<QNumberType>(QNumberType(0.5f), QNumberType(0.0f)));
+                else
+                    result.push_back(math::Complex<QNumberType>(QNumberType(0.0f), QNumberType(0.0f)));
+            }
+            return result;
+        }
+
+        VectorReal& Inverse(VectorComplex& input) override
+        {
+            timeResult.clear();
+            for (std::size_t i = 0; i < Length; ++i)
+                timeResult.push_back(QNumberType(0.0f));
+            return timeResult;
+        }
+
+    private:
+        typename VectorComplex::template WithMaxSize<Length> result;
+        typename VectorReal::template WithMaxSize<Length> timeResult;
+    };
 }

@@ -150,7 +150,7 @@ namespace control_analysis
         for (std::size_t k{ 1 }; k <= n; ++k)
         {
             auto CB{ sys.C * N * sys.B };
-            numCoeffs[k] = CB.at(0, 0);
+            numCoeffs[k] = CB.at(0, 0) + sys.D.at(0, 0) * charPoly[k];
             N = sys.A * N;
             for (std::size_t i{ 0 }; i < n; ++i)
                 N.at(i, i) += charPoly[k];

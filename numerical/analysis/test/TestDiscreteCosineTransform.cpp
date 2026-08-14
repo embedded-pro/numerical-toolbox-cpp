@@ -49,7 +49,7 @@ namespace
 
         ConcreteTwiddleFactors<float, Length / 2> twiddle;
         analysis::FastFourierTransformRadix2Impl<float, Length> fft{ twiddle };
-        analysis::DiscreteConsineTransform<float, Length> dct{ fft };
+        analysis::DiscreteCosineTransform<float, Length> dct{ fft };
 
         RealBuf signal;
 
@@ -71,7 +71,7 @@ namespace
         using ComplexBuf = VectorComplex::WithMaxSize<Length>;
 
         ::testing::StrictMock<MockFft> mockFft;
-        analysis::DiscreteConsineTransform<float, Length> dct{ mockFft };
+        analysis::DiscreteCosineTransform<float, Length> dct{ mockFft };
 
         RealBuf signal;
         ComplexBuf fftOut;
@@ -112,7 +112,7 @@ TEST_F(TestDiscreteCosineTransform, forward_impulse_at_origin_matches_closed_for
     EXPECT_NEAR(result[0], 1.0f / sqrtN, math::Tolerance<float>());
     for (std::size_t k = 1; k < Length; ++k)
     {
-        float ref{ 2.0f * std::cos(static_cast<float>(k) * std::numbers::pi_v<float> / (2.0f * static_cast<float>(Length))) / sqrtN };
+        float ref{ std::sqrt(2.0f / static_cast<float>(Length)) * std::cos(static_cast<float>(k) * std::numbers::pi_v<float> / (2.0f * static_cast<float>(Length))) };
         EXPECT_NEAR(result[k], ref, math::Tolerance<float>());
     }
 }
@@ -136,7 +136,7 @@ TEST_F(TestDiscreteCosineTransform, forward_matches_direct_dct_ii_definition)
         for (std::size_t n = 0; n < Length; ++n)
             acc += x[n] * std::cos(std::numbers::pi_v<float> * (2.0f * static_cast<float>(n) + 1.0f) * static_cast<float>(k) / (2.0f * static_cast<float>(Length)));
 
-        float ref{ 2.0f / std::sqrt(static_cast<float>(Length)) * acc };
+        float ref{ std::sqrt(2.0f / static_cast<float>(Length)) * acc };
         EXPECT_NEAR(result[k], ref, math::Tolerance<float>());
     }
 }
@@ -222,6 +222,25 @@ TEST_F(TestDiscreteCosineTransform, inverse_pure_dc_spectrum_gives_constant_sign
     float ref{ 1.0f / std::sqrt(static_cast<float>(Length)) };
     for (std::size_t n = 0; n < Length; ++n)
         EXPECT_NEAR(result[n], ref, math::Tolerance<float>());
+}
+
+TEST_F(TestDiscreteCosineTransform, parseval_identity_holds)
+{
+    constexpr std::array<float, Length> x{ 3.0f, -1.0f, 4.0f, 1.0f, -5.0f, 9.0f, -2.0f, 6.0f };
+    for (std::size_t n = 0; n < Length; ++n)
+        signal[n] = x[n];
+
+    auto& X = dct.Forward(signal);
+
+    float energyTime{ 0.0f };
+    for (std::size_t n = 0; n < Length; ++n)
+        energyTime += x[n] * x[n];
+
+    float energyFreq{ 0.0f };
+    for (std::size_t k = 0; k < Length; ++k)
+        energyFreq += X[k] * X[k];
+
+    EXPECT_NEAR(energyFreq, energyTime, 1.0f);
 }
 
 TEST_F(TestDiscreteCosineTransformMockFft, forward_passes_full_length_buffer_to_fft)

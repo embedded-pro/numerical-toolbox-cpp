@@ -85,7 +85,10 @@ namespace analysis
             auto& spectrum = fft.Forward(segment);
 
             for (std::size_t k = 0; k <= SegmentSize / 2; ++k)
-                y[k] += QNumberType(math::ToFloat(MagnitudeSquared(spectrum[k])) / static_cast<float>(SegmentSize));
+            {
+                float factor = (k == 0 || k == SegmentSize / 2) ? 1.0f : 2.0f;
+                y[k] += QNumberType(math::ToFloat(MagnitudeSquared(spectrum[k])) * factor / static_cast<float>(SegmentSize));
+            }
 
             ++segmentCount;
         }

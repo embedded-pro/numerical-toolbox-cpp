@@ -176,6 +176,34 @@ TYPED_TEST(TestPowerSpectralDensityZeroOverlap, output_size_equals_half_segment_
     EXPECT_EQ(result.size(), TestFixture::length / 2 + 1);
 }
 
+TYPED_TEST(TestPowerSpectralDensity, interior_bin_is_doubled_relative_to_dc_for_equal_magnitude)
+{
+    if constexpr (!std::is_floating_point_v<TypeParam>)
+        GTEST_SKIP();
+
+    using FftInterior = analysis::test::FftStubInteriorBin<TypeParam, TestFixture::length>;
+    using Twiddle = analysis::test::TwiddleFactorsStub<TypeParam, TestFixture::length / 2>;
+    using PsdInterior = analysis::PowerSpectralDensity<TypeParam, TestFixture::length, FftInterior, Twiddle, TestFixture::overlap>;
+
+    analysis::test::WindowStub<TypeParam> win;
+    TypeParam samplingTime = TypeParam(1.0f / 48000.0f);
+
+    PsdInterior psdInterior(win, samplingTime);
+
+    typename TestFixture::PowerDensitySpectrum::VectorReal::template WithMaxSize<TestFixture::length> input;
+    for (std::size_t i = 0; i < this->length; ++i)
+        input.push_back(TypeParam(0.5f));
+
+    auto& dcResult = this->powerDensitySpectrum->Calculate(input);
+    float dcBin = math::ToFloat(dcResult[0]);
+
+    auto& interiorResult = psdInterior.Calculate(input);
+    float interiorBin1 = math::ToFloat(interiorResult[1]);
+
+    ASSERT_GT(dcBin, 0.0f);
+    EXPECT_NEAR(interiorBin1 / dcBin, 2.0f, 1e-3f);
+}
+
 TYPED_TEST(TestPowerSpectralDensityZeroOverlap, zero_overlap_step_equals_segment_size)
 {
     if constexpr (!std::is_floating_point_v<TypeParam>)

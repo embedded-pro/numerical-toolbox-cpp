@@ -23,6 +23,7 @@ target_sources(numerical.math_test PRIVATE
     TestMatrixNorms.cpp
     TestMatrixOperations.cpp
     TestQNumber.cpp
+    TestTolerance.cpp
     TestMatrix.cpp
     TestQuaternion.cpp
     TestRecursiveBuffer.cpp

@@ -10,13 +10,15 @@ This library implements **DCT-II** (the most common variant) by leveraging the F
 
 ### DCT-II Definition
 
-For a length-$N$ sequence $x[n]$, the DCT-II is defined as:
+This implementation uses the **orthonormal** DCT-II. For a length-$N$ sequence $x[n]$:
 
-$$X[k] = \sum_{n=0}^{N-1} x[n] \cos\!\left(\frac{\pi}{N}\left(n + \tfrac{1}{2}\right) k\right), \quad k = 0, 1, \ldots, N-1$$
+$$X[0] = \frac{1}{\sqrt{N}} \sum_{n=0}^{N-1} x[n]$$
 
-The inverse (DCT-III, also called IDCT) recovers $x[n]$:
+$$X[k] = \sqrt{\frac{2}{N}} \sum_{n=0}^{N-1} x[n] \cos\!\left(\frac{\pi}{N}\left(n + \tfrac{1}{2}\right) k\right), \quad k = 1, \ldots, N-1$$
 
-$$x[n] = \frac{1}{N}\left[\frac{X[0]}{2} + \sum_{k=1}^{N-1} X[k] \cos\!\left(\frac{\pi}{N}\left(n + \tfrac{1}{2}\right) k\right)\right]$$
+This normalisation makes the transform matrix unitary, so Parseval's theorem holds exactly: $\sum_k X[k]^2 = \sum_n x[n]^2$. The inverse (orthonormal DCT-III) recovers $x[n]$:
+
+$$x[n] = \frac{X[0]}{\sqrt{N}} + \sqrt{\frac{2}{N}} \sum_{k=1}^{N-1} X[k] \cos\!\left(\frac{\pi}{N}\left(n + \tfrac{1}{2}\right) k\right)$$
 
 ### FFT-Based Computation
 
@@ -24,7 +26,9 @@ The DCT can be computed via the DFT of a reordered sequence:
 
 1. Form a new sequence $y[n]$ by interleaving even-indexed and reverse odd-indexed samples of $x$.
 2. Compute the $N$-point FFT: $Y[k] = \text{FFT}\{y\}$.
-3. Apply twiddle factors: $X[k] = 2 \cdot \text{Re}\!\left(W[k] \cdot Y[k]\right)$, where $W[k] = e^{-j\pi k / 2N}$.
+3. Apply twiddle factors and orthonormal scale:
+   - $k = 0$: $X[0] = \text{Re}(Y[0]) / \sqrt{N}$
+   - $k \ge 1$: $X[k] = \sqrt{2/N} \cdot \text{Re}\!\left(W[k] \cdot Y[k]\right)$, where $W[k] = e^{-j\pi k / 2N}$.
 
 ### Why Cosine Basis?
 
@@ -50,25 +54,25 @@ $$y = [x[0],\; x[2],\; x[3],\; x[1]] = [1, 3, 4, 2]$$
 
 **Step 2 — Compute FFT**
 
-$$Y = \text{FFT}([1, 3, 4, 2]) = [10,\; -3+j,\; -2,\; -3-j]$$
+$$Y = \text{FFT}([1, 3, 4, 2]) = [10,\; -3-j,\; 0,\; -3+j]$$
 
-**Step 3 — Apply twiddle factors** $W[k] = e^{-j\pi k/8}$
+**Step 3 — Apply twiddle factors and orthonormal scale** ($N=4$, $W[k] = e^{-j\pi k/8}$)
 
-| $k$ | $W[k]$         | $W[k] \cdot Y[k]$ | $X[k] = 2 \cdot \text{Re}(\cdot)$ |
-|-----|----------------|-------------------|-----------------------------------|
-| 0   | 1              | 10                | 20                                |
-| 1   | $e^{-j\pi/8}$  | ≈ −2.22 − 1.90j   | ≈ −4.44                           |
-| 2   | $e^{-j\pi/4}$  | ≈ −1.41 + 1.41j   | ≈ −2.83                           |
-| 3   | $e^{-j3\pi/8}$ | ≈ −0.24 + 3.07j   | ≈ −0.47                           |
+| $k$ | $W[k]$         | $W[k] \cdot Y[k]$         | $X[k]$                                    |
+|-----|----------------|---------------------------|-------------------------------------------|
+| 0   | —              | —                         | $10 / \sqrt{4} = 5$                       |
+| 1   | $e^{-j\pi/8}$  | $\approx -3.154 + 0.224j$ | $\sqrt{0.5} \cdot (-3.154) \approx -2.23$ |
+| 2   | $e^{-j\pi/4}$  | $0$                       | $0$                                       |
+| 3   | $e^{-j3\pi/8}$ | $\approx -0.224 + 3.154j$ | $\sqrt{0.5} \cdot (-0.224) \approx -0.16$ |
 
-**Output:** $X \approx [20, -4.44, -2.83, -0.47]$
+**Output:** $X \approx [5,\; -2.23,\; 0,\; -0.16]$
 
-Notice how most of the energy is in $X[0]$ (the DC component) — energy compaction in action.
+Notice how most of the energy is in $X[0]$ (the DC component) — energy compaction in action. The orthonormal scale ensures $\sum_k X[k]^2 = 1^2+2^2+3^2+4^2 = 30$.
 
 ## Pitfalls & Edge Cases
 
 - **Power-of-2 length required** — inherited from the underlying FFT constraint.
-- **Normalization convention.** Different references use different scaling (some include $\sqrt{2/N}$). Verify which convention the consumer expects.
+- **Normalization convention.** This library uses the **orthonormal** convention ($1/\sqrt{N}$ for $k=0$, $\sqrt{2/N}$ for $k \ge 1$), which satisfies Parseval's theorem and makes the transform matrix unitary. Other references may use the unnormalized form; scale accordingly when interfacing.
 - **Fixed-point overflow.** The reordering and FFT steps must preserve range; apply the 0.9999 scaling factor used throughout this library.
 - **Inverse accuracy.** Rounding errors accumulate in the forward-then-inverse round-trip, especially for Q15 types.
 - **Real input only.** Complex inputs are not supported by the reordering trick.
