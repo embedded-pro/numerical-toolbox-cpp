@@ -38,8 +38,10 @@ TEST_F(CholeskyDecompositionTest, TryFactorSingularScalarReturnsNullopt)
 TEST_F(CholeskyDecompositionTest, TryFactor2x2SpdMatrixCoversOffDiagonalBranch)
 {
     Mat2 a;
-    a.at(0, 0) = 4.0f; a.at(0, 1) = 2.0f;
-    a.at(1, 0) = 2.0f; a.at(1, 1) = 3.0f;
+    a.at(0, 0) = 4.0f;
+    a.at(0, 1) = 2.0f;
+    a.at(1, 0) = 2.0f;
+    a.at(1, 1) = 3.0f;
 
     auto l = Chol2::TryFactor(a);
 
@@ -52,8 +54,10 @@ TEST_F(CholeskyDecompositionTest, TryFactor2x2SpdMatrixCoversOffDiagonalBranch)
 TEST_F(CholeskyDecompositionTest, TryFactorNonSpdMatrixReturnsNullopt)
 {
     Mat2 a;
-    a.at(0, 0) = 1.0f; a.at(0, 1) = 2.0f;
-    a.at(1, 0) = 2.0f; a.at(1, 1) = 1.0f;
+    a.at(0, 0) = 1.0f;
+    a.at(0, 1) = 2.0f;
+    a.at(1, 0) = 2.0f;
+    a.at(1, 1) = 1.0f;
 
     EXPECT_FALSE(Chol2::TryFactor(a).has_value());
 }
@@ -72,8 +76,10 @@ TEST_F(CholeskyDecompositionTest, TryFactorSmallScaleSpdMatrixAccepted)
 TEST_F(CholeskyDecompositionTest, FactorNonSpdReturnsZeroMatrix)
 {
     Mat2 a;
-    a.at(0, 0) = 1.0f; a.at(0, 1) = 2.0f;
-    a.at(1, 0) = 2.0f; a.at(1, 1) = 1.0f;
+    a.at(0, 0) = 1.0f;
+    a.at(0, 1) = 2.0f;
+    a.at(1, 0) = 2.0f;
+    a.at(1, 1) = 1.0f;
 
     auto l = Chol2::Factor(a);
 
@@ -84,8 +90,10 @@ TEST_F(CholeskyDecompositionTest, FactorNonSpdReturnsZeroMatrix)
 TEST_F(CholeskyDecompositionTest, SolveDiagonalSystemFindsExactSolution)
 {
     Mat2 a;
-    a.at(0, 0) = 4.0f; a.at(0, 1) = 0.0f;
-    a.at(1, 0) = 0.0f; a.at(1, 1) = 9.0f;
+    a.at(0, 0) = 4.0f;
+    a.at(0, 1) = 0.0f;
+    a.at(1, 0) = 0.0f;
+    a.at(1, 1) = 9.0f;
     Vec2 b;
     b.at(0, 0) = 8.0f;
     b.at(1, 0) = 27.0f;
@@ -100,8 +108,10 @@ TEST_F(CholeskyDecompositionTest, SolveDiagonalSystemFindsExactSolution)
 TEST_F(CholeskyDecompositionTest, SolveNonSpdSystemReturnsNullopt)
 {
     Mat2 a;
-    a.at(0, 0) = 1.0f; a.at(0, 1) = 2.0f;
-    a.at(1, 0) = 2.0f; a.at(1, 1) = 1.0f;
+    a.at(0, 0) = 1.0f;
+    a.at(0, 1) = 2.0f;
+    a.at(1, 0) = 2.0f;
+    a.at(1, 1) = 1.0f;
     Vec2 b;
     b.at(0, 0) = 1.0f;
     b.at(1, 0) = 1.0f;
