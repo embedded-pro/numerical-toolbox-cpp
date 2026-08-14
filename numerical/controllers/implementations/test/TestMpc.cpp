@@ -877,3 +877,46 @@ TEST_F(TestMpc, no_constraints_does_not_clamp_output)
 
     EXPECT_FLOAT_EQ(uUnconstrained.at(0, 0), uDefault.at(0, 0));
 }
+
+TEST_F(TestMpc, non_equilibrium_reference_produces_correct_optimal_control)
+{
+    math::SquareMatrix<float, 1> A{ { 0.0f } };
+    math::Matrix<float, 1, 1> B{ { 1.0f } };
+
+    controllers::MpcWeights<float, 1, 1> weights;
+    weights.Q = math::SquareMatrix<float, 1>{ { 1.0f } };
+    weights.R = math::SquareMatrix<float, 1>{ { 1.0f } };
+
+    controllers::Mpc<float, 1, 1, 1, 1> mpc(A, B, weights);
+
+    math::Vector<float, 1> state{ { 0.0f } };
+    mpc.SetReference(math::Vector<float, 1>{ { 1.0f } });
+
+    auto u = mpc.ComputeControl(state);
+    EXPECT_NEAR(u.at(0, 0), 0.5f, math::Tolerance<float>());
+}
+
+TEST_F(TestMpc, coupled_constraints_re_optimize_free_variables)
+{
+    math::SquareMatrix<float, 2> H{
+        { 2.0f, 1.0f },
+        { 1.0f, 2.0f }
+    };
+    math::Matrix<float, 2, 1> F{
+        { -4.0f },
+        { -2.0f }
+    };
+
+    controllers::MpcConstraints<float, 1> constraints;
+    constraints.uMax = math::Vector<float, 1>{ 1.0f };
+
+    controllers::Mpc<float, 1, 1, 2, 2> mpc(H, F, constraints);
+
+    math::Vector<float, 1> state{ { 1.0f } };
+    auto u = mpc.ComputeControl(state);
+
+    EXPECT_NEAR(u.at(0, 0), 1.0f, 1e-4f);
+
+    auto seq = mpc.GetControlSequence();
+    EXPECT_NEAR(seq[1].at(0, 0), 0.5f, 1e-4f);
+}
