@@ -9,6 +9,7 @@
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/TriangularSolve.hpp"
 #include <cstddef>
+#include <limits>
 #include <optional>
 
 namespace math
@@ -50,7 +51,7 @@ namespace math
 
                 if (i != j)
                     l.at(i, j) = T(sum / ToFloat(l.at(j, j)));
-                else if (sum < 1e-10f)
+                else if (sum <= std::numeric_limits<float>::epsilon() * math::Abs(ToFloat(a.at(i, i))))
                     return std::nullopt;
                 else
                     l.at(i, j) = T(math::Sqrt(sum));

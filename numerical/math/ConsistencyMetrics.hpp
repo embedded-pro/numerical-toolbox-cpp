@@ -27,6 +27,16 @@ namespace math
             5.023886f, 7.377759f, 9.348404f, 11.143480f, 12.832502f,
             14.449376f, 16.012764f, 17.534546f, 19.022768f, 20.483177f
         };
+
+        static constexpr float kZ975 = 1.95996f;
+
+        static float Chi2QuantileApprox(float z, float dof)
+        {
+            const float mu = 1.0f - 2.0f / (9.0f * dof);
+            const float sigma = math::Sqrt(2.0f / (9.0f * dof));
+            const float x = mu + z * sigma;
+            return dof * x * x * x;
+        }
     }
 
     template<typename T, std::size_t Dim>
@@ -77,12 +87,16 @@ namespace math
         if (numSamples == 0)
             return false;
         const std::size_t dof = numSamples * Dim;
-        const float lo = (dof <= detail::kMaxChiSquareDim)
-                             ? detail::kChi2Lo95[dof - 1] / static_cast<float>(numSamples)
-                             : detail::kChi2Lo95[detail::kMaxChiSquareDim - 1] / static_cast<float>(numSamples);
-        const float hi = (dof <= detail::kMaxChiSquareDim)
-                             ? detail::kChi2Hi95[dof - 1] / static_cast<float>(numSamples)
-                             : detail::kChi2Hi95[detail::kMaxChiSquareDim - 1] / static_cast<float>(numSamples);
+        const float fdof = static_cast<float>(dof);
+        const float fsamples = static_cast<float>(numSamples);
+        const float lo_raw = (dof <= detail::kMaxChiSquareDim)
+                                 ? detail::kChi2Lo95[dof - 1]
+                                 : detail::Chi2QuantileApprox(-detail::kZ975, fdof);
+        const float hi_raw = (dof <= detail::kMaxChiSquareDim)
+                                 ? detail::kChi2Hi95[dof - 1]
+                                 : detail::Chi2QuantileApprox(detail::kZ975, fdof);
+        const float lo = lo_raw / fsamples;
+        const float hi = hi_raw / fsamples;
         return static_cast<float>(averagedValue) >= lo &&
                static_cast<float>(averagedValue) <= hi;
     }

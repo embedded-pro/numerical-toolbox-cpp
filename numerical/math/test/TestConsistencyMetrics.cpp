@@ -258,13 +258,11 @@ TEST_F(ConsistencyMetrics3DTest, IsTimeAveragedConsistentWithOneSample)
     EXPECT_TRUE(Metrics::IsTimeAveragedConsistent(midpoint, 1));
 }
 
-TEST_F(ConsistencyMetrics3DTest, IsTimeAveragedConsistentDofClampBranch)
+TEST_F(ConsistencyMetrics3DTest, IsTimeAveragedConsistentLargeDofWilsonHilferty)
 {
-    const float lo = math::detail::kChi2Lo95[math::detail::kMaxChiSquareDim - 1] / 5.0f;
-    const float hi = math::detail::kChi2Hi95[math::detail::kMaxChiSquareDim - 1] / 5.0f;
-    const float midpoint = (lo + hi) / 2.0f;
-
-    EXPECT_TRUE(Metrics::IsTimeAveragedConsistent(midpoint, 5));
+    // dof=15 > kMaxChiSquareDim; WH bounds ≈ [1.248, 5.499] after dividing by 5
+    EXPECT_TRUE(Metrics::IsTimeAveragedConsistent(2.373f, 5));
+    EXPECT_FALSE(Metrics::IsTimeAveragedConsistent(6.0f, 5));
 }
 
 TEST_F(ConsistencyMetrics3DTest, IsTimeAveragedConsistentInconsistentOutOfBounds)
@@ -272,4 +270,11 @@ TEST_F(ConsistencyMetrics3DTest, IsTimeAveragedConsistentInconsistentOutOfBounds
     const float aboveHi = math::detail::kChi2Hi95[math::detail::kMaxChiSquareDim - 1] / 1.0f + 1.0f;
 
     EXPECT_FALSE(Metrics::IsTimeAveragedConsistent(aboveHi, 1));
+}
+
+TEST_F(ConsistencyMetrics1DTest, IsTimeAveragedConsistentLargeNumSamplesUsesApproximation)
+{
+    // dof=100 >> kMaxChiSquareDim; WH bounds ≈ [0.742, 1.296] — old code gave hi≈0.205 (wrong)
+    EXPECT_TRUE(Metrics::IsTimeAveragedConsistent(1.0f, 100));
+    EXPECT_FALSE(Metrics::IsTimeAveragedConsistent(1.4f, 100));
 }

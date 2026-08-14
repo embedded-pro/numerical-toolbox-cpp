@@ -150,7 +150,7 @@ TEST_F(TestSavitzkyGolayFilter, second_derivative_of_quadratic_recovers_curvatur
         float x = static_cast<float>(n);
         float out = d2.Filter(a * x * x + 5.0f * x - 2.0f);
         if (n >= 4)
-            EXPECT_NEAR(out, a, tol);
+            EXPECT_NEAR(out, 2.0f * a, tol);
     }
 }
 
