@@ -127,12 +127,12 @@ graph TD
     Opt -.->|"analytical solution at η→∞, 1 step"| LR
 ```
 
-| Component                                                | Relationship                                                                                      |
-|----------------------------------------------------------|---------------------------------------------------------------------------------------------------|
-| Loss Functions                                           | Provides the `Cost()` and `Gradient()` the optimizer calls each iteration                         |
-| Model                                                    | Passes initial parameters to the optimizer and receives optimized parameters back                 |
-| [Regularization](../regularization/Regularization.md)    | Adds a penalty gradient to $\nabla\mathcal{L}$, biasing the optimizer toward simpler models       |
-| [Linear Regression](../estimators/LinearRegression.md)   | For MSE on a linear model, gradient descent converges to the same solution as the normal equation |
+| Component                                              | Relationship                                                                                      |
+|--------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| Loss Functions                                         | Provides the `Cost()` and `Gradient()` the optimizer calls each iteration                         |
+| Model                                                  | Passes initial parameters to the optimizer and receives optimized parameters back                 |
+| [Regularization](../regularization/Regularization.md)  | Adds a penalty gradient to $\nabla\mathcal{L}$, biasing the optimizer toward simpler models       |
+| [Linear Regression](../estimators/LinearRegression.md) | For MSE on a linear model, gradient descent converges to the same solution as the normal equation |
 
 ## References & Further Reading
 
