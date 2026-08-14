@@ -27,6 +27,7 @@ namespace robust_control
 
         ActiveDisturbanceRejectionControl(T observerBandwidth, T controlBandwidth, T b0, T sampleTime);
 
+        OPTIMIZE_FOR_SPEED T Compute(T reference, T measuredOutput, T actualApplied);
         OPTIMIZE_FOR_SPEED T Compute(T reference, T measuredOutput);
         void Reset();
 
@@ -75,7 +76,7 @@ namespace robust_control
     }
 
     template<typename T, std::size_t Order>
-    OPTIMIZE_FOR_SPEED T ActiveDisturbanceRejectionControl<T, Order>::Compute(T reference, T measuredOutput)
+    OPTIMIZE_FOR_SPEED T ActiveDisturbanceRejectionControl<T, Order>::Compute(T reference, T measuredOutput, T actualApplied)
     {
         const T e = measuredOutput - xhat.at(0, 0);
 
@@ -85,7 +86,7 @@ namespace robust_control
         for (std::size_t i = 0; i < Order; ++i)
             xhat.at(i, 0) += sampleTime * xhat.at(i + 1, 0);
 
-        xhat.at(Order - 1, 0) += sampleTime * b0 * appliedPrev;
+        xhat.at(Order - 1, 0) += sampleTime * b0 * actualApplied;
 
         T u0 = controlGain.at(0, 0) * (reference - xhat.at(0, 0));
         for (std::size_t i = 1; i < Order; ++i)
@@ -94,6 +95,12 @@ namespace robust_control
         const T u = (u0 - xhat.at(Order, 0)) / b0;
         appliedPrev = u;
         return u;
+    }
+
+    template<typename T, std::size_t Order>
+    OPTIMIZE_FOR_SPEED T ActiveDisturbanceRejectionControl<T, Order>::Compute(T reference, T measuredOutput)
+    {
+        return Compute(reference, measuredOutput, appliedPrev);
     }
 
     template<typename T, std::size_t Order>
