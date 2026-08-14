@@ -9,7 +9,8 @@ namespace
         : public controllers::Feedforward<float>
     {
     public:
-        MOCK_METHOD(float, Evaluate, (float), (const, override));
+        MOCK_METHOD(float, Evaluate, (float), (override));
+        MOCK_METHOD(void, Reset, (), (override));
     };
 
     class MockFeedbackLaw
@@ -109,8 +110,9 @@ TEST_F(TestFeedforward2Dof, zero_feedback_reduces_to_feedforward)
     EXPECT_NEAR(result, 0.4f, math::Tolerance<float>());
 }
 
-TEST_F(TestFeedforward2Dof, reset_delegates_to_feedback)
+TEST_F(TestFeedforward2Dof, reset_delegates_to_feedforward_and_feedback)
 {
+    EXPECT_CALL(ff, Reset()).Times(1);
     EXPECT_CALL(fb, Reset()).Times(1);
 
     controller.Reset();

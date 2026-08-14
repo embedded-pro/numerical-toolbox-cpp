@@ -17,7 +17,8 @@ namespace controllers
         static_assert(std::is_floating_point_v<T>, "Feedforward supports floating-point types");
 
         virtual ~Feedforward() = default;
-        virtual T Evaluate(T reference) const = 0;
+        virtual T Evaluate(T reference) = 0;
+        virtual void Reset() = 0;
     };
 
     template<typename T>
@@ -68,6 +69,7 @@ namespace controllers
     template<typename T>
     void Feedforward2Dof<T>::Reset()
     {
+        feedforward.Reset();
         feedback.Reset();
     }
 

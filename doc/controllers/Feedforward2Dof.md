@@ -55,6 +55,7 @@ If the system were already tracking perfectly ($y = r = 0.5$), then $e = 0$, $u_
 - **Feedforward does not aid disturbance rejection.** If $u_{ff}$ is tuned for tracking and a disturbance enters the plant, only $u_{fb}$ responds.
 - **Inverse-plant feedforward for non-minimum-phase systems** is non-causal; use a truncated or approximate inverse.
 - **Sign convention.** The error passed to feedback is $r - y$, not $y - r$. Swapping signs destabilises positive-gain plants.
+- **Stateful feedforward must implement `Reset()`.** Dynamic pre-filters (e.g. reference model filters) carry internal state that must be cleared on `Reset()`. Both the feedforward and feedback components are reset when `Feedforward2Dof::Reset()` is called; any feedforward implementation that holds state must override `Reset()` to clear it.
 
 ## Variants & Generalizations
 
