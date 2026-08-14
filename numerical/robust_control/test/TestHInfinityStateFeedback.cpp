@@ -159,8 +159,9 @@ TEST_F(TestHInfinityStateFeedback, gain_matches_gare_solution)
     auto Q = plant.C1.Transpose() * plant.C1;
     solvers::DiscreteAlgebraicRiccatiEquation<float, 2, AugInputSize> dare{};
     auto Xref = dare.Solve(plant.A, B, Q, Rtilde);
+    ASSERT_TRUE(Xref.converged);
 
-    auto BtX = B.Transpose() * Xref;
+    auto BtX = B.Transpose() * Xref.value;
     auto S = Rtilde + BtX * B;
     auto BtXA = BtX * plant.A;
     auto Kfull = solvers::SolveSystem<float, AugInputSize, 2>(S, BtXA);
@@ -294,7 +295,8 @@ TEST_F(TestHInfinityStateFeedbackSynthesized, riccati_solution_diagonal_is_posit
     auto Q = plant.C1.Transpose() * plant.C1;
     solvers::DiscreteAlgebraicRiccatiEquation<float, 2, AugInputSize> dare{};
     auto Xref = dare.Solve(plant.A, B, Q, Rtilde);
+    ASSERT_TRUE(Xref.converged);
 
-    EXPECT_GT(Xref.at(0, 0), 0.0f);
-    EXPECT_GT(Xref.at(1, 1), 0.0f);
+    EXPECT_GT(Xref.value.at(0, 0), 0.0f);
+    EXPECT_GT(Xref.value.at(1, 1), 0.0f);
 }

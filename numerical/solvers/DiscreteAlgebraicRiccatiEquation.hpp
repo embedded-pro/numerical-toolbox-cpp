@@ -9,10 +9,11 @@
 #include "numerical/math/QNumber.hpp"
 #include "numerical/math/Tolerance.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
+#include <cmath>
 
 namespace solvers
 {
-    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t MaxIterations = 100>
+    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t MaxIterations = 300>
     class DiscreteAlgebraicRiccatiEquation
     {
         static_assert(math::detail::is_supported_type_v<T>,
@@ -27,9 +28,15 @@ namespace solvers
         using InputMatrix = math::Matrix<T, StateSize, InputSize>;
         using InputWeightMatrix = math::SquareMatrix<T, InputSize>;
 
+        struct SolveResult
+        {
+            StateMatrix value{};
+            bool converged{ false };
+        };
+
         DiscreteAlgebraicRiccatiEquation() = default;
 
-        StateMatrix Solve(const StateMatrix& A, const InputMatrix& B, const StateMatrix& Q, const InputWeightMatrix& R) const;
+        SolveResult Solve(const StateMatrix& A, const InputMatrix& B, const StateMatrix& Q, const InputWeightMatrix& R) const;
 
     private:
         StateMatrix Iterate(const StateMatrix& P, const StateMatrix& A, const InputMatrix& B,
@@ -53,7 +60,7 @@ namespace solvers
     }
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t MaxIterations>
-    typename DiscreteAlgebraicRiccatiEquation<T, StateSize, InputSize, MaxIterations>::StateMatrix
+    typename DiscreteAlgebraicRiccatiEquation<T, StateSize, InputSize, MaxIterations>::SolveResult
     DiscreteAlgebraicRiccatiEquation<T, StateSize, InputSize, MaxIterations>::Solve(
         const StateMatrix& A, const InputMatrix& B, const StateMatrix& Q, const InputWeightMatrix& R) const
     {
@@ -65,10 +72,10 @@ namespace solvers
             P = Iterate(P, A, B, Q, R);
 
             if (HasConverged(P, Pprev, math::Tolerance<T>()))
-                break;
+                return { P, true };
         }
 
-        return P;
+        return { P, false };
     }
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t MaxIterations>
@@ -77,8 +84,13 @@ namespace solvers
     {
         for (std::size_t i = 0; i < StateSize; ++i)
             for (std::size_t j = 0; j < StateSize; ++j)
-                if (math::Abs(math::ToFloat(P.at(i, j)) - math::ToFloat(Pprev.at(i, j))) > tolerance)
+            {
+                const float pij = math::ToFloat(P.at(i, j));
+                if (!std::isfinite(pij))
                     return false;
+                if (math::Abs(pij - math::ToFloat(Pprev.at(i, j))) > tolerance)
+                    return false;
+            }
 
         return true;
     }

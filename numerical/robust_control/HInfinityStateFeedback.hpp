@@ -126,7 +126,10 @@ namespace robust_control
         const Augmented aug = BuildAugmented(g);
 
         solvers::DiscreteAlgebraicRiccatiEquation<T, StateSize, AugInputSize> dare{};
-        auto Xcandidate = dare.Solve(plant.A, aug.B, aug.Q, aug.Rtilde);
+        auto xcResult = dare.Solve(plant.A, aug.B, aug.Q, aug.Rtilde);
+        if (!xcResult.converged)
+            return false;
+        auto Xcandidate = xcResult.value;
 
         for (std::size_t i = 0; i < StateSize; ++i)
             if (Xcandidate.at(i, i) < T{ 0 })
@@ -155,7 +158,10 @@ namespace robust_control
         const Augmented aug = BuildAugmented(g);
 
         solvers::DiscreteAlgebraicRiccatiEquation<T, StateSize, AugInputSize> dare{};
-        X = dare.Solve(plant.A, aug.B, aug.Q, aug.Rtilde);
+        auto xResult = dare.Solve(plant.A, aug.B, aug.Q, aug.Rtilde);
+        if (!xResult.converged)
+            return;
+        X = xResult.value;
 
         K = FullGain(aug, X).template GetBlock<ControlSize, StateSize>(0, 0);
     }

@@ -5,6 +5,7 @@
 #include "numerical/controllers/implementations/DeadbeatControl.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/math/Tolerance.hpp"
+#include <cmath>
 #include <gtest/gtest.h>
 
 namespace
@@ -105,16 +106,16 @@ TEST_F(TestDeadbeatControl, state_gain_matches_analytic_reachability_formula)
 {
     controllers::DeadbeatControl<float, 2, 1, 2> ctrl{ A2, B2 };
 
-    EXPECT_NEAR(ctrl.GetStateGain().at(0, 0), kGainStateA, 1e-1f);
-    EXPECT_NEAR(ctrl.GetStateGain().at(0, 1), kGainStateB, 1e-1f);
+    EXPECT_NEAR(ctrl.GetStateGain().at(0, 0), kGainStateA, math::Tolerance<float>());
+    EXPECT_NEAR(ctrl.GetStateGain().at(0, 1), kGainStateB, math::Tolerance<float>());
 }
 
 TEST_F(TestDeadbeatControl, reference_gain_matches_analytic_reachability_formula)
 {
     controllers::DeadbeatControl<float, 2, 1, 2> ctrl{ A2, B2 };
 
-    EXPECT_NEAR(ctrl.GetReferenceGain().at(0, 0), kGainRefA, 1e-1f);
-    EXPECT_NEAR(ctrl.GetReferenceGain().at(0, 1), kGainRefB, 1e-1f);
+    EXPECT_NEAR(ctrl.GetReferenceGain().at(0, 0), kGainRefA, math::Tolerance<float>());
+    EXPECT_NEAR(ctrl.GetReferenceGain().at(0, 1), kGainRefB, math::Tolerance<float>());
 }
 
 TEST_F(TestDeadbeatControl, lti_constructor_matches_matrix_constructor)
@@ -128,4 +129,44 @@ TEST_F(TestDeadbeatControl, lti_constructor_matches_matrix_constructor)
     EXPECT_NEAR(ctrlMat.GetStateGain().at(0, 1), ctrlLti.GetStateGain().at(0, 1), math::Tolerance<float>());
     EXPECT_NEAR(ctrlMat.GetReferenceGain().at(0, 0), ctrlLti.GetReferenceGain().at(0, 0), math::Tolerance<float>());
     EXPECT_NEAR(ctrlMat.GetReferenceGain().at(0, 1), ctrlLti.GetReferenceGain().at(0, 1), math::Tolerance<float>());
+}
+
+TEST_F(TestDeadbeatControl, two_step_gain_amplifies_noise_less_than_one_step)
+{
+    math::SquareMatrix<float, 1> A{ { kScalarA } };
+    math::Matrix<float, 1, 1> B{ { kScalarB } };
+    controllers::DeadbeatControl<float, 1, 1, 1> ctrl1{ A, B };
+    controllers::DeadbeatControl<float, 1, 1, 2> ctrl2{ A, B };
+
+    EXPECT_LT(std::abs(ctrl2.GetReferenceGain().at(0, 0)),
+        std::abs(ctrl1.GetReferenceGain().at(0, 0)));
+}
+
+TEST_F(TestDeadbeatControl, scalar_two_step_closed_loop_is_stable)
+{
+    math::SquareMatrix<float, 1> A{ { kScalarA } };
+    math::Matrix<float, 1, 1> B{ { kScalarB } };
+    controllers::DeadbeatControl<float, 1, 1, 2> ctrl{ A, B };
+
+    const float closedLoopEig = kScalarA - kScalarB * ctrl.GetStateGain().at(0, 0);
+
+    EXPECT_LT(std::abs(closedLoopEig), 1.0f);
+}
+
+TEST_F(TestDeadbeatControl, two_state_three_step_asymptotically_converges)
+{
+    controllers::DeadbeatControl<float, 2, 1, 3> ctrl{ A2, B2 };
+
+    math::Vector<float, 2> x{ { 0.0f }, { 0.0f } };
+    math::Vector<float, 2> r{ { 5.0f }, { 0.0f } };
+    ctrl.SetReference(r);
+
+    for (int i = 0; i < 50; ++i)
+    {
+        const auto u = ctrl.ComputeControl(x);
+        x = A2 * x + B2 * u;
+    }
+
+    EXPECT_NEAR(x.at(0, 0), r.at(0, 0), math::Tolerance<float>());
+    EXPECT_NEAR(x.at(1, 0), r.at(1, 0), math::Tolerance<float>());
 }

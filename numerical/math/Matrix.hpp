@@ -151,13 +151,20 @@ namespace math
 
     template<typename T, size_t Rows, size_t Cols>
     OPTIMIZE_FOR_SPEED constexpr Matrix<T, Rows, Cols>::Matrix(std::initializer_list<std::initializer_list<T>> init)
+        : data{}
     {
         size_t row = 0;
         for (const auto& row_list : init)
         {
+#ifdef NUMERICAL_TOOLBOX_ENABLE_ASSERTIONS
+            really_assert(row < Rows);
+#endif
             size_t col = 0;
             for (const auto& value : row_list)
             {
+#ifdef NUMERICAL_TOOLBOX_ENABLE_ASSERTIONS
+                really_assert(col < Cols);
+#endif
                 at(row, col) = value;
                 ++col;
             }

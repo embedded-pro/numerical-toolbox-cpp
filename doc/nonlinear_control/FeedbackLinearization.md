@@ -12,17 +12,17 @@ The technique applies to plants whose output $y \in \mathbb{R}^m$ satisfies, aft
 
 $$y^{(r)} = a(x) + B(x)\, u$$
 
-where $x \in \mathbb{R}^n$ is the state, $u \in \mathbb{R}^m$ is the input, $a(x) \in \mathbb{R}^m$ is the **drift term** (known nonlinear dynamics), and $B(x) \in \mathbb{R}^{m \times m}$ is the **decoupling matrix** (state-dependent input gain). The integer $r$ is the relative degree. For mechanical systems ($r = 2$), $B(x) = M(q)$ is the inertia matrix and $a(x) = C(q, \dot{q})\dot{q} + g(q)$ is the Coriolis-plus-gravity term.
+where $x \in \mathbb{R}^n$ is the state, $u \in \mathbb{R}^m$ is the input, $a(x) \in \mathbb{R}^m$ is the **drift term** (known nonlinear dynamics), and $B(x) \in \mathbb{R}^{m \times m}$ is the **decoupling matrix** (state-dependent input gain). The integer $r$ is the relative degree. For mechanical systems ($r = 2$), written as $M(q)\ddot{q} + C(q,\dot{q})\dot{q} + g(q) = u$, the control-affine form has $B(x) = M^{-1}(q)$ and $a(x) = -M^{-1}(q)\bigl(C(q,\dot{q})\dot{q} + g(q)\bigr)$.
 
 ### Inner Control Law (Cancellation)
 
 The inner law selects $u$ so that the term $a(x)$ is cancelled and the decoupling matrix is factored out:
 
-$$u = B(x)\, v + a(x)$$
+$$u = B^{-1}(x)\,(v - a(x))$$
 
 Substituting into the plant equation yields
 
-$$y^{(r)} = a(x) + B(x)\bigl(B(x)\,v + a(x)\bigr) - a(x) = v$$
+$$y^{(r)} = a(x) + B(x)\,B^{-1}(x)\,(v - a(x)) = a(x) + (v - a(x)) = v$$
 
 leaving pure integrator chains $y^{(r)} = v$, provided $B(x)$ is nonsingular.
 
@@ -42,16 +42,16 @@ whose eigenvalues are set by choosing $K_p, K_d$. Critical damping per channel r
 
 Expanding yields the single expression evaluated on the hot path:
 
-$$u = B(x)\bigl(y_d^{(r)} + K_d\,\dot{e} + K_p\, e\bigr) + a(x)$$
+$$u = B^{-1}(x)\bigl(y_d^{(r)} + K_d\,\dot{e} + K_p\, e - a(x)\bigr)$$
 
-No matrix inversion appears on the hot path: the law multiplies by $B(x)$, not by $B(x)^{-1}$.
+The law requires solving the linear system $B(x)\,u = v - a(x)$ on the hot path; $B(x)$ must be nonsingular.
 
 ## Complexity Analysis
 
 | Operation    | Time               | Space        | Notes                                  |
 |--------------|--------------------|--------------|----------------------------------------|
 | Construction | $O(m^2)$           | $O(m^2)$     | Copy two gain matrices                 |
-| ComputeInput | $O(m^2)$           | $O(m)$ extra | Two matrix-vector products dominate    |
+| ComputeInput | $O(m^3)$           | $O(m)$ extra | One linear solve dominates             |
 | Model query  | $O(m^2)$–$O(nm^2)$ | $O(m^2)$     | Implementation-defined; injected model |
 
 All storage is in fixed-size stack arrays; the law itself performs no heap allocation.
@@ -66,7 +66,7 @@ Consider a 2-DOF planar arm with $m = 2$, $K_p = 100 I$, $K_d = 20 I$, and at on
 
 1. Compute error: $e = [0.4, 0.3]^\top$, $\dot{e} = [0, 0]^\top$.
 2. Compute virtual input: $v = 0 + 20 \cdot 0 + 100 \cdot [0.4, 0.3]^\top = [40, 30]^\top$.
-3. Inner law: $u = I \cdot [40, 30]^\top + [0.3, 0.1]^\top = [40.3, 30.1]^\top$.
+3. Inner law: $u = I^{-1}([40, 30]^\top - [0.3, 0.1]^\top) = [39.7, 29.9]^\top$.
 
 The gravity-like drift $a(x)$ is added directly; the outer PD term drives position error to zero.
 

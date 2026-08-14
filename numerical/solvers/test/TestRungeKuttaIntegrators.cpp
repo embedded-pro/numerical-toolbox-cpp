@@ -238,3 +238,21 @@ TEST_F(TestRungeKutta, dp45_deterministic_same_input)
     EXPECT_FLOAT_EQ(a.hNext, b.hNext);
     EXPECT_EQ(a.accepted, b.accepted);
 }
+
+TEST_F(TestRungeKutta, dp45_fifth_order_more_accurate_than_fourth)
+{
+    State1 x{ { 1.0f } };
+    float t{ 0.0f };
+    float h{ 0.1f };
+    for (int i{ 0 }; i < 10; ++i)
+    {
+        auto result{ dp45.Step(x, t, h) };
+        if (result.accepted)
+        {
+            x = result.xNext;
+            t += result.hUsed;
+        }
+        h = result.hNext;
+    }
+    EXPECT_NEAR(x.at(0, 0), std::exp(-t), math::Tolerance<float>());
+}

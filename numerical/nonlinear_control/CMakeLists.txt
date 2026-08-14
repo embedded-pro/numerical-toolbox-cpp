@@ -7,6 +7,7 @@ target_include_directories(numerical.nonlinear_control ${NUMERICAL_VISIBILITY}
 
 target_link_libraries(numerical.nonlinear_control ${NUMERICAL_VISIBILITY}
     numerical.math
+    numerical.solver
     infra.util
 )
 
