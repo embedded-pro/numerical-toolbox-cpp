@@ -9,6 +9,7 @@ namespace analysis
     class TwiddleFactors
     {
     public:
+        virtual ~TwiddleFactors() = default;
         virtual math::Complex<QNumberType>& operator[](std::size_t n) = 0;
     };
 
@@ -20,9 +21,17 @@ namespace analysis
             "FastFourierTransform can only be instantiated with math::QNumber types.");
 
     public:
-        constexpr std::size_t Log2(std::size_t n)
+        virtual ~FastFourierTransform() = default;
+
+        static constexpr std::size_t Log2(std::size_t n)
         {
-            return (n <= 1) ? 0 : 1 + Log2(n >> 1);
+            std::size_t result = 0;
+            while (n > 1)
+            {
+                n >>= 1;
+                ++result;
+            }
+            return result;
         }
 
         using VectorComplex = infra::BoundedVector<math::Complex<QNumberType>>;

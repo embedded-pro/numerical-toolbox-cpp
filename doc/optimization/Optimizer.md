@@ -2,7 +2,7 @@
 
 ## Overview & Motivation
 
-An **optimizer** adjusts a model's parameter vector $\theta \in \mathbb{R}^P$ to minimize a [loss function](../losses/Loss.md) $\mathcal{L}(\theta)$. The simplest and most fundamental strategy is **gradient descent**: repeatedly step in the direction of steepest descent:
+An **optimizer** adjusts a model's parameter vector $\theta \in \mathbb{R}^P$ to minimize a loss function $\mathcal{L}(\theta)$. The simplest and most fundamental strategy is **gradient descent**: repeatedly step in the direction of steepest descent:
 
 $$\theta_{t+1} = \theta_t - \eta \, \nabla_\theta \mathcal{L}(\theta_t)$$
 
@@ -14,7 +14,7 @@ This library provides a batch gradient descent optimizer with a fixed learning r
 
 ### The Gradient
 
-The gradient $\nabla_\theta \mathcal{L}$ is obtained via [back-propagation](../NeuralNetwork.md). Each component $\frac{\partial \mathcal{L}}{\partial \theta_i}$ tells how much the loss changes when $\theta_i$ is perturbed by a small amount. The gradient points **uphill**; subtracting it moves **downhill**.
+The gradient $\nabla_\theta \mathcal{L}$ is obtained via back-propagation. Each component $\frac{\partial \mathcal{L}}{\partial \theta_i}$ tells how much the loss changes when $\theta_i$ is perturbed by a small amount. The gradient points **uphill**; subtracting it moves **downhill**.
 
 ### Convergence Conditions
 
@@ -127,12 +127,12 @@ graph TD
     Opt -.->|"analytical solution at η→∞, 1 step"| LR
 ```
 
-| Component                                                 | Relationship                                                                                      |
-|-----------------------------------------------------------|---------------------------------------------------------------------------------------------------|
-| [Loss Functions](../losses/Loss.md)                       | Provides the `Cost()` and `Gradient()` the optimizer calls each iteration                         |
-| [Model](../model/Model.md)                                | Passes initial parameters to the optimizer and receives optimized parameters back                 |
-| [Regularization](../regularization/Regularization.md)     | Adds a penalty gradient to $\nabla\mathcal{L}$, biasing the optimizer toward simpler models       |
-| [Linear Regression](../../estimators/LinearRegression.md) | For MSE on a linear model, gradient descent converges to the same solution as the normal equation |
+| Component                                              | Relationship                                                                                      |
+|--------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| Loss Functions                                         | Provides the `Cost()` and `Gradient()` the optimizer calls each iteration                         |
+| Model                                                  | Passes initial parameters to the optimizer and receives optimized parameters back                 |
+| [Regularization](../regularization/Regularization.md)  | Adds a penalty gradient to $\nabla\mathcal{L}$, biasing the optimizer toward simpler models       |
+| [Linear Regression](../estimators/LinearRegression.md) | For MSE on a linear model, gradient descent converges to the same solution as the normal equation |
 
 ## References & Further Reading
 

@@ -122,11 +122,11 @@ graph TD
     Reg -.->|"L2 + MSE = Ridge regression"| LR
 ```
 
-| Component                                                 | Relationship                                                                                                |
-|-----------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
-| [Loss Functions](../losses/Loss.md)                       | Regularization is a penalty *added to* the loss: $\mathcal{L}_{\text{total}} = \mathcal{L} + \lambda\Omega$ |
-| [Optimizer](../optimizer/Optimizer.md)                    | Receives the combined gradient $\nabla\mathcal{L} + \lambda\nabla\Omega$                                    |
-| [Linear Regression](../../estimators/LinearRegression.md) | L2-regularized MSE with a linear model is **Ridge regression**; L1 is **Lasso**                             |
+| Component                                              | Relationship                                                                                                |
+|--------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| Loss Functions                                         | Regularization is a penalty *added to* the loss: $\mathcal{L}_{\text{total}} = \mathcal{L} + \lambda\Omega$ |
+| [Optimizer](../optimization/Optimizer.md)              | Receives the combined gradient $\nabla\mathcal{L} + \lambda\nabla\Omega$                                    |
+| [Linear Regression](../estimators/LinearRegression.md) | L2-regularized MSE with a linear model is **Ridge regression**; L1 is **Lasso**                             |
 
 ## References & Further Reading
 
