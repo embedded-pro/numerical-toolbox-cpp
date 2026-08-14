@@ -153,6 +153,45 @@ TEST_F(TestDeadbeatControl, scalar_two_step_closed_loop_is_stable)
     EXPECT_LT(std::abs(closedLoopEig), 1.0f);
 }
 
+TEST_F(TestDeadbeatControl, scalar_two_step_closed_loop_unity_dc_gain)
+{
+    math::SquareMatrix<float, 1> A{ { kScalarA } };
+    math::Matrix<float, 1, 1> B{ { kScalarB } };
+    controllers::DeadbeatControl<float, 1, 1, 2> ctrl{ A, B };
+
+    math::Vector<float, 1> x{ { 0.0f } };
+    math::Vector<float, 1> r{ { 3.0f } };
+    ctrl.SetReference(r);
+
+    for (std::size_t i = 0; i < 50; ++i)
+    {
+        const auto u = ctrl.ComputeControl(x);
+        x = A * x + B * u;
+    }
+
+    EXPECT_NEAR(x.at(0, 0), r.at(0, 0), math::Tolerance<float>());
+}
+
+TEST_F(TestDeadbeatControl, scalar_fast_plant_two_step_unity_dc_gain)
+{
+    static constexpr float kFastA = 0.6065f;
+    math::SquareMatrix<float, 1> A{ { kFastA } };
+    math::Matrix<float, 1, 1> B{ { kScalarB } };
+    controllers::DeadbeatControl<float, 1, 1, 2> ctrl{ A, B };
+
+    math::Vector<float, 1> x{ { 0.0f } };
+    math::Vector<float, 1> r{ { 3.0f } };
+    ctrl.SetReference(r);
+
+    for (std::size_t i = 0; i < 50; ++i)
+    {
+        const auto u = ctrl.ComputeControl(x);
+        x = A * x + B * u;
+    }
+
+    EXPECT_NEAR(x.at(0, 0), r.at(0, 0), math::Tolerance<float>());
+}
+
 TEST_F(TestDeadbeatControl, two_state_three_step_asymptotically_converges)
 {
     controllers::DeadbeatControl<float, 2, 1, 3> ctrl{ A2, B2 };

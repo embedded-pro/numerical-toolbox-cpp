@@ -125,9 +125,18 @@ namespace controllers
             AN = A * AN;
 
         auto gammaPinv = solvers::SolveSystem<T, StateSize, ReachSize>(gamma * gamma.Transpose(), gamma).Transpose();
+        auto gainRefOl = gammaPinv.template GetBlock<InputSize, StateSize>(0, 0);
+        gainState = gainRefOl * AN;
 
-        gainRef = gammaPinv.template GetBlock<InputSize, StateSize>(0, 0);
-        gainState = gainRef * AN;
+        if constexpr (StateSize == InputSize)
+        {
+            StateMatrix rhs = StateMatrix::Identity() - A + B * gainState;
+            gainRef = solvers::SolveSystem<T, StateSize, StateSize>(B, rhs);
+        }
+        else
+        {
+            gainRef = gainRefOl;
+        }
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
