@@ -1,5 +1,31 @@
 # Changelog
 
+## [3.1.0](https://github.com/embedded-pro/numerical-toolbox-cpp/compare/v3.0.0...v3.1.0) (2026-08-14)
+
+
+### Features
+
+* Add deadbeat controller ([#271](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/271)) ([69b491c](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/69b491cd1a6fe012a5ddc8ede18776398e95e6a1))
+
+
+### Bug Fixes
+
+* **adrc:** Add 3-arg Compute for actuator saturation anti-windup ([#276](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/276)) ([#282](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/282)) ([dbd43ec](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/dbd43ec4c9e8c7737dddd48768227bbfd2d2f8ab))
+* **adrc:** Guard ESO against forward-Euler instability with order-aware precondition ([#280](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/280)) ([7809292](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/780929232c188655432a11cba56a067a5e05f2c6))
+* **controllers:** Allow stateful feedforward in Feedforward2Dof ([#277](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/277)) ([#281](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/281)) ([13fba55](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/13fba550207192e845ddda65eccbf1e2f73d7803))
+* **controllers:** Apply N-bar precompensator in DeadbeatControl for unity DC gain ([#283](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/283)) ([8c0ea7c](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/8c0ea7c4c5199e0fd33060267fb3e0d6c8ff0b4f))
+* Correct issues 257 to 259 ([#285](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/285)) ([1cf95af](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/1cf95af6d855cc9320b5f7dc717687a6a6a7fcb9))
+* Dp45, matrix init, feedlin, dare and statistics ([#272](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/272)) ([d89092b](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/d89092b3bbb446914b40a3ceb3852536e5cc4d31))
+* **lqr:** Forward MaxIterations through Lqr and IntegralStateFeedbackLqi ([#279](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/279)) ([79e2fdc](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/79e2fdcf8cb25b682b10fcb0c4626c8c8b16b5e0))
+* Resolve issues 251, 252, and 253 ([#287](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/287)) ([0ca7e98](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/0ca7e985e053af5cdc8326fefd89af107286dd01))
+* Resolve issues 254-256 and sonar findings in MPC, IIR, Matrix ([#286](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/286)) ([c8b2636](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/c8b2636b55dcc4d99f334fa43f8008809fd4918d))
+* Resolve issues 260 to 267 ([#284](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/284)) ([666d21a](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/666d21a25f7c79357b4c5315673ab2a42f550fa0))
+
+
+### Build System
+
+* **deps:** Bump github/codeql-action/upload-sarif ([#268](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/268)) ([b522174](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/b5221740917a1c9e640552f9b90cea18fde80a2d))
+
 ## [3.0.0](https://github.com/embedded-pro/numerical-toolbox-cpp/compare/v2.0.0...v3.0.0) (2026-08-09)
 
 
