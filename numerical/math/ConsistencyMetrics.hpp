@@ -30,7 +30,7 @@ namespace math
 
         static constexpr float kZ975 = 1.95996f;
 
-        static float Chi2QuantileApprox(float z, float dof)
+        [[nodiscard]] OPTIMIZE_FOR_SPEED constexpr float Chi2QuantileApprox(float z, float dof)
         {
             const float mu = 1.0f - 2.0f / (9.0f * dof);
             const float sigma = math::Sqrt(2.0f / (9.0f * dof));

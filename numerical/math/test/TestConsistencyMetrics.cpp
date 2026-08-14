@@ -260,7 +260,6 @@ TEST_F(ConsistencyMetrics3DTest, IsTimeAveragedConsistentWithOneSample)
 
 TEST_F(ConsistencyMetrics3DTest, IsTimeAveragedConsistentLargeDofWilsonHilferty)
 {
-    // dof=15 > kMaxChiSquareDim; WH bounds ≈ [1.248, 5.499] after dividing by 5
     EXPECT_TRUE(Metrics::IsTimeAveragedConsistent(2.373f, 5));
     EXPECT_FALSE(Metrics::IsTimeAveragedConsistent(6.0f, 5));
 }
@@ -274,7 +273,6 @@ TEST_F(ConsistencyMetrics3DTest, IsTimeAveragedConsistentInconsistentOutOfBounds
 
 TEST_F(ConsistencyMetrics1DTest, IsTimeAveragedConsistentLargeNumSamplesUsesApproximation)
 {
-    // dof=100 >> kMaxChiSquareDim; WH bounds ≈ [0.742, 1.296] — old code gave hi≈0.205 (wrong)
     EXPECT_TRUE(Metrics::IsTimeAveragedConsistent(1.0f, 100));
     EXPECT_FALSE(Metrics::IsTimeAveragedConsistent(1.4f, 100));
 }

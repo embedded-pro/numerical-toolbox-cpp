@@ -11,6 +11,7 @@ target_link_libraries(numerical.math_test PUBLIC
 numerical_add_qemu_test(numerical.math_test)
 
 target_sources(numerical.math_test PRIVATE
+    TestCholeskyDecomposition.cpp
     TestComplexNumber.cpp
     TestMath.cpp
     TestConsistencyMetrics.cpp

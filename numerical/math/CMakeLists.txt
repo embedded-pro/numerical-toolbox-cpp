@@ -36,6 +36,7 @@ target_sources(numerical.math PRIVATE
 
 numerical_add_coverage_sources(numerical.math
     Math.cpp
+    CholeskyDecomposition.cpp
     ComplexNumber.cpp
     ConsistencyMetrics.cpp
     Cordic.cpp

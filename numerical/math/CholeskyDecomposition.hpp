@@ -77,4 +77,10 @@ namespace math
         const Vector<T, N> y = SolveLowerTriangular(l.value(), b);
         return SolveUpperTriangular(l.value().Transpose(), y);
     }
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+    extern template class CholeskyDecomposition<float, 1>;
+    extern template class CholeskyDecomposition<float, 2>;
+    extern template class CholeskyDecomposition<float, 3>;
+#endif
 }
