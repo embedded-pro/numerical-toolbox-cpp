@@ -160,6 +160,29 @@ TEST_F(TestDiscreteAlgebraicRiccatiEquation, two_by_two_full_input_solution_is_s
     EXPECT_GT(det, 0.0f);
 }
 
+TEST_F(TestDiscreteAlgebraicRiccatiEquation, small_scale_q_and_r_do_not_converge_prematurely)
+{
+    math::SquareMatrix<float, 2> A{
+        { 1.0f, 0.1f },
+        { 0.0f, 1.0f }
+    };
+    math::Matrix<float, 2, 1> B{
+        { 0.005f },
+        { 0.1f }
+    };
+    const float scale = 1e-3f;
+    math::SquareMatrix<float, 2> Q{ { scale, 0.0f }, { 0.0f, scale } };
+    math::SquareMatrix<float, 1> R{ { scale } };
+
+    auto unscaled = twoByOneSolver.Solve(A, B, math::SquareMatrix<float, 2>::Identity(), math::SquareMatrix<float, 1>{ { 1.0f } });
+    auto scaled = twoByOneSolver.Solve(A, B, Q, R);
+
+    ASSERT_TRUE(unscaled.converged);
+    ASSERT_TRUE(scaled.converged);
+    EXPECT_NEAR(scaled.value.at(0, 0), unscaled.value.at(0, 0) * scale, 1e-3f);
+    EXPECT_NEAR(scaled.value.at(1, 1), unscaled.value.at(1, 1) * scale, 1e-3f);
+}
+
 TEST_F(TestDiscreteAlgebraicRiccatiEquation, solve_reports_not_converged_for_single_iteration_unstable_system)
 {
     solvers::DiscreteAlgebraicRiccatiEquation<float, 2, 1, 1> singleIterSolver;

@@ -9,6 +9,7 @@
 #include "numerical/math/QNumber.hpp"
 #include "numerical/math/Tolerance.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
+#include <algorithm>
 #include <cmath>
 
 namespace solvers
@@ -86,9 +87,11 @@ namespace solvers
             for (std::size_t j = 0; j < StateSize; ++j)
             {
                 const float pij = math::ToFloat(P.at(i, j));
+                const float prev = math::ToFloat(Pprev.at(i, j));
                 if (!std::isfinite(pij))
                     return false;
-                if (math::Abs(pij - math::ToFloat(Pprev.at(i, j))) > tolerance)
+                const float scale = std::max(math::Abs(pij), math::Abs(prev));
+                if (math::Abs(pij - prev) > tolerance * tolerance * (1.0f + scale))
                     return false;
             }
 
