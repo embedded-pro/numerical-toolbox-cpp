@@ -7,9 +7,8 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/QNumber.hpp"
-#include "numerical/math/Tolerance.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
-#include <cmath>
+#include <algorithm>
 
 namespace solvers
 {
@@ -39,9 +38,13 @@ namespace solvers
         SolveResult Solve(const StateMatrix& A, const InputMatrix& B, const StateMatrix& Q, const InputWeightMatrix& R) const;
 
     private:
+        static constexpr float kRelativeConvergenceTolerance = 1e-6f;
+        static constexpr float kDivergenceBound = 1e30f;
+
         StateMatrix Iterate(const StateMatrix& P, const StateMatrix& A, const InputMatrix& B,
             const StateMatrix& Q, const InputWeightMatrix& R) const;
-        bool HasConverged(const StateMatrix& P, const StateMatrix& Pprev, float tolerance) const;
+        bool HasConverged(const StateMatrix& P, const StateMatrix& Pprev) const;
+        bool HasDiverged(const StateMatrix& P) const;
     };
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t MaxIterations>
@@ -71,7 +74,10 @@ namespace solvers
             StateMatrix Pprev = P;
             P = Iterate(P, A, B, Q, R);
 
-            if (HasConverged(P, Pprev, math::Tolerance<T>()))
+            if (HasDiverged(P))
+                return { P, false };
+
+            if (HasConverged(P, Pprev))
                 return { P, true };
         }
 
@@ -80,24 +86,39 @@ namespace solvers
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t MaxIterations>
     bool DiscreteAlgebraicRiccatiEquation<T, StateSize, InputSize, MaxIterations>::HasConverged(
-        const StateMatrix& P, const StateMatrix& Pprev, float tolerance) const
+        const StateMatrix& P, const StateMatrix& Pprev) const
     {
+        float magnitude = 0.0f;
+        float deviation = 0.0f;
+
         for (std::size_t i = 0; i < StateSize; ++i)
             for (std::size_t j = 0; j < StateSize; ++j)
             {
                 const float pij = math::ToFloat(P.at(i, j));
-                if (!std::isfinite(pij))
-                    return false;
-                if (math::Abs(pij - math::ToFloat(Pprev.at(i, j))) > tolerance)
-                    return false;
+                const float prev = math::ToFloat(Pprev.at(i, j));
+                magnitude = std::max(magnitude, math::Abs(pij));
+                deviation = std::max(deviation, math::Abs(pij - prev));
             }
 
-        return true;
+        return deviation <= kRelativeConvergenceTolerance * magnitude;
+    }
+
+    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t MaxIterations>
+    bool DiscreteAlgebraicRiccatiEquation<T, StateSize, InputSize, MaxIterations>::HasDiverged(
+        const StateMatrix& P) const
+    {
+        for (std::size_t i = 0; i < StateSize; ++i)
+            for (std::size_t j = 0; j < StateSize; ++j)
+                if (math::Abs(math::ToFloat(P.at(i, j))) > kDivergenceBound)
+                    return true;
+
+        return false;
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class DiscreteAlgebraicRiccatiEquation<float, 1, 1>;
     extern template class DiscreteAlgebraicRiccatiEquation<float, 2, 1>;
+    extern template class DiscreteAlgebraicRiccatiEquation<float, 2, 1, 1>;
     extern template class DiscreteAlgebraicRiccatiEquation<float, 2, 2>;
     extern template class DiscreteAlgebraicRiccatiEquation<float, 4, 1>;
 #endif

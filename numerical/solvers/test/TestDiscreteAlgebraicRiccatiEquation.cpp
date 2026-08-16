@@ -160,6 +160,58 @@ TEST_F(TestDiscreteAlgebraicRiccatiEquation, two_by_two_full_input_solution_is_s
     EXPECT_GT(det, 0.0f);
 }
 
+TEST_F(TestDiscreteAlgebraicRiccatiEquation, small_scale_q_and_r_do_not_converge_prematurely)
+{
+    math::SquareMatrix<float, 2> A{
+        { 1.0f, 0.1f },
+        { 0.0f, 1.0f }
+    };
+    math::Matrix<float, 2, 1> B{
+        { 0.005f },
+        { 0.1f }
+    };
+    const float scale = 1e-3f;
+    math::SquareMatrix<float, 2> Q{ { scale, 0.0f }, { 0.0f, scale } };
+    math::SquareMatrix<float, 1> R{ { scale } };
+
+    auto unscaled = twoByOneSolver.Solve(A, B, math::SquareMatrix<float, 2>::Identity(), math::SquareMatrix<float, 1>{ { 1.0f } });
+    auto scaled = twoByOneSolver.Solve(A, B, Q, R);
+
+    ASSERT_TRUE(unscaled.converged);
+    ASSERT_TRUE(scaled.converged);
+    EXPECT_NEAR(scaled.value.at(0, 0), unscaled.value.at(0, 0) * scale, 1e-3f);
+    EXPECT_NEAR(scaled.value.at(1, 1), unscaled.value.at(1, 1) * scale, 1e-3f);
+}
+
+TEST_F(TestDiscreteAlgebraicRiccatiEquation, ten_decades_of_q_and_r_scale_produce_proportional_riccati_solution)
+{
+    math::SquareMatrix<float, 2> A{
+        { 1.0f, 0.1f },
+        { 0.0f, 1.0f }
+    };
+    math::Matrix<float, 2, 1> B{
+        { 0.005f },
+        { 0.1f }
+    };
+    auto Q = math::SquareMatrix<float, 2>::Identity();
+    math::SquareMatrix<float, 1> R{ { 1.0f } };
+
+    auto unscaled = twoByOneSolver.Solve(A, B, Q, R);
+    ASSERT_TRUE(unscaled.converged);
+
+    for (float scale : { 1e-3f, 1e-5f, 1e-6f, 1e-8f, 1e-10f })
+    {
+        math::SquareMatrix<float, 2> Qscaled{ { scale, 0.0f }, { 0.0f, scale } };
+        math::SquareMatrix<float, 1> Rscaled{ { scale } };
+
+        auto scaled = twoByOneSolver.Solve(A, B, Qscaled, Rscaled);
+
+        ASSERT_TRUE(scaled.converged) << "scale=" << scale;
+        const float expected = unscaled.value.at(0, 0) * scale;
+        EXPECT_NEAR(scaled.value.at(0, 0), expected, expected * 1e-2f) << "scale=" << scale;
+    }
+}
+
 TEST_F(TestDiscreteAlgebraicRiccatiEquation, solve_reports_not_converged_for_single_iteration_unstable_system)
 {
     solvers::DiscreteAlgebraicRiccatiEquation<float, 2, 1, 1> singleIterSolver;
@@ -169,6 +221,18 @@ TEST_F(TestDiscreteAlgebraicRiccatiEquation, solve_reports_not_converged_for_sin
     math::SquareMatrix<float, 1> R{ { 1.0f } };
 
     auto result = singleIterSolver.Solve(A, B, Q, R);
+
+    EXPECT_FALSE(result.converged);
+}
+
+TEST_F(TestDiscreteAlgebraicRiccatiEquation, uncontrollable_unstable_system_reports_not_converged_instead_of_diverging)
+{
+    math::SquareMatrix<float, 2> A{ { 10.0f, 0.0f }, { 0.0f, 10.0f } };
+    math::Matrix<float, 2, 1> B{ { 1.0f }, { 1.0f } };
+    auto Q = math::SquareMatrix<float, 2>::Identity();
+    math::SquareMatrix<float, 1> R{ { 1.0f } };
+
+    auto result = twoByOneSolver.Solve(A, B, Q, R);
 
     EXPECT_FALSE(result.converged);
 }

@@ -169,6 +169,42 @@ TEST_F(TestLqr, high_frequency_plant_converges_with_raised_iteration_cap)
     EXPECT_NEAR(lqr.GetRiccatiSolution().at(1, 1), 549.203735f, 1.0f);
 }
 
+TEST_F(TestLqr, try_create_returns_gain_for_convergent_system)
+{
+    auto lqr = controllers::Lqr<float, 2, 1>::TryCreate(A2, B2, Q2, R2);
+
+    ASSERT_TRUE(lqr.has_value());
+    EXPECT_NEAR(lqr->GetGain().at(0, 0), kK0, 5e-2f);
+    EXPECT_NEAR(lqr->GetGain().at(0, 1), kK1, 5e-2f);
+}
+
+TEST_F(TestLqr, try_create_returns_nullopt_for_non_convergent_system)
+{
+    math::SquareMatrix<float, 2> A{ { 10.0f, 0.0f }, { 0.0f, 10.0f } };
+    math::Matrix<float, 2, 1> B{ { 1.0f }, { 1.0f } };
+    auto Q = math::SquareMatrix<float, 2>::Identity();
+    math::SquareMatrix<float, 1> R{ { 1.0f } };
+
+    auto lqr = controllers::Lqr<float, 2, 1, 1>::TryCreate(A, B, Q, R);
+
+    EXPECT_FALSE(lqr.has_value());
+}
+
+TEST_F(TestLqr, small_scale_q_and_r_produce_scale_invariant_gain)
+{
+    const float scale = 1e-3f;
+    math::SquareMatrix<float, 2> Qsmall{ { Q2.at(0, 0) * scale, 0.0f }, { 0.0f, Q2.at(1, 1) * scale } };
+    math::SquareMatrix<float, 1> Rsmall{ { R2.at(0, 0) * scale } };
+
+    auto reference = controllers::Lqr<float, 2, 1>::TryCreate(A2, B2, Q2, R2);
+    auto scaled = controllers::Lqr<float, 2, 1>::TryCreate(A2, B2, Qsmall, Rsmall);
+
+    ASSERT_TRUE(reference.has_value());
+    ASSERT_TRUE(scaled.has_value());
+    EXPECT_NEAR(scaled->GetGain().at(0, 0), reference->GetGain().at(0, 0), 1e-2f);
+    EXPECT_NEAR(scaled->GetGain().at(0, 1), reference->GetGain().at(0, 1), 1e-2f);
+}
+
 TEST_F(TestLqr, two_instances_with_same_matrices_produce_identical_gains)
 {
     controllers::Lqr<float, 2, 1> lqr1{ A2, B2, Q2, R2 };

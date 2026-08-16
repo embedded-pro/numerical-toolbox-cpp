@@ -10,6 +10,7 @@
 #include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/solvers/DiscreteAlgebraicRiccatiEquation.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
+#include <optional>
 
 namespace controllers
 {
@@ -33,11 +34,20 @@ namespace controllers
         Lqr(const math::LinearTimeInvariant<T, StateSize, InputSize>& plant,
             const StateMatrix& Q, const InputWeightMatrix& R);
 
+        [[nodiscard]] static std::optional<Lqr> TryCreate(
+            const StateMatrix& A, const InputMatrix& B, const StateMatrix& Q, const InputWeightMatrix& R);
+
         InputVector ComputeControl(const StateVector& state) override;
         [[nodiscard]] const GainMatrix& GetGain() const;
         [[nodiscard]] const StateMatrix& GetRiccatiSolution() const;
 
     private:
+        struct PrecomputedRiccatiTag
+        {
+        };
+
+        Lqr(const StateMatrix& A, const InputMatrix& B, const StateMatrix& P, const InputWeightMatrix& R, PrecomputedRiccatiTag);
+
         void ComputeGain(const StateMatrix& A, const InputMatrix& B, const StateMatrix& P, const InputWeightMatrix& R);
 
         GainMatrix gain;
@@ -63,6 +73,27 @@ namespace controllers
     Lqr<T, StateSize, InputSize, MaxIterations>::Lqr(const GainMatrix& precomputedGain)
         : gain(precomputedGain)
     {}
+
+    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t MaxIterations>
+    Lqr<T, StateSize, InputSize, MaxIterations>::Lqr(
+        const StateMatrix& A, const InputMatrix& B, const StateMatrix& P, const InputWeightMatrix& R, PrecomputedRiccatiTag)
+        : riccatiSolution(P)
+        , riccatiSolutionAvailable(true)
+    {
+        ComputeGain(A, B, riccatiSolution, R);
+    }
+
+    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t MaxIterations>
+    std::optional<Lqr<T, StateSize, InputSize, MaxIterations>>
+    Lqr<T, StateSize, InputSize, MaxIterations>::TryCreate(
+        const StateMatrix& A, const InputMatrix& B, const StateMatrix& Q, const InputWeightMatrix& R)
+    {
+        auto result = solvers::DiscreteAlgebraicRiccatiEquation<T, StateSize, InputSize, MaxIterations>{}.Solve(A, B, Q, R);
+        if (!result.converged)
+            return std::nullopt;
+
+        return Lqr(A, B, result.value, R, PrecomputedRiccatiTag{});
+    }
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t MaxIterations>
     OPTIMIZE_FOR_SPEED
@@ -107,6 +138,7 @@ namespace controllers
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class Lqr<float, 1, 1>;
     extern template class Lqr<float, 2, 1>;
+    extern template class Lqr<float, 2, 1, 1>;
     extern template class Lqr<float, 3, 1>;
     extern template class Lqr<float, 4, 1>;
     extern template class Lqr<float, 2, 2>;

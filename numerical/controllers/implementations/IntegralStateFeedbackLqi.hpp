@@ -8,6 +8,7 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/math/Matrix.hpp"
+#include <optional>
 
 namespace controllers
 {
@@ -34,6 +35,12 @@ namespace controllers
             const math::SquareMatrix<T, InputSize>& R,
             T ts);
 
+        [[nodiscard]] static std::optional<IntegralStateFeedbackLqi> TryCreate(
+            const math::LinearTimeInvariant<T, StateSize, InputSize, OutputSize>& plant,
+            const math::SquareMatrix<T, AugmentedSize>& Q,
+            const math::SquareMatrix<T, InputSize>& R,
+            T ts);
+
         OPTIMIZE_FOR_SPEED InputVector ComputeControl(
             const StateVector& x,
             const OutputVector& reference,
@@ -45,6 +52,15 @@ namespace controllers
         [[nodiscard]] const GainIntegralMatrix& GetGainIntegral() const;
 
     private:
+        using AugmentedStateMatrix = math::SquareMatrix<T, AugmentedSize>;
+        using AugmentedInputMatrix = math::Matrix<T, AugmentedSize, InputSize>;
+
+        static void BuildAugmentedSystem(
+            const math::LinearTimeInvariant<T, StateSize, InputSize, OutputSize>& plant,
+            T ts,
+            AugmentedStateMatrix& Aa,
+            AugmentedInputMatrix& Ba);
+
         GainStateMatrix gainState{};
         GainIntegralMatrix gainIntegral{};
         IntegralVector integral{};
@@ -69,20 +85,52 @@ namespace controllers
         T ts)
         : sampleTime{ ts }
     {
-        math::SquareMatrix<T, AugmentedSize> Aa{};
-        math::Matrix<T, AugmentedSize, InputSize> Ba{};
-
-        Aa.SetBlock(plant.A, 0, 0);
-        Aa.SetBlock(plant.C * T(-ts), StateSize, 0);
-        for (std::size_t r = 0; r < OutputSize; ++r)
-            Aa.at(StateSize + r, StateSize + r) = T(1);
-        Ba.SetBlock(plant.B, 0, 0);
+        AugmentedStateMatrix Aa{};
+        AugmentedInputMatrix Ba{};
+        BuildAugmentedSystem(plant, ts, Aa, Ba);
 
         Lqr<T, AugmentedSize, InputSize, MaxIterations> lqr{ Aa, Ba, Q, R };
         const auto& Ka = lqr.GetGain();
 
         gainState = Ka.template GetBlock<InputSize, StateSize>(0, 0);
         gainIntegral = Ka.template GetBlock<InputSize, OutputSize>(0, StateSize);
+    }
+
+    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t OutputSize, std::size_t MaxIterations>
+    std::optional<IntegralStateFeedbackLqi<T, StateSize, InputSize, OutputSize, MaxIterations>>
+    IntegralStateFeedbackLqi<T, StateSize, InputSize, OutputSize, MaxIterations>::TryCreate(
+        const math::LinearTimeInvariant<T, StateSize, InputSize, OutputSize>& plant,
+        const math::SquareMatrix<T, AugmentedSize>& Q,
+        const math::SquareMatrix<T, InputSize>& R,
+        T ts)
+    {
+        AugmentedStateMatrix Aa{};
+        AugmentedInputMatrix Ba{};
+        BuildAugmentedSystem(plant, ts, Aa, Ba);
+
+        auto lqr = Lqr<T, AugmentedSize, InputSize, MaxIterations>::TryCreate(Aa, Ba, Q, R);
+        if (!lqr)
+            return std::nullopt;
+
+        const auto& Ka = lqr->GetGain();
+        return IntegralStateFeedbackLqi(
+            Ka.template GetBlock<InputSize, StateSize>(0, 0),
+            Ka.template GetBlock<InputSize, OutputSize>(0, StateSize),
+            ts);
+    }
+
+    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t OutputSize, std::size_t MaxIterations>
+    void IntegralStateFeedbackLqi<T, StateSize, InputSize, OutputSize, MaxIterations>::BuildAugmentedSystem(
+        const math::LinearTimeInvariant<T, StateSize, InputSize, OutputSize>& plant,
+        T ts,
+        AugmentedStateMatrix& Aa,
+        AugmentedInputMatrix& Ba)
+    {
+        Aa.SetBlock(plant.A, 0, 0);
+        Aa.SetBlock(plant.C * T(-ts), StateSize, 0);
+        for (std::size_t r = 0; r < OutputSize; ++r)
+            Aa.at(StateSize + r, StateSize + r) = T(1);
+        Ba.SetBlock(plant.B, 0, 0);
     }
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t OutputSize, std::size_t MaxIterations>
@@ -120,5 +168,6 @@ namespace controllers
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class IntegralStateFeedbackLqi<float, 2, 1, 1>;
+    extern template class IntegralStateFeedbackLqi<float, 2, 1, 1, 1>;
 #endif
 }
