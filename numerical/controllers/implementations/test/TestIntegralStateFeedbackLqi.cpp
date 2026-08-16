@@ -213,6 +213,33 @@ TEST_F(TestIntegralStateFeedbackLqi, direct_gain_constructor_matches_lqr_constru
     EXPECT_NEAR(u1.at(0, 0), u2.at(0, 0), math::Tolerance<float>());
 }
 
+TEST_F(TestIntegralStateFeedbackLqi, try_create_returns_gains_matching_asserting_constructor)
+{
+    auto created = Controller::TryCreate(plant, Q, R, 0.01f);
+
+    ASSERT_TRUE(created.has_value());
+    EXPECT_NEAR(created->GetGainState().at(0, 0), controller.GetGainState().at(0, 0), math::Tolerance<float>());
+    EXPECT_NEAR(created->GetGainState().at(0, 1), controller.GetGainState().at(0, 1), math::Tolerance<float>());
+    EXPECT_NEAR(created->GetGainIntegral().at(0, 0), controller.GetGainIntegral().at(0, 0), math::Tolerance<float>());
+}
+
+TEST_F(TestIntegralStateFeedbackLqi, try_create_returns_nullopt_for_non_convergent_plant)
+{
+    using NonConvergingController = controllers::IntegralStateFeedbackLqi<float, 2, 1, 1, 1>;
+
+    Plant unstable{};
+    unstable.A = math::SquareMatrix<float, 2>{
+        { 10.0f, 0.0f },
+        { 0.0f, 10.0f }
+    };
+    unstable.B = math::Matrix<float, 2, 1>{ { 1.0f }, { 1.0f } };
+    unstable.C = math::Matrix<float, 1, 2>{ { 1.0f, 0.0f } };
+
+    auto created = NonConvergingController::TryCreate(unstable, Q, R, 0.01f);
+
+    EXPECT_FALSE(created.has_value());
+}
+
 TEST_F(TestIntegralStateFeedbackLqi, direct_gain_constructor_get_gains)
 {
     math::Matrix<float, 1, 2> kx{ { 1.5f, 0.8f } };
