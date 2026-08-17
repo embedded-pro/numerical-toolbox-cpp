@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.1](https://github.com/embedded-pro/numerical-toolbox-cpp/compare/v3.1.0...v3.1.1) (2026-08-16)
+
+
+### Bug Fixes
+
+* Use scale-invariant convergence tolerance in DARE solver ([#288](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/288)) ([#289](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/289)) ([7524ab1](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/7524ab123cee292cc5d02c760b62422e82b46f45))
+
 ## [3.1.0](https://github.com/embedded-pro/numerical-toolbox-cpp/compare/v3.0.0...v3.1.0) (2026-08-14)
 
 
