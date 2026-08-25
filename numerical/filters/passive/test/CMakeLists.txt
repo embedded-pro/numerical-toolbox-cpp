@@ -9,7 +9,7 @@ target_link_libraries(numerical.filters.passive_test PUBLIC
     numerical.controllers_test_helper
 )
 
-numerical_add_qemu_test(numerical.filters.passive_test)
+numerical_link_qemu_runtime(numerical.filters.passive_test)
 
 target_sources(numerical.filters.passive_test PRIVATE
     TestBiquadCascade.cpp

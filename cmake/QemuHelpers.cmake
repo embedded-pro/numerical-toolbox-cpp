@@ -1,16 +1,14 @@
-function(numerical_add_qemu_test target)
-    if(NOT DEFINED QEMU_MACHINE)
+function(numerical_link_qemu_runtime target)
+    if(NOT EMIL_BUILD_QEMU)
         return()
     endif()
-    target_link_libraries(${target} PRIVATE platform_qemu_startup)
-    target_link_libraries(${target} PRIVATE -lrdimon)
-    add_test(
-        NAME qemu.${target}
-        COMMAND qemu-system-arm
-            -machine ${QEMU_MACHINE}
-            -nographic
-            -semihosting-config enable=on,target=native
-            -kernel $<TARGET_FILE:${target}>
+    target_link_libraries(${target} PRIVATE
+        hal.cortex_m
+        hal.cortex_m.runtime
+        hal.qemu.syscalls
+        hal.qemu.default_init
+        hal.qemu.sync
+        hal.qemu.cortex
+        gmock_main
     )
-    set_tests_properties(qemu.${target} PROPERTIES TIMEOUT 120)
 endfunction()

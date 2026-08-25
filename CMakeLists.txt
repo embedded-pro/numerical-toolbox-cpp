@@ -38,7 +38,7 @@ if (NUMERICAL_TOOLBOX_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/embedded-pro/embedded-infra-lib.git
-        GIT_TAG        2848dbf163a6ebf159e29f7f4f73b96f7773d20d # Unreleased
+        GIT_TAG        b1056e80ab5376d7e4ee821c5b3c5680bc01f751 # Unreleased
     )
 
     set(EMIL_INCLUDE_MBEDTLS Off CACHE BOOL "" FORCE)
@@ -47,16 +47,7 @@ if (NUMERICAL_TOOLBOX_STANDALONE)
     set(EMIL_BUILD_ECHO_COMPILERS Off CACHE BOOL "" FORCE)
     set(EMIL_ENABLE_DOCKER_TOOLS Off CACHE BOOL "" FORCE)
 
-    if(DEFINED QEMU_MACHINE)
-        set(gtest_disable_pthreads ON CACHE BOOL "" FORCE)
-    endif()
-
     FetchContent_MakeAvailable(emil)
-
-    if(DEFINED QEMU_MACHINE)
-        function(emil_add_test target)
-        endfunction()
-    endif()
 endif()
 
 project(numerical-toolbox LANGUAGES C CXX ASM VERSION 3.1.1) # x-release-please-version
@@ -96,10 +87,6 @@ elseif (NUMERICAL_TOOLBOX_BUILD_INTEGRATION_TESTS)
 endif()
 
 include(QemuHelpers)
-
-if(DEFINED QEMU_MACHINE)
-    add_subdirectory(platform/qemu)
-endif()
 
 add_subdirectory(numerical)
 

@@ -7,7 +7,7 @@ target_link_libraries(numerical.regularization_test PUBLIC
     numerical.regularization
 )
 
-numerical_add_qemu_test(numerical.regularization_test)
+numerical_link_qemu_runtime(numerical.regularization_test)
 
 target_sources(numerical.regularization_test PRIVATE
     TestL1.cpp

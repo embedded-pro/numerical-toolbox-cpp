@@ -8,7 +8,7 @@ target_link_libraries(numerical.controllers_test PUBLIC
     numerical.math_test_helper
 )
 
-numerical_add_qemu_test(numerical.controllers_test)
+numerical_link_qemu_runtime(numerical.controllers_test)
 
 target_sources(numerical.controllers_test PRIVATE
     TestBangBangHysteresis.cpp

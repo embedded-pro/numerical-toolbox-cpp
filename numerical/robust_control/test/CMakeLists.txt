@@ -7,7 +7,7 @@ target_link_libraries(numerical.robust_control_test PUBLIC
     numerical.robust_control
 )
 
-numerical_add_qemu_test(numerical.robust_control_test)
+numerical_link_qemu_runtime(numerical.robust_control_test)
 
 target_sources(numerical.robust_control_test PRIVATE
     TestActiveDisturbanceRejection.cpp
