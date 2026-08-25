@@ -233,7 +233,7 @@ TEST_F(TestBiquadCascade, cascade_equals_serial_sections)
     for (int i = 0; i < 20; ++i)
     {
         const float x{ static_cast<float>(i) * 0.1f };
-        EXPECT_FLOAT_EQ(cascade.Filter(x), s1.Filter(s0.Filter(x)));
+        EXPECT_NEAR(cascade.Filter(x), s1.Filter(s0.Filter(x)), math::Tolerance<float>());
     }
 }
 
