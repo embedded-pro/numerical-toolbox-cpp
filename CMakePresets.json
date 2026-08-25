@@ -67,7 +67,10 @@
         "CMAKE_CONFIGURATION_TYPES": "RelWithDebInfo",
         "NUMERICAL_TOOLBOX_BUILD_TESTS": "On",
         "NUMERICAL_TOOLBOX_BUILD_SIMULATOR": "Off",
-        "QEMU_MACHINE": "mps2-an386",
+        "EMIL_BUILD_QEMU": "On",
+        "EMIL_BUILD_CORTEX_M": "On",
+        "TARGET_CORTEX": "m4",
+        "CMAKE_CROSSCOMPILING_EMULATOR": "qemu-system-arm;-M;mps2-an386;-nographic;-semihosting-config;enable=on,target=native;-kernel",
         "CMAKE_CXX_FLAGS": "-DGTEST_HAS_STREAM_REDIRECTION=0 -DGTEST_HAS_POSIX_RE=0 -D_POSIX_C_SOURCE=200112L"
       }
     },
@@ -81,7 +84,10 @@
         "CMAKE_CONFIGURATION_TYPES": "RelWithDebInfo",
         "NUMERICAL_TOOLBOX_BUILD_TESTS": "On",
         "NUMERICAL_TOOLBOX_BUILD_SIMULATOR": "Off",
-        "QEMU_MACHINE": "mps2-an500",
+        "EMIL_BUILD_QEMU": "On",
+        "EMIL_BUILD_CORTEX_M": "On",
+        "TARGET_CORTEX": "m7",
+        "CMAKE_CROSSCOMPILING_EMULATOR": "qemu-system-arm;-M;mps2-an500;-nographic;-semihosting-config;enable=on,target=native;-kernel",
         "CMAKE_CXX_FLAGS": "-DGTEST_HAS_STREAM_REDIRECTION=0 -DGTEST_HAS_POSIX_RE=0 -D_POSIX_C_SOURCE=200112L"
       }
     }
@@ -126,6 +132,7 @@
       "configuration": "RelWithDebInfo",
       "configurePreset": "qemu-cortex-m4",
       "targets": [
+        "hal.qemu.test",
         "numerical.analysis_test",
         "numerical.analysis.windowing_test",
         "numerical.control_analysis_test",
@@ -147,6 +154,7 @@
       "configuration": "RelWithDebInfo",
       "configurePreset": "qemu-cortex-m7",
       "targets": [
+        "hal.qemu.test",
         "numerical.analysis_test",
         "numerical.analysis.windowing_test",
         "numerical.control_analysis_test",

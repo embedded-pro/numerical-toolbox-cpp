@@ -7,7 +7,7 @@ target_link_libraries(numerical.analysis.windowing_test PUBLIC
     numerical.analysis.windowing
 )
 
-numerical_add_qemu_test(numerical.analysis.windowing_test)
+numerical_link_qemu_runtime(numerical.analysis.windowing_test)
 
 target_sources(numerical.analysis.windowing_test PRIVATE
     TestWindowing.cpp

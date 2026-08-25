@@ -7,7 +7,7 @@ target_link_libraries(numerical.optimization_test PUBLIC
     numerical.optimization
 )
 
-numerical_add_qemu_test(numerical.optimization_test)
+numerical_link_qemu_runtime(numerical.optimization_test)
 
 target_sources(numerical.optimization_test PRIVATE
     TestBayesianOptimization.cpp
