@@ -146,8 +146,8 @@ namespace filters
         T f6{ bx * T(2) * (qw * qy + qx * qz) + bz * (T(1) - T(2) * (qx * qx + qy * qy)) - mz };
 
         T gw{ -T(2) * bz * qy * f4 + (-T(2) * bx * qz + T(2) * bz * qx) * f5 + T(2) * bx * qy * f6 };
-        T gx{ T(2) * bz * qz * f4 + (T(2) * bx * qy + T(2) * bz * qw) * f5 + (T(2) * bx * qz - T(2) * bz * qw) * f6 };
-        T gy{ (-T(4) * bx * qy - T(2) * bz * qw) * f4 + (T(2) * bx * qx + T(2) * bz * qz) * f5 + (T(2) * bx * qw + T(2) * bz * qy) * f6 };
+        T gx{ T(2) * bz * qz * f4 + (T(2) * bx * qy + T(2) * bz * qw) * f5 + (T(2) * bx * qz - T(4) * bz * qx) * f6 };
+        T gy{ (-T(4) * bx * qy - T(2) * bz * qw) * f4 + (T(2) * bx * qx + T(2) * bz * qz) * f5 + (T(2) * bx * qw - T(4) * bz * qy) * f6 };
         T gz{ (-T(4) * bx * qz + T(2) * bz * qx) * f4 + (-T(2) * bx * qw + T(2) * bz * qy) * f5 + T(2) * bx * qx * f6 };
 
         T invNorm{ SafeInvSqrt(gw * gw + gx * gx + gy * gy + gz * gz) };

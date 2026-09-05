@@ -5,6 +5,7 @@
 #endif
 
 #include "infra/util/BoundedVector.hpp"
+#include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Math.hpp"
 #include <array>
@@ -83,6 +84,9 @@ namespace analysis
         static_assert(N > 0, "DiscreteWaveletTransform N must be > 0");
         static_assert(Levels > 0, "DiscreteWaveletTransform Levels must be > 0");
         static_assert(Taps >= 2, "DiscreteWaveletTransform Taps must be >= 2");
+        static_assert(Levels < 32, "DiscreteWaveletTransform Levels must be < 32");
+        static_assert(N % (std::size_t{ 1 } << Levels) == 0,
+            "DiscreteWaveletTransform N must be divisible by 2^Levels for exact reconstruction");
 
     public:
         using Signal = typename infra::BoundedVector<T>::template WithMaxSize<N>;
@@ -155,26 +159,19 @@ namespace analysis
         out.clear();
         out.resize(outLen, T{ 0 });
 
-        for (std::size_t n = 0; n < outLen; ++n)
-        {
-            T sumA{ 0 };
-            T sumD{ 0 };
-            for (std::size_t i = 0; i < half; ++i)
+        for (std::size_t i = 0; i < half; ++i)
+            for (std::size_t k = 0; k < Taps; ++k)
             {
-                std::size_t fIdx = (n + outLen - 2 * i) % outLen;
-                if (fIdx < Taps)
-                {
-                    sumA += filters.lowAnalysis[fIdx] * ca[i];
-                    sumD += filters.highAnalysis[fIdx] * cd[i];
-                }
+                const std::size_t n = (2 * i + Taps - 1 - k) % outLen;
+                out[n] += filters.lowSynthesis[k] * ca[i] + filters.highSynthesis[k] * cd[i];
             }
-            out[n] = sumA + sumD;
-        }
     }
 
     template<typename T, std::size_t N, std::size_t Levels, std::size_t Taps>
     OPTIMIZE_FOR_SPEED void DiscreteWaveletTransform<T, N, Levels, Taps>::Forward(const Signal& x, Signal& coeffs)
     {
+        really_assert(x.size() == N);
+
         coeffs.clear();
         coeffs.resize(N, T{ 0 });
 
@@ -205,6 +202,8 @@ namespace analysis
     template<typename T, std::size_t N, std::size_t Levels, std::size_t Taps>
     void DiscreteWaveletTransform<T, N, Levels, Taps>::Inverse(const Signal& coeffs, Signal& x)
     {
+        really_assert(coeffs.size() == N);
+
         std::size_t approxLen = N;
         for (std::size_t lvl = 0; lvl < Levels; ++lvl)
             approxLen /= 2;

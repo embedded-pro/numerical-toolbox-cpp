@@ -44,7 +44,7 @@ namespace filters::passive
         BiquadCoeffs<T> Section(std::size_t i) const noexcept;
 
     private:
-        static constexpr std::size_t kMaxSections{ (MaxOrder + 1) / 2 };
+        static constexpr std::size_t kMaxSections{ MaxOrder };
 
         using ComplexT = math::Complex<T>;
 
@@ -68,6 +68,10 @@ namespace filters::passive
             std::array<bool, 32>& used, std::size_t& bi, ComplexT z1, T& b1, T& b2) noexcept;
         static void PairZero(const std::array<ComplexT, 32>& bz, std::size_t numB,
             std::array<bool, 32>& used, std::size_t& bi, T& b0, T& b1, T& b2) noexcept;
+
+        static T CascadeMagnitude(const std::array<BiquadCoeffs<T>, kMaxSections>& out,
+            std::size_t count, T omega) noexcept;
+        void NormalizeAt(T omega) noexcept;
 
         static void BuildSections(const std::array<ComplexT, 32>& bz, std::size_t numB,
             const std::array<ComplexT, 32>& az, std::size_t numA, T gain,
@@ -243,6 +247,12 @@ namespace filters::passive
         std::array<bool, 32> bUsed{};
         std::array<bool, 32> aUsed{};
 
+        if ((numA + 1) / 2 > kMaxSections)
+        {
+            count = 0;
+            return;
+        }
+
         while (ai < numA && count < kMaxSections)
         {
             T a1{};
@@ -372,8 +382,8 @@ namespace filters::passive
             bz[numB++] = { -T{ 1 }, T{ 0 } };
         }
 
-        const T gain{ T{ 1 } };
-        BuildSections(bz, numB, az, numA, gain, sections, sectionCount);
+        BuildSections(bz, numB, az, numA, T{ 1 }, sections, sectionCount);
+        NormalizeAt(T{ 2 } * math::Atan(wc / (T{ 2 } * fs)));
         return sectionCount;
     }
 
@@ -406,9 +416,55 @@ namespace filters::passive
             bz[numB++] = BilinearS2Z({ T{ 0 }, -wc0 }, fs);
         }
 
-        const T gain{ T{ 1 } };
-        BuildSections(bz, numB, az, numA, gain, sections, sectionCount);
+        BuildSections(bz, numB, az, numA, T{ 1 }, sections, sectionCount);
+        NormalizeAt(T{ 0 });
         return sectionCount;
+    }
+
+    template<typename T, std::size_t MaxOrder>
+    T IirFilterDesign<T, MaxOrder>::CascadeMagnitude(const std::array<BiquadCoeffs<T>, kMaxSections>& out,
+        std::size_t count, T omega) noexcept
+    {
+        const T c1{ math::Cos(omega) };
+        const T s1{ -math::Sin(omega) };
+        const T c2{ math::Cos(T{ 2 } * omega) };
+        const T s2{ -math::Sin(T{ 2 } * omega) };
+
+        T magnitude{ T{ 1 } };
+
+        for (std::size_t i{ 0 }; i < count; ++i)
+        {
+            const T numRe{ out[i].b0 + out[i].b1 * c1 + out[i].b2 * c2 };
+            const T numIm{ out[i].b1 * s1 + out[i].b2 * s2 };
+            const T denRe{ T{ 1 } + out[i].a1 * c1 + out[i].a2 * c2 };
+            const T denIm{ out[i].a1 * s1 + out[i].a2 * s2 };
+
+            const T denMag{ math::Sqrt(denRe * denRe + denIm * denIm) };
+
+            if (denMag <= T{ 0 })
+                return T{ 0 };
+
+            magnitude *= math::Sqrt(numRe * numRe + numIm * numIm) / denMag;
+        }
+
+        return magnitude;
+    }
+
+    template<typename T, std::size_t MaxOrder>
+    void IirFilterDesign<T, MaxOrder>::NormalizeAt(T omega) noexcept
+    {
+        if (sectionCount == 0)
+            return;
+
+        const T magnitude{ CascadeMagnitude(sections, sectionCount, omega) };
+
+        if (!math::IsFinite(magnitude) || magnitude <= T{ 0 })
+            return;
+
+        const T scale{ T{ 1 } / magnitude };
+        sections[0].b0 *= scale;
+        sections[0].b1 *= scale;
+        sections[0].b2 *= scale;
     }
 
     template<typename T, std::size_t MaxOrder>

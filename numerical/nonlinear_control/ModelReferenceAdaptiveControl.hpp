@@ -6,6 +6,7 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
+#include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/Matrix.hpp"
 #include <cstddef>
 #include <type_traits>
@@ -32,6 +33,7 @@ namespace nonlinear_control
         using FeedbackMatrix = math::Matrix<T, InputSize, StateSize>;
         using FeedforwardMatrix = math::Matrix<T, InputSize, InputSize>;
         using ReferenceModel = math::LinearTimeInvariant<T, StateSize, InputSize, StateSize>;
+        using LyapunovWeight = math::SquareMatrix<T, StateSize>;
 
         ModelReferenceAdaptiveControl(const ReferenceModel& referenceModel,
             T gamma, T signB, AdaptationLaw law);
@@ -40,6 +42,8 @@ namespace nonlinear_control
             const StateVector& x, const InputVector& r, T dt);
 
         void Reset();
+
+        void SetLyapunovWeight(const LyapunovWeight& weight);
 
         [[nodiscard]] const StateVector& GetReferenceState() const
         {
@@ -64,6 +68,7 @@ namespace nonlinear_control
         T gamma;
         T signB;
         AdaptationLaw law;
+        LyapunovWeight lyapunovWeight{ LyapunovWeight::Identity() };
     };
 
     template<typename T, std::size_t StateSize, std::size_t InputSize>
@@ -73,7 +78,15 @@ namespace nonlinear_control
         , gamma{ gamma }
         , signB{ signB }
         , law{ law }
-    {}
+    {
+        really_assert(law == AdaptationLaw::Lyapunov || (StateSize == 1 && InputSize == 1));
+    }
+
+    template<typename T, std::size_t StateSize, std::size_t InputSize>
+    void ModelReferenceAdaptiveControl<T, StateSize, InputSize>::SetLyapunovWeight(const LyapunovWeight& weight)
+    {
+        lyapunovWeight = weight;
+    }
 
     template<typename T, std::size_t StateSize, std::size_t InputSize>
     OPTIMIZE_FOR_SPEED typename ModelReferenceAdaptiveControl<T, StateSize, InputSize>::InputVector
@@ -86,14 +99,16 @@ namespace nonlinear_control
 
         const InputVector u{ thetaX * x + thetaR * r };
 
+        const InputVector direction{ reference.B.Transpose() * lyapunovWeight * e };
+
         const T scale{ gamma * signB * dt };
         for (std::size_t i = 0; i < InputSize; ++i)
         {
             for (std::size_t j = 0; j < StateSize; ++j)
-                thetaX.at(i, j) -= scale * e.at(i, 0) * x.at(j, 0);
+                thetaX.at(i, j) -= scale * direction.at(i, 0) * x.at(j, 0);
 
             for (std::size_t j = 0; j < InputSize; ++j)
-                thetaR.at(i, j) -= scale * e.at(i, 0) * r.at(j, 0);
+                thetaR.at(i, j) -= scale * direction.at(i, 0) * r.at(j, 0);
         }
 
         return u;
