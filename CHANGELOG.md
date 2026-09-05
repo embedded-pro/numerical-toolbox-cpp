@@ -1,5 +1,25 @@
 # Changelog
 
+## [3.1.2](https://github.com/embedded-pro/numerical-toolbox-cpp/compare/v3.1.1...v3.1.2) (2026-09-05)
+
+
+### Bug Fixes
+
+* **solvers:** Propagate factorization and convergence failure ([#325](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/325)) ([9b94f7c](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/9b94f7ce1361de781faed82f6943331cda5e1e24))
+
+
+### Miscellaneous
+
+* Reuse emil qemu runtime ([#296](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/296)) ([a8c9e07](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/a8c9e07a8934af115ffe8429b7424d07c0da7502))
+
+
+### Build System
+
+* **deps:** Bump github/codeql-action/upload-sarif ([#292](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/292)) ([b550738](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/b5507389534d9d23ae59d3ba708d1d99a9963185))
+* **deps:** Bump github/codeql-action/upload-sarif ([#295](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/295)) ([0ba1aec](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/0ba1aec54372c66175a8f3060fad360ec69544a1))
+* **deps:** Bump github/codeql-action/upload-sarif ([#297](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/297)) ([2f47932](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/2f479320d805a1f9f35ebe4afaaeeded48913a94))
+* **deps:** Bump oxsecurity/megalinter/flavors/c_cpp ([#293](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/293)) ([24799a5](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/24799a5cbe1e4fa7de6082e972bddb0e2f8dd363))
+
 ## [3.1.1](https://github.com/embedded-pro/numerical-toolbox-cpp/compare/v3.1.0...v3.1.1) (2026-08-16)
 
 
