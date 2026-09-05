@@ -4,6 +4,7 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
+#include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Math.hpp"
 #include "numerical/math/QNumber.hpp"
 
@@ -22,6 +23,26 @@ namespace windowing
         virtual QNumberType Power(std::size_t order) = 0;
     };
 
+    namespace detail
+    {
+        template<typename QNumberType>
+        OPTIMIZE_FOR_SPEED QNumberType MeanSquarePower(Window<QNumberType>& window, std::size_t order)
+        {
+            if (order == 0)
+                return QNumberType(0.0f);
+
+            float sum = 0.0f;
+
+            for (std::size_t n = 0; n < order; ++n)
+            {
+                const float value = math::ToFloat(window(n, order));
+                sum += value * value;
+            }
+
+            return QNumberType(sum / static_cast<float>(order));
+        }
+    }
+
     template<typename QNumberType>
     class HammingWindow
         : public Window<QNumberType>
@@ -32,9 +53,9 @@ namespace windowing
             return QNumberType((0.54f - 0.46f * static_cast<float>(math::Cos(2.0 * math::pi * static_cast<double>(n) / static_cast<double>(order)))) * 0.9999f);
         }
 
-        QNumberType Power([[maybe_unused]] std::size_t order) override
+        QNumberType Power(std::size_t order) override
         {
-            return QNumberType(0.397f);
+            return detail::MeanSquarePower(*this, order);
         }
     };
 
@@ -48,9 +69,9 @@ namespace windowing
             return QNumberType(0.5f * (1.0f - static_cast<float>(math::Cos(2.0 * math::pi * static_cast<double>(n) / static_cast<double>(order)))) * 0.9999f);
         }
 
-        QNumberType Power([[maybe_unused]] std::size_t order) override
+        QNumberType Power(std::size_t order) override
         {
-            return QNumberType(0.375f);
+            return detail::MeanSquarePower(*this, order);
         }
     };
 
@@ -65,9 +86,9 @@ namespace windowing
                 (0.42f - 0.5f * static_cast<float>(math::Cos(2.0 * math::pi * static_cast<double>(n) / static_cast<double>(order))) + 0.08f * static_cast<float>(math::Cos(4.0 * math::pi * static_cast<double>(n) / static_cast<double>(order)))) * 0.9999f);
         }
 
-        QNumberType Power([[maybe_unused]] std::size_t order) override
+        QNumberType Power(std::size_t order) override
         {
-            return QNumberType(0.305f);
+            return detail::MeanSquarePower(*this, order);
         }
     };
 
@@ -81,9 +102,9 @@ namespace windowing
             return QNumberType(0.9999f);
         }
 
-        QNumberType Power([[maybe_unused]] std::size_t order) override
+        QNumberType Power(std::size_t order) override
         {
-            return QNumberType(0.9999f);
+            return detail::MeanSquarePower(*this, order);
         }
     };
 

@@ -6,8 +6,11 @@
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/MatrixNorms.hpp"
 #include "numerical/math/TriangularSolve.hpp"
+#include "numerical/math/Math.hpp"
 #include <array>
 #include <cstddef>
+#include <limits>
+#include <optional>
 #include <type_traits>
 
 namespace math
@@ -20,10 +23,12 @@ namespace math
     public:
         MatrixExponential() = default;
 
-        OPTIMIZE_FOR_SPEED SquareMatrix<T, N> Compute(const SquareMatrix<T, N>& a);
-        OPTIMIZE_FOR_SPEED SquareMatrix<T, N> Compute(const SquareMatrix<T, N>& a, T dt);
+        OPTIMIZE_FOR_SPEED std::optional<SquareMatrix<T, N>> Compute(const SquareMatrix<T, N>& a);
+        OPTIMIZE_FOR_SPEED std::optional<SquareMatrix<T, N>> Compute(const SquareMatrix<T, N>& a, T dt);
 
     private:
+        static constexpr T maxSquaringGrowth{ T{ 1 } / T{ 100 } };
+
         static constexpr T c0{ T{ 1 } };
         static constexpr T c1{ T{ 1 } / T{ 2 } };
         static constexpr T c2{ T{ 5 } / T{ 44 } };
@@ -36,7 +41,7 @@ namespace math
             SquareMatrix<T, N>& num,
             SquareMatrix<T, N>& den) const;
 
-        SquareMatrix<T, N> SolvePade(const SquareMatrix<T, N>& den, const SquareMatrix<T, N>& num);
+        std::optional<SquareMatrix<T, N>> SolvePade(const SquareMatrix<T, N>& den, const SquareMatrix<T, N>& num);
     };
 
     template<typename T, std::size_t N>
@@ -57,8 +62,15 @@ namespace math
     }
 
     template<typename T, std::size_t N>
-    SquareMatrix<T, N> MatrixExponential<T, N>::SolvePade(const SquareMatrix<T, N>& den, const SquareMatrix<T, N>& num)
+    std::optional<SquareMatrix<T, N>> MatrixExponential<T, N>::SolvePade(const SquareMatrix<T, N>& den, const SquareMatrix<T, N>& num)
     {
+        const T scale = InfinityNorm(den);
+
+        if (!math::IsFinite(scale) || scale <= T{})
+            return std::nullopt;
+
+        const T pivotThreshold = scale * std::numeric_limits<T>::epsilon() * static_cast<T>(N);
+
         SquareMatrix<T, N> lu = den;
         std::array<std::size_t, N> piv{};
         for (std::size_t i = 0; i < N; ++i)
@@ -99,6 +111,10 @@ namespace math
             }
         }
 
+        for (std::size_t k = 0; k < N; ++k)
+            if (math::Abs(lu.at(k, k)) <= pivotThreshold)
+                return std::nullopt;
+
         SquareMatrix<T, N> result{};
         for (std::size_t col = 0; col < N; ++col)
         {
@@ -117,9 +133,13 @@ namespace math
     }
 
     template<typename T, std::size_t N>
-    OPTIMIZE_FOR_SPEED SquareMatrix<T, N> MatrixExponential<T, N>::Compute(const SquareMatrix<T, N>& a)
+    OPTIMIZE_FOR_SPEED std::optional<SquareMatrix<T, N>> MatrixExponential<T, N>::Compute(const SquareMatrix<T, N>& a)
     {
         const T norm = InfinityNorm(a);
+
+        if (!math::IsFinite(norm))
+            return std::nullopt;
+
         int s{ 0 };
         if (norm > T{ 1 })
         {
@@ -129,8 +149,10 @@ namespace math
                 s = 0;
         }
 
-        const T scale = T{ 1 } / static_cast<T>(1 << s);
-        const auto as = a * scale;
+        if (math::Ldexp(std::numeric_limits<T>::epsilon(), s) > maxSquaringGrowth)
+            return std::nullopt;
+
+        const auto as = a * math::Ldexp(T{ 1 }, -s);
 
         SquareMatrix<T, N> num{};
         SquareMatrix<T, N> den{};
@@ -138,14 +160,22 @@ namespace math
 
         auto r = SolvePade(den, num);
 
-        for (int k = 0; k < s; ++k)
-            r = r * r;
+        if (!r)
+            return std::nullopt;
 
-        return r;
+        SquareMatrix<T, N> result = *r;
+
+        for (int k = 0; k < s; ++k)
+            result = result * result;
+
+        if (!math::IsFinite(InfinityNorm(result)))
+            return std::nullopt;
+
+        return result;
     }
 
     template<typename T, std::size_t N>
-    OPTIMIZE_FOR_SPEED SquareMatrix<T, N> MatrixExponential<T, N>::Compute(const SquareMatrix<T, N>& a, T dt)
+    OPTIMIZE_FOR_SPEED std::optional<SquareMatrix<T, N>> MatrixExponential<T, N>::Compute(const SquareMatrix<T, N>& a, T dt)
     {
         const auto adt = a * dt;
         return Compute(adt);

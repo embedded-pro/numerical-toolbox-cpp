@@ -39,7 +39,7 @@ namespace control_analysis
 
         static std::optional<math::SquareMatrix<T, StateSize>> Invert(const math::SquareMatrix<T, StateSize>& a);
 
-        SystemType Zoh(const SystemType& sys, T ts);
+        std::optional<SystemType> Zoh(const SystemType& sys, T ts);
         std::optional<SystemType> Bilinear(const SystemType& sys, T ts);
         SystemType ForwardEuler(const SystemType& sys, T ts);
         std::optional<SystemType> Backward(const SystemType& sys, T ts);
@@ -79,7 +79,7 @@ namespace control_analysis
     }
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t OutputSize>
-    typename ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::SystemType
+    std::optional<typename ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::SystemType>
     ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::Zoh(const SystemType& sys, T ts)
     {
         math::SquareMatrix<T, StateSize + InputSize> augmented{};
@@ -94,14 +94,17 @@ namespace control_analysis
 
         const auto expM = expm.Compute(augmented);
 
+        if (!expM)
+            return std::nullopt;
+
         SystemType result{};
         for (std::size_t i = 0; i < StateSize; ++i)
             for (std::size_t j = 0; j < StateSize; ++j)
-                result.A.at(i, j) = expM.at(i, j);
+                result.A.at(i, j) = expM->at(i, j);
 
         for (std::size_t i = 0; i < StateSize; ++i)
             for (std::size_t j = 0; j < InputSize; ++j)
-                result.B.at(i, j) = expM.at(i, StateSize + j);
+                result.B.at(i, j) = expM->at(i, StateSize + j);
 
         result.C = sys.C;
         result.D = sys.D;

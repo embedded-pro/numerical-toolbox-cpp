@@ -66,7 +66,7 @@ namespace control_analysis
     RootLocus<T, MaxOrder, MaxGainSteps>::FindRoots(std::span<const T> polynomial) const
     {
         solvers::DurandKerner<T, MaxOrder> solver;
-        return solver.Solve(polynomial);
+        return solver.Solve(polynomial).roots;
     }
 
     template<typename T, std::size_t MaxOrder, std::size_t MaxGainSteps>

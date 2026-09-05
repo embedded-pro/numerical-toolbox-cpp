@@ -16,7 +16,7 @@ TEST_F(TestDurandKerner, linear_polynomial_returns_single_exact_root)
 {
     std::array<float, 2> coefficients{ 2.0f, 4.0f };
 
-    auto roots = solver.Solve(coefficients);
+    auto roots = solver.Solve(coefficients).roots;
 
     ASSERT_EQ(roots.size(), 1u);
     EXPECT_NEAR(roots[0].Real(), -2.0f, 1e-4f);
@@ -27,7 +27,7 @@ TEST_F(TestDurandKerner, real_quadratic_roots_match_factored_form)
 {
     std::array<float, 3> coefficients{ 1.0f, -3.0f, 2.0f };
 
-    auto roots = solver.Solve(coefficients);
+    auto roots = solver.Solve(coefficients).roots;
 
     ASSERT_EQ(roots.size(), 2u);
     EXPECT_NEAR(roots[0].Real(), 1.0f, 1e-4f);
@@ -40,7 +40,7 @@ TEST_F(TestDurandKerner, complex_conjugate_roots_have_unit_imaginary_magnitude)
 {
     std::array<float, 3> coefficients{ 1.0f, 0.0f, 1.0f };
 
-    auto roots = solver.Solve(coefficients);
+    auto roots = solver.Solve(coefficients).roots;
 
     ASSERT_EQ(roots.size(), 2u);
     EXPECT_NEAR(roots[0].Real(), 0.0f, 1e-4f);
@@ -53,7 +53,7 @@ TEST_F(TestDurandKerner, cubic_roots_match_factored_form_1_2_3)
 {
     std::array<float, 4> coefficients{ 1.0f, -6.0f, 11.0f, -6.0f };
 
-    auto roots = solver.Solve(coefficients);
+    auto roots = solver.Solve(coefficients).roots;
 
     ASSERT_EQ(roots.size(), 3u);
     EXPECT_NEAR(roots[0].Real(), 1.0f, 1e-3f);
@@ -68,7 +68,7 @@ TEST_F(TestDurandKerner, quartic_roots_match_factored_form_1_2_3_4)
 {
     std::array<float, 5> coefficients{ 1.0f, -10.0f, 35.0f, -50.0f, 24.0f };
 
-    auto roots = solver.Solve(coefficients);
+    auto roots = solver.Solve(coefficients).roots;
 
     ASSERT_EQ(roots.size(), 4u);
     EXPECT_NEAR(roots[0].Real(), 1.0f, 1e-2f);
@@ -85,7 +85,7 @@ TEST_F(TestDurandKerner, repeated_root_both_approximations_converge_to_same_valu
 {
     std::array<float, 3> coefficients{ 1.0f, -2.0f, 1.0f };
 
-    auto roots = solver.Solve(coefficients);
+    auto roots = solver.Solve(coefficients).roots;
 
     ASSERT_EQ(roots.size(), 2u);
     EXPECT_NEAR(roots[0].Real(), 1.0f, 1e-3f);
@@ -96,7 +96,7 @@ TEST_F(TestDurandKerner, constant_polynomial_returns_empty)
 {
     std::array<float, 1> coefficients{ 5.0f };
 
-    auto roots = solver.Solve(coefficients);
+    auto roots = solver.Solve(coefficients).roots;
 
     EXPECT_EQ(roots.size(), 0u);
 }
@@ -107,7 +107,7 @@ TEST_F(TestDurandKerner, second_order_control_system_roots_match_analytic_poles)
     float zeta = 0.5f;
     std::array<float, 3> coefficients{ 1.0f, 2.0f * zeta * wn, wn * wn };
 
-    auto roots = solver.Solve(coefficients);
+    auto roots = solver.Solve(coefficients).roots;
 
     ASSERT_EQ(roots.size(), 2u);
     float expectedReal = -zeta * wn;
@@ -121,7 +121,7 @@ TEST_F(TestDurandKerner, each_root_satisfies_polynomial_residual_near_zero)
 {
     std::array<float, 4> coefficients{ 1.0f, -6.0f, 11.0f, -6.0f };
 
-    auto roots = solver.Solve(coefficients);
+    auto roots = solver.Solve(coefficients).roots;
 
     ASSERT_EQ(roots.size(), 3u);
     for (std::size_t i = 0; i < roots.size(); ++i)
@@ -143,8 +143,8 @@ TEST_F(TestDurandKerner, same_input_produces_identical_real_parts_determinism)
 {
     std::array<float, 4> coefficients{ 1.0f, -6.0f, 11.0f, -6.0f };
 
-    auto roots1 = solver.Solve(coefficients);
-    auto roots2 = solver.Solve(coefficients);
+    auto roots1 = solver.Solve(coefficients).roots;
+    auto roots2 = solver.Solve(coefficients).roots;
 
     ASSERT_EQ(roots1.size(), roots2.size());
     for (std::size_t i = 0; i < roots1.size(); ++i)

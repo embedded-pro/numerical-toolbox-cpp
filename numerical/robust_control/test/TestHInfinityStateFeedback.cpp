@@ -82,7 +82,7 @@ TEST_F(TestHInfinityStateFeedback, closed_loop_is_schur_stable)
     charPoly[2] = clA.at(0, 0) * clA.at(1, 1) - clA.at(0, 1) * clA.at(1, 0);
 
     solvers::DurandKerner<float, 2> dk{};
-    auto roots = dk.Solve(std::span<const float>{ charPoly.data(), 3 });
+    auto roots = dk.Solve(std::span<const float>{ charPoly.data(), 3 }).roots;
 
     for (const auto& root : roots)
         EXPECT_LT(math::Abs(root), 1.0f);
