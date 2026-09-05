@@ -319,7 +319,7 @@ TEST_F(TestFrequencyResponseHighpass, magnitude_at_quarter_nyquist_is_minus_3db)
     EXPECT_NEAR(bestMag, -3.0103f, 0.5f);
 }
 
-TEST_F(TestFrequencyResponseUnity, zero_denominator_coefficients_produce_finite_output)
+TEST_F(TestFrequencyResponseUnity, zero_denominator_coefficients_produce_finite_clamped_output)
 {
     std::array<float, 1> bz{ 1.0f };
     std::array<float, 1> az{ 0.0f };
@@ -327,11 +327,20 @@ TEST_F(TestFrequencyResponseUnity, zero_denominator_coefficients_produce_finite_
 
     auto [frequencies, magnitudes, phases] = frZeroDenom.Calculate();
 
+    using Response = control_analysis::FrequencyResponse<float, 64>;
+    constexpr std::uint32_t exponentMask{ 0x7f800000u };
+
     for (const auto& m : magnitudes)
     {
-        EXPECT_FALSE(std::isnan(m));
-        EXPECT_FALSE(std::isinf(m));
+        const float clamped = Response::ClampDb(m, -120.0f, 120.0f);
+
+        EXPECT_NE(std::bit_cast<std::uint32_t>(clamped) & exponentMask, exponentMask);
+        EXPECT_LE(clamped, 120.0f);
+        EXPECT_GE(clamped, -120.0f);
     }
+
+    for (const auto& p : phases)
+        EXPECT_NE(std::bit_cast<std::uint32_t>(p) & exponentMask, exponentMask);
 }
 
 TEST_F(TestFrequencyResponseUnity, magnitude_output_size_matches_points_for_128_points)
