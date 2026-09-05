@@ -68,16 +68,4 @@ namespace math
         }
     };
 
-#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
-    extern template struct LinearTimeInvariant<float, 2, 1>;
-    extern template struct LinearTimeInvariant<float, 2, 1, 1>;
-    extern template struct LinearTimeInvariant<float, 3, 1>;
-    extern template struct LinearTimeInvariant<float, 4, 1>;
-    extern template struct LinearTimeInvariant<float, 4, 1, 1>;
-    extern template struct LinearTimeInvariant<float, 2, 2>;
-    extern template struct LinearTimeInvariant<math::Q15, 2, 1>;
-    extern template struct LinearTimeInvariant<math::Q15, 2, 1, 1>;
-    extern template struct LinearTimeInvariant<math::Q31, 2, 1>;
-    extern template struct LinearTimeInvariant<math::Q31, 2, 1, 1>;
-#endif
 }

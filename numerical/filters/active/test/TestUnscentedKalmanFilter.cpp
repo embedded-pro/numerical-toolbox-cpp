@@ -488,3 +488,39 @@ TEST_F(UnscentedKalmanFilterConsistencyTest, NisIsNonNegativeAndFiniteOnEverySte
         ukf->Update(meas);
     }
 }
+
+TEST_F(UnscentedKalmanFilterTest, ShippedDefaultsPreserveMeanAndCovarianceUnderIdentity)
+{
+    StateVec2 initial{ { 100.0f }, { -100.0f } };
+
+    UkfType ukf{ initial, InitP(),
+        UkfType::StateTransitionFn{ [](const StateVec2& x)
+            {
+                return x;
+            } },
+        UkfType::MeasurementFn{ [](const StateVec2& x)
+            {
+                return MeasVec1{ { x.at(0, 0) } };
+            } } };
+
+    ukf.SetProcessNoise(StateMat2{});
+    ukf.Predict();
+
+    EXPECT_NEAR(ukf.GetState().at(0, 0), 100.0f, 1e-2f);
+    EXPECT_NEAR(ukf.GetState().at(1, 0), -100.0f, 1e-2f);
+    EXPECT_NEAR(ukf.GetCovariance().at(0, 0), 0.5f, 1e-3f);
+    EXPECT_NEAR(ukf.GetCovariance().at(1, 1), 0.5f, 1e-3f);
+}
+
+TEST_F(UnscentedKalmanFilterTest, NumericallyUnsafeParametersAreRejected)
+{
+    filters::UkfParameters tiny;
+    tiny.alpha = 1e-3f;
+
+    filters::UkfParameters zero;
+    zero.alpha = 0.0f;
+
+    EXPECT_FALSE(UkfType::AreParametersUsable(tiny));
+    EXPECT_FALSE(UkfType::AreParametersUsable(zero));
+    EXPECT_TRUE(UkfType::AreParametersUsable(filters::UkfParameters{}));
+}

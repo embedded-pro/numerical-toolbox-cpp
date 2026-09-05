@@ -7,8 +7,8 @@
 
 namespace
 {
-    using Plant = robust_control::GeneralizedPlant<float, 2, 1, 1, 1>;
-    using HInf = robust_control::HInfinityStateFeedback<float, 2, 1, 1, 1>;
+    using Plant = robust_control::GeneralizedPlant<float, 2, 1, 1, 2>;
+    using HInf = robust_control::HInfinityStateFeedback<float, 2, 1, 1, 2>;
 
     Plant MakeGeneralizedPlant()
     {
@@ -26,8 +26,11 @@ namespace
 
         p.C1.at(0, 0) = 1.0f;
         p.C1.at(0, 1) = 0.0f;
+        p.C1.at(1, 0) = 0.0f;
+        p.C1.at(1, 1) = 0.0f;
 
         p.D12.at(0, 0) = 0.0f;
+        p.D12.at(1, 0) = 1.0f;
         return p;
     }
 
@@ -82,7 +85,7 @@ TEST_F(TestHInfinityStateFeedback, closed_loop_is_schur_stable)
     charPoly[2] = clA.at(0, 0) * clA.at(1, 1) - clA.at(0, 1) * clA.at(1, 0);
 
     solvers::DurandKerner<float, 2> dk{};
-    auto roots = dk.Solve(std::span<const float>{ charPoly.data(), 3 });
+    auto roots = dk.Solve(std::span<const float>{ charPoly.data(), 3 }).roots;
 
     for (const auto& root : roots)
         EXPECT_LT(math::Abs(root), 1.0f);
@@ -299,4 +302,37 @@ TEST_F(TestHInfinityStateFeedbackSynthesized, riccati_solution_diagonal_is_posit
 
     EXPECT_GT(Xref.value.at(0, 0), 0.0f);
     EXPECT_GT(Xref.value.at(1, 1), 0.0f);
+}
+
+namespace
+{
+    Plant MakePlantWithControlWeight(float d12)
+    {
+        Plant p{ MakeGeneralizedPlant() };
+        p.D12.at(1, 0) = d12;
+        return p;
+    }
+}
+
+TEST_F(TestHInfinityStateFeedback, changing_d12_changes_gain_and_achieved_bound)
+{
+    Plant cheap{ MakePlantWithControlWeight(0.5f) };
+    Plant expensive{ MakePlantWithControlWeight(4.0f) };
+
+    HInf hinfCheap{ cheap };
+    HInf hinfExpensive{ expensive };
+
+    ASSERT_TRUE(hinfCheap.Synthesize(0.1f, 50.0f, 1e-3f));
+    ASSERT_TRUE(hinfExpensive.Synthesize(0.1f, 50.0f, 1e-3f));
+
+    EXPECT_GT(std::abs(hinfCheap.Gain().at(0, 0)), std::abs(hinfExpensive.Gain().at(0, 0)));
+    EXPECT_LT(hinfCheap.Gamma(), hinfExpensive.Gamma());
+}
+
+TEST_F(TestHInfinityStateFeedback, singular_control_weight_reports_failure)
+{
+    Plant singular{ MakePlantWithControlWeight(0.0f) };
+    HInf hinfSingular{ singular };
+
+    EXPECT_FALSE(hinfSingular.Synthesize(0.1f, 50.0f, 1e-3f));
 }

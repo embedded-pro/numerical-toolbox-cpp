@@ -319,3 +319,73 @@ TEST_F(TestIirFilterDesign, bibo_stability_impulse_decays)
     }
     EXPECT_LT(lastAmp, 0.01f);
 }
+
+namespace
+{
+    float CascadeMagnitudeAt(filters::passive::IirFilterDesign<float, 8>& design,
+        std::size_t sections, float omega)
+    {
+        float realPart{ 1.0f };
+        float imagPart{ 0.0f };
+
+        for (std::size_t i = 0; i < sections; ++i)
+        {
+            const auto c = design.Section(i);
+            const float c1 = std::cos(omega);
+            const float s1 = -std::sin(omega);
+            const float c2 = std::cos(2.0f * omega);
+            const float s2 = -std::sin(2.0f * omega);
+
+            const float numRe = c.b0 + c.b1 * c1 + c.b2 * c2;
+            const float numIm = c.b1 * s1 + c.b2 * s2;
+            const float denRe = 1.0f + c.a1 * c1 + c.a2 * c2;
+            const float denIm = c.a1 * s1 + c.a2 * s2;
+
+            const float denNorm = denRe * denRe + denIm * denIm;
+            const float qRe = (numRe * denRe + numIm * denIm) / denNorm;
+            const float qIm = (numIm * denRe - numRe * denIm) / denNorm;
+
+            const float nextRe = realPart * qRe - imagPart * qIm;
+            imagPart = realPart * qIm + imagPart * qRe;
+            realPart = nextRe;
+        }
+
+        return std::sqrt(realPart * realPart + imagPart * imagPart);
+    }
+}
+
+TEST_F(TestIirFilterDesign, BandPassAllocatesOneSectionPerPrototypeOrder)
+{
+    for (std::size_t order : { 1u, 2u, 4u, 8u })
+    {
+        const auto sections = designer.Design(filters::passive::Prototype::Butterworth,
+            filters::passive::Kind::BandPass, order, 1000.0f, 8000.0f);
+
+        EXPECT_EQ(sections, order);
+    }
+}
+
+TEST_F(TestIirFilterDesign, BandPassIsUnityAtCentreAndAttenuatedAtDcAndNyquist)
+{
+    const float sampleHz = 8000.0f;
+    const float centreHz = 1000.0f;
+    const float omega0 = 2.0f * std::numbers::pi_v<float> * centreHz / sampleHz;
+
+    for (std::size_t order : { 1u, 2u, 4u })
+    {
+        const auto sections = designer.Design(filters::passive::Prototype::Butterworth,
+            filters::passive::Kind::BandPass, order, centreHz, sampleHz);
+
+        EXPECT_NEAR(CascadeMagnitudeAt(designer, sections, omega0), 1.0f, 1e-3f);
+        EXPECT_NEAR(CascadeMagnitudeAt(designer, sections, 0.0f), 0.0f, 1e-3f);
+        EXPECT_NEAR(CascadeMagnitudeAt(designer, sections, std::numbers::pi_v<float>), 0.0f, 1e-3f);
+    }
+}
+
+TEST_F(TestIirFilterDesign, BandStopIsUnityAtDc)
+{
+    const auto sections = designer.Design(filters::passive::Prototype::Butterworth,
+        filters::passive::Kind::BandStop, 2, 1000.0f, 8000.0f);
+
+    EXPECT_NEAR(CascadeMagnitudeAt(designer, sections, 0.0f), 1.0f, 1e-3f);
+}

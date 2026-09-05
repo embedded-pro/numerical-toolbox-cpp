@@ -6,7 +6,9 @@
 
 namespace simulator::controllers::lqr
 {
-    using LqrController = ::controllers::Lqr<float, stateSize, inputSize>;
+    static constexpr std::size_t riccatiIterations{ 2000 };
+
+    using LqrController = ::controllers::Lqr<float, stateSize, inputSize, riccatiIterations>;
 
     struct LqrWeightsConfig
     {
@@ -43,6 +45,7 @@ namespace simulator::controllers::lqr
         [[nodiscard]] float ComputeControlForce();
         [[nodiscard]] const CartPoleState& GetState() const;
         [[nodiscard]] const CartPoleParameters& GetPlantParameters() const;
+        [[nodiscard]] bool HasController() const;
         [[nodiscard]] float GetDt() const;
         [[nodiscard]] float GetForceLimit() const;
 

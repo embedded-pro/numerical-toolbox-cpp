@@ -310,6 +310,6 @@ namespace optimization
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class BayesianOptimization<1, 10, 50>;
-    extern template class BayesianOptimization<2, 30, 200>;
+    extern template class BayesianOptimization<2, 20, 100>;
 #endif
 }

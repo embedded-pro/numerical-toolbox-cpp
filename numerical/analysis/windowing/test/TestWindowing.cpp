@@ -1,5 +1,6 @@
 #include "numerical/analysis/windowing/Windowing.hpp"
 #include "numerical/math/QNumber.hpp"
+#include <array>
 #include <gtest/gtest.h>
 
 namespace
@@ -146,4 +147,43 @@ TYPED_TEST(WindowingTest, RectangularWindowPower)
 {
     windowing::RectangularWindow<TypeParam> w;
     EXPECT_NEAR(math::ToFloat(w.Power(8)), 0.999f, this->kEpsilon);
+}
+
+namespace
+{
+    class WindowPowerFloatTest
+        : public ::testing::Test
+    {
+    protected:
+        windowing::HammingWindow<float> hamming;
+        windowing::HanningWindow<float> hanning;
+        windowing::BlackmanWindow<float> blackman;
+        windowing::RectangularWindow<float> rectangular;
+
+        static float DirectMeanSquarePower(windowing::Window<float>& window, std::size_t order)
+        {
+            float sum = 0.0f;
+            for (std::size_t n = 0; n < order; ++n)
+            {
+                const float value = window(n, order);
+                sum += value * value;
+            }
+            return sum / static_cast<float>(order);
+        }
+    };
+}
+
+TEST_F(WindowPowerFloatTest, PowerMatchesDirectFiniteSumForEveryLength)
+{
+    std::array<windowing::Window<float>*, 4> windows{ &hamming, &hanning, &blackman, &rectangular };
+
+    for (auto* window : windows)
+        for (std::size_t order : { 2u, 4u, 8u, 64u, 256u })
+            EXPECT_NEAR(window->Power(order), DirectMeanSquarePower(*window, order), 1e-6f);
+}
+
+TEST_F(WindowPowerFloatTest, ShortHannWindowIsNotTheAsymptoticConstant)
+{
+    EXPECT_NEAR(hanning.Power(2), 0.4999f, 1e-4f);
+    EXPECT_NEAR(hanning.Power(256), 0.3749f, 1e-3f);
 }

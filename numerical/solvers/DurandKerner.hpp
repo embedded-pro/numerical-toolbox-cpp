@@ -10,6 +10,7 @@
 #include "numerical/math/ComplexNumber.hpp"
 #include "numerical/math/Math.hpp"
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <numbers>
 #include <span>
@@ -26,7 +27,13 @@ namespace solvers
     public:
         using Roots = typename infra::BoundedVector<math::Complex<T>>::template WithMaxSize<MaxOrder>;
 
-        Roots Solve(std::span<const T> coefficients,
+        struct Result
+        {
+            Roots roots;
+            bool converged{ false };
+        };
+
+        Result Solve(std::span<const T> coefficients,
             std::size_t maxIterations = 200, T tolerance = T(1e-6)) const;
 
     private:
@@ -89,60 +96,79 @@ namespace solvers
     }
 
     template<typename T, std::size_t MaxOrder>
-    OPTIMIZE_FOR_SPEED typename DurandKerner<T, MaxOrder>::Roots
+    OPTIMIZE_FOR_SPEED typename DurandKerner<T, MaxOrder>::Result
     DurandKerner<T, MaxOrder>::Solve(std::span<const T> coefficients,
         std::size_t maxIterations, T tolerance) const
     {
-        Roots roots;
+        Result result;
 
-        if (coefficients.empty())
-            return roots;
+        std::size_t lead = 0;
+        while (lead < coefficients.size() && coefficients[lead] == T(0))
+            ++lead;
 
-        std::size_t order = coefficients.size() - 1;
+        if (lead >= coefficients.size())
+            return result;
+
+        const std::size_t order = coefficients.size() - lead - 1;
+
+        if (order > MaxOrder)
+            return result;
 
         if (order == 0)
-            return roots;
+        {
+            result.converged = true;
+            return result;
+        }
 
-        really_assert(math::Abs(coefficients[0]) > T(0));
-        really_assert(order <= MaxOrder);
+        std::array<T, MaxOrder + 1> monic{};
+        const T leading = coefficients[lead];
+
+        for (std::size_t i = 0; i <= order; ++i)
+        {
+            monic[i] = coefficients[lead + i] / leading;
+
+            if (!math::IsFinite(monic[i]))
+                return result;
+        }
+
+        const std::span<const T> normalized{ monic.data(), order + 1 };
 
         if (order == 1)
         {
-            roots.emplace_back(-coefficients[1] / coefficients[0], T(0));
-            return roots;
+            result.roots.emplace_back(-monic[1], T(0));
+            result.converged = true;
+            return result;
         }
 
-        T radius = math::Pow(math::Abs(coefficients[order] / coefficients[0]),
-            T(1) / static_cast<T>(order));
+        T radius = math::Pow(math::Abs(monic[order]), T(1) / static_cast<T>(order));
         if (radius < T(0.1))
             radius = T(1);
 
         for (std::size_t r = 0; r < order; ++r)
         {
             T angle = T(2) * std::numbers::pi_v<T> * static_cast<T>(r) / static_cast<T>(order) + T(0.4);
-            roots.emplace_back(radius * math::Cos(angle), radius * math::Sin(angle));
+            result.roots.emplace_back(radius * math::Cos(angle), radius * math::Sin(angle));
         }
 
         for (std::size_t iter = 0; iter < maxIterations; ++iter)
-        {
-            if (Iterate(roots, coefficients, order, tolerance))
+            if (Iterate(result.roots, normalized, order, tolerance))
+            {
+                result.converged = true;
                 break;
-        }
+            }
 
-        std::ranges::sort(roots,
+        std::ranges::sort(result.roots,
             [](const math::Complex<T>& a, const math::Complex<T>& b)
             {
-                if (math::Abs(a.Real() - b.Real()) > T(0.01))
+                if (a.Real() != b.Real())
                     return a.Real() < b.Real();
                 return a.Imaginary() < b.Imaginary();
             });
 
-        return roots;
+        return result;
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class DurandKerner<float, 10>;
-
-    extern template class DurandKerner<double, 10>;
 #endif
 }

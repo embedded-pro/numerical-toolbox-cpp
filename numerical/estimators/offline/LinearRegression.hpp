@@ -21,7 +21,7 @@ namespace estimators
 
         LinearRegression() = default;
 
-        void Fit(const math::Matrix<T, Samples, Features>& X, const math::Matrix<T, Samples, 1>& y) override;
+        bool Fit(const math::Matrix<T, Samples, Features>& X, const math::Matrix<T, Samples, 1>& y) override;
         T Predict(const InputMatrix& X) const override;
         const CoefficientsMatrix& Coefficients() const override;
 
@@ -32,7 +32,7 @@ namespace estimators
     // Implementation //
 
     template<typename T, std::size_t Samples, std::size_t Features>
-    OPTIMIZE_FOR_SPEED void LinearRegression<T, Samples, Features>::Fit(const math::Matrix<T, Samples, Features>& X, const math::Matrix<T, Samples, 1>& y)
+    OPTIMIZE_FOR_SPEED bool LinearRegression<T, Samples, Features>::Fit(const math::Matrix<T, Samples, Features>& X, const math::Matrix<T, Samples, 1>& y)
     {
         math::Matrix<T, Samples, Features + 1> X_design;
 
@@ -45,8 +45,12 @@ namespace estimators
         }
 
         solvers::QrDecomposition<T, Samples, Features + 1> qr;
-        qr.Decompose(X_design);
+
+        if (!qr.Decompose(X_design))
+            return false;
+
         coefficients = qr.SolveLeastSquares(y);
+        return true;
     }
 
     template<typename T, std::size_t Samples, std::size_t Features>

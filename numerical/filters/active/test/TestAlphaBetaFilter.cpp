@@ -208,3 +208,12 @@ TEST_F(TestAlphaBetaGammaFilter, reset_restores_initial_state_order3)
     EXPECT_NEAR(filter.State()[1], 0.0f, math::Tolerance<float>());
     EXPECT_NEAR(filter.State()[2], 0.0f, math::Tolerance<float>());
 }
+
+TEST_F(TestAlphaBetaFilter, ZeroSamplePeriodIsRejected)
+{
+    using Filter2 = filters::AlphaBetaFilter<float, 2>;
+
+    EXPECT_FALSE(Filter2::IsSamplePeriodValid(0.0f));
+    EXPECT_FALSE(Filter2::IsSamplePeriodValid(-0.1f));
+    EXPECT_TRUE(Filter2::IsSamplePeriodValid(0.01f));
+}

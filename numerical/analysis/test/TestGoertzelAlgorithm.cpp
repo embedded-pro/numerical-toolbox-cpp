@@ -80,8 +80,7 @@ TEST_F(TestGoertzelAlgorithm, result_matches_direct_dft_bin)
 
     std::array<float, N> signal{};
     for (std::size_t n = 0; n < N; ++n)
-        signal[n] = std::cos(2.0f * std::numbers::pi_v<float> * static_cast<float>(k) * static_cast<float>(n) / static_cast<float>(N))
-                    + 0.3f * std::sin(2.0f * std::numbers::pi_v<float> * static_cast<float>(k) * static_cast<float>(n) / static_cast<float>(N));
+        signal[n] = std::cos(2.0f * std::numbers::pi_v<float> * static_cast<float>(k) * static_cast<float>(n) / static_cast<float>(N)) + 0.3f * std::sin(2.0f * std::numbers::pi_v<float> * static_cast<float>(k) * static_cast<float>(n) / static_cast<float>(N));
 
     for (float s : signal)
         goertzel.Push(s);
@@ -268,4 +267,14 @@ TEST_F(TestGoertzelAlgorithm, coefficient_formula_correct)
     constexpr std::size_t k{ 3 };
     float expected{ 2.0f * std::cos(2.0f * std::numbers::pi_v<float> * static_cast<float>(k) / static_cast<float>(N)) };
     EXPECT_NEAR(analysis::GoertzelAlgorithm<float>::Coefficient(k, N), expected, math::Tolerance<float>());
+}
+
+TEST_F(TestGoertzelAlgorithm, zero_block_length_is_rejected)
+{
+    EXPECT_FALSE(analysis::GoertzelAlgorithm<float>::TryCreate(1, 0).has_value());
+}
+
+TEST_F(TestGoertzelAlgorithm, positive_block_length_is_accepted)
+{
+    EXPECT_TRUE(analysis::GoertzelAlgorithm<float>::TryCreate(1, 8).has_value());
 }

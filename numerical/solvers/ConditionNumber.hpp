@@ -13,39 +13,26 @@
 
 namespace solvers
 {
-    namespace detail
-    {
-        template<typename T, std::size_t N>
-        bool HasZeroRow(const math::SquareMatrix<T, N>& a)
-        {
-            for (std::size_t i = 0; i < N; ++i)
-            {
-                bool allZero = true;
-                for (std::size_t j = 0; j < N; ++j)
-                {
-                    if (math::Abs(a.at(i, j)) > static_cast<T>(1e-12))
-                    {
-                        allZero = false;
-                        break;
-                    }
-                }
-                if (allZero)
-                    return true;
-            }
-            return false;
-        }
-    }
-
     template<typename T, std::size_t N>
     [[nodiscard]] OPTIMIZE_FOR_SPEED std::optional<T> ConditionNumber(const math::SquareMatrix<T, N>& a)
     {
         static_assert(std::is_floating_point_v<T>, "ConditionNumber supports floating-point types");
-        if (detail::HasZeroRow(a))
+
+        const T normA = math::OneNorm(a);
+
+        if (!math::IsFinite(normA) || normA <= T{})
             return std::nullopt;
-        T normA = math::OneNorm(a);
-        if (normA < static_cast<T>(1e-12))
+
+        const auto invA = TrySolveSystem(a, math::SquareMatrix<T, N>::Identity());
+
+        if (!invA)
             return std::nullopt;
-        auto invA = SolveSystem(a, math::SquareMatrix<T, N>::Identity());
-        return normA * math::OneNorm(invA);
+
+        const T normInv = math::OneNorm(*invA);
+
+        if (!math::IsFinite(normInv))
+            return std::nullopt;
+
+        return normA * normInv;
     }
 }

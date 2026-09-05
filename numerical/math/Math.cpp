@@ -74,5 +74,11 @@ template float math::Round<float>(float);
 #ifndef MATH_ERFC_OVERRIDE
 template float math::Erfc<float>(float);
 #endif
+#ifndef MATH_LDEXP_OVERRIDE
+template float math::Ldexp<float>(float, int);
+#endif
+#ifndef MATH_ISFINITE_OVERRIDE
+template bool math::IsFinite<float>(float);
+#endif
 
 #endif

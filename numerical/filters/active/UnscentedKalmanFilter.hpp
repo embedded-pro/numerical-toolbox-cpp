@@ -1,6 +1,7 @@
 #pragma once
 
 #include "infra/util/Function.hpp"
+#include "infra/util/ReallyAssert.hpp"
 #include "numerical/filters/active/KalmanFilterBase.hpp"
 #include "numerical/math/CholeskyDecomposition.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
@@ -17,7 +18,7 @@ namespace filters
 {
     struct UkfParameters
     {
-        float alpha = 1e-3f;
+        float alpha = 1.0f;
         float beta = 2.0f;
         float kappa = 0.0f;
     };
@@ -62,7 +63,11 @@ namespace filters
 
         void Update(const MeasurementVector& measurement);
 
+        [[nodiscard]] static bool AreParametersUsable(const UkfParameters& params);
+
     private:
+        static constexpr float minimumWeightScale{ 0.01f };
+
         void ComputeWeights();
         OPTIMIZE_FOR_SPEED void GenerateSigmaPoints(std::array<StateVector, SigmaPointCount>& sigmaPoints) const;
         OPTIMIZE_FOR_SPEED void PredictFromPropagatedSigmaPoints(const std::array<StateVector, SigmaPointCount>& sigmaPoints);
@@ -121,8 +126,25 @@ namespace filters
     }
 
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
+    bool UnscentedKalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::AreParametersUsable(
+        const UkfParameters& params)
+    {
+        constexpr auto n = static_cast<float>(StateSize);
+
+        if (!math::IsFinite(params.alpha) || !math::IsFinite(params.beta) || !math::IsFinite(params.kappa))
+            return false;
+
+        if (params.alpha <= 0.0f || n + params.kappa <= 0.0f)
+            return false;
+
+        return params.alpha * params.alpha * (n + params.kappa) >= minimumWeightScale * n;
+    }
+
+    template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize>
     void UnscentedKalmanFilter<QNumberType, StateSize, MeasurementSize, ControlSize>::ComputeWeights()
     {
+        really_assert(AreParametersUsable(parameters));
+
         constexpr auto n = static_cast<float>(StateSize);
         lambda = parameters.alpha * parameters.alpha * (n + parameters.kappa) - n;
 

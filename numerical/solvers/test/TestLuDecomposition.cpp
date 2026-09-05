@@ -312,3 +312,59 @@ TEST_F(TestLuDecomposition, decompose_is_deterministic)
             EXPECT_FLOAT_EQ(u1.at(i, j), u2.at(i, j));
         }
 }
+
+TEST_F(TestLuDecomposition, fourth_order_factors_expose_triangular_parts_and_determinant)
+{
+    math::SquareMatrix<float, 4> a{
+        { 4.0f, 1.0f, 0.0f, 0.0f },
+        { 1.0f, 4.0f, 1.0f, 0.0f },
+        { 0.0f, 1.0f, 4.0f, 1.0f },
+        { 0.0f, 0.0f, 1.0f, 4.0f }
+    };
+
+    ASSERT_TRUE(lu4.Decompose(a));
+    EXPECT_FALSE(lu4.IsSingular());
+
+    const auto l = lu4.L();
+    const auto u = lu4.U();
+
+    for (std::size_t i = 0; i < 4; ++i)
+        EXPECT_NEAR(l.at(i, i), 1.0f, math::Tolerance<float>());
+
+    for (std::size_t r = 1; r < 4; ++r)
+        for (std::size_t c = 0; c < r; ++c)
+            EXPECT_NEAR(u.at(r, c), 0.0f, math::Tolerance<float>());
+
+    EXPECT_NEAR(lu4.Determinant(), 209.0f, 1e-1f);
+}
+
+TEST_F(TestLuDecomposition, fourth_order_inverse_reconstructs_identity)
+{
+    math::SquareMatrix<float, 4> a{
+        { 4.0f, 1.0f, 0.0f, 0.0f },
+        { 1.0f, 4.0f, 1.0f, 0.0f },
+        { 0.0f, 1.0f, 4.0f, 1.0f },
+        { 0.0f, 0.0f, 1.0f, 4.0f }
+    };
+
+    ASSERT_TRUE(lu4.Decompose(a));
+
+    const auto inverse = lu4.Inverse();
+    const auto product = a * inverse;
+
+    for (std::size_t r = 0; r < 4; ++r)
+        for (std::size_t c = 0; c < 4; ++c)
+            EXPECT_NEAR(product.at(r, c), (r == c) ? 1.0f : 0.0f, 1e-4f);
+}
+
+TEST_F(TestLuDecomposition, singular_matrix_is_reported_as_singular)
+{
+    math::SquareMatrix<float, 3> singular{
+        { 1.0f, 2.0f, 3.0f },
+        { 2.0f, 4.0f, 6.0f },
+        { 1.0f, 1.0f, 1.0f }
+    };
+
+    EXPECT_FALSE(lu.Decompose(singular));
+    EXPECT_TRUE(lu.IsSingular());
+}

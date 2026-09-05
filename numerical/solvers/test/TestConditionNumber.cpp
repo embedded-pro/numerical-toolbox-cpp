@@ -75,3 +75,26 @@ TEST_F(ConditionNumberTest, AllTinyRowReturnsNullopt)
     auto result = solvers::ConditionNumber(nearZero);
     EXPECT_FALSE(result.has_value());
 }
+
+TEST_F(ConditionNumberTest, ScaleInvariantAcrossDecades)
+{
+    for (float scale : { 5e-13f, 1.0f, 5e11f })
+    {
+        math::SquareMatrix<float, 2> scaled{
+            { 3.0f * scale, 1.0f * scale },
+            { 1.0f * scale, 2.0f * scale }
+        };
+        auto result = solvers::ConditionNumber(scaled);
+        ASSERT_TRUE(result.has_value());
+        EXPECT_NEAR(*result, 3.2f, 1e-3f);
+    }
+}
+
+TEST_F(ConditionNumberTest, DependentRowsReturnNullopt)
+{
+    math::SquareMatrix<float, 2> dependent{
+        { 1.0f, 2.0f },
+        { 2.0f, 4.0f }
+    };
+    EXPECT_FALSE(solvers::ConditionNumber(dependent).has_value());
+}

@@ -148,8 +148,9 @@ TEST_F(TestControllabilityObservability, duality_ctrb_equals_obsv_of_transpose)
 TEST_F(TestControllabilityObservability, controllability_gramian_solves_discrete_lyapunov)
 {
     auto Wc = CO::ControllabilityGramian(stablePlant);
+    ASSERT_TRUE(Wc.has_value());
     auto BBt = stablePlant.B * stablePlant.B.Transpose();
-    auto residual = stablePlant.A * Wc * stablePlant.A.Transpose() - Wc + BBt;
+    auto residual = stablePlant.A * (*Wc) * stablePlant.A.Transpose() - *Wc + BBt;
 
     for (std::size_t r = 0; r < 2; ++r)
         for (std::size_t c = 0; c < 2; ++c)
@@ -159,8 +160,9 @@ TEST_F(TestControllabilityObservability, controllability_gramian_solves_discrete
 TEST_F(TestControllabilityObservability, observability_gramian_solves_discrete_lyapunov)
 {
     auto Wo = CO::ObservabilityGramian(stablePlant);
+    ASSERT_TRUE(Wo.has_value());
     auto CtC = stablePlant.C.Transpose() * stablePlant.C;
-    auto residual = stablePlant.A.Transpose() * Wo * stablePlant.A - Wo + CtC;
+    auto residual = stablePlant.A.Transpose() * (*Wo) * stablePlant.A - *Wo + CtC;
 
     for (std::size_t r = 0; r < 2; ++r)
         for (std::size_t c = 0; c < 2; ++c)
@@ -170,24 +172,26 @@ TEST_F(TestControllabilityObservability, observability_gramian_solves_discrete_l
 TEST_F(TestControllabilityObservability, controllability_gramian_is_symmetric_positive_definite)
 {
     auto Wc = CO::ControllabilityGramian(stablePlant);
+    ASSERT_TRUE(Wc.has_value());
 
-    EXPECT_NEAR(Wc.at(0, 1), Wc.at(1, 0), math::Tolerance<float>());
-    EXPECT_TRUE(Wc.at(0, 0) > 0.0f);
-    EXPECT_TRUE(Wc.at(1, 1) > 0.0f);
-    EXPECT_TRUE(Wc.at(0, 0) * Wc.at(1, 1) > Wc.at(0, 1) * Wc.at(1, 0));
+    EXPECT_NEAR(Wc->at(0, 1), Wc->at(1, 0), math::Tolerance<float>());
+    EXPECT_TRUE(Wc->at(0, 0) > 0.0f);
+    EXPECT_TRUE(Wc->at(1, 1) > 0.0f);
+    EXPECT_TRUE(Wc->at(0, 0) * Wc->at(1, 1) > Wc->at(0, 1) * Wc->at(1, 0));
 }
 
 TEST_F(TestControllabilityObservability, observability_gramian_is_symmetric_positive_definite)
 {
     auto Wo = CO::ObservabilityGramian(stablePlant);
+    ASSERT_TRUE(Wo.has_value());
 
-    EXPECT_NEAR(Wo.at(0, 1), Wo.at(1, 0), math::Tolerance<float>());
-    EXPECT_TRUE(Wo.at(0, 0) > 0.0f);
-    EXPECT_TRUE(Wo.at(1, 1) > 0.0f);
-    EXPECT_TRUE(Wo.at(0, 0) * Wo.at(1, 1) > Wo.at(0, 1) * Wo.at(1, 0));
+    EXPECT_NEAR(Wo->at(0, 1), Wo->at(1, 0), math::Tolerance<float>());
+    EXPECT_TRUE(Wo->at(0, 0) > 0.0f);
+    EXPECT_TRUE(Wo->at(1, 1) > 0.0f);
+    EXPECT_TRUE(Wo->at(0, 0) * Wo->at(1, 1) > Wo->at(0, 1) * Wo->at(1, 0));
 }
 
-TEST_F(TestControllabilityObservability, gramian_of_unstable_system_returns_zero_matrix)
+TEST_F(TestControllabilityObservability, gramian_of_unstable_system_reports_failure)
 {
     LTI unstablePlant;
     unstablePlant.A = math::Matrix<float, 2, 2>{
@@ -207,7 +211,35 @@ TEST_F(TestControllabilityObservability, gramian_of_unstable_system_returns_zero
 
     auto Wc = CO::ControllabilityGramian(unstablePlant);
 
-    for (std::size_t r = 0; r < 2; ++r)
-        for (std::size_t c = 0; c < 2; ++c)
-            EXPECT_FLOAT_EQ(Wc.at(r, c), 0.0f);
+    EXPECT_FALSE(Wc.has_value());
+}
+
+TEST_F(TestControllabilityObservability, scalar_gramian_matches_analytic_value_near_unit_circle)
+{
+    using ScalarCO = control_analysis::ControllabilityObservability<float, 1, 1, 1>;
+
+    for (float a : { 0.5f, 0.9f, 0.99f })
+    {
+        math::LinearTimeInvariant<float, 1, 1, 1> scalarPlant{};
+        scalarPlant.A.at(0, 0) = a;
+        scalarPlant.B.at(0, 0) = 1.0f;
+        scalarPlant.C.at(0, 0) = 1.0f;
+
+        auto Wc = ScalarCO::ControllabilityGramian(scalarPlant);
+
+        ASSERT_TRUE(Wc.has_value());
+        EXPECT_NEAR(Wc->at(0, 0), 1.0f / (1.0f - a * a), 1e-2f);
+    }
+}
+
+TEST_F(TestControllabilityObservability, marginally_stable_gramian_reports_failure)
+{
+    using ScalarCO = control_analysis::ControllabilityObservability<float, 1, 1, 1>;
+
+    math::LinearTimeInvariant<float, 1, 1, 1> marginal{};
+    marginal.A.at(0, 0) = 1.0f;
+    marginal.B.at(0, 0) = 1.0f;
+    marginal.C.at(0, 0) = 1.0f;
+
+    EXPECT_FALSE(ScalarCO::ControllabilityGramian(marginal).has_value());
 }

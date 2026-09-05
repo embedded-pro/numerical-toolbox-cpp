@@ -68,7 +68,5 @@ namespace filters::passive
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class Iir<float, 3, 3>;
-    extern template class Iir<math::Q15, 3, 3>;
-    extern template class Iir<math::Q31, 3, 3>;
 #endif
 }

@@ -147,3 +147,61 @@ TYPED_TEST(LinearRegressionTest, PredictionStaysWithinTrainingRange)
 
     EXPECT_LE(std::abs(math::ToFloat(predicted)), 0.02f);
 }
+
+namespace
+{
+    class LinearRegressionRankTest
+        : public ::testing::Test
+    {
+    protected:
+        estimators::LinearRegression<float, 4, 2> regression;
+    };
+}
+
+TEST_F(LinearRegressionRankTest, CollinearFeaturesReportFailure)
+{
+    math::Matrix<float, 4, 2> design{};
+    math::Matrix<float, 4, 1> target{};
+
+    for (std::size_t i = 0; i < 4; ++i)
+    {
+        design.at(i, 0) = static_cast<float>(i);
+        design.at(i, 1) = 2.0f * static_cast<float>(i);
+        target.at(i, 0) = static_cast<float>(i);
+    }
+
+    EXPECT_FALSE(regression.Fit(design, target));
+}
+
+TEST_F(LinearRegressionRankTest, CoefficientsRemainWellDefinedAfterFailure)
+{
+    math::Matrix<float, 4, 2> design{};
+    math::Matrix<float, 4, 1> target{};
+
+    for (std::size_t i = 0; i < 4; ++i)
+    {
+        design.at(i, 0) = static_cast<float>(i);
+        design.at(i, 1) = 2.0f * static_cast<float>(i);
+        target.at(i, 0) = static_cast<float>(i);
+    }
+
+    regression.Fit(design, target);
+
+    for (std::size_t i = 0; i < 3; ++i)
+        EXPECT_EQ(regression.Coefficients().at(i, 0), 0.0f);
+}
+
+TEST_F(LinearRegressionRankTest, FullRankFeaturesReportSuccess)
+{
+    math::Matrix<float, 4, 2> design{};
+    math::Matrix<float, 4, 1> target{};
+
+    for (std::size_t i = 0; i < 4; ++i)
+    {
+        design.at(i, 0) = static_cast<float>(i);
+        design.at(i, 1) = static_cast<float>(i) * static_cast<float>(i);
+        target.at(i, 0) = 1.0f + static_cast<float>(i);
+    }
+
+    EXPECT_TRUE(regression.Fit(design, target));
+}

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "infra/util/ReallyAssert.hpp"
 #include "numerical/controllers/interfaces/StateFeedbackController.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
@@ -64,6 +65,10 @@ namespace controllers
         Mpc(const HessianMatrix& precomputedH, const GradientMatrix& precomputedF,
             const MpcConstraints<T, InputSize>& constraints = MpcConstraints<T, InputSize>{});
 
+        Mpc(const HessianMatrix& precomputedH, const GradientMatrix& precomputedF,
+            const GradientMatrix& precomputedReferenceGain,
+            const MpcConstraints<T, InputSize>& constraints = MpcConstraints<T, InputSize>{});
+
         InputVector ComputeControl(const StateVector& state) override;
         [[nodiscard]] const ControlSequence& GetControlSequence() const;
 
@@ -93,6 +98,7 @@ namespace controllers
         MpcConstraints<T, InputSize> constraints;
         ControlSequence controlSequence;
         std::optional<StateVector> reference;
+        bool referenceTrackingAvailable{ true };
     };
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t PredictionHorizon, std::size_t ControlHorizon>
@@ -111,6 +117,18 @@ namespace controllers
         const MpcConstraints<T, InputSize>& constraints)
         : hessian(precomputedH)
         , gradientMatrix(precomputedF)
+        , constraints(constraints)
+        , referenceTrackingAvailable(false)
+    {}
+
+    template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t PredictionHorizon, std::size_t ControlHorizon>
+    Mpc<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>::Mpc(
+        const HessianMatrix& precomputedH, const GradientMatrix& precomputedF,
+        const GradientMatrix& precomputedReferenceGain,
+        const MpcConstraints<T, InputSize>& constraints)
+        : hessian(precomputedH)
+        , gradientMatrix(precomputedF)
+        , referenceGainMatrix(precomputedReferenceGain)
         , constraints(constraints)
     {}
 
@@ -252,6 +270,7 @@ namespace controllers
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t PredictionHorizon, std::size_t ControlHorizon>
     void Mpc<T, StateSize, InputSize, PredictionHorizon, ControlHorizon>::SetReference(const StateVector& ref)
     {
+        really_assert(referenceTrackingAvailable);
         reference = ref;
     }
 

@@ -195,7 +195,7 @@ TEST_F(TestPolynomialFitting, predict_evaluates_fitted_polynomial)
     fitter.Fit(x, y);
 
     EXPECT_NEAR(fitter.Predict(0.5f), 1.0f - 0.5f * 0.5f + 0.25f * 0.25f, math::Tolerance<float>());
-    EXPECT_NEAR(fitter.Predict(1.0f), 1.0f - 0.5f * 1.0f + 0.25f * 1.0f,  math::Tolerance<float>());
+    EXPECT_NEAR(fitter.Predict(1.0f), 1.0f - 0.5f * 1.0f + 0.25f * 1.0f, math::Tolerance<float>());
 }
 
 TEST_F(TestPolynomialFitting, predict_all_coefficients_finite_on_far_from_origin_data)
@@ -219,4 +219,21 @@ TEST_F(TestPolynomialFitting, predict_all_coefficients_finite_on_far_from_origin
     EXPECT_NEAR(c.at(0, 0), 3.0f, math::Tolerance<float>());
     EXPECT_NEAR(c.at(1, 0), 7.0f, math::Tolerance<float>());
     EXPECT_NEAR(c.at(2, 0), 2.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestPolynomialFitting, repeated_abscissae_report_failure_without_nan_coefficients)
+{
+    math::Matrix<float, 8, 1> x{};
+    math::Matrix<float, 8, 1> y{};
+
+    for (std::size_t i = 0; i < 8; ++i)
+    {
+        x.at(i, 0) = 1.0f;
+        y.at(i, 0) = static_cast<float>(i);
+    }
+
+    EXPECT_FALSE(fitter.Fit(x, y));
+
+    for (std::size_t i = 0; i < 3; ++i)
+        EXPECT_EQ(fitter.Coefficients().at(i, 0), 0.0f);
 }

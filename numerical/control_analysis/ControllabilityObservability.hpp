@@ -6,8 +6,11 @@
 
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
+#include <algorithm>
 #include <cstddef>
+#include <optional>
 #include <type_traits>
 
 namespace control_analysis
@@ -32,8 +35,8 @@ namespace control_analysis
 
         static bool IsControllable(const LTI& plant, T tol = T(1e-6));
         static bool IsObservable(const LTI& plant, T tol = T(1e-6));
-        OPTIMIZE_FOR_SPEED static SquareMatrix ControllabilityGramian(const LTI& plant);
-        OPTIMIZE_FOR_SPEED static SquareMatrix ObservabilityGramian(const LTI& plant);
+        OPTIMIZE_FOR_SPEED static std::optional<SquareMatrix> ControllabilityGramian(const LTI& plant);
+        OPTIMIZE_FOR_SPEED static std::optional<SquareMatrix> ObservabilityGramian(const LTI& plant);
 
     private:
         template<std::size_t Rows, std::size_t Cols>
@@ -47,7 +50,7 @@ namespace control_analysis
             math::Matrix<T, Rows, Cols>& M, std::size_t pivotRow, std::size_t col, T pivotVal);
 
         static T MaxAbsDiff(const SquareMatrix& a, const SquareMatrix& b);
-        static SquareMatrix SolveDiscreteLyapunov(const SquareMatrix& A, const SquareMatrix& Q);
+        static std::optional<SquareMatrix> SolveDiscreteLyapunov(const SquareMatrix& A, const SquareMatrix& Q);
     };
 
     ////    Implementation    ////
@@ -182,38 +185,46 @@ namespace control_analysis
     }
 
     template<typename T, std::size_t n, std::size_t m, std::size_t p>
-    typename ControllabilityObservability<T, n, m, p>::SquareMatrix
+    std::optional<typename ControllabilityObservability<T, n, m, p>::SquareMatrix>
     ControllabilityObservability<T, n, m, p>::SolveDiscreteLyapunov(
         const SquareMatrix& A, const SquareMatrix& Q)
     {
-        constexpr std::size_t maxIter{ 200 };
+        constexpr std::size_t maxIter{ 64 };
         constexpr T convTol{ T(1e-6) };
         constexpr T divergenceBound{ T(1e18) };
+
         SquareMatrix X{ Q };
-        SquareMatrix At{ A.Transpose() };
+        SquareMatrix Ak{ A };
 
         for (std::size_t iter = 0; iter < maxIter; ++iter)
         {
-            SquareMatrix Xnext{ A * X * At + Q };
-            if (MaxAbsValue(Xnext) > divergenceBound)
-                return SquareMatrix{};
-            if (MaxAbsDiff(Xnext, X) < convTol)
+            SquareMatrix Xnext{ X + Ak * X * Ak.Transpose() };
+            const T magnitude{ MaxAbsValue(Xnext) };
+
+            if (!math::IsFinite(magnitude) || magnitude > divergenceBound)
+                return std::nullopt;
+
+            const T reference{ std::max(magnitude, T(1)) };
+
+            if (MaxAbsDiff(Xnext, X) <= convTol * reference)
                 return Xnext;
+
             X = Xnext;
+            Ak = Ak * Ak;
         }
 
-        return SquareMatrix{};
+        return std::nullopt;
     }
 
     template<typename T, std::size_t n, std::size_t m, std::size_t p>
-    OPTIMIZE_FOR_SPEED typename ControllabilityObservability<T, n, m, p>::SquareMatrix
+    OPTIMIZE_FOR_SPEED std::optional<typename ControllabilityObservability<T, n, m, p>::SquareMatrix>
     ControllabilityObservability<T, n, m, p>::ControllabilityGramian(const LTI& plant)
     {
         return SolveDiscreteLyapunov(plant.A, plant.B * plant.B.Transpose());
     }
 
     template<typename T, std::size_t n, std::size_t m, std::size_t p>
-    OPTIMIZE_FOR_SPEED typename ControllabilityObservability<T, n, m, p>::SquareMatrix
+    OPTIMIZE_FOR_SPEED std::optional<typename ControllabilityObservability<T, n, m, p>::SquareMatrix>
     ControllabilityObservability<T, n, m, p>::ObservabilityGramian(const LTI& plant)
     {
         return SolveDiscreteLyapunov(plant.A.Transpose(), plant.C.Transpose() * plant.C);

@@ -97,3 +97,53 @@ TEST_F(TestYuleWalkerFloat, constant_signal_yields_near_zero_coefficients)
     EXPECT_NEAR(coeffs[0], 0.0f, math::Tolerance<float>());
     EXPECT_NEAR(coeffs[1], 0.0f, math::Tolerance<float>());
 }
+
+namespace
+{
+    class TestYuleWalkerFourthOrder
+        : public ::testing::Test
+    {
+    protected:
+        static constexpr std::size_t Samples = 128;
+        static constexpr std::size_t Order = 4;
+
+        using SignalVector = math::Vector<float, Samples>;
+        using PastVector = math::Vector<float, Order>;
+
+        estimators::YuleWalker<float, Samples, Order> estimator;
+
+        SignalVector MakeAr1Signal(float a1) const
+        {
+            SignalVector signal;
+            signal[0] = 0.5f;
+            for (std::size_t t = 1; t < Samples; ++t)
+                signal[t] = a1 * signal[t - 1];
+            return signal;
+        }
+    };
+}
+
+TEST_F(TestYuleWalkerFourthOrder, recovers_dominant_first_order_coefficient)
+{
+    const float a1 = 0.7f;
+    estimator.Fit(MakeAr1Signal(a1));
+
+    const auto& coefficients = estimator.Coefficients();
+
+    EXPECT_NEAR(coefficients.at(0, 0), a1, 5e-2f);
+    EXPECT_GE(estimator.NoiseVariance(), 0.0f);
+}
+
+TEST_F(TestYuleWalkerFourthOrder, prediction_continues_the_geometric_sequence)
+{
+    const float a1 = 0.7f;
+    estimator.Fit(MakeAr1Signal(a1));
+
+    PastVector past{};
+    past.at(0, 0) = 1.0f;
+    past.at(1, 0) = 1.0f / a1;
+    past.at(2, 0) = 1.0f / (a1 * a1);
+    past.at(3, 0) = 1.0f / (a1 * a1 * a1);
+
+    EXPECT_NEAR(estimator.Predict(past), a1, 1e-1f);
+}

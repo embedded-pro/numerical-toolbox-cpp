@@ -8,6 +8,7 @@
 #include "numerical/math/Math.hpp"
 #include <array>
 #include <cstddef>
+#include <limits>
 #include <numbers>
 #include <type_traits>
 
@@ -17,6 +18,9 @@ namespace math
     class Cordic
     {
         static_assert(std::is_floating_point_v<T>, "Cordic supports floating-point types only");
+        static_assert(Iterations > 0, "Cordic requires at least one iteration");
+        static_assert(Iterations < std::numeric_limits<std::size_t>::digits,
+            "Cordic Iterations must stay below the shift width of std::size_t");
 
     public:
         struct SinCos
@@ -85,7 +89,15 @@ namespace math
         const T pi{ std::numbers::pi_v<T> };
         const T halfPi{ pi / T(2) };
 
-        T angle{ angleRadians };
+        const T twoPi{ T(2) * pi };
+
+        T angle{ math::Fmod(angleRadians, twoPi) };
+
+        if (angle > pi)
+            angle -= twoPi;
+        else if (angle < -pi)
+            angle += twoPi;
+
         T sinSign{ T(1) };
         T cosSign{ T(1) };
 
@@ -124,6 +136,9 @@ namespace math
     T Cordic<T, Iterations>::Arctangent2(T y, T x) const
     {
         const T pi{ std::numbers::pi_v<T> };
+
+        if (y == T(0) && x == T(0))
+            return T(0);
 
         T quadrantOffset{ T(0) };
         T xv{ x };

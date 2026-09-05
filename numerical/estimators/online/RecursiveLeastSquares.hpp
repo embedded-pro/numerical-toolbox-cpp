@@ -4,9 +4,11 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
+#include "infra/util/ReallyAssert.hpp"
 #include "numerical/estimators/Estimator.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Math.hpp"
+#include <optional>
 
 namespace estimators
 {
@@ -29,6 +31,9 @@ namespace estimators
         explicit RecursiveLeastSquares(T forgettingFactor);
         RecursiveLeastSquares(T initialCovariance, T forgettingFactor);
 
+        [[nodiscard]] static bool IsForgettingFactorValid(T forgettingFactor);
+        [[nodiscard]] static std::optional<RecursiveLeastSquares> TryCreate(T forgettingFactor);
+
         EstimationMetrics Update(const InputMatrix& X, const math::Matrix<T, 1, 1>& y) override;
         const CoefficientsMatrix& Coefficients() const override;
         void SetCoefficients(const CoefficientsMatrix& initial);
@@ -49,11 +54,27 @@ namespace estimators
     // Implementation
 
     template<typename T, std::size_t Features>
+    bool RecursiveLeastSquares<T, Features>::IsForgettingFactorValid(T forgettingFactor)
+    {
+        return math::IsFinite(forgettingFactor) && forgettingFactor > T(0) && forgettingFactor <= T(1);
+    }
+
+    template<typename T, std::size_t Features>
+    std::optional<RecursiveLeastSquares<T, Features>> RecursiveLeastSquares<T, Features>::TryCreate(T forgettingFactor)
+    {
+        if (!IsForgettingFactorValid(forgettingFactor))
+            return std::nullopt;
+
+        return RecursiveLeastSquares{ forgettingFactor };
+    }
+
+    template<typename T, std::size_t Features>
     RecursiveLeastSquares<T, Features>::RecursiveLeastSquares(T forgettingFactor)
         : covariance(DesignMatrix::Identity())
         , lambda(forgettingFactor)
         , lambdaInverse(T(1) / lambda)
     {
+        really_assert(IsForgettingFactorValid(forgettingFactor));
     }
 
     template<typename T, std::size_t Features>
@@ -62,6 +83,8 @@ namespace estimators
         , lambda(forgettingFactor)
         , lambdaInverse(T(1) / lambda)
     {
+        really_assert(IsForgettingFactorValid(forgettingFactor));
+        really_assert(math::IsFinite(initialCovariance) && initialCovariance > T(0));
     }
 
     template<typename T, std::size_t Features>

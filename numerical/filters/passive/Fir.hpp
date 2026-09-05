@@ -57,7 +57,5 @@ namespace filters::passive
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class Fir<float, 3>;
-    extern template class Fir<math::Q15, 3>;
-    extern template class Fir<math::Q31, 3>;
 #endif
 }

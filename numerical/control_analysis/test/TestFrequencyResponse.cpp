@@ -1,8 +1,11 @@
 #include "numerical/control_analysis/FrequencyResponse.hpp"
 #include "numerical/math/Tolerance.hpp"
 #include <array>
+#include <bit>
 #include <cmath>
+#include <cstdint>
 #include <gtest/gtest.h>
+#include <limits>
 #include <tuple>
 
 namespace
@@ -316,7 +319,7 @@ TEST_F(TestFrequencyResponseHighpass, magnitude_at_quarter_nyquist_is_minus_3db)
     EXPECT_NEAR(bestMag, -3.0103f, 0.5f);
 }
 
-TEST_F(TestFrequencyResponseUnity, zero_denominator_coefficients_produce_finite_output)
+TEST_F(TestFrequencyResponseUnity, zero_denominator_coefficients_produce_finite_clamped_output)
 {
     std::array<float, 1> bz{ 1.0f };
     std::array<float, 1> az{ 0.0f };
@@ -324,11 +327,20 @@ TEST_F(TestFrequencyResponseUnity, zero_denominator_coefficients_produce_finite_
 
     auto [frequencies, magnitudes, phases] = frZeroDenom.Calculate();
 
+    using Response = control_analysis::FrequencyResponse<float, 64>;
+    constexpr std::uint32_t exponentMask{ 0x7f800000u };
+
     for (const auto& m : magnitudes)
     {
-        EXPECT_FALSE(std::isnan(m));
-        EXPECT_FALSE(std::isinf(m));
+        const float clamped = Response::ClampDb(m, -120.0f, 120.0f);
+
+        EXPECT_NE(std::bit_cast<std::uint32_t>(clamped) & exponentMask, exponentMask);
+        EXPECT_LE(clamped, 120.0f);
+        EXPECT_GE(clamped, -120.0f);
     }
+
+    for (const auto& p : phases)
+        EXPECT_NE(std::bit_cast<std::uint32_t>(p) & exponentMask, exponentMask);
 }
 
 TEST_F(TestFrequencyResponseUnity, magnitude_output_size_matches_points_for_128_points)
@@ -396,4 +408,59 @@ TEST_F(TestFrequencyResponseLowpass, lowpass_dc_gain_is_zero_db)
 
     ASSERT_FALSE(magnitudes.empty());
     EXPECT_NEAR(magnitudes.front(), 0.0f, 0.1f);
+}
+
+TEST_F(TestFrequencyResponseUnity, RepeatedCalculateOnSameObjectIsIdentical)
+{
+    auto [firstFrequencies, firstMagnitude, firstPhase] = freqResponse.Calculate();
+    const auto expectedSize = firstFrequencies.size();
+
+    auto [secondFrequencies, secondMagnitude, secondPhase] = freqResponse.Calculate();
+
+    ASSERT_EQ(secondFrequencies.size(), expectedSize);
+    ASSERT_EQ(secondMagnitude.size(), expectedSize);
+    ASSERT_EQ(secondPhase.size(), expectedSize);
+
+    for (std::size_t i = 0; i < expectedSize; ++i)
+    {
+        EXPECT_NEAR(secondFrequencies[i], firstFrequencies[i], math::Tolerance<float>());
+        EXPECT_NEAR(secondMagnitude[i], firstMagnitude[i], math::Tolerance<float>());
+        EXPECT_NEAR(secondPhase[i], firstPhase[i], math::Tolerance<float>());
+    }
+}
+
+namespace
+{
+    class TestFrequencyResponseAtPole : public ::testing::Test
+    {
+    protected:
+        std::array<float, 1> b{ 5.0f };
+        std::array<float, 1> a{ 0.0f };
+        control_analysis::FrequencyResponse<float, 16> freqResponse{ b, a, kSampleFrequency };
+    };
+}
+
+TEST_F(TestFrequencyResponseAtPole, ExactPoleReportsInfinityNotNumeratorMagnitude)
+{
+    auto [frequencies, magnitude, phase] = freqResponse.Calculate();
+
+    ASSERT_GT(magnitude.size(), 0u);
+
+    const auto infinityBits = std::bit_cast<std::uint32_t>(std::numeric_limits<float>::infinity());
+    const float numeratorOnlyDb = 20.0f * std::log10(5.0f);
+
+    for (std::size_t i = 0; i < magnitude.size(); ++i)
+    {
+        EXPECT_EQ(std::bit_cast<std::uint32_t>(magnitude[i]), infinityBits);
+        EXPECT_NE(magnitude[i], numeratorOnlyDb);
+    }
+}
+
+TEST_F(TestFrequencyResponseAtPole, ClampDbGivesFiniteDisplayRange)
+{
+    using Response = control_analysis::FrequencyResponse<float, 16>;
+
+    EXPECT_NEAR(Response::ClampDb(std::numeric_limits<float>::infinity(), -120.0f, 120.0f), 120.0f, math::Tolerance<float>());
+    EXPECT_NEAR(Response::ClampDb(-std::numeric_limits<float>::infinity(), -120.0f, 120.0f), -120.0f, math::Tolerance<float>());
+    EXPECT_NEAR(Response::ClampDb(6.0f, -120.0f, 120.0f), 6.0f, math::Tolerance<float>());
 }

@@ -8,6 +8,7 @@
 #include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/TriangularSolve.hpp"
+#include <algorithm>
 #include <cstddef>
 #include <limits>
 #include <optional>
@@ -23,6 +24,32 @@ namespace math
             for (std::size_t k = 0; k < j; ++k)
                 sum += ToFloat(l.at(i, k)) * ToFloat(l.at(j, k));
             return sum;
+        }
+
+        template<typename T, std::size_t N>
+        [[nodiscard]] OPTIMIZE_FOR_SPEED constexpr bool IsFiniteSymmetric(const SquareMatrix<T, N>& a)
+        {
+            float scale = 0.0f;
+
+            for (std::size_t i = 0; i < N; ++i)
+                for (std::size_t j = 0; j < N; ++j)
+                {
+                    const float value = ToFloat(a.at(i, j));
+
+                    if (!math::IsFinite(value))
+                        return false;
+
+                    scale = std::max(scale, math::Abs(value));
+                }
+
+            const float tolerance = std::numeric_limits<float>::epsilon() * scale * static_cast<float>(N);
+
+            for (std::size_t i = 0; i < N; ++i)
+                for (std::size_t j = 0; j < i; ++j)
+                    if (math::Abs(ToFloat(a.at(i, j)) - ToFloat(a.at(j, i))) > tolerance)
+                        return false;
+
+            return true;
         }
     }
 
@@ -41,6 +68,9 @@ namespace math
     template<typename T, std::size_t N>
     OPTIMIZE_FOR_SPEED constexpr std::optional<SquareMatrix<T, N>> CholeskyDecomposition<T, N>::TryFactor(const SquareMatrix<T, N>& a)
     {
+        if (!detail::IsFiniteSymmetric(a))
+            return std::nullopt;
+
         SquareMatrix<T, N> l{};
 
         for (std::size_t i = 0; i < N; ++i)
@@ -48,6 +78,9 @@ namespace math
             for (std::size_t j = 0; j <= i; ++j)
             {
                 const float sum = ToFloat(a.at(i, j)) - detail::CholeskyInnerProduct(l, i, j);
+
+                if (!math::IsFinite(sum))
+                    return std::nullopt;
 
                 if (i != j)
                     l.at(i, j) = T(sum / ToFloat(l.at(j, j)));

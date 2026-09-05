@@ -201,3 +201,28 @@ TEST_F(TestExpectationMaximization, minimal_steps_returns_finite_symmetric_covar
     EXPECT_GT(result.parameters.R.at(0, 0), 0.0f);
     EXPECT_TRUE(std::isfinite(result.logLikelihood));
 }
+
+TEST_F(TestExpectationMaximization, returned_likelihood_belongs_to_returned_parameters)
+{
+    const float noConverge = std::numeric_limits<float>::lowest();
+
+    const auto oneIteration = em.Run(observations, T, MakeInitialGuess(), 1, noConverge);
+
+    Em verifier;
+    const float evaluateOnly = std::numeric_limits<float>::infinity();
+    const auto reevaluated = verifier.Run(observations, T, oneIteration.parameters, 1, evaluateOnly);
+
+    ASSERT_TRUE(reevaluated.converged);
+    EXPECT_NEAR(reevaluated.logLikelihood, oneIteration.logLikelihood, 1e-3f);
+}
+
+TEST_F(TestExpectationMaximization, single_iteration_advances_parameters)
+{
+    const float noConverge = std::numeric_limits<float>::lowest();
+
+    const auto initial = MakeInitialGuess();
+    const auto oneIteration = em.Run(observations, T, initial, 1, noConverge);
+
+    EXPECT_EQ(oneIteration.iterations, 1u);
+    EXPECT_NE(oneIteration.parameters.Q.at(0, 0), initial.Q.at(0, 0));
+}

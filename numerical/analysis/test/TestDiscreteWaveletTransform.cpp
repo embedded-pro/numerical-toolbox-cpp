@@ -1,6 +1,7 @@
 #include "numerical/analysis/DiscreteWaveletTransform.hpp"
 #include "numerical/math/Tolerance.hpp"
 #include "gtest/gtest.h"
+#include <cmath>
 #include <cstddef>
 #include <random>
 
@@ -307,4 +308,34 @@ TEST_F(TestDiscreteWaveletTransform, determinism_same_input_same_output)
 
     for (std::size_t i = 0; i < N; ++i)
         EXPECT_FLOAT_EQ(coeffs1[i], coeffs2[i]);
+}
+
+TEST_F(TestDiscreteWaveletTransform, haar_reconstruction_uses_synthesis_filters)
+{
+    analysis::DiscreteWaveletTransform<float, N, 3, 2>::Signal x, coeffs, reconstructed;
+
+    for (std::size_t i = 0; i < N; ++i)
+        x.push_back(std::sin(0.3f * static_cast<float>(i)) + 0.5f * static_cast<float>(i));
+
+    dwtHaar.Forward(x, coeffs);
+    dwtHaar.Inverse(coeffs, reconstructed);
+
+    ASSERT_EQ(reconstructed.size(), N);
+    for (std::size_t i = 0; i < N; ++i)
+        EXPECT_NEAR(reconstructed[i], x[i], 1e-4f);
+}
+
+TEST_F(TestDiscreteWaveletTransform, daubechies2_reconstruction_uses_synthesis_filters)
+{
+    analysis::DiscreteWaveletTransform<float, N, 3, 4>::Signal x, coeffs, reconstructed;
+
+    for (std::size_t i = 0; i < N; ++i)
+        x.push_back(std::cos(0.4f * static_cast<float>(i)) - 0.25f * static_cast<float>(i));
+
+    dwtDb2.Forward(x, coeffs);
+    dwtDb2.Inverse(coeffs, reconstructed);
+
+    ASSERT_EQ(reconstructed.size(), N);
+    for (std::size_t i = 0; i < N; ++i)
+        EXPECT_NEAR(reconstructed[i], x[i], 1e-4f);
 }

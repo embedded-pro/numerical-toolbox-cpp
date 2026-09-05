@@ -67,7 +67,7 @@ namespace solvers
         const std::array<T, Size + 1> poly = CharacteristicPolynomial(matrix);
 
         DurandKerner<T, Size> solver{};
-        auto roots = solver.Solve(std::span<const T>{ poly.data(), poly.size() });
+        auto roots = solver.Solve(std::span<const T>{ poly.data(), poly.size() }).roots;
 
         T rho{};
         for (std::size_t i = 0; i < roots.size(); ++i)

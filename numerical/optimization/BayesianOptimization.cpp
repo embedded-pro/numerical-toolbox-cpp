@@ -3,5 +3,5 @@
 namespace optimization
 {
     template class BayesianOptimization<1, 10, 50>;
-    template class BayesianOptimization<2, 30, 200>;
+    template class BayesianOptimization<2, 20, 100>;
 }

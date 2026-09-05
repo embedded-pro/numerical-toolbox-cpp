@@ -71,7 +71,5 @@ namespace optimization
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class GradientDescent<float, 2>;
-    extern template class GradientDescent<math::Q15, 2>;
-    extern template class GradientDescent<math::Q31, 2>;
 #endif
 }

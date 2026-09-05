@@ -17,7 +17,7 @@ namespace estimators
         using DesignMatrix = math::Matrix<T, Features + 1, Features + 1>;
         using InputMatrix = math::Matrix<T, Features, 1>;
 
-        virtual void Fit(const math::Matrix<T, Samples, Features>& X, const math::Matrix<T, Samples, 1>& y) = 0;
+        virtual bool Fit(const math::Matrix<T, Samples, Features>& X, const math::Matrix<T, Samples, 1>& y) = 0;
         virtual T Predict(const InputMatrix& X) const = 0;
         virtual const CoefficientsMatrix& Coefficients() const = 0;
     };

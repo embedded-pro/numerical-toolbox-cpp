@@ -549,3 +549,146 @@ TEST_F(TestAhrsFilter, mahony_no_nan_inf_at_extreme_accel)
     EXPECT_FALSE(std::isnan(orient.x));
     EXPECT_FALSE(std::isinf(orient.x));
 }
+
+namespace
+{
+    struct BodyPrediction
+    {
+        float x;
+        float y;
+        float z;
+    };
+
+    BodyPrediction RotateEarthToBody(const math::Quaternion<float>& q, float ex, float ez)
+    {
+        const float qw = q.w;
+        const float qx = q.x;
+        const float qy = q.y;
+        const float qz = q.z;
+
+        return BodyPrediction{
+            ex * (1.0f - 2.0f * (qy * qy + qz * qz)) + ez * 2.0f * (qx * qz - qw * qy),
+            ex * 2.0f * (qx * qy - qw * qz) + ez * 2.0f * (qw * qx + qy * qz),
+            ex * 2.0f * (qw * qy + qx * qz) + ez * (1.0f - 2.0f * (qx * qx + qy * qy))
+        };
+    }
+
+    class TestAhrsTiltedMarg : public ::testing::Test
+    {
+    protected:
+        static constexpr float g{ 9.81f };
+
+        filters::AhrsFilter<float, filters::AhrsMode::Madgwick> madgwick{ 0.5f, 0.01f };
+
+        math::Quaternion<float> truth{ 0.8446f, 0.1913f, 0.4619f, 0.1802f };
+
+        static constexpr float inclination{ 1.0472f };
+        float fieldX{ std::cos(inclination) };
+        float fieldZ{ std::sin(inclination) };
+
+        void SetUp() override
+        {
+            truth.Normalize();
+        }
+    };
+}
+
+namespace
+{
+    float MagneticObjective(const math::Quaternion<float>& q, float mx, float my, float mz, float bx, float bz)
+    {
+        const float qw = q.w;
+        const float qx = q.x;
+        const float qy = q.y;
+        const float qz = q.z;
+
+        const float f4 = bx * (1.0f - 2.0f * (qy * qy + qz * qz)) + bz * 2.0f * (qx * qz - qw * qy) - mx;
+        const float f5 = bx * 2.0f * (qx * qy - qw * qz) + bz * 2.0f * (qw * qx + qy * qz) - my;
+        const float f6 = bx * 2.0f * (qw * qy + qx * qz) + bz * (1.0f - 2.0f * (qx * qx + qy * qy)) - mz;
+
+        return 0.5f * (f4 * f4 + f5 * f5 + f6 * f6);
+    }
+}
+
+TEST_F(TestAhrsTiltedMarg, magnetic_gradient_matches_finite_differences)
+{
+    using Filter = filters::AhrsFilter<float, filters::AhrsMode::Madgwick>;
+
+    const std::array<math::Quaternion<float>, 3> orientations{
+        math::Quaternion<float>{ 0.8446f, 0.1913f, 0.4619f, 0.1802f },
+        math::Quaternion<float>{ 0.5963f, -0.4802f, 0.3521f, 0.5361f },
+        math::Quaternion<float>{ 0.7071f, 0.0f, 0.7071f, 0.0f }
+    };
+
+    const float mx = 0.31f;
+    const float my = -0.47f;
+    const float mz = 0.82f;
+    const float bx = 0.5f;
+    const float bz = 0.87f;
+
+    for (auto quat : orientations)
+    {
+        quat.Normalize();
+
+        math::Vector3<float> mag{};
+        mag.at(0, 0) = mx;
+        mag.at(1, 0) = my;
+        mag.at(2, 0) = mz;
+
+        const auto analytic = Filter::GradientMag(quat, mag, bx, bz);
+
+        const float step = 1e-3f;
+        std::array<float, 4> numeric{};
+        for (std::size_t i = 0; i < 4; ++i)
+        {
+            math::Quaternion<float> plus{ quat };
+            math::Quaternion<float> minus{ quat };
+            float* plusComponents[4]{ &plus.w, &plus.x, &plus.y, &plus.z };
+            float* minusComponents[4]{ &minus.w, &minus.x, &minus.y, &minus.z };
+            *plusComponents[i] += step;
+            *minusComponents[i] -= step;
+
+            numeric[i] = (MagneticObjective(plus, mx, my, mz, bx, bz) - MagneticObjective(minus, mx, my, mz, bx, bz)) / (2.0f * step);
+        }
+
+        float norm = std::sqrt(numeric[0] * numeric[0] + numeric[1] * numeric[1] + numeric[2] * numeric[2] + numeric[3] * numeric[3]);
+        ASSERT_GT(norm, 1e-4f);
+
+        EXPECT_NEAR(analytic.w, numeric[0] / norm, 1e-3f);
+        EXPECT_NEAR(analytic.x, numeric[1] / norm, 1e-3f);
+        EXPECT_NEAR(analytic.y, numeric[2] / norm, 1e-3f);
+        EXPECT_NEAR(analytic.z, numeric[3] / norm, 1e-3f);
+    }
+}
+
+TEST_F(TestAhrsTiltedMarg, converges_for_arbitrary_tilted_magnetic_field)
+{
+    const auto gravityBody = RotateEarthToBody(truth, 0.0f, 1.0f);
+    const auto magBody = RotateEarthToBody(truth, fieldX, fieldZ);
+
+    math::Vector3<float> gyro{};
+    math::Vector3<float> accel{};
+    accel.at(0, 0) = gravityBody.x * g;
+    accel.at(1, 0) = gravityBody.y * g;
+    accel.at(2, 0) = gravityBody.z * g;
+
+    math::Vector3<float> mag{};
+    mag.at(0, 0) = magBody.x;
+    mag.at(1, 0) = magBody.y;
+    mag.at(2, 0) = magBody.z;
+
+    for (int i = 0; i < 20000; ++i)
+        madgwick.UpdateMarg(gyro, accel, mag);
+
+    const auto estimate = madgwick.Orientation();
+    const auto predictedGravity = RotateEarthToBody(estimate, 0.0f, 1.0f);
+    const auto predictedMag = RotateEarthToBody(estimate, fieldX, fieldZ);
+
+    EXPECT_NEAR(predictedGravity.x, gravityBody.x, 2e-2f);
+    EXPECT_NEAR(predictedGravity.y, gravityBody.y, 2e-2f);
+    EXPECT_NEAR(predictedGravity.z, gravityBody.z, 2e-2f);
+
+    EXPECT_NEAR(predictedMag.x, magBody.x, 2e-2f);
+    EXPECT_NEAR(predictedMag.y, magBody.y, 2e-2f);
+    EXPECT_NEAR(predictedMag.z, magBody.z, 2e-2f);
+}

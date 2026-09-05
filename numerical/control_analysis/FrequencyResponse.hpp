@@ -7,6 +7,7 @@
 #include "infra/util/BoundedVector.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Math.hpp"
+#include <algorithm>
 #include <complex>
 #include <limits>
 #include <numbers>
@@ -25,6 +26,8 @@ namespace control_analysis
 
         FrequencyResponse(std::span<T> b, std::span<T> a, T sampleFrequency);
         std::tuple<Vector, Vector, Vector> Calculate();
+
+        [[nodiscard]] static T ClampDb(T magnitudeDb, T floorDb, T ceilingDb);
 
     private:
         Vector frequencies;
@@ -50,6 +53,10 @@ namespace control_analysis
         std::tuple<typename FrequencyResponse<T, NumberOfPoints>::Vector, typename FrequencyResponse<T, NumberOfPoints>::Vector, typename FrequencyResponse<T, NumberOfPoints>::Vector>
         FrequencyResponse<T, NumberOfPoints>::Calculate()
     {
+        frequencies.clear();
+        response.clear();
+        phase.clear();
+
         const auto maxSize = static_cast<T>(response.max_size());
         const auto fstart = sampleFrequency / maxSize;
         const auto fend = sampleFrequency / static_cast<T>(2);
@@ -69,18 +76,32 @@ namespace control_analysis
             for (std::size_t i = 0; i < a.size(); ++i)
                 denominator += a[i] * std::polar(static_cast<T>(1), -omega * static_cast<T>(i));
 
-            if (denominator == static_cast<T>(0))
-                denominator.real(static_cast<T>(1));
+            frequencies.emplace_back(f);
+
+            if (denominator == std::complex<T>(static_cast<T>(0), static_cast<T>(0)))
+            {
+                response.emplace_back(std::numeric_limits<T>::infinity());
+                phase.emplace_back(static_cast<T>(0));
+                continue;
+            }
 
             auto h = numerator / denominator;
             auto magnitude = std::max(std::abs(h), std::numeric_limits<T>::min());
 
-            frequencies.emplace_back(f);
             response.emplace_back(static_cast<T>(20) * math::Log10(magnitude));
             phase.emplace_back(std::arg(h) * static_cast<T>(180) / static_cast<T>(std::numbers::pi));
         }
 
         return std::make_tuple(frequencies, response, phase);
+    }
+
+    template<typename T, std::size_t NumberOfPoints>
+    T FrequencyResponse<T, NumberOfPoints>::ClampDb(T magnitudeDb, T floorDb, T ceilingDb)
+    {
+        if (!math::IsFinite(magnitudeDb))
+            return magnitudeDb > T{} ? ceilingDb : floorDb;
+
+        return std::min(std::max(magnitudeDb, floorDb), ceilingDb);
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD

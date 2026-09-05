@@ -173,3 +173,100 @@ TEST_F(TestSingularValueDecomposition, known_2x2_svd)
     EXPECT_NEAR(sig.at(1, 0), std::sqrt(10.0f), 1e-3f);
     EXPECT_NEAR(sig.at(2, 0), 0.0f, 1e-3f);
 }
+
+TEST_F(TestSingularValueDecomposition, ZeroDiagonalBidiagonalBlockDiagonalizes)
+{
+    math::Matrix<float, 3, 3> single{};
+    single.at(0, 1) = 1.0f;
+
+    ASSERT_TRUE(svdSquare.Decompose(single));
+
+    EXPECT_NEAR(svdSquare.SingularValues().at(0, 0), 1.0f, math::Tolerance<float>());
+    EXPECT_NEAR(svdSquare.SingularValues().at(1, 0), 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(svdSquare.SingularValues().at(2, 0), 0.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestSingularValueDecomposition, ZeroDiagonalBlockReconstructsInput)
+{
+    math::Matrix<float, 3, 3> single{};
+    single.at(0, 1) = 1.0f;
+
+    ASSERT_TRUE(svdSquare.Decompose(single));
+
+    const auto& u = svdSquare.U();
+    const auto& v = svdSquare.V();
+
+    for (std::size_t r = 0; r < 3; ++r)
+        for (std::size_t c = 0; c < 3; ++c)
+        {
+            float acc = 0.0f;
+            for (std::size_t k = 0; k < 3; ++k)
+                acc += u.at(r, k) * svdSquare.SingularValues().at(k, 0) * v.at(c, k);
+
+            EXPECT_NEAR(acc, single.at(r, c), 1e-5f);
+        }
+}
+
+TEST_F(TestSingularValueDecomposition, TwoNonzeroSuperdiagonalsDiagonalize)
+{
+    math::Matrix<float, 3, 3> bidiagonal{};
+    bidiagonal.at(0, 1) = 1.0f;
+    bidiagonal.at(1, 2) = 2.0f;
+
+    ASSERT_TRUE(svdSquare.Decompose(bidiagonal));
+
+    EXPECT_NEAR(svdSquare.SingularValues().at(0, 0), 2.0f, 1e-5f);
+    EXPECT_NEAR(svdSquare.SingularValues().at(1, 0), 1.0f, 1e-5f);
+    EXPECT_NEAR(svdSquare.SingularValues().at(2, 0), 0.0f, 1e-5f);
+}
+
+TEST_F(TestSingularValueDecomposition, rank_and_condition_number_of_tall_matrix)
+{
+    ASSERT_TRUE(svd.Decompose(a43));
+
+    EXPECT_EQ(svd.Rank(1e-5f), 3u);
+    EXPECT_GT(svd.ConditionNumber(), 1.0f);
+}
+
+TEST_F(TestSingularValueDecomposition, rank_drops_for_rank_deficient_tall_matrix)
+{
+    math::Matrix<float, 4, 3> deficient{
+        { 1.0f, 2.0f, 3.0f },
+        { 2.0f, 4.0f, 6.0f },
+        { 3.0f, 6.0f, 9.0f },
+        { 4.0f, 8.0f, 12.0f }
+    };
+
+    ASSERT_TRUE(svd.Decompose(deficient));
+    EXPECT_EQ(svd.Rank(1e-4f), 1u);
+}
+
+TEST_F(TestSingularValueDecomposition, pseudo_inverse_of_square_matrix_solves_system)
+{
+    math::Matrix<float, 3, 3> invertible{
+        { 2.0f, 0.0f, 0.0f },
+        { 0.0f, 4.0f, 0.0f },
+        { 0.0f, 0.0f, 5.0f }
+    };
+
+    ASSERT_TRUE(svdSquare.Decompose(invertible));
+
+    const auto pinv = svdSquare.PseudoInverse(1e-6f);
+
+    EXPECT_NEAR(pinv.at(0, 0), 0.5f, 1e-4f);
+    EXPECT_NEAR(pinv.at(1, 1), 0.25f, 1e-4f);
+    EXPECT_NEAR(pinv.at(2, 2), 0.2f, 1e-4f);
+}
+
+TEST_F(TestSingularValueDecomposition, trailing_zero_diagonal_block_is_deflated_left)
+{
+    math::Matrix<float, 4, 3> trailingZero{};
+    trailingZero.at(0, 0) = 2.0f;
+    trailingZero.at(1, 2) = 3.0f;
+
+    ASSERT_TRUE(svd.Decompose(trailingZero));
+
+    EXPECT_NEAR(svd.SingularValues().at(0, 0), 3.0f, 1e-4f);
+    EXPECT_NEAR(svd.SingularValues().at(1, 0), 2.0f, 1e-4f);
+    EXPECT_NEAR(svd.SingularValues().at(2, 0), 0.0f, 1e-4f);
+}

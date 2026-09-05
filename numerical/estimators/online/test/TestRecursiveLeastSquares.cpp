@@ -1,5 +1,6 @@
 #include "numerical/estimators/online/RecursiveLeastSquares.hpp"
 #include "numerical/math/Tolerance.hpp"
+#include <cmath>
 #include <gtest/gtest.h>
 
 namespace
@@ -291,4 +292,84 @@ TEST_F(TestRecursiveLeastSquares, ResidualSmallerThanInnovationAfterUpdate)
         auto m = rls.Update(MakeInput(1.0f, x), MakeOutput(1.0f + 2.0f * x));
         EXPECT_LE(std::abs(m.residual), std::abs(m.innovation) + math::Tolerance<float>());
     }
+}
+
+TEST_F(TestRecursiveLeastSquares, zero_forgetting_factor_is_rejected)
+{
+    EXPECT_FALSE(Rls::TryCreate(0.0f).has_value());
+    EXPECT_FALSE(Rls::IsForgettingFactorValid(0.0f));
+}
+
+TEST_F(TestRecursiveLeastSquares, out_of_range_forgetting_factor_is_rejected)
+{
+    EXPECT_FALSE(Rls::TryCreate(1.5f).has_value());
+    EXPECT_FALSE(Rls::TryCreate(-0.5f).has_value());
+}
+
+TEST_F(TestRecursiveLeastSquares, valid_forgetting_factor_is_accepted)
+{
+    EXPECT_TRUE(Rls::TryCreate(0.98f).has_value());
+    EXPECT_TRUE(Rls::TryCreate(1.0f).has_value());
+}
+
+namespace
+{
+    class TestRecursiveLeastSquaresWidths : public ::testing::Test
+    {
+    };
+}
+
+TEST_F(TestRecursiveLeastSquaresWidths, single_feature_estimator_tracks_a_constant_gain)
+{
+    using Rls1 = estimators::RecursiveLeastSquares<float, 1>;
+
+    auto created = Rls1::TryCreate(0.98f);
+    ASSERT_TRUE(created.has_value());
+
+    math::Matrix<float, 1, 1> seed{};
+    seed.at(0, 0) = 0.0f;
+    created->SetCoefficients(seed);
+
+    math::Matrix<float, 1, 1> x{};
+    math::Matrix<float, 1, 1> y{};
+
+    for (int step = 0; step < 100; ++step)
+    {
+        x.at(0, 0) = 1.0f + 0.01f * static_cast<float>(step);
+        y.at(0, 0) = 3.0f * x.at(0, 0);
+        created->Update(x, y);
+    }
+
+    EXPECT_NEAR(created->Coefficients().at(0, 0), 3.0f, 1e-2f);
+}
+
+TEST_F(TestRecursiveLeastSquaresWidths, three_feature_estimator_recovers_known_weights)
+{
+    using Rls3 = estimators::RecursiveLeastSquares<float, 3>;
+
+    Rls3 estimator{ 1.0f };
+
+    math::Matrix<float, 3, 1> seed{};
+    estimator.SetCoefficients(seed);
+
+    const float w0 = 0.5f;
+    const float w1 = -1.5f;
+    const float w2 = 2.0f;
+
+    math::Matrix<float, 3, 1> x{};
+    math::Matrix<float, 1, 1> y{};
+
+    for (int step = 0; step < 600; ++step)
+    {
+        const float t = 0.05f * static_cast<float>(step);
+        x.at(0, 0) = 1.0f;
+        x.at(1, 0) = std::sin(t);
+        x.at(2, 0) = std::cos(t);
+        y.at(0, 0) = w0 * x.at(0, 0) + w1 * x.at(1, 0) + w2 * x.at(2, 0);
+        estimator.Update(x, y);
+    }
+
+    EXPECT_NEAR(estimator.Coefficients().at(0, 0), w0, 3e-2f);
+    EXPECT_NEAR(estimator.Coefficients().at(1, 0), w1, 3e-2f);
+    EXPECT_NEAR(estimator.Coefficients().at(2, 0), w2, 3e-2f);
 }

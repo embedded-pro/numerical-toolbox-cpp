@@ -23,7 +23,7 @@ namespace estimators
 
         PolynomialFitting() = default;
 
-        OPTIMIZE_FOR_SPEED void Fit(const SamplesVector& x, const SamplesVector& y);
+        OPTIMIZE_FOR_SPEED bool Fit(const SamplesVector& x, const SamplesVector& y);
         T Predict(T xVal) const;
         const CoefficientsVector& Coefficients() const;
 
@@ -32,7 +32,7 @@ namespace estimators
     };
 
     template<typename T, std::size_t Samples, std::size_t Degree>
-    OPTIMIZE_FOR_SPEED void PolynomialFitting<T, Samples, Degree>::Fit(const SamplesVector& x, const SamplesVector& y)
+    OPTIMIZE_FOR_SPEED bool PolynomialFitting<T, Samples, Degree>::Fit(const SamplesVector& x, const SamplesVector& y)
     {
         math::Matrix<T, Samples, Degree + 1> v;
 
@@ -44,8 +44,12 @@ namespace estimators
         }
 
         solvers::QrDecomposition<T, Samples, Degree + 1> qr;
-        qr.Decompose(v);
+
+        if (!qr.Decompose(v))
+            return false;
+
         coefficients = qr.SolveLeastSquares(y);
+        return true;
     }
 
     template<typename T, std::size_t Samples, std::size_t Degree>

@@ -16,6 +16,7 @@ namespace analysis
     template<typename QNumberType, std::size_t Length>
     class DiscreteCosineTransform
     {
+        static_assert(Length >= 2, "DiscreteCosineTransform requires Length >= 2");
         static_assert((Length & (Length - 1)) == 0, "DiscreteCosineTransform size must be a power of 2");
         static_assert(math::is_qnumber<QNumberType>::value || std::is_floating_point_v<QNumberType>,
             "DiscreteCosineTransform can only be instantiated with math::QNumber types or floating point.");
@@ -109,7 +110,5 @@ namespace analysis
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class DiscreteCosineTransform<float, 8>;
-    extern template class DiscreteCosineTransform<math::Q15, 8>;
-    extern template class DiscreteCosineTransform<math::Q31, 8>;
 #endif
 }
