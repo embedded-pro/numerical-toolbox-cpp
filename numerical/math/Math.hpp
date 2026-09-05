@@ -4,7 +4,9 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
+#include <bit>
 #include <cmath>
+#include <cstdint>
 #include <type_traits>
 
 namespace math
@@ -225,6 +227,28 @@ namespace math
     }
 #endif
 
+#ifndef MATH_LDEXP_OVERRIDE
+    template<typename T>
+    constexpr T Ldexp(T x, int exponent)
+    {
+        static_assert(std::is_floating_point_v<T>, "T must be a floating-point type");
+        return std::ldexp(x, exponent);
+    }
+#endif
+
+#ifndef MATH_ISFINITE_OVERRIDE
+    template<typename T>
+    constexpr bool IsFinite(T x)
+    {
+        static_assert(std::is_floating_point_v<T>, "T must be a floating-point type");
+
+        if constexpr (sizeof(T) == sizeof(std::uint32_t))
+            return (std::bit_cast<std::uint32_t>(x) & 0x7f800000u) != 0x7f800000u;
+        else
+            return (std::bit_cast<std::uint64_t>(x) & 0x7ff0000000000000ull) != 0x7ff0000000000000ull;
+    }
+#endif
+
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
 #ifndef MATH_ABS_OVERRIDE
     extern template float Abs<float>(float);
@@ -297,6 +321,12 @@ namespace math
 #endif
 #ifndef MATH_ERFC_OVERRIDE
     extern template float Erfc<float>(float);
+#endif
+#ifndef MATH_LDEXP_OVERRIDE
+    extern template float Ldexp<float>(float, int);
+#endif
+#ifndef MATH_ISFINITE_OVERRIDE
+    extern template bool IsFinite<float>(float);
 #endif
 #endif
 }

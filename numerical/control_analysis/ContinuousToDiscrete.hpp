@@ -7,7 +7,9 @@
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/MatrixExponential.hpp"
 #include "numerical/solvers/LuDecomposition.hpp"
+#include "numerical/math/Math.hpp"
 #include <cstddef>
+#include <optional>
 #include <type_traits>
 
 namespace control_analysis
@@ -30,32 +32,38 @@ namespace control_analysis
 
         ContinuousToDiscrete() = default;
 
-        OPTIMIZE_FOR_SPEED SystemType Convert(const SystemType& sys, T ts, DiscretizationMethod method);
+        OPTIMIZE_FOR_SPEED std::optional<SystemType> Convert(const SystemType& sys, T ts, DiscretizationMethod method);
 
     private:
         [[no_unique_address]] math::MatrixExponential<T, StateSize + InputSize> expm{};
 
-        static math::SquareMatrix<T, StateSize> Invert(const math::SquareMatrix<T, StateSize>& a);
+        static std::optional<math::SquareMatrix<T, StateSize>> Invert(const math::SquareMatrix<T, StateSize>& a);
 
         SystemType Zoh(const SystemType& sys, T ts);
-        SystemType Bilinear(const SystemType& sys, T ts);
+        std::optional<SystemType> Bilinear(const SystemType& sys, T ts);
         SystemType ForwardEuler(const SystemType& sys, T ts);
-        SystemType Backward(const SystemType& sys, T ts);
+        std::optional<SystemType> Backward(const SystemType& sys, T ts);
     };
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t OutputSize>
-    math::SquareMatrix<T, StateSize>
+    std::optional<math::SquareMatrix<T, StateSize>>
     ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::Invert(const math::SquareMatrix<T, StateSize>& a)
     {
         solvers::LuDecomposition<T, StateSize> lu{};
-        lu.Decompose(a);
+
+        if (!lu.Decompose(a))
+            return std::nullopt;
+
         return lu.Inverse();
     }
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t OutputSize>
-    OPTIMIZE_FOR_SPEED typename ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::SystemType
+    OPTIMIZE_FOR_SPEED std::optional<typename ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::SystemType>
     ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::Convert(const SystemType& sys, T ts, DiscretizationMethod method)
     {
+        if (!math::IsFinite(ts) || ts <= T{})
+            return std::nullopt;
+
         switch (method)
         {
             case DiscretizationMethod::ZeroOrderHold:
@@ -101,15 +109,19 @@ namespace control_analysis
     }
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t OutputSize>
-    typename ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::SystemType
+    std::optional<typename ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::SystemType>
     ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::Bilinear(const SystemType& sys, T ts)
     {
         const T alpha{ T{ 2 } / ts };
         const auto identity = math::SquareMatrix<T, StateSize>::Identity();
         const auto alphaI = identity * alpha;
         const auto lhs = alphaI - sys.A;
-        const auto P = Invert(lhs);
+        const auto inverse = Invert(lhs);
 
+        if (!inverse)
+            return std::nullopt;
+
+        const auto& P = *inverse;
         const auto Ad = P * (alphaI + sys.A);
         const auto Bd = P * sys.B * T{ 2 };
         const auto Cd = sys.C * P * alpha;
@@ -137,12 +149,17 @@ namespace control_analysis
     }
 
     template<typename T, std::size_t StateSize, std::size_t InputSize, std::size_t OutputSize>
-    typename ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::SystemType
+    std::optional<typename ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::SystemType>
     ContinuousToDiscrete<T, StateSize, InputSize, OutputSize>::Backward(const SystemType& sys, T ts)
     {
         const auto identity = math::SquareMatrix<T, StateSize>::Identity();
         const auto lhs = identity - sys.A * ts;
-        const auto P = Invert(lhs);
+        const auto inverse = Invert(lhs);
+
+        if (!inverse)
+            return std::nullopt;
+
+        const auto& P = *inverse;
         const auto PB = P * sys.B;
         const auto CP = sys.C * P;
 

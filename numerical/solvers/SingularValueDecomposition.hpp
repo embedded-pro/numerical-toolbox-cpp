@@ -8,9 +8,12 @@
 #include "numerical/math/GivensRotation.hpp"
 #include "numerical/math/HouseholderTransform.hpp"
 #include "numerical/math/Math.hpp"
+#include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/Matrix.hpp"
+#include <algorithm>
 #include <array>
 #include <cstddef>
+#include <limits>
 #include <type_traits>
 
 namespace solvers
@@ -44,8 +47,12 @@ namespace solvers
         void ExtractBidiagonal(const math::Matrix<T, Rows, Cols>& bidiag);
         void AccumulateU(const LeftVectors& leftVecs, const Betas& leftBeta);
         void AccumulateV(const RightVectors& rightVecs, const Betas& rightBeta);
-        void DiagonalizeGolubKahan();
+        bool DiagonalizeGolubKahan();
         bool NextBlock(std::size_t& p, std::size_t& q);
+        T BidiagonalScale() const;
+        bool DeflateZeroDiagonal(std::size_t p, std::size_t q);
+        void ChaseZeroDiagonalRight(std::size_t q, std::size_t k);
+        void ChaseZeroDiagonalLeft(std::size_t p, std::size_t q);
         T WilkinsonShift(std::size_t q) const;
         void QrSweep(std::size_t p, std::size_t q);
         void MakeSingularValuesPositive();
@@ -56,6 +63,7 @@ namespace solvers
         math::Vector<T, Cols> sigma{};
         math::Vector<T, Cols> superdiag{};
         math::Matrix<T, Cols, Cols> vMat{};
+        bool decomposed{ false };
     };
 
     template<typename T, std::size_t Rows, std::size_t Cols>
@@ -154,14 +162,26 @@ namespace solvers
         Betas leftBeta{};
         Betas rightBeta{};
 
+        decomposed = false;
+
         Bidiagonalize(bidiag, leftVecs, leftBeta, rightVecs, rightBeta);
         ExtractBidiagonal(bidiag);
         AccumulateU(leftVecs, leftBeta);
         AccumulateV(rightVecs, rightBeta);
-        DiagonalizeGolubKahan();
+
+        if (!DiagonalizeGolubKahan())
+        {
+            uMat = math::Matrix<T, Rows, Cols>{};
+            sigma = math::Vector<T, Cols>{};
+            superdiag = math::Vector<T, Cols>{};
+            vMat = math::Matrix<T, Cols, Cols>{};
+            return false;
+        }
+
         MakeSingularValuesPositive();
         SortDescending();
 
+        decomposed = true;
         return true;
     }
 
@@ -203,7 +223,97 @@ namespace solvers
     }
 
     template<typename T, std::size_t Rows, std::size_t Cols>
-    OPTIMIZE_FOR_SPEED void SingularValueDecomposition<T, Rows, Cols>::DiagonalizeGolubKahan()
+    T SingularValueDecomposition<T, Rows, Cols>::BidiagonalScale() const
+    {
+        T scale{};
+
+        for (std::size_t i = 0; i < Cols; ++i)
+        {
+            scale = std::max(scale, math::Abs(sigma.at(i, 0)));
+            scale = std::max(scale, math::Abs(superdiag.at(i, 0)));
+        }
+
+        return scale;
+    }
+
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    OPTIMIZE_FOR_SPEED void SingularValueDecomposition<T, Rows, Cols>::ChaseZeroDiagonalRight(
+        std::size_t q, std::size_t k)
+    {
+        T extra = superdiag.at(k, 0);
+        superdiag.at(k, 0) = T{};
+
+        for (std::size_t j = k + 1; j <= q + 1; ++j)
+        {
+            const math::GivensRotation<T> g = math::ComputeGivens(sigma.at(j, 0), extra);
+
+            sigma.at(j, 0) = g.c * sigma.at(j, 0) + g.s * extra;
+
+            for (std::size_t i = 0; i < Rows; ++i)
+                math::ApplyGivens(g, uMat.at(i, j), uMat.at(i, k));
+
+            if (j > q)
+                break;
+
+            extra = -g.s * superdiag.at(j, 0);
+            superdiag.at(j, 0) = g.c * superdiag.at(j, 0);
+        }
+    }
+
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    OPTIMIZE_FOR_SPEED void SingularValueDecomposition<T, Rows, Cols>::ChaseZeroDiagonalLeft(
+        std::size_t p, std::size_t q)
+    {
+        T extra = superdiag.at(q, 0);
+        superdiag.at(q, 0) = T{};
+
+        for (std::size_t step = 0; step <= q - p; ++step)
+        {
+            const std::size_t j = q - step;
+            const math::GivensRotation<T> g = math::ComputeGivens(sigma.at(j, 0), extra);
+
+            sigma.at(j, 0) = g.c * sigma.at(j, 0) + g.s * extra;
+
+            for (std::size_t i = 0; i < Cols; ++i)
+                math::ApplyGivens(g, vMat.at(i, j), vMat.at(i, q + 1));
+
+            if (j == p)
+                break;
+
+            extra = -g.s * superdiag.at(j - 1, 0);
+            superdiag.at(j - 1, 0) = g.c * superdiag.at(j - 1, 0);
+        }
+    }
+
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    OPTIMIZE_FOR_SPEED bool SingularValueDecomposition<T, Rows, Cols>::DeflateZeroDiagonal(
+        std::size_t p, std::size_t q)
+    {
+        const T scale = BidiagonalScale();
+
+        if (scale <= T{})
+            return false;
+
+        const T threshold = scale * std::numeric_limits<T>::epsilon() * static_cast<T>(Cols);
+
+        for (std::size_t k = p; k <= q; ++k)
+            if (math::Abs(sigma.at(k, 0)) <= threshold)
+            {
+                ChaseZeroDiagonalRight(q, k);
+                return true;
+            }
+
+        if (math::Abs(sigma.at(q + 1, 0)) <= threshold)
+        {
+            ChaseZeroDiagonalLeft(p, q);
+            return true;
+        }
+
+        return false;
+    }
+
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    OPTIMIZE_FOR_SPEED bool SingularValueDecomposition<T, Rows, Cols>::DiagonalizeGolubKahan()
     {
         constexpr std::size_t maxIter = 30 * Cols * Cols;
 
@@ -212,9 +322,13 @@ namespace solvers
         for (std::size_t iter = 0; iter < maxIter; ++iter)
         {
             if (!NextBlock(p, q))
-                return;
-            QrSweep(p, q);
+                return true;
+
+            if (!DeflateZeroDiagonal(p, q))
+                QrSweep(p, q);
         }
+
+        return false;
     }
 
     template<typename T, std::size_t Rows, std::size_t Cols>
@@ -337,24 +451,28 @@ namespace solvers
     template<typename T, std::size_t Rows, std::size_t Cols>
     const math::Vector<T, Cols>& SingularValueDecomposition<T, Rows, Cols>::SingularValues() const
     {
+        really_assert(decomposed);
         return sigma;
     }
 
     template<typename T, std::size_t Rows, std::size_t Cols>
     const math::Matrix<T, Rows, Cols>& SingularValueDecomposition<T, Rows, Cols>::U() const
     {
+        really_assert(decomposed);
         return uMat;
     }
 
     template<typename T, std::size_t Rows, std::size_t Cols>
     const math::Matrix<T, Cols, Cols>& SingularValueDecomposition<T, Rows, Cols>::V() const
     {
+        really_assert(decomposed);
         return vMat;
     }
 
     template<typename T, std::size_t Rows, std::size_t Cols>
     math::Matrix<T, Cols, Rows> SingularValueDecomposition<T, Rows, Cols>::PseudoInverse(T tol) const
     {
+        really_assert(decomposed);
         math::Matrix<T, Cols, Cols> sigmaInv{};
         for (std::size_t i = 0; i < Cols; ++i)
             sigmaInv.at(i, i) = (sigma.at(i, 0) > tol) ? T{ 1 } / sigma.at(i, 0) : T{};
@@ -365,6 +483,7 @@ namespace solvers
     template<typename T, std::size_t Rows, std::size_t Cols>
     std::size_t SingularValueDecomposition<T, Rows, Cols>::Rank(T tol) const
     {
+        really_assert(decomposed);
         std::size_t r{ 0 };
         for (std::size_t i = 0; i < Cols; ++i)
             if (sigma.at(i, 0) > tol)
@@ -375,6 +494,7 @@ namespace solvers
     template<typename T, std::size_t Rows, std::size_t Cols>
     T SingularValueDecomposition<T, Rows, Cols>::ConditionNumber() const
     {
+        really_assert(decomposed);
         T sMin = sigma.at(Cols - 1, 0);
         if (sMin <= T{})
             return T{};
@@ -385,6 +505,7 @@ namespace solvers
     math::Vector<T, Cols> SingularValueDecomposition<T, Rows, Cols>::SolveLeastSquares(
         const math::Vector<T, Rows>& b) const
     {
+        really_assert(decomposed);
         math::Vector<T, Cols> utb{};
         for (std::size_t i = 0; i < Cols; ++i)
         {

@@ -22,9 +22,10 @@ TEST_F(TestContinuousToDiscrete, IntegratorZoh)
 
     const float ts{ 0.1f };
     auto result = c2d.Convert(continuousSys, ts, control_analysis::DiscretizationMethod::ZeroOrderHold);
+    ASSERT_TRUE(result.has_value());
 
-    EXPECT_NEAR(result.A.at(0, 0), 1.0f, math::Tolerance<float>());
-    EXPECT_NEAR(result.B.at(0, 0), ts, math::Tolerance<float>());
+    EXPECT_NEAR(result->A.at(0, 0), 1.0f, math::Tolerance<float>());
+    EXPECT_NEAR(result->B.at(0, 0), ts, math::Tolerance<float>());
 }
 
 TEST_F(TestContinuousToDiscrete, FirstOrderZohMatchesAnalytic)
@@ -39,12 +40,13 @@ TEST_F(TestContinuousToDiscrete, FirstOrderZohMatchesAnalytic)
     continuousSys.D = math::Matrix<float, 1, 1>{ 0.0f };
 
     auto result = c2d.Convert(continuousSys, ts, control_analysis::DiscretizationMethod::ZeroOrderHold);
+    ASSERT_TRUE(result.has_value());
 
     const float expectedAd{ std::exp(-a * ts) };
     const float expectedBd{ (b / a) * (1.0f - std::exp(-a * ts)) };
 
-    EXPECT_NEAR(result.A.at(0, 0), expectedAd, math::Tolerance<float>());
-    EXPECT_NEAR(result.B.at(0, 0), expectedBd, math::Tolerance<float>());
+    EXPECT_NEAR(result->A.at(0, 0), expectedAd, math::Tolerance<float>());
+    EXPECT_NEAR(result->B.at(0, 0), expectedBd, math::Tolerance<float>());
 }
 
 TEST_F(TestContinuousToDiscrete, ZohPreservesCAndD)
@@ -55,10 +57,11 @@ TEST_F(TestContinuousToDiscrete, ZohPreservesCAndD)
     continuousSys.D = math::Matrix<float, 1, 1>{ 5.0f };
 
     auto result = c2d.Convert(continuousSys, 0.1f, control_analysis::DiscretizationMethod::ZeroOrderHold);
+    ASSERT_TRUE(result.has_value());
 
-    EXPECT_NEAR(result.C.at(0, 0), 3.0f, math::Tolerance<float>());
-    EXPECT_NEAR(result.C.at(0, 1), 4.0f, math::Tolerance<float>());
-    EXPECT_NEAR(result.D.at(0, 0), 5.0f, math::Tolerance<float>());
+    EXPECT_NEAR(result->C.at(0, 0), 3.0f, math::Tolerance<float>());
+    EXPECT_NEAR(result->C.at(0, 1), 4.0f, math::Tolerance<float>());
+    EXPECT_NEAR(result->D.at(0, 0), 5.0f, math::Tolerance<float>());
 }
 
 TEST_F(TestContinuousToDiscrete, ZohPreservesStability)
@@ -69,9 +72,10 @@ TEST_F(TestContinuousToDiscrete, ZohPreservesStability)
     continuousSys.D = math::Matrix<float, 1, 1>{ 0.0f };
 
     auto result = c2d.Convert(continuousSys, 0.1f, control_analysis::DiscretizationMethod::ZeroOrderHold);
+    ASSERT_TRUE(result.has_value());
 
-    EXPECT_LT(std::abs(result.A.at(0, 0)), 1.0f);
-    EXPECT_LT(std::abs(result.A.at(1, 1)), 1.0f);
+    EXPECT_LT(std::abs(result->A.at(0, 0)), 1.0f);
+    EXPECT_LT(std::abs(result->A.at(1, 1)), 1.0f);
 }
 
 TEST_F(TestContinuousToDiscrete, ForwardEulerFormula)
@@ -83,13 +87,14 @@ TEST_F(TestContinuousToDiscrete, ForwardEulerFormula)
 
     const float ts{ 0.1f };
     auto result = c2d.Convert(continuousSys, ts, control_analysis::DiscretizationMethod::ForwardEuler);
+    ASSERT_TRUE(result.has_value());
 
-    EXPECT_NEAR(result.A.at(0, 0), 1.0f + (-1.0f) * ts, math::Tolerance<float>());
-    EXPECT_NEAR(result.A.at(1, 1), 1.0f + (-2.0f) * ts, math::Tolerance<float>());
-    EXPECT_NEAR(result.B.at(0, 0), 1.0f * ts, math::Tolerance<float>());
-    EXPECT_NEAR(result.B.at(1, 0), 0.5f * ts, math::Tolerance<float>());
-    EXPECT_NEAR(result.C.at(0, 0), 1.0f, math::Tolerance<float>());
-    EXPECT_NEAR(result.D.at(0, 0), 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(result->A.at(0, 0), 1.0f + (-1.0f) * ts, math::Tolerance<float>());
+    EXPECT_NEAR(result->A.at(1, 1), 1.0f + (-2.0f) * ts, math::Tolerance<float>());
+    EXPECT_NEAR(result->B.at(0, 0), 1.0f * ts, math::Tolerance<float>());
+    EXPECT_NEAR(result->B.at(1, 0), 0.5f * ts, math::Tolerance<float>());
+    EXPECT_NEAR(result->C.at(0, 0), 1.0f, math::Tolerance<float>());
+    EXPECT_NEAR(result->D.at(0, 0), 0.0f, math::Tolerance<float>());
 }
 
 TEST_F(TestContinuousToDiscrete, BackwardEulerFormula)
@@ -104,6 +109,7 @@ TEST_F(TestContinuousToDiscrete, BackwardEulerFormula)
     continuousSys.D = math::Matrix<float, 1, 1>{ 0.0f };
 
     auto result = c2d.Convert(continuousSys, ts, control_analysis::DiscretizationMethod::BackwardEuler);
+    ASSERT_TRUE(result.has_value());
 
     const float p{ 1.0f / (1.0f + a * ts) };
     const float expectedAd{ p };
@@ -111,10 +117,10 @@ TEST_F(TestContinuousToDiscrete, BackwardEulerFormula)
     const float expectedCd{ 1.0f * p };
     const float expectedDd{ 0.0f + 1.0f * p * b * ts };
 
-    EXPECT_NEAR(result.A.at(0, 0), expectedAd, math::Tolerance<float>());
-    EXPECT_NEAR(result.B.at(0, 0), expectedBd, math::Tolerance<float>());
-    EXPECT_NEAR(result.C.at(0, 0), expectedCd, math::Tolerance<float>());
-    EXPECT_NEAR(result.D.at(0, 0), expectedDd, math::Tolerance<float>());
+    EXPECT_NEAR(result->A.at(0, 0), expectedAd, math::Tolerance<float>());
+    EXPECT_NEAR(result->B.at(0, 0), expectedBd, math::Tolerance<float>());
+    EXPECT_NEAR(result->C.at(0, 0), expectedCd, math::Tolerance<float>());
+    EXPECT_NEAR(result->D.at(0, 0), expectedDd, math::Tolerance<float>());
 }
 
 TEST_F(TestContinuousToDiscrete, BackwardEulerPreservesStability)
@@ -125,9 +131,10 @@ TEST_F(TestContinuousToDiscrete, BackwardEulerPreservesStability)
     continuousSys.D = math::Matrix<float, 1, 1>{ 0.0f };
 
     auto result = c2d.Convert(continuousSys, 2.0f, control_analysis::DiscretizationMethod::BackwardEuler);
+    ASSERT_TRUE(result.has_value());
 
-    EXPECT_LT(std::abs(result.A.at(0, 0)), 1.0f);
-    EXPECT_LT(std::abs(result.A.at(1, 1)), 1.0f);
+    EXPECT_LT(std::abs(result->A.at(0, 0)), 1.0f);
+    EXPECT_LT(std::abs(result->A.at(1, 1)), 1.0f);
 }
 
 TEST_F(TestContinuousToDiscrete, TustinBilinearReference)
@@ -143,12 +150,13 @@ TEST_F(TestContinuousToDiscrete, TustinBilinearReference)
     continuousSys.D = math::Matrix<float, 1, 1>{ 0.0f };
 
     auto result = c2d.Convert(continuousSys, ts, control_analysis::DiscretizationMethod::Tustin);
+    ASSERT_TRUE(result.has_value());
 
     const float expectedAd{ (alpha - a) / (alpha + a) };
     const float expectedBd{ b * 2.0f / (alpha + a) };
 
-    EXPECT_NEAR(result.A.at(0, 0), expectedAd, math::Tolerance<float>());
-    EXPECT_NEAR(result.B.at(0, 0), expectedBd, math::Tolerance<float>());
+    EXPECT_NEAR(result->A.at(0, 0), expectedAd, math::Tolerance<float>());
+    EXPECT_NEAR(result->B.at(0, 0), expectedBd, math::Tolerance<float>());
 }
 
 TEST_F(TestContinuousToDiscrete, TustinPreservesStability)
@@ -159,9 +167,10 @@ TEST_F(TestContinuousToDiscrete, TustinPreservesStability)
     continuousSys.D = math::Matrix<float, 1, 1>{ 0.0f };
 
     auto result = c2d.Convert(continuousSys, 0.05f, control_analysis::DiscretizationMethod::Tustin);
+    ASSERT_TRUE(result.has_value());
 
-    EXPECT_LT(std::abs(result.A.at(0, 0)), 1.0f);
-    EXPECT_LT(std::abs(result.A.at(1, 1)), 1.0f);
+    EXPECT_LT(std::abs(result->A.at(0, 0)), 1.0f);
+    EXPECT_LT(std::abs(result->A.at(1, 1)), 1.0f);
 }
 
 TEST_F(TestContinuousToDiscrete, TustinDcGainPreserved)
@@ -178,9 +187,10 @@ TEST_F(TestContinuousToDiscrete, TustinDcGainPreserved)
     const float continuousDcGain{ b / a };
 
     auto discrete = c2d.Convert(continuousSys, ts, control_analysis::DiscretizationMethod::Tustin);
+    ASSERT_TRUE(discrete.has_value());
 
-    const float oneMinusAd{ 1.0f - discrete.A.at(0, 0) };
-    const float discreteDcGain{ discrete.C.at(0, 0) * discrete.B.at(0, 0) / oneMinusAd + discrete.D.at(0, 0) };
+    const float oneMinusAd{ 1.0f - discrete->A.at(0, 0) };
+    const float discreteDcGain{ discrete->C.at(0, 0) * discrete->B.at(0, 0) / oneMinusAd + discrete->D.at(0, 0) };
 
     EXPECT_NEAR(discreteDcGain, continuousDcGain, math::Tolerance<float>());
 }
@@ -196,13 +206,16 @@ TEST_F(TestContinuousToDiscrete, SmallTsMethodsConverge)
     continuousSys.D = math::Matrix<float, 1, 1>{ 0.0f };
 
     auto zoh = c2d.Convert(continuousSys, ts, control_analysis::DiscretizationMethod::ZeroOrderHold);
+    ASSERT_TRUE(zoh.has_value());
     auto tustin = c2d.Convert(continuousSys, ts, control_analysis::DiscretizationMethod::Tustin);
+    ASSERT_TRUE(tustin.has_value());
     auto euler = c2d.Convert(continuousSys, ts, control_analysis::DiscretizationMethod::ForwardEuler);
+    ASSERT_TRUE(euler.has_value());
 
-    EXPECT_NEAR(zoh.A.at(0, 0), tustin.A.at(0, 0), 1e-3f);
-    EXPECT_NEAR(zoh.A.at(0, 0), euler.A.at(0, 0), 1e-3f);
-    EXPECT_NEAR(zoh.B.at(0, 0), tustin.B.at(0, 0), 1e-3f);
-    EXPECT_NEAR(zoh.B.at(0, 0), euler.B.at(0, 0), 1e-3f);
+    EXPECT_NEAR(zoh->A.at(0, 0), tustin->A.at(0, 0), 1e-3f);
+    EXPECT_NEAR(zoh->A.at(0, 0), euler->A.at(0, 0), 1e-3f);
+    EXPECT_NEAR(zoh->B.at(0, 0), tustin->B.at(0, 0), 1e-3f);
+    EXPECT_NEAR(zoh->B.at(0, 0), euler->B.at(0, 0), 1e-3f);
 }
 
 TEST_F(TestContinuousToDiscrete, DcGainPreserved)
@@ -219,9 +232,10 @@ TEST_F(TestContinuousToDiscrete, DcGainPreserved)
     const float continuousDcGain{ b / a };
 
     auto discrete = c2d.Convert(continuousSys, ts, control_analysis::DiscretizationMethod::ZeroOrderHold);
+    ASSERT_TRUE(discrete.has_value());
 
-    const float oneMinusAd{ 1.0f - discrete.A.at(0, 0) };
-    const float discreteDcGain{ discrete.C.at(0, 0) * discrete.B.at(0, 0) / oneMinusAd + discrete.D.at(0, 0) };
+    const float oneMinusAd{ 1.0f - discrete->A.at(0, 0) };
+    const float discreteDcGain{ discrete->C.at(0, 0) * discrete->B.at(0, 0) / oneMinusAd + discrete->D.at(0, 0) };
 
     EXPECT_NEAR(discreteDcGain, continuousDcGain, math::Tolerance<float>());
 }
@@ -235,10 +249,12 @@ TEST_F(TestContinuousToDiscrete, DeterminismSameInputSameOutput)
 
     const float ts{ 0.1f };
     auto result1 = c2d.Convert(continuousSys, ts, control_analysis::DiscretizationMethod::ZeroOrderHold);
+    ASSERT_TRUE(result1.has_value());
     auto result2 = c2d.Convert(continuousSys, ts, control_analysis::DiscretizationMethod::ZeroOrderHold);
+    ASSERT_TRUE(result2.has_value());
 
-    EXPECT_FLOAT_EQ(result1.A.at(0, 0), result2.A.at(0, 0));
-    EXPECT_FLOAT_EQ(result1.A.at(0, 1), result2.A.at(0, 1));
-    EXPECT_FLOAT_EQ(result1.B.at(0, 0), result2.B.at(0, 0));
-    EXPECT_FLOAT_EQ(result1.B.at(1, 0), result2.B.at(1, 0));
+    EXPECT_FLOAT_EQ(result1->A.at(0, 0), result2->A.at(0, 0));
+    EXPECT_FLOAT_EQ(result1->A.at(0, 1), result2->A.at(0, 1));
+    EXPECT_FLOAT_EQ(result1->B.at(0, 0), result2->B.at(0, 0));
+    EXPECT_FLOAT_EQ(result1->B.at(1, 0), result2->B.at(1, 0));
 }

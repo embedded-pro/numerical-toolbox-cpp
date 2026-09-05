@@ -9,7 +9,10 @@
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/QNumber.hpp"
 #include "numerical/math/TriangularSolve.hpp"
+#include "numerical/math/MatrixNorms.hpp"
 #include "numerical/solvers/Solver.hpp"
+#include <limits>
+#include <optional>
 
 namespace solvers
 {
@@ -31,6 +34,9 @@ namespace solvers
 
     template<typename T, std::size_t N, std::size_t Cols>
     math::Matrix<T, N, Cols> SolveSystem(const math::Matrix<T, N, N>& a, const math::Matrix<T, N, Cols>& b);
+
+    template<typename T, std::size_t N, std::size_t Cols>
+    [[nodiscard]] std::optional<math::Matrix<T, N, Cols>> TrySolveSystem(const math::Matrix<T, N, N>& a, const math::Matrix<T, N, Cols>& b);
 
     template<typename T, std::size_t N>
     void GaussianElimination<T, N>::EliminateBelow(InputMatrix& matrix, SolutionVector& vector, std::size_t col) const
@@ -91,6 +97,72 @@ namespace solvers
 
             for (std::size_t row = 0; row < N; ++row)
                 result.at(row, col) = xCol.at(row, 0);
+        }
+
+        return result;
+    }
+
+    template<typename T, std::size_t N, std::size_t Cols>
+    [[nodiscard]] OPTIMIZE_FOR_SPEED
+        std::optional<math::Matrix<T, N, Cols>>
+        TrySolveSystem(const math::Matrix<T, N, N>& a, const math::Matrix<T, N, Cols>& b)
+    {
+        static_assert(std::is_floating_point_v<T>, "TrySolveSystem supports floating-point types");
+
+        const T scale = math::InfinityNorm(a);
+
+        if (!math::IsFinite(scale) || scale <= T{})
+            return std::nullopt;
+
+        const T pivotThreshold = scale * std::numeric_limits<T>::epsilon() * static_cast<T>(N);
+
+        math::Matrix<T, N, N> augA = a;
+        math::Matrix<T, N, Cols> augB = b;
+
+        for (std::size_t col = 0; col < N; ++col)
+        {
+            const std::size_t pivotRow = math::FindPartialPivotRow(augA, col);
+
+            if (pivotRow != col)
+            {
+                math::SwapRows(augA, col, pivotRow);
+                math::SwapRows(augB, col, pivotRow);
+            }
+
+            const T pivot = augA.at(col, col);
+
+            if (math::Abs(pivot) <= pivotThreshold)
+                return std::nullopt;
+
+            for (std::size_t row = col + 1; row < N; ++row)
+            {
+                const T factor = augA.at(row, col) / pivot;
+
+                for (std::size_t j = col; j < N; ++j)
+                    augA.at(row, j) = augA.at(row, j) - factor * augA.at(col, j);
+
+                for (std::size_t j = 0; j < Cols; ++j)
+                    augB.at(row, j) = augB.at(row, j) - factor * augB.at(col, j);
+            }
+        }
+
+        math::Matrix<T, N, Cols> result;
+
+        for (std::size_t col = 0; col < Cols; ++col)
+        {
+            math::Vector<T, N> rhs;
+            for (std::size_t row = 0; row < N; ++row)
+                rhs.at(row, 0) = augB.at(row, col);
+
+            const auto solution = math::SolveUpperTriangular(augA, rhs);
+
+            for (std::size_t row = 0; row < N; ++row)
+            {
+                if (!math::IsFinite(solution.at(row, 0)))
+                    return std::nullopt;
+
+                result.at(row, col) = solution.at(row, 0);
+            }
         }
 
         return result;
