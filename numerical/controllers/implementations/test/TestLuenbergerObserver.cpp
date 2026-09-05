@@ -269,3 +269,144 @@ TEST_F(TestLuenbergerObserver, closed_loop_eigenvalues_inside_unit_disk)
     EXPECT_LT(lambda1mag, 1.0f);
     EXPECT_LT(lambda2mag, 1.0f);
 }
+
+namespace
+{
+    class TestLuenbergerObserverShapes : public ::testing::Test
+    {
+    };
+}
+
+TEST_F(TestLuenbergerObserverShapes, third_order_observer_converges_to_true_state)
+{
+    using Plant31 = math::LinearTimeInvariant<float, 3, 1, 1>;
+    using Observer31 = controllers::LuenbergerObserver<float, 3, 1, 1>;
+
+    Plant31 plant{};
+    plant.A = math::SquareMatrix<float, 3>{
+        { 0.9f, 0.1f, 0.0f },
+        { 0.0f, 0.9f, 0.1f },
+        { 0.0f, 0.0f, 0.9f }
+    };
+    plant.B = math::Matrix<float, 3, 1>{ { 0.0f }, { 0.0f }, { 1.0f } };
+    plant.C = math::Matrix<float, 1, 3>{ { 1.0f, 0.0f, 0.0f } };
+
+    math::Matrix<float, 3, 1> gain{ { 0.5f }, { 0.2f }, { 0.05f } };
+    Observer31 observer{ plant, gain };
+
+    math::Vector<float, 3> truth{};
+    truth.at(0, 0) = 1.0f;
+    truth.at(1, 0) = -0.5f;
+    truth.at(2, 0) = 0.25f;
+
+    math::Vector<float, 1> u{};
+
+    for (int step = 0; step < 400; ++step)
+    {
+        const auto y = plant.C * truth;
+        observer.Update(u, y);
+        truth = plant.A * truth + plant.B * u;
+    }
+
+    const auto& estimate = observer.Estimate();
+    for (std::size_t i = 0; i < 3; ++i)
+        EXPECT_NEAR(estimate.at(i, 0), truth.at(i, 0), 1e-2f);
+}
+
+TEST_F(TestLuenbergerObserverShapes, two_input_plant_observer_tracks_state)
+{
+    using Plant221 = math::LinearTimeInvariant<float, 2, 2, 1>;
+    using Observer221 = controllers::LuenbergerObserver<float, 2, 2, 1>;
+
+    Plant221 plant{};
+    plant.A = math::SquareMatrix<float, 2>{
+        { 0.8f, 0.1f },
+        { 0.0f, 0.8f }
+    };
+    plant.B = math::Matrix<float, 2, 2>{
+        { 1.0f, 0.0f },
+        { 0.0f, 1.0f }
+    };
+    plant.C = math::Matrix<float, 1, 2>{ { 1.0f, 0.0f } };
+
+    math::Matrix<float, 2, 1> gain{ { 0.4f }, { 0.1f } };
+    Observer221 observer{ plant, gain };
+
+    math::Vector<float, 2> truth{};
+    truth.at(0, 0) = 2.0f;
+    truth.at(1, 0) = 1.0f;
+
+    math::Vector<float, 2> u{};
+    u.at(0, 0) = 0.1f;
+
+    for (int step = 0; step < 400; ++step)
+    {
+        const auto y = plant.C * truth;
+        observer.Update(u, y);
+        truth = plant.A * truth + plant.B * u;
+    }
+
+    const auto& estimate = observer.Estimate();
+    EXPECT_NEAR(estimate.at(0, 0), truth.at(0, 0), 1e-2f);
+    EXPECT_NEAR(estimate.at(1, 0), truth.at(1, 0), 1e-2f);
+}
+
+TEST_F(TestLuenbergerObserverShapes, ackermann_gain_and_reset_for_third_order_plant)
+{
+    using Plant31 = math::LinearTimeInvariant<float, 3, 1, 1>;
+    using Observer31 = controllers::LuenbergerObserver<float, 3, 1, 1>;
+
+    Plant31 plant{};
+    plant.A = math::SquareMatrix<float, 3>{
+        { 0.0f, 1.0f, 0.0f },
+        { 0.0f, 0.0f, 1.0f },
+        { 0.0f, 0.0f, 0.0f }
+    };
+    plant.B = math::Matrix<float, 3, 1>{ { 0.0f }, { 0.0f }, { 1.0f } };
+    plant.C = math::Matrix<float, 1, 3>{ { 1.0f, 0.0f, 0.0f } };
+
+    const std::array<float, 3> poles{ 0.2f, 0.3f, 0.4f };
+    const auto gain = Observer31::AckermannGain(plant, poles);
+
+    for (std::size_t i = 0; i < 3; ++i)
+        EXPECT_TRUE(std::isfinite(gain.at(i, 0)));
+
+    Observer31 observer{ plant, gain };
+
+    math::Vector<float, 3> seed{};
+    seed.at(0, 0) = 1.5f;
+    observer.Reset(seed);
+
+    EXPECT_NEAR(observer.Estimate().at(0, 0), 1.5f, math::Tolerance<float>());
+}
+
+TEST_F(TestLuenbergerObserverShapes, ackermann_gain_and_reset_for_two_input_plant)
+{
+    using Plant221 = math::LinearTimeInvariant<float, 2, 2, 1>;
+    using Observer221 = controllers::LuenbergerObserver<float, 2, 2, 1>;
+
+    Plant221 plant{};
+    plant.A = math::SquareMatrix<float, 2>{
+        { 0.0f, 1.0f },
+        { 0.0f, 0.0f }
+    };
+    plant.B = math::Matrix<float, 2, 2>{
+        { 1.0f, 0.0f },
+        { 0.0f, 1.0f }
+    };
+    plant.C = math::Matrix<float, 1, 2>{ { 1.0f, 0.0f } };
+
+    const std::array<float, 2> poles{ 0.25f, 0.5f };
+    const auto gain = Observer221::AckermannGain(plant, poles);
+
+    EXPECT_TRUE(std::isfinite(gain.at(0, 0)));
+    EXPECT_TRUE(std::isfinite(gain.at(1, 0)));
+
+    Observer221 observer{ plant, gain };
+
+    math::Vector<float, 2> seed{};
+    seed.at(1, 0) = -2.0f;
+    observer.Reset(seed);
+
+    EXPECT_NEAR(observer.Estimate().at(1, 0), -2.0f, math::Tolerance<float>());
+}

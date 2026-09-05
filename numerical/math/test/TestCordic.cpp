@@ -201,3 +201,18 @@ TEST_F(TestCordic, Arctangent2OfZeroVectorIsZero)
 {
     EXPECT_NEAR(cordic.Arctangent2(0.0f, 0.0f), 0.0f, math::Tolerance<float>());
 }
+
+TEST_F(TestCordic, EightIterationVariantSupportsFullPolarApi)
+{
+    math::Cordic<float, 8> cordic8{};
+
+    EXPECT_NEAR(cordic8.Arctangent2(1.0f, 1.0f), std::atan2(1.0f, 1.0f), 1e-2f);
+    EXPECT_NEAR(cordic8.Arctangent2(-1.0f, -1.0f), std::atan2(-1.0f, -1.0f), 1e-2f);
+    EXPECT_NEAR(cordic8.Arctangent2(0.0f, 0.0f), 0.0f, math::Tolerance<float>());
+
+    EXPECT_NEAR(cordic8.Magnitude(3.0f, 4.0f), 5.0f, 1e-2f);
+
+    auto rotated = cordic8.Rotate(std::array<float, 2>{ 1.0f, 0.0f }, std::numbers::pi_v<float> / 2.0f);
+    EXPECT_NEAR(rotated[0], 0.0f, 1e-2f);
+    EXPECT_NEAR(rotated[1], 1.0f, 1e-2f);
+}

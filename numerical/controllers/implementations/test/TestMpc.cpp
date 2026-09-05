@@ -957,3 +957,77 @@ TEST_F(TestMpc, precomputed_controller_matches_online_reference_tracking)
     EXPECT_NEAR(actual.at(0, 0), expected.at(0, 0), 1e-4f);
     EXPECT_NE(actual.at(0, 0), 0.0f);
 }
+
+namespace
+{
+    class TestMpcHorizons : public ::testing::Test
+    {
+    protected:
+        math::SquareMatrix<float, 2> A2{
+            { 1.0f, 0.1f },
+            { 0.0f, 1.0f }
+        };
+        math::Matrix<float, 2, 1> B2{
+            { 0.0f },
+            { 0.1f }
+        };
+
+        controllers::MpcWeights<float, 2, 1> Weights2() const
+        {
+            controllers::MpcWeights<float, 2, 1> w;
+            w.Q = math::SquareMatrix<float, 2>{ { 1.0f, 0.0f }, { 0.0f, 1.0f } };
+            w.R = math::SquareMatrix<float, 1>{ { 0.1f } };
+            return w;
+        }
+    };
+}
+
+TEST_F(TestMpcHorizons, long_equal_horizon_drives_state_toward_origin)
+{
+    controllers::Mpc<float, 2, 1, 10, 10> mpc(A2, B2, Weights2());
+
+    math::Vector<float, 2> state{};
+    state.at(0, 0) = 1.0f;
+
+    auto x = state;
+    for (int step = 0; step < 60; ++step)
+        x = A2 * x + B2 * mpc.ComputeControl(x);
+
+    EXPECT_LT(std::abs(x.at(0, 0)), std::abs(state.at(0, 0)));
+    EXPECT_TRUE(std::isfinite(x.at(1, 0)));
+}
+
+TEST_F(TestMpcHorizons, control_horizon_shorter_than_prediction_horizon_is_supported)
+{
+    controllers::Mpc<float, 2, 1, 10, 5> mpc(A2, B2, Weights2());
+
+    math::Vector<float, 2> state{};
+    state.at(0, 0) = 0.5f;
+    state.at(1, 0) = -0.2f;
+
+    const auto u = mpc.ComputeControl(state);
+
+    EXPECT_TRUE(std::isfinite(u.at(0, 0)));
+    EXPECT_EQ(mpc.GetControlSequence().size(), 5u);
+}
+
+TEST_F(TestMpcHorizons, third_order_plant_with_long_horizon_is_supported)
+{
+    math::SquareMatrix<float, 3> A3{
+        { 1.0f, 0.1f, 0.0f },
+        { 0.0f, 1.0f, 0.1f },
+        { 0.0f, 0.0f, 1.0f }
+    };
+    math::Matrix<float, 3, 1> B3{ { 0.0f }, { 0.0f }, { 0.1f } };
+
+    controllers::MpcWeights<float, 3, 1> weights;
+    weights.Q = math::SquareMatrix<float, 3>::Identity();
+    weights.R = math::SquareMatrix<float, 1>{ { 0.1f } };
+
+    controllers::Mpc<float, 3, 1, 10, 10> mpc(A3, B3, weights);
+
+    math::Vector<float, 3> state{};
+    state.at(0, 0) = 1.0f;
+
+    EXPECT_TRUE(std::isfinite(mpc.ComputeControl(state).at(0, 0)));
+}

@@ -251,3 +251,35 @@ TEST_F(TestIntegralStateFeedbackLqi, direct_gain_constructor_get_gains)
     EXPECT_FLOAT_EQ(c.GetGainState().at(0, 1), 0.8f);
     EXPECT_FLOAT_EQ(c.GetGainIntegral().at(0, 0), 2.0f);
 }
+
+TEST_F(TestIntegralStateFeedbackLqi, limited_iteration_controller_supports_full_control_cycle)
+{
+    using LimitedController = controllers::IntegralStateFeedbackLqi<float, 2, 1, 1, 1>;
+
+    math::Matrix<float, 1, 2> kx{ { 1.2f, 0.6f } };
+    math::Matrix<float, 1, 1> ki{ { 0.4f } };
+
+    LimitedController controller{ kx, ki, 0.01f };
+
+    EXPECT_FLOAT_EQ(controller.GetGainState().at(0, 0), 1.2f);
+
+    math::Vector<float, 2> state{};
+    state.at(0, 0) = 1.0f;
+    state.at(1, 0) = 0.0f;
+
+    math::Vector<float, 1> reference{};
+    reference.at(0, 0) = 0.0f;
+
+    math::Vector<float, 1> measurement{};
+    measurement.at(0, 0) = 1.0f;
+
+    const auto first = controller.ComputeControl(state, reference, measurement);
+    const auto second = controller.ComputeControl(state, reference, measurement);
+
+    EXPECT_TRUE(std::isfinite(first.at(0, 0)));
+    EXPECT_NE(second.at(0, 0), first.at(0, 0));
+
+    controller.Reset();
+    const auto afterReset = controller.ComputeControl(state, reference, measurement);
+    EXPECT_FLOAT_EQ(afterReset.at(0, 0), first.at(0, 0));
+}

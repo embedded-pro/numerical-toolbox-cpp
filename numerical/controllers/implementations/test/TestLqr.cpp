@@ -232,3 +232,138 @@ TEST_F(TestLqr, closed_loop_state_norm_decays_over_simulation)
     const float normFinal = std::sqrt(x.at(0, 0) * x.at(0, 0) + x.at(1, 0) * x.at(1, 0));
     EXPECT_LT(normFinal, normInit * 1e-4f);
 }
+
+namespace
+{
+    class TestLqrDimensions : public ::testing::Test
+    {
+    protected:
+        template<std::size_t StateSize>
+        static math::SquareMatrix<float, StateSize> StableCompanion()
+        {
+            math::SquareMatrix<float, StateSize> a{};
+            for (std::size_t i = 0; i < StateSize; ++i)
+                a.at(i, i) = 0.9f;
+            for (std::size_t i = 0; i + 1 < StateSize; ++i)
+                a.at(i, i + 1) = 0.1f;
+            return a;
+        }
+
+        template<std::size_t StateSize, std::size_t InputSize>
+        static math::Matrix<float, StateSize, InputSize> InputChannels()
+        {
+            math::Matrix<float, StateSize, InputSize> b{};
+            for (std::size_t i = 0; i < InputSize; ++i)
+                b.at(StateSize - 1 - i, i) = 1.0f;
+            return b;
+        }
+
+        template<std::size_t StateSize>
+        static math::SquareMatrix<float, StateSize> Identity()
+        {
+            return math::SquareMatrix<float, StateSize>::Identity();
+        }
+    };
+}
+
+TEST_F(TestLqrDimensions, scalar_plant_gain_is_positive_and_stabilizing)
+{
+    math::SquareMatrix<float, 1> a{ { 1.1f } };
+    math::Matrix<float, 1, 1> b{ { 1.0f } };
+
+    controllers::Lqr<float, 1, 1> lqr{ a, b, Identity<1>(), Identity<1>() };
+
+    const float gain = lqr.GetGain().at(0, 0);
+    EXPECT_GT(gain, 0.0f);
+    EXPECT_LT(std::abs(a.at(0, 0) - b.at(0, 0) * gain), 1.0f);
+
+    math::Vector<float, 1> state{};
+    state.at(0, 0) = 2.0f;
+    EXPECT_NEAR(lqr.ComputeControl(state).at(0, 0), -gain * 2.0f, 1e-4f);
+}
+
+TEST_F(TestLqrDimensions, third_order_plant_solves_and_stabilizes)
+{
+    auto a = StableCompanion<3>();
+    auto b = InputChannels<3, 1>();
+
+    controllers::Lqr<float, 3, 1> lqr{ a, b, Identity<3>(), Identity<1>() };
+
+    const auto& p = lqr.GetRiccatiSolution();
+    for (std::size_t i = 0; i < 3; ++i)
+        EXPECT_GT(p.at(i, i), 0.0f);
+
+    math::Vector<float, 3> state{};
+    state.at(0, 0) = 1.0f;
+    EXPECT_TRUE(std::isfinite(lqr.ComputeControl(state).at(0, 0)));
+}
+
+TEST_F(TestLqrDimensions, fourth_order_plant_solves_and_stabilizes)
+{
+    auto a = StableCompanion<4>();
+    auto b = InputChannels<4, 1>();
+
+    controllers::Lqr<float, 4, 1> lqr{ a, b, Identity<4>(), Identity<1>() };
+
+    const auto& gain = lqr.GetGain();
+    for (std::size_t i = 0; i < 4; ++i)
+        EXPECT_TRUE(std::isfinite(gain.at(0, i)));
+
+    math::Vector<float, 4> state{};
+    state.at(1, 0) = 0.5f;
+    EXPECT_TRUE(std::isfinite(lqr.ComputeControl(state).at(0, 0)));
+}
+
+TEST_F(TestLqrDimensions, two_input_plant_produces_two_control_channels)
+{
+    auto a = StableCompanion<2>();
+    auto b = InputChannels<2, 2>();
+
+    controllers::Lqr<float, 2, 2> lqr{ a, b, Identity<2>(), Identity<2>() };
+
+    math::Vector<float, 2> state{};
+    state.at(0, 0) = 1.0f;
+    state.at(1, 0) = -1.0f;
+
+    const auto u = lqr.ComputeControl(state);
+    EXPECT_TRUE(std::isfinite(u.at(0, 0)));
+    EXPECT_TRUE(std::isfinite(u.at(1, 0)));
+    EXPECT_EQ(lqr.GetGain().at(0, 0), lqr.GetGain().at(0, 0));
+}
+
+TEST_F(TestLqrDimensions, exhausted_iteration_budget_reports_failure)
+{
+    auto a = StableCompanion<2>();
+    auto b = InputChannels<2, 1>();
+
+    auto limited = controllers::Lqr<float, 2, 1, 1>::TryCreate(a, b, Identity<2>(), Identity<1>());
+
+    EXPECT_FALSE(limited.has_value());
+}
+
+TEST_F(TestLqrDimensions, precomputed_gain_constructor_bypasses_riccati)
+{
+    math::Matrix<float, 1, 2> precomputed{ { 2.0f, 3.0f } };
+
+    controllers::Lqr<float, 2, 1> lqr{ precomputed };
+
+    math::Vector<float, 2> state{};
+    state.at(0, 0) = 1.0f;
+    state.at(1, 0) = 1.0f;
+
+    EXPECT_NEAR(lqr.ComputeControl(state).at(0, 0), -5.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestLqrDimensions, try_create_succeeds_with_sufficient_budget)
+{
+    auto a = StableCompanion<3>();
+    auto b = InputChannels<3, 1>();
+
+    auto created = controllers::Lqr<float, 3, 1>::TryCreate(a, b, Identity<3>(), Identity<1>());
+
+    ASSERT_TRUE(created.has_value());
+
+    math::Vector<float, 3> state{};
+    state.at(2, 0) = 1.0f;
+    EXPECT_TRUE(std::isfinite(created->ComputeControl(state).at(0, 0)));
+}

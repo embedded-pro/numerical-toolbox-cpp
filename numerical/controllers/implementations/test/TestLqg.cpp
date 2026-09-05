@@ -141,3 +141,69 @@ TEST_F(TestLqg, polymorphic_interface_computes_same_output_as_concrete)
 
     EXPECT_FLOAT_EQ(uConcrete, uInterface);
 }
+
+namespace
+{
+    class TestLqgFourthOrder : public ::testing::Test
+    {
+    protected:
+        static constexpr std::size_t kState = 4;
+        static constexpr std::size_t kInput = 1;
+        static constexpr std::size_t kMeas = 1;
+
+        math::SquareMatrix<float, kState> A{
+            { 1.0f, 0.1f, 0.0f, 0.0f },
+            { 0.0f, 1.0f, 0.1f, 0.0f },
+            { 0.0f, 0.0f, 1.0f, 0.1f },
+            { 0.0f, 0.0f, 0.0f, 0.9f }
+        };
+        math::Matrix<float, kState, kInput> B{ { 0.0f }, { 0.0f }, { 0.0f }, { 0.1f } };
+        math::Matrix<float, kMeas, kState> C{ { 1.0f, 0.0f, 0.0f, 0.0f } };
+        math::Matrix<float, kMeas, kInput> D{};
+
+        math::LinearTimeInvariant<float, kState, kInput, kMeas> plant{ A, B, C, D };
+
+        controllers::LqgWeights<float, kState, kInput> weights{
+            math::SquareMatrix<float, kState>::Identity(),
+            math::SquareMatrix<float, kInput>{ { 0.1f } }
+        };
+
+        controllers::LqgNoise<float, kState, kInput, kMeas> noise{
+            math::SquareMatrix<float, kState>::Identity() * 0.01f,
+            math::SquareMatrix<float, kMeas>{ { 0.1f } }
+        };
+
+        math::Vector<float, kState> initialState{};
+        math::SquareMatrix<float, kState> initialCovariance{ math::SquareMatrix<float, kState>::Identity() };
+
+        controllers::Lqg<float, kState, kInput, kMeas> lqg{
+            plant, noise, weights, initialState, initialCovariance
+        };
+    };
+}
+
+TEST_F(TestLqgFourthOrder, gain_is_finite_for_every_state_channel)
+{
+    for (std::size_t i = 0; i < kState; ++i)
+        EXPECT_TRUE(std::isfinite(lqg.GetGain().at(0, i)));
+}
+
+TEST_F(TestLqgFourthOrder, estimator_tracks_a_measured_chain)
+{
+    math::Vector<float, kState> truth{};
+    truth.at(0, 0) = 1.0f;
+
+    for (int step = 0; step < 200; ++step)
+    {
+        math::Vector<float, kMeas> measurement{};
+        measurement.at(0, 0) = truth.at(0, 0);
+
+        const auto u = lqg.ComputeControl(measurement);
+        truth = A * truth + B * u;
+    }
+
+    const auto estimate = lqg.GetEstimatedState();
+
+    EXPECT_TRUE(std::isfinite(estimate.at(0, 0)));
+    EXPECT_NEAR(estimate.at(0, 0), truth.at(0, 0), 5e-1f);
+}

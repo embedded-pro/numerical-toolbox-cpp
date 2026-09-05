@@ -110,7 +110,5 @@ namespace analysis
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
     extern template class DiscreteCosineTransform<float, 8>;
-    extern template class DiscreteCosineTransform<math::Q15, 8>;
-    extern template class DiscreteCosineTransform<math::Q31, 8>;
 #endif
 }

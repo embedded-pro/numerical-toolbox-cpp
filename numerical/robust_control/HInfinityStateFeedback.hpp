@@ -274,6 +274,6 @@ namespace robust_control
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
-    extern template class HInfinityStateFeedback<float, 2, 1, 1, 1>;
+    extern template class HInfinityStateFeedback<float, 2, 1, 1, 2>;
 #endif
 }

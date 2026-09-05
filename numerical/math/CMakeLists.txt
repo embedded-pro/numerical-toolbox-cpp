@@ -40,7 +40,6 @@ numerical_add_coverage_sources(numerical.math
     ComplexNumber.cpp
     ConsistencyMetrics.cpp
     Cordic.cpp
-    LinearTimeInvariant.cpp
     Matrix.cpp
     MatrixExponential.cpp
     QNumber.cpp

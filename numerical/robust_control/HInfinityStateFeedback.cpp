@@ -2,5 +2,5 @@
 
 namespace robust_control
 {
-    template class HInfinityStateFeedback<float, 2, 1, 1, 1>;
+    template class HInfinityStateFeedback<float, 2, 1, 1, 2>;
 }
