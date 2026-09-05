@@ -33,6 +33,9 @@ namespace filters
         math::Vector3<T> Euler() const;
         void Reset();
 
+        static math::Quaternion<T> GradientGravity(const math::Quaternion<T>& quat, const math::Vector3<T>& a);
+        static math::Quaternion<T> GradientMag(const math::Quaternion<T>& quat, const math::Vector3<T>& m, T bx, T bz);
+
     private:
         math::Quaternion<T> q{ math::Quaternion<T>::Identity() };
         T Ts;
@@ -43,9 +46,6 @@ namespace filters
 
         static math::Vector3<T> GravityFromQuaternion(const math::Quaternion<T>& quat);
         static math::Vector3<T> NorthFromQuaternion(const math::Quaternion<T>& quat, T bx, T bz);
-
-        static math::Quaternion<T> GradientGravity(const math::Quaternion<T>& quat, const math::Vector3<T>& a);
-        static math::Quaternion<T> GradientMag(const math::Quaternion<T>& quat, const math::Vector3<T>& m, T bx, T bz);
 
         static T SafeInvSqrt(T x);
         static math::Vector3<T> NormalizeVec(const math::Vector3<T>& v, T norm);

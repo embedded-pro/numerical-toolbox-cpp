@@ -121,6 +121,16 @@ namespace estimators
             currentParams = MStep(smootherOutput, observations, numSteps);
         }
 
+        if (!converged)
+        {
+            const auto finalOutput = smoother_.Smooth(
+                { currentParams.F, currentParams.H, currentParams.Q, currentParams.R },
+                observations, numSteps,
+                currentParams.initialState, currentParams.initialCovariance);
+
+            logLikelihood = finalOutput.logLikelihood;
+        }
+
         return EmResult{ currentParams, iter, logLikelihood, converged };
     }
 

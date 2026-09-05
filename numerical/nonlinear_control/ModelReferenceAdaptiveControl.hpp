@@ -4,9 +4,9 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
+#include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
-#include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/Matrix.hpp"
 #include <cstddef>
 #include <type_traits>

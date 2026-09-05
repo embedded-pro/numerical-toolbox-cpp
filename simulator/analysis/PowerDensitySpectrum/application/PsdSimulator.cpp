@@ -19,7 +19,7 @@ namespace simulator::analysis::psd
             using FFT = ::analysis::FastFourierTransformRadix2Impl<float, SegmentSize>;
             using TwiddleFactors = utils::TwiddleFactorsTable<float, SegmentSize / 2>;
 
-            float samplingTime = static_cast<float>(inputSize) / sampleRateHz;
+            float samplingTime = 1.0f / sampleRateHz;
             float frequencyResolution = sampleRateHz / static_cast<float>(SegmentSize);
 
             ::analysis::PowerSpectralDensity<float, SegmentSize, FFT, TwiddleFactors, Overlap> psd(window, samplingTime);

@@ -292,3 +292,21 @@ TEST_F(TestRecursiveLeastSquares, ResidualSmallerThanInnovationAfterUpdate)
         EXPECT_LE(std::abs(m.residual), std::abs(m.innovation) + math::Tolerance<float>());
     }
 }
+
+TEST_F(TestRecursiveLeastSquares, zero_forgetting_factor_is_rejected)
+{
+    EXPECT_FALSE(Rls::TryCreate(0.0f).has_value());
+    EXPECT_FALSE(Rls::IsForgettingFactorValid(0.0f));
+}
+
+TEST_F(TestRecursiveLeastSquares, out_of_range_forgetting_factor_is_rejected)
+{
+    EXPECT_FALSE(Rls::TryCreate(1.5f).has_value());
+    EXPECT_FALSE(Rls::TryCreate(-0.5f).has_value());
+}
+
+TEST_F(TestRecursiveLeastSquares, valid_forgetting_factor_is_accepted)
+{
+    EXPECT_TRUE(Rls::TryCreate(0.98f).has_value());
+    EXPECT_TRUE(Rls::TryCreate(1.0f).has_value());
+}

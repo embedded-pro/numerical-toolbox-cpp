@@ -47,6 +47,18 @@ jobs:
           buildPreset: "host-Debug-WithPackage"
           testPreset: "host"
           configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=ccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=ccache']"
+      - name: Verify package contents
+        run: |
+          set -euo pipefail
+          archive=$(ls build/host/numerical-toolbox-*-Linux.tar.gz)
+          echo "Inspecting $archive"
+          headers=$(tar -tzf "$archive" | grep -c 'include/numerical/.*\.hpp' || true)
+          exports=$(tar -tzf "$archive" | grep -c 'cmake/NumericalToolbox/NumericalToolboxTargets\.cmake' || true)
+          config=$(tar -tzf "$archive" | grep -c 'cmake/NumericalToolbox/NumericalToolboxConfig\.cmake' || true)
+          echo "numerical headers: $headers, target export: $exports, package config: $config"
+          test "$headers" -gt 50
+          test "$exports" -eq 1
+          test "$config" -eq 1
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: numerical-toolbox

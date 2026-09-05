@@ -920,3 +920,40 @@ TEST_F(TestMpc, coupled_constraints_re_optimize_free_variables)
     auto seq = mpc.GetControlSequence();
     EXPECT_NEAR(seq[1].at(0, 0), 0.5f, 1e-4f);
 }
+
+TEST_F(TestMpc, precomputed_controller_matches_online_reference_tracking)
+{
+    math::SquareMatrix<float, 2> A{
+        { 1.0f, 0.1f },
+        { 0.0f, 1.0f }
+    };
+    math::Matrix<float, 2, 1> B{
+        { 0.0f },
+        { 0.1f }
+    };
+
+    controllers::MpcWeights<float, 2, 1> weights;
+    weights.Q = math::SquareMatrix<float, 2>{
+        { 1.0f, 0.0f },
+        { 0.0f, 1.0f }
+    };
+    weights.R = math::SquareMatrix<float, 1>{
+        { 0.1f }
+    };
+
+    controllers::Mpc<float, 2, 1, 5, 2> online(A, B, weights);
+
+    math::Vector<float, 2> reference{ 3.0f, 0.0f };
+    math::Vector<float, 2> state{ 0.5f, -0.2f };
+
+    online.SetReference(reference);
+    const auto expected = online.ComputeControl(state);
+
+    controllers::Mpc<float, 2, 1, 5, 2> precomputed(
+        online.GetHessian(), online.GetGradientMatrix(), online.GetReferenceGainMatrix());
+    precomputed.SetReference(reference);
+    const auto actual = precomputed.ComputeControl(state);
+
+    EXPECT_NEAR(actual.at(0, 0), expected.at(0, 0), 1e-4f);
+    EXPECT_NE(actual.at(0, 0), 0.0f);
+}

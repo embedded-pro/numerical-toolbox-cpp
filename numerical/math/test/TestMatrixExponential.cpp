@@ -201,3 +201,29 @@ TEST_F(TestMatrixExponential, StiffNegativeEigenvalueNearZeroNoNaN)
     EXPECT_NEAR(result->at(0, 1), 0.0f, math::Tolerance<float>());
     EXPECT_NEAR(result->at(1, 0), 0.0f, math::Tolerance<float>());
 }
+
+TEST_F(TestMatrixExponential, LargeNormOutsideSupportedScalingRangeReportsFailure)
+{
+    math::SquareMatrix<float, 2> nilpotent{
+        { 0.0f, 1e20f },
+        { 0.0f, 0.0f }
+    };
+
+    EXPECT_FALSE(expm2.Compute(nilpotent).has_value());
+}
+
+TEST_F(TestMatrixExponential, ModerateNormWithinScalingRangeSucceeds)
+{
+    math::SquareMatrix<float, 2> nilpotent{
+        { 0.0f, 1000.0f },
+        { 0.0f, 0.0f }
+    };
+
+    auto result = expm2.Compute(nilpotent);
+
+    ASSERT_TRUE(result.has_value());
+    EXPECT_NEAR(result->at(0, 0), 1.0f, 1e-3f);
+    EXPECT_NEAR(result->at(0, 1), 1000.0f, 1.0f);
+    EXPECT_NEAR(result->at(1, 0), 0.0f, 1e-3f);
+    EXPECT_NEAR(result->at(1, 1), 1.0f, 1e-3f);
+}

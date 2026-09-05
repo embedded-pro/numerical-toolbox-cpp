@@ -4,10 +4,10 @@
 #endif
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/MatrixExponential.hpp"
 #include "numerical/solvers/LuDecomposition.hpp"
-#include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <optional>
 #include <type_traits>

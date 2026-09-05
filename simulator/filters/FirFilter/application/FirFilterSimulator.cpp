@@ -142,17 +142,16 @@ namespace simulator::filters::fir
             {
                 auto normalizedLow = design.cutoffHz / design.sampleRateHz;
                 auto normalizedHigh = design.cutoffHighHz / design.sampleRateHz;
-                auto highpass = WindowedSinc(design.order, normalizedHigh);
-                auto lowpass = WindowedSinc(design.order, normalizedLow);
 
-                auto mid = (design.order - 1) / 2;
-                for (std::size_t i = 0; i < lowpass.size(); ++i)
-                    lowpass[i] = -lowpass[i];
-                lowpass[mid] += 1.0f;
+                if (normalizedLow >= normalizedHigh || normalizedHigh >= 0.5f || normalizedLow <= 0.0f)
+                    return std::vector<float>(design.order, 0.0f);
+
+                auto upper = WindowedSinc(design.order, normalizedHigh);
+                auto lower = WindowedSinc(design.order, normalizedLow);
 
                 std::vector<float> bandpass(design.order);
                 for (std::size_t i = 0; i < design.order; ++i)
-                    bandpass[i] = highpass[i] - lowpass[i];
+                    bandpass[i] = upper[i] - lower[i];
                 return bandpass;
             }
 

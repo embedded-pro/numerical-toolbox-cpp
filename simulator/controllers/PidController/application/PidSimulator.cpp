@@ -23,6 +23,24 @@ namespace simulator::controllers
 
             return result;
         }
+
+        std::vector<float> TrimLeadingZeros(std::vector<float> poly)
+        {
+            std::size_t lead = 0;
+            while (lead + 1 < poly.size() && std::abs(poly[lead]) <= 1e-30f)
+                ++lead;
+
+            return std::vector<float>(poly.begin() + static_cast<std::ptrdiff_t>(lead), poly.end());
+        }
+
+        ::controllers::PidTunings<float> ToDiscreteTunings(
+            const ::controllers::PidTunings<float>& continuousTunings, float sampleTime)
+        {
+            ::controllers::PidTunings<float> discrete{ continuousTunings };
+            discrete.ki = continuousTunings.ki * sampleTime;
+            discrete.kd = (sampleTime > 0.0f) ? (continuousTunings.kd / sampleTime) : 0.0f;
+            return discrete;
+        }
     }
 
     void PidSimulator::Configure(std::unique_ptr<Plant> plant, const Configuration& config)
@@ -37,7 +55,7 @@ namespace simulator::controllers
         float ki = configuration.tunings.ki;
         float kd = configuration.tunings.kd;
 
-        return { { kd, kp, ki }, { 1.0f, 0.0f } };
+        return { TrimLeadingZeros({ kd, kp, ki }), { 1.0f, 0.0f } };
     }
 
     TransferFunction PidSimulator::GetOpenLoopTf() const
@@ -115,7 +133,8 @@ namespace simulator::controllers
         response.controlSignal.resize(numSamples, 0.0f);
         response.error.resize(numSamples, 0.0f);
 
-        ::controllers::PidIncrementalSynchronous<float> pid(configuration.tunings, configuration.limits);
+        ::controllers::PidIncrementalSynchronous<float> pid(
+            ToDiscreteTunings(configuration.tunings, dt), configuration.limits);
 
         plant->Reset();
 

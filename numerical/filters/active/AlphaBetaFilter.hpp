@@ -4,6 +4,7 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
+#include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Math.hpp"
 #include <array>
@@ -27,6 +28,8 @@ namespace filters
 
         AlphaBetaFilter(T alpha, T beta, T Ts)
         requires(Order == 2);
+
+        [[nodiscard]] static bool IsSamplePeriodValid(T Ts);
 
         AlphaBetaFilter(T alpha, T beta, T gamma, T Ts)
         requires(Order == 3);
@@ -59,7 +62,15 @@ namespace filters
         , gainAlpha{ alpha }
         , gainBeta{ beta }
         , betaOverTs{ beta / Ts }
-    {}
+    {
+        really_assert(IsSamplePeriodValid(Ts));
+    }
+
+    template<typename T, std::size_t Order>
+    bool AlphaBetaFilter<T, Order>::IsSamplePeriodValid(T Ts)
+    {
+        return math::IsFinite(Ts) && Ts > T{ 0 };
+    }
 
     template<typename T, std::size_t Order>
     AlphaBetaFilter<T, Order>::AlphaBetaFilter(T alpha, T beta, T gamma, T Ts)
@@ -70,7 +81,9 @@ namespace filters
         , gainGamma{ gamma }
         , betaOverTs{ beta / Ts }
         , twoGammaOverTs2{ T{ 2 } * gamma / (Ts * Ts) }
-    {}
+    {
+        really_assert(IsSamplePeriodValid(Ts));
+    }
 
     template<typename T, std::size_t Order>
     OPTIMIZE_FOR_SPEED T AlphaBetaFilter<T, Order>::Filter(T measuredPosition)

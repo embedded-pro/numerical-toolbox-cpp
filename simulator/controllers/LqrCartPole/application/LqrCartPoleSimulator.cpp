@@ -38,11 +38,24 @@ namespace simulator::controllers::lqr
 
         math::SquareMatrix<float, inputSize> R{ { w.rForce } };
 
-        lqr.emplace(plant.Linearize(configuration.simulation.dt), Q, R);
+        auto controller = LqrController::TryCreate(
+            plant.LinearizedA(configuration.simulation.dt),
+            plant.LinearizedB(configuration.simulation.dt), Q, R);
+
+        if (controller)
+            lqr = std::move(controller);
+    }
+
+    bool LqrCartPoleSimulator::HasController() const
+    {
+        return lqr.has_value();
     }
 
     float LqrCartPoleSimulator::ComputeControlForce()
     {
+        if (!lqr)
+            return 0.0f;
+
         auto& s = plant.GetState();
 
         StateVector stateVec(s.x, s.xDot, s.theta, s.thetaDot);

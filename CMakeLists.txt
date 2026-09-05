@@ -110,6 +110,92 @@ if (NUMERICAL_TOOLBOX_STANDALONE)
     emil_folderize_all_targets()
 endif()
 
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+set(NUMERICAL_TOOLBOX_INSTALL_TARGETS
+    numerical.analysis
+    numerical.analysis.windowing
+    numerical.control_analysis
+    numerical.controllers.interfaces
+    numerical.controllers.implementations
+    numerical.estimators
+    numerical.estimators.offline
+    numerical.estimators.online
+    numerical.filters.active
+    numerical.filters.passive
+    numerical.math
+    numerical.nonlinear_control
+    numerical.optimization
+    numerical.regularization
+    numerical.robust_control
+    numerical.solver
+)
+
+if (NUMERICAL_TOOLBOX_STANDALONE AND TARGET infra.util)
+    list(APPEND NUMERICAL_TOOLBOX_INSTALL_TARGETS infra.util)
+endif()
+
+foreach(numerical_target ${NUMERICAL_TOOLBOX_INSTALL_TARGETS})
+    if (TARGET ${numerical_target})
+        install(TARGETS ${numerical_target}
+            EXPORT NumericalToolboxTargets
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        )
+    endif()
+endforeach()
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/numerical
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    FILES_MATCHING
+    PATTERN "*.hpp"
+    PATTERN "test" EXCLUDE
+    PATTERN "test_doubles" EXCLUDE
+)
+
+if (NUMERICAL_TOOLBOX_STANDALONE AND DEFINED emil_SOURCE_DIR)
+    install(DIRECTORY ${emil_SOURCE_DIR}/infra
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        FILES_MATCHING
+        PATTERN "*.hpp"
+        PATTERN "test" EXCLUDE
+        PATTERN "test_doubles" EXCLUDE
+    )
+endif()
+
+install(EXPORT NumericalToolboxTargets
+    FILE NumericalToolboxTargets.cmake
+    NAMESPACE numerical-toolbox::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/NumericalToolbox
+)
+
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/NumericalToolboxConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/NumericalToolboxConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/NumericalToolbox
+)
+
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/NumericalToolboxConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/NumericalToolboxConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/NumericalToolboxConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/NumericalToolbox
+)
+
+install(FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE
+    ${CMAKE_CURRENT_SOURCE_DIR}/README.md
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/numerical-toolbox
+)
+
 set(CPACK_GENERATOR "ZIP;TGZ")
 set(CPACK_SOURCE_IGNORE_FILES ".vs/;.git/;build/")
 set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")

@@ -420,3 +420,67 @@ TEST_F(TestModelReferenceAdaptiveControlMitRule, mit_rule_reset_clears_state)
     EXPECT_NEAR(mracMit.GetThetaX().at(0, 0), 0.0f, math::Tolerance<float>());
     EXPECT_NEAR(mracMit.GetThetaR().at(0, 0), 0.0f, math::Tolerance<float>());
 }
+
+namespace
+{
+    class TestModelReferenceAdaptiveControlDimensions : public ::testing::Test
+    {
+    protected:
+        template<std::size_t StateSize, std::size_t InputSize>
+        static math::LinearTimeInvariant<float, StateSize, InputSize, StateSize> MakeReference()
+        {
+            math::LinearTimeInvariant<float, StateSize, InputSize, StateSize> lti{};
+            for (std::size_t i = 0; i < StateSize; ++i)
+                lti.A.at(i, i) = -1.0f;
+            for (std::size_t i = 0; i < StateSize && i < InputSize; ++i)
+                lti.B.at(i, i) = 1.0f;
+            return lti;
+        }
+    };
+}
+
+TEST_F(TestModelReferenceAdaptiveControlDimensions, more_inputs_than_states_stays_in_bounds)
+{
+    auto reference = MakeReference<1, 2>();
+    nonlinear_control::ModelReferenceAdaptiveControl<float, 1, 2> mrac{
+        reference, 1.0f, +1.0f, nonlinear_control::AdaptationLaw::Lyapunov
+    };
+
+    math::Vector<float, 1> x{};
+    x.at(0, 0) = 1.0f;
+    math::Vector<float, 2> r{};
+    r.at(0, 0) = 0.5f;
+    r.at(1, 0) = 0.25f;
+
+    const auto u = mrac.ComputeControl(x, r, 0.01f);
+
+    EXPECT_TRUE(std::isfinite(u.at(0, 0)));
+    EXPECT_TRUE(std::isfinite(u.at(1, 0)));
+    EXPECT_NEAR(mrac.GetThetaX().at(1, 0), 0.0f, math::Tolerance<float>());
+}
+
+TEST_F(TestModelReferenceAdaptiveControlDimensions, fewer_inputs_than_states_uses_every_error_component)
+{
+    auto reference = MakeReference<2, 1>();
+    nonlinear_control::ModelReferenceAdaptiveControl<float, 2, 1> mrac{
+        reference, 1.0f, +1.0f, nonlinear_control::AdaptationLaw::Lyapunov
+    };
+
+    math::SquareMatrix<float, 2> weight{
+        { 1.0f, 0.0f },
+        { 0.0f, 1.0f }
+    };
+    mrac.SetLyapunovWeight(weight);
+
+    math::Vector<float, 2> x{};
+    x.at(0, 0) = 1.0f;
+    x.at(1, 0) = 2.0f;
+    math::Vector<float, 1> r{};
+    r.at(0, 0) = 0.5f;
+
+    const auto u = mrac.ComputeControl(x, r, 0.01f);
+
+    EXPECT_TRUE(std::isfinite(u.at(0, 0)));
+    EXPECT_NE(mrac.GetThetaX().at(0, 0), 0.0f);
+    EXPECT_NE(mrac.GetThetaX().at(0, 1), 0.0f);
+}

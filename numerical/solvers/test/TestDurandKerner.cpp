@@ -150,3 +150,53 @@ TEST_F(TestDurandKerner, same_input_produces_identical_real_parts_determinism)
     for (std::size_t i = 0; i < roots1.size(); ++i)
         EXPECT_FLOAT_EQ(roots1[i].Real(), roots2[i].Real());
 }
+
+TEST_F(TestDurandKerner, non_monic_polynomial_roots_match_monic_form)
+{
+    std::array<float, 3> scaled{ 10.0f, -30.0f, 20.0f };
+
+    auto result = solver.Solve(scaled);
+
+    ASSERT_TRUE(result.converged);
+    ASSERT_EQ(result.roots.size(), 2u);
+    EXPECT_NEAR(result.roots[0].Real(), 1.0f, 1e-4f);
+    EXPECT_NEAR(result.roots[1].Real(), 2.0f, 1e-4f);
+}
+
+TEST_F(TestDurandKerner, roots_are_invariant_under_coefficient_scaling)
+{
+    std::array<float, 3> monic{ 1.0f, -3.0f, 2.0f };
+    std::array<float, 3> negated{ -0.5f, 1.5f, -1.0f };
+
+    auto monicRoots = solver.Solve(monic).roots;
+    auto negatedRoots = solver.Solve(negated).roots;
+
+    ASSERT_EQ(monicRoots.size(), negatedRoots.size());
+    for (std::size_t i = 0; i < monicRoots.size(); ++i)
+    {
+        EXPECT_NEAR(monicRoots[i].Real(), negatedRoots[i].Real(), 1e-4f);
+        EXPECT_NEAR(monicRoots[i].Imaginary(), negatedRoots[i].Imaginary(), 1e-4f);
+    }
+}
+
+TEST_F(TestDurandKerner, leading_zero_coefficients_are_trimmed)
+{
+    std::array<float, 4> withLeadingZero{ 0.0f, 1.0f, -3.0f, 2.0f };
+
+    auto result = solver.Solve(withLeadingZero);
+
+    ASSERT_TRUE(result.converged);
+    ASSERT_EQ(result.roots.size(), 2u);
+    EXPECT_NEAR(result.roots[0].Real(), 1.0f, 1e-4f);
+    EXPECT_NEAR(result.roots[1].Real(), 2.0f, 1e-4f);
+}
+
+TEST_F(TestDurandKerner, identically_zero_polynomial_reports_failure)
+{
+    std::array<float, 3> zeros{ 0.0f, 0.0f, 0.0f };
+
+    auto result = solver.Solve(zeros);
+
+    EXPECT_FALSE(result.converged);
+    EXPECT_EQ(result.roots.size(), 0u);
+}

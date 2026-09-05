@@ -2,6 +2,7 @@
 #include "numerical/math/Tolerance.hpp"
 #include <cmath>
 #include <gtest/gtest.h>
+#include <limits>
 
 namespace
 {
@@ -117,4 +118,43 @@ TEST_F(CholeskyDecompositionTest, SolveNonSpdSystemReturnsNullopt)
     b.at(1, 0) = 1.0f;
 
     EXPECT_FALSE(Chol2::Solve(a, b).has_value());
+}
+
+TEST_F(CholeskyDecompositionTest, NonsymmetricInputIsRejected)
+{
+    math::SquareMatrix<float, 2> nonsymmetric{
+        { 4.0f, 100.0f },
+        { 2.0f, 3.0f }
+    };
+    EXPECT_FALSE(Chol2::TryFactor(nonsymmetric).has_value());
+}
+
+TEST_F(CholeskyDecompositionTest, NonFiniteInputIsRejected)
+{
+    math::SquareMatrix<float, 2> withNan{
+        { std::numeric_limits<float>::quiet_NaN(), 0.0f },
+        { 0.0f, 1.0f }
+    };
+    math::SquareMatrix<float, 2> withInf{
+        { std::numeric_limits<float>::infinity(), 0.0f },
+        { 0.0f, 1.0f }
+    };
+    EXPECT_FALSE(Chol2::TryFactor(withNan).has_value());
+    EXPECT_FALSE(Chol2::TryFactor(withInf).has_value());
+}
+
+TEST_F(CholeskyDecompositionTest, FactorReconstructsOriginalMatrix)
+{
+    math::SquareMatrix<float, 2> spd{
+        { 4.0f, 2.0f },
+        { 2.0f, 3.0f }
+    };
+    auto factor = Chol2::TryFactor(spd);
+    ASSERT_TRUE(factor.has_value());
+
+    auto reconstructed = *factor * factor->Transpose();
+
+    for (std::size_t r = 0; r < 2; ++r)
+        for (std::size_t c = 0; c < 2; ++c)
+            EXPECT_NEAR(reconstructed.at(r, c), spd.at(r, c), math::Tolerance<float>());
 }

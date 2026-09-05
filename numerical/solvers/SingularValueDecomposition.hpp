@@ -4,11 +4,11 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
+#include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/GivensRotation.hpp"
 #include "numerical/math/HouseholderTransform.hpp"
 #include "numerical/math/Math.hpp"
-#include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/Matrix.hpp"
 #include <algorithm>
 #include <array>

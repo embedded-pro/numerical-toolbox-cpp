@@ -7,9 +7,9 @@
 #include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Matrix.hpp"
+#include "numerical/math/MatrixNorms.hpp"
 #include "numerical/math/QNumber.hpp"
 #include "numerical/math/TriangularSolve.hpp"
-#include "numerical/math/MatrixNorms.hpp"
 #include "numerical/solvers/Solver.hpp"
 #include <limits>
 #include <optional>

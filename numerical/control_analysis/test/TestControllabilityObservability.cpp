@@ -213,3 +213,33 @@ TEST_F(TestControllabilityObservability, gramian_of_unstable_system_reports_fail
 
     EXPECT_FALSE(Wc.has_value());
 }
+
+TEST_F(TestControllabilityObservability, scalar_gramian_matches_analytic_value_near_unit_circle)
+{
+    using ScalarCO = control_analysis::ControllabilityObservability<float, 1, 1, 1>;
+
+    for (float a : { 0.5f, 0.9f, 0.99f })
+    {
+        math::LinearTimeInvariant<float, 1, 1, 1> scalarPlant{};
+        scalarPlant.A.at(0, 0) = a;
+        scalarPlant.B.at(0, 0) = 1.0f;
+        scalarPlant.C.at(0, 0) = 1.0f;
+
+        auto Wc = ScalarCO::ControllabilityGramian(scalarPlant);
+
+        ASSERT_TRUE(Wc.has_value());
+        EXPECT_NEAR(Wc->at(0, 0), 1.0f / (1.0f - a * a), 1e-2f);
+    }
+}
+
+TEST_F(TestControllabilityObservability, marginally_stable_gramian_reports_failure)
+{
+    using ScalarCO = control_analysis::ControllabilityObservability<float, 1, 1, 1>;
+
+    math::LinearTimeInvariant<float, 1, 1, 1> marginal{};
+    marginal.A.at(0, 0) = 1.0f;
+    marginal.B.at(0, 0) = 1.0f;
+    marginal.C.at(0, 0) = 1.0f;
+
+    EXPECT_FALSE(ScalarCO::ControllabilityGramian(marginal).has_value());
+}

@@ -258,3 +258,36 @@ TEST_F(TestContinuousToDiscrete, DeterminismSameInputSameOutput)
     EXPECT_FLOAT_EQ(result1->B.at(0, 0), result2->B.at(0, 0));
     EXPECT_FLOAT_EQ(result1->B.at(1, 0), result2->B.at(1, 0));
 }
+
+TEST_F(TestContinuousToDiscrete, SingularTustinOperatorReportsFailure)
+{
+    control_analysis::ContinuousToDiscrete<float, 1, 1, 1> scalar{};
+    math::LinearTimeInvariant<float, 1, 1, 1> sys{};
+    sys.A.at(0, 0) = 2.0f;
+    sys.B.at(0, 0) = 1.0f;
+    sys.C.at(0, 0) = 1.0f;
+
+    auto result = scalar.Convert(sys, 1.0f, control_analysis::DiscretizationMethod::Tustin);
+
+    EXPECT_FALSE(result.has_value());
+}
+
+TEST_F(TestContinuousToDiscrete, NearSingularTustinOperatorStillConverts)
+{
+    control_analysis::ContinuousToDiscrete<float, 1, 1, 1> scalar{};
+    math::LinearTimeInvariant<float, 1, 1, 1> sys{};
+    sys.A.at(0, 0) = 2.0f;
+    sys.B.at(0, 0) = 1.0f;
+    sys.C.at(0, 0) = 1.0f;
+
+    auto result = scalar.Convert(sys, 0.5f, control_analysis::DiscretizationMethod::Tustin);
+
+    ASSERT_TRUE(result.has_value());
+    EXPECT_NEAR(result->A.at(0, 0), 3.0f, 1e-4f);
+}
+
+TEST_F(TestContinuousToDiscrete, NonPositiveSampleTimeIsRejected)
+{
+    EXPECT_FALSE(c2d.Convert(continuousSys, 0.0f, control_analysis::DiscretizationMethod::ZeroOrderHold).has_value());
+    EXPECT_FALSE(c2d.Convert(continuousSys, -0.1f, control_analysis::DiscretizationMethod::Tustin).has_value());
+}

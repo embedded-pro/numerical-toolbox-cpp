@@ -171,3 +171,33 @@ TEST_F(TestCordic, AccuracyScalesWithIterations)
     float err16{ std::abs(cordic.SineCosine(angle).sin - ref) };
     EXPECT_LT(err16, err8);
 }
+
+TEST_F(TestCordic, SineCosineOverMultiplePeriods)
+{
+    const float pi = std::numbers::pi_v<float>;
+
+    for (float angle : { 2.0f * pi, -2.0f * pi, 4.0f * pi, 6.0f * pi })
+    {
+        auto result = cordic.SineCosine(angle);
+        EXPECT_NEAR(result.sin, std::sin(angle), 1e-3f);
+        EXPECT_NEAR(result.cos, std::cos(angle), 1e-3f);
+    }
+}
+
+TEST_F(TestCordic, SineCosineAtAxesOutsideFirstPeriod)
+{
+    const float pi = std::numbers::pi_v<float>;
+
+    auto atTwoPi = cordic.SineCosine(2.0f * pi);
+    EXPECT_NEAR(atTwoPi.sin, 0.0f, 1e-3f);
+    EXPECT_NEAR(atTwoPi.cos, 1.0f, 1e-3f);
+
+    auto atFivePiOverTwo = cordic.SineCosine(2.5f * pi);
+    EXPECT_NEAR(atFivePiOverTwo.sin, 1.0f, 1e-3f);
+    EXPECT_NEAR(atFivePiOverTwo.cos, 0.0f, 1e-3f);
+}
+
+TEST_F(TestCordic, Arctangent2OfZeroVectorIsZero)
+{
+    EXPECT_NEAR(cordic.Arctangent2(0.0f, 0.0f), 0.0f, math::Tolerance<float>());
+}

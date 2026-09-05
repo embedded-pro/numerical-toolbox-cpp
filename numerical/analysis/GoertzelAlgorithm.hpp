@@ -4,11 +4,13 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
+#include "infra/util/ReallyAssert.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/ComplexNumber.hpp"
 #include "numerical/math/Math.hpp"
 #include <cstddef>
 #include <numbers>
+#include <optional>
 #include <type_traits>
 
 namespace analysis
@@ -21,6 +23,8 @@ namespace analysis
     public:
         GoertzelAlgorithm(std::size_t k, std::size_t blockLength);
         GoertzelAlgorithm(T targetHz, T sampleHz, std::size_t blockLength);
+
+        [[nodiscard]] static std::optional<GoertzelAlgorithm> TryCreate(std::size_t k, std::size_t blockLength);
 
         OPTIMIZE_FOR_SPEED void Push(T x);
         bool Ready() const;
@@ -41,19 +45,32 @@ namespace analysis
     };
 
     template<typename T>
+    std::optional<GoertzelAlgorithm<T>> GoertzelAlgorithm<T>::TryCreate(std::size_t k, std::size_t blockLength)
+    {
+        if (blockLength == 0)
+            return std::nullopt;
+
+        return GoertzelAlgorithm{ k, blockLength };
+    }
+
+    template<typename T>
     GoertzelAlgorithm<T>::GoertzelAlgorithm(std::size_t k, std::size_t blockLength)
         : coeff{ T{ 2 } * math::Cos(T{ 2 } * std::numbers::pi_v<T> * static_cast<T>(k) / static_cast<T>(blockLength)) }
         , cosine{ math::Cos(T{ 2 } * std::numbers::pi_v<T> * static_cast<T>(k) / static_cast<T>(blockLength)) }
         , sine{ math::Sin(T{ 2 } * std::numbers::pi_v<T> * static_cast<T>(k) / static_cast<T>(blockLength)) }
         , blockSize{ blockLength }
-    {}
+    {
+        really_assert(blockLength > 0);
+    }
 
     template<typename T>
     GoertzelAlgorithm<T>::GoertzelAlgorithm(T targetHz, T sampleHz, std::size_t blockLength)
         : GoertzelAlgorithm(
               static_cast<std::size_t>(targetHz / sampleHz * static_cast<T>(blockLength) + T{ 0.5 }),
               blockLength)
-    {}
+    {
+        really_assert(math::IsFinite(targetHz) && math::IsFinite(sampleHz) && sampleHz > T{ 0 });
+    }
 
     template<typename T>
     OPTIMIZE_FOR_SPEED void GoertzelAlgorithm<T>::Push(T x)

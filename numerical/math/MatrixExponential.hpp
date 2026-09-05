@@ -3,10 +3,10 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 #include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Math.hpp"
 #include "numerical/math/Matrix.hpp"
 #include "numerical/math/MatrixNorms.hpp"
 #include "numerical/math/TriangularSolve.hpp"
-#include "numerical/math/Math.hpp"
 #include <array>
 #include <cstddef>
 #include <limits>
