@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.3](https://github.com/embedded-pro/numerical-toolbox-cpp/compare/v3.1.2...v3.1.3) (2026-09-08)
+
+
+### Build System
+
+* **deps:** Bump the patch-minor-action-updates group with 3 updates ([#326](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/326)) ([c580f38](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/c580f38ccc835c0b8cd2286f3e1d9c3d99b713cd))
+
 ## [3.1.2](https://github.com/embedded-pro/numerical-toolbox-cpp/compare/v3.1.1...v3.1.2) (2026-09-05)
 
 
