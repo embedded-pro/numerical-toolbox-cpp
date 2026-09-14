@@ -18,6 +18,7 @@ namespace controllers
         void SetPoint(QNumberType setPoint);
         void SetTunings(PidTunings<QNumberType> tunnings);
         QNumberType Process(QNumberType processVariable);
+        void SetPreviousOutput(QNumberType value) noexcept;
 
     protected:
         PidIncrementalBase(PidTunings<QNumberType> tunnings, PidLimits<QNumberType> limits);
@@ -75,6 +76,7 @@ namespace controllers
         void SetPoint(QNumberType setPoint) override;
         void SetTunings(PidTunings<QNumberType> tunnings) override;
         QNumberType Process(QNumberType processVariable) override;
+        using PidIncrementalBase<QNumberType>::SetPreviousOutput;
     };
 
     ////    Implementation    ////
@@ -97,6 +99,12 @@ namespace controllers
         e = QNumberType(0.0f);
         e_1 = QNumberType(0.0f);
         e_2 = QNumberType(0.0f);
+    }
+
+    template<class QNumberType>
+    void PidIncrementalBase<QNumberType>::SetPreviousOutput(QNumberType value) noexcept
+    {
+        u = value;
     }
 
     template<class QNumberType>
