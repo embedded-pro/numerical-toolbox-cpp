@@ -251,6 +251,37 @@ TYPED_TEST(TestPidIncrementalSynchronous, output_within_limits_not_clamped)
     EXPECT_GT(output, limits.min);
 }
 
+TYPED_TEST(TestPidIncrementalSynchronous, set_previous_output_sets_base_for_next_increment)
+{
+    // Integral-only controller: u = u_1 + ki * e
+    auto controller = this->MakeController(this->IGains(0.5f), this->WideLimit());
+    controller.SetPoint(TypeParam(0.4f));
+    const auto first = math::ToFloat(controller.Process(TypeParam(0.0f))); // u = 0 + 0.5*0.4 = 0.2
+
+    controller.SetPreviousOutput(TypeParam(0.0f)); // inject 0 as new base
+    controller.SetPoint(TypeParam(0.4f));
+    const auto afterInject = math::ToFloat(controller.Process(TypeParam(0.0f))); // u = 0 + 0.5*0.4 = 0.2
+
+    EXPECT_NEAR(afterInject, first, math::Tolerance<TypeParam>());
+}
+
+TYPED_TEST(TestPidIncrementalSynchronous, set_previous_output_enables_external_anti_windup)
+{
+    auto limits = this->NarrowLimit();
+    auto controller = this->MakeController(this->IGains(0.5f), limits);
+    controller.SetPoint(TypeParam(0.9f));
+    for (int i = 0; i < 10; ++i)
+        controller.Process(TypeParam(0.0f)); // saturates at max
+
+    // Back-calculation: inject a value inside the limits to allow recovery
+    controller.SetPreviousOutput(TypeParam(0.05f));
+    controller.SetPoint(TypeParam(-0.9f));
+    const auto output = controller.Process(TypeParam(0.0f));
+
+    EXPECT_LE(output, limits.max);
+    EXPECT_GE(output, limits.min);
+}
+
 TEST_F(TestPidIncrementalAsynchronous, zero_error_produces_zero_control_action)
 {
     CreateController({ 0.1f, 0.1f, 0.1f }, { -0.9f, 0.9f });
