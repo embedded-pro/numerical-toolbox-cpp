@@ -132,9 +132,7 @@ set(NUMERICAL_TOOLBOX_INSTALL_TARGETS
     numerical.solver
 )
 
-if (NUMERICAL_TOOLBOX_STANDALONE AND TARGET infra.util)
-    list(APPEND NUMERICAL_TOOLBOX_INSTALL_TARGETS infra.util)
-endif()
+list(APPEND NUMERICAL_TOOLBOX_INSTALL_TARGETS infra.util)
 
 foreach(numerical_target ${NUMERICAL_TOOLBOX_INSTALL_TARGETS})
     if (TARGET ${numerical_target})
