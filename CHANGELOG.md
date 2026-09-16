@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.2.0](https://github.com/embedded-pro/numerical-toolbox-cpp/compare/v3.1.2...v3.2.0) (2026-09-16)
+
+
+### Features
+
+* Add SetPreviousOutput to PidIncrementalBase ([#328](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/328)) ([762b59e](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/762b59ef15ea7d54bd6b703ff4bd75b25ae0c99f))
+
+
+### Build System
+
+* **deps:** Bump the patch-minor-action-updates group with 2 updates ([#330](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/330)) ([7d1e7de](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/7d1e7de61371043eb4783834413855710292dd29))
+* **deps:** Bump the patch-minor-action-updates group with 3 updates ([#326](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/326)) ([c580f38](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/c580f38ccc835c0b8cd2286f3e1d9c3d99b713cd))
+
 ## [3.1.2](https://github.com/embedded-pro/numerical-toolbox-cpp/compare/v3.1.1...v3.1.2) (2026-09-05)
 
 
