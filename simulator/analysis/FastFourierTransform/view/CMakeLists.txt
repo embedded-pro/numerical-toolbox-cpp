@@ -8,6 +8,8 @@ target_include_directories(numerical.simulator.analysis.fft.view PUBLIC
 target_link_libraries(numerical.simulator.analysis.fft.view PUBLIC
     numerical.simulator.analysis.fft.application
     numerical.simulator.widgets
+    ui.charts
+    ui.backend.qt
     Qt6::Widgets
 )
 

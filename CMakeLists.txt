@@ -48,6 +48,21 @@ if (NUMERICAL_TOOLBOX_STANDALONE)
     set(EMIL_ENABLE_DOCKER_TOOLS Off CACHE BOOL "" FORCE)
 
     FetchContent_MakeAvailable(emil)
+
+    if (NUMERICAL_TOOLBOX_BUILD_SIMULATOR)
+        FetchContent_Declare(
+            ui
+            GIT_REPOSITORY https://github.com/embedded-pro/ui-cpp.git
+            GIT_TAG        main
+        )
+
+        # Set explicitly rather than inferred by ui-cpp from a consumer's simulator flag: e-foc
+        # configures its Qt tools on every host build, so there is no consumer flag that means
+        # the same thing everywhere.
+        set(UI_BUILD_QT_BACKEND On CACHE BOOL "" FORCE)
+
+        FetchContent_MakeAvailable(ui)
+    endif()
 endif()
 
 project(numerical-toolbox LANGUAGES C CXX ASM VERSION 3.1.2) # x-release-please-version

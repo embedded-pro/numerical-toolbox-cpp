@@ -1,6 +1,5 @@
 #include "simulator/analysis/FastFourierTransform/view/FftMainWindow.hpp"
-#include "simulator/widgets/FrequencyChartWidget.hpp"
-#include "simulator/widgets/TimeSeriesChartWidget.hpp"
+#include "ui/theme/Theme.hpp"
 #include <QMessageBox>
 #include <QSplitter>
 #include <QTabWidget>
@@ -21,11 +20,14 @@ namespace simulator::analysis::view
 
         tabWidget = new QTabWidget(splitter);
 
-        timeDomainChart = new widgets::TimeSeriesChartWidget(tabWidget);
-        frequencyChart = new widgets::FrequencyChartWidget(tabWidget);
+        timeDomainView = new ui::backend::qt::QtPaintedWidget(timeDomainChart, tabWidget);
+        frequencyView = new ui::backend::qt::QtPaintedWidget(frequencyChart, tabWidget);
 
-        tabWidget->addTab(timeDomainChart, "Time Domain");
-        tabWidget->addTab(frequencyChart, "Frequency Spectrum");
+        timeDomainView->SetPanCursorEnabled(true);
+        frequencyView->SetPanCursorEnabled(true);
+
+        tabWidget->addTab(timeDomainView, "Time Domain");
+        tabWidget->addTab(frequencyView, "Frequency Spectrum");
 
         splitter->addWidget(configPanel);
         splitter->addWidget(tabWidget);
@@ -47,31 +49,35 @@ namespace simulator::analysis::view
         try
         {
             auto result = fftSimulator.Compute();
+            const auto& theme = ui::theme::Current();
 
-            timeDomainChart->SetTimeAxis(result.time);
-            timeDomainChart->SetPanels({
+            timeDomainChart.SetAxisValues(result.time);
+            timeDomainChart.SetPanels({
                 {
                     "Input Signal",
                     "Amplitude",
                     {
-                        { "Signal", QColor(41, 128, 185), result.signal },
-                        { "Windowed", QColor(231, 76, 60), result.windowedSignal },
+                        { "Signal", theme.Series(0), result.signal },
+                        { "Windowed", theme.Series(1), result.windowedSignal },
                     },
                     1,
                 },
             });
 
-            frequencyChart->SetFrequencyAxis(result.frequencies);
-            frequencyChart->SetPanels({
+            frequencyChart.SetAxisValues(result.frequencies);
+            frequencyChart.SetPanels({
                 {
                     "FFT Magnitude",
                     "Magnitude",
                     {
-                        { "Magnitude", QColor(41, 128, 185), result.magnitudes },
+                        { "Magnitude", theme.Series(0), result.magnitudes },
                     },
                     1,
                 },
             });
+
+            timeDomainView->update();
+            frequencyView->update();
 
             statusBar()->showMessage(
                 QString("FFT computed: %1 points, sample rate %2 Hz")
