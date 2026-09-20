@@ -1,6 +1,6 @@
 #include "simulator/filters/FirFilter/application/FirFilterSimulator.hpp"
 #include "numerical/analysis/FastFourierTransformRadix2Impl.hpp"
-#include "simulator/utils/TwiddleFactorsTable.hpp"
+#include "numerical/analysis/TwiddleFactorsTable.hpp"
 #include <algorithm>
 #include <cmath>
 #include <numbers>
@@ -34,7 +34,7 @@ namespace simulator::filters::fir
         template<std::size_t N>
         std::vector<float> ComputeMagnitudeDb(const std::vector<float>& signal, float sampleRateHz, std::vector<float>& freqsOut)
         {
-            utils::TwiddleFactorsTable<float, N / 2> twiddleFactors;
+            ::analysis::TwiddleFactorsTable<float, N / 2> twiddleFactors;
             ::analysis::FastFourierTransformRadix2Impl<float, N> fft(twiddleFactors);
 
             infra::BoundedVector<float>::WithMaxSize<N> input;
