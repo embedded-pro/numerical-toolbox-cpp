@@ -9,6 +9,7 @@ emil_build_for(numerical.simulator.analysis.power_density_spectrum HOST All PRER
 target_link_libraries(numerical.simulator.analysis.power_density_spectrum PRIVATE
     numerical.simulator.analysis.psd.application
     numerical.simulator.analysis.psd.view
+    numerical.simulator.shell.qt
 )
 
 target_sources(numerical.simulator.analysis.power_density_spectrum PRIVATE

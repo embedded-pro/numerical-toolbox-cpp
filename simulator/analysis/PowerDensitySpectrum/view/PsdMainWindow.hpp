@@ -1,10 +1,9 @@
 #pragma once
 
-#include "simulator/analysis/PowerDensitySpectrum/application/PsdSimulator.hpp"
-#include "simulator/analysis/PowerDensitySpectrum/view/PsdConfigurationPanel.hpp"
+#include "simulator/analysis/PowerDensitySpectrum/application/PsdForm.hpp"
+#include "ui/backend/qt/QtAppShell.hpp"
+#include "ui/backend/qt/QtFormView.hpp"
 #include <QMainWindow>
-#include <QStatusBar>
-#include <QTabWidget>
 
 namespace simulator::widgets
 {
@@ -26,8 +25,10 @@ namespace simulator::analysis::psd::view
         void OnComputeRequested();
 
         PsdSimulator psdSimulator;
-        PsdConfigurationPanel* configPanel;
-        QTabWidget* tabWidget;
+        PsdForm form;
+        ui::backend::qt::QtFormView* formView;
+        ui::backend::qt::QtAppShell shell;
+
         widgets::TimeSeriesChartWidget* timeDomainChart;
         widgets::FrequencyChartWidget* psdChart;
     };

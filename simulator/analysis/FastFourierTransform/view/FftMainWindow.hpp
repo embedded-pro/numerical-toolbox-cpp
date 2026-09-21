@@ -1,14 +1,13 @@
 #pragma once
 
-#include "simulator/analysis/FastFourierTransform/application/FftSimulator.hpp"
-#include "simulator/analysis/FastFourierTransform/view/FftConfigurationPanel.hpp"
+#include "simulator/analysis/FastFourierTransform/application/FftForm.hpp"
+#include "ui/backend/qt/QtAppShell.hpp"
+#include "ui/backend/qt/QtFormView.hpp"
 #include "ui/backend/qt/QtPaintedWidget.hpp"
 #include "ui/charts/ChartCore.hpp"
 #include "ui/charts/LinearAxis.hpp"
 #include "ui/charts/Log10Axis.hpp"
 #include <QMainWindow>
-#include <QStatusBar>
-#include <QTabWidget>
 
 namespace simulator::analysis::view
 {
@@ -24,8 +23,9 @@ namespace simulator::analysis::view
         void OnComputeRequested();
 
         FftSimulator fftSimulator;
-        FftConfigurationPanel* configPanel;
-        QTabWidget* tabWidget;
+        FftForm form;
+        ui::backend::qt::QtFormView* formView;
+        ui::backend::qt::QtAppShell shell;
 
         ui::charts::LinearAxis timeAxis{ ui::charts::LinearAxis::Time() };
         ui::charts::Log10Axis frequencyAxis;

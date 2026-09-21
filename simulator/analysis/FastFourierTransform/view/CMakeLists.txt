@@ -7,7 +7,7 @@ target_include_directories(numerical.simulator.analysis.fft.view PUBLIC
 
 target_link_libraries(numerical.simulator.analysis.fft.view PUBLIC
     numerical.simulator.analysis.fft.application
-    numerical.simulator.widgets
+    numerical.simulator.shell
     ui.charts
     ui.backend.qt
     Qt6::Widgets
@@ -18,8 +18,6 @@ set_target_properties(numerical.simulator.analysis.fft.view PROPERTIES
 )
 
 target_sources(numerical.simulator.analysis.fft.view PRIVATE
-    FftConfigurationPanel.cpp
-    FftConfigurationPanel.hpp
     FftMainWindow.cpp
     FftMainWindow.hpp
 )
