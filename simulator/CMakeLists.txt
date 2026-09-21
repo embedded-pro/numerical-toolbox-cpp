@@ -1,6 +1,5 @@
 add_subdirectory(utils)
 add_subdirectory(shell)
-add_subdirectory(widgets)
 add_subdirectory(analysis)
 add_subdirectory(controllers)
 add_subdirectory(estimators)
