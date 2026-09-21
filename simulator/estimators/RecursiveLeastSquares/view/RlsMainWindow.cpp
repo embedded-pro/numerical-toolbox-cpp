@@ -1,8 +1,8 @@
 #include "simulator/estimators/RecursiveLeastSquares/view/RlsMainWindow.hpp"
 #include "simulator/shell/Guard.hpp"
-#include "simulator/widgets/TimeSeriesChartWidget.hpp"
 #include "ui/theme/Theme.hpp"
 #include <array>
+#include <format>
 
 namespace simulator::estimators::rls::view
 {
@@ -21,28 +21,26 @@ namespace simulator::estimators::rls::view
             pages,
             "Configure RLS parameters and press Compute"
         };
-
-        [[nodiscard]] QColor Series(std::size_t index)
-        {
-            const auto color = ui::theme::Current().Series(index);
-            return QColor{ color.red, color.green, color.blue };
-        }
     }
 
     RlsMainWindow::RlsMainWindow(QWidget* parent)
         : QMainWindow(parent)
         , formView(new ui::backend::qt::QtFormView{ this })
         , shell(*this, shellSpec)
-        , outputChart(new widgets::TimeSeriesChartWidget{ this })
-        , coefficientChart(new widgets::TimeSeriesChartWidget{ this })
-        , metricsChart(new widgets::TimeSeriesChartWidget{ this })
+        , outputView(new ui::backend::qt::QtPaintedWidget{ outputChart, this })
+        , coefficientView(new ui::backend::qt::QtPaintedWidget{ coefficientChart, this })
+        , metricsView(new ui::backend::qt::QtPaintedWidget{ metricsChart, this })
     {
         formView->Build(form.Model());
         shell.SetPanel(formView);
 
-        shell.SetPage(0, outputChart);
-        shell.SetPage(1, coefficientChart);
-        shell.SetPage(2, metricsChart);
+        outputView->SetPanCursorEnabled(true);
+        coefficientView->SetPanCursorEnabled(true);
+        metricsView->SetPanCursorEnabled(true);
+
+        shell.SetPage(0, outputView);
+        shell.SetPage(1, coefficientView);
+        shell.SetPage(2, metricsView);
 
         form.Model().onActionTriggered = [this](ui::model::ActionId)
         {
@@ -60,34 +58,36 @@ namespace simulator::estimators::rls::view
                 simulator.Configure(config);
                 auto result = simulator.Run();
 
-                outputChart->SetTimeAxis(result.sampleIndex);
-                outputChart->SetPanels({
+                const auto& theme = ui::theme::Current();
+
+                outputChart.SetAxisValues(result.sampleIndex);
+                outputChart.SetPanels({
                     {
                         "True vs Estimated Output",
                         "Value",
                         {
-                            { "True", Series(0), result.trueOutput },
-                            { "Estimated", Series(1), result.estimatedOutput },
+                            { "True", theme.Series(0), result.trueOutput },
+                            { "Estimated", theme.Series(1), result.estimatedOutput },
                         },
                         1,
                     },
                 });
 
-                std::vector<widgets::Series> coefficientSeries;
+                std::vector<ui::charts::Series> coefficientSeries;
 
                 for (std::size_t i = 0; i < result.coefficientHistory.size(); ++i)
                 {
                     const auto trueValue = i < config.rls.trueCoefficients.size() ? config.rls.trueCoefficients[i] : 0.0f;
 
                     coefficientSeries.push_back({
-                        QString("θ%1 (true=%2)").arg(i).arg(static_cast<double>(trueValue), 0, 'f', 2),
-                        Series(i % 4),
+                        std::format("θ{} (true={:.2f})", i, static_cast<double>(trueValue)),
+                        theme.Series(i % 4),
                         result.coefficientHistory[i],
                     });
                 }
 
-                coefficientChart->SetTimeAxis(result.sampleIndex);
-                coefficientChart->SetPanels({
+                coefficientChart.SetAxisValues(result.sampleIndex);
+                coefficientChart.SetPanels({
                     {
                         "Coefficient Convergence",
                         "Coefficient Value",
@@ -96,13 +96,13 @@ namespace simulator::estimators::rls::view
                     },
                 });
 
-                metricsChart->SetTimeAxis(result.sampleIndex);
-                metricsChart->SetPanels({
+                metricsChart.SetAxisValues(result.sampleIndex);
+                metricsChart.SetPanels({
                     {
                         "Innovation (pre-update error)",
                         "Error",
                         {
-                            { "Innovation", Series(1), result.innovationHistory },
+                            { "Innovation", theme.Series(1), result.innovationHistory },
                         },
                         1,
                     },
@@ -110,11 +110,15 @@ namespace simulator::estimators::rls::view
                         "Uncertainty (trace of P)",
                         "Trace(P)",
                         {
-                            { "Uncertainty", Series(3), result.uncertaintyHistory },
+                            { "Uncertainty", theme.Series(3), result.uncertaintyHistory },
                         },
                         1,
                     },
                 });
+
+                outputView->update();
+                coefficientView->update();
+                metricsView->update();
 
                 shell.SetStatus(QString("RLS estimation complete: %1 samples, λ=%2")
                                     .arg(config.rls.numSamples)

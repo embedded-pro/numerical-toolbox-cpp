@@ -1,4 +1,5 @@
 #include "simulator/controllers/LqrCartPole/view/LqrEvaluationWidget.hpp"
+#include "ui/theme/Theme.hpp"
 #include <QHBoxLayout>
 #include <QSplitter>
 #include <QVBoxLayout>
@@ -50,11 +51,14 @@ namespace simulator::controllers::lqr::view
 
         auto* chartSplitter = new QSplitter(Qt::Vertical, this);
 
-        stateChart = new widgets::TimeSeriesChartWidget(chartSplitter);
-        controlChart = new widgets::TimeSeriesChartWidget(chartSplitter);
+        stateView = new ui::backend::qt::QtPaintedWidget(stateChart, chartSplitter);
+        controlView = new ui::backend::qt::QtPaintedWidget(controlChart, chartSplitter);
 
-        chartSplitter->addWidget(stateChart);
-        chartSplitter->addWidget(controlChart);
+        stateView->SetPanCursorEnabled(true);
+        controlView->SetPanCursorEnabled(true);
+
+        chartSplitter->addWidget(stateView);
+        chartSplitter->addWidget(controlView);
         chartSplitter->setStretchFactor(0, 2);
         chartSplitter->setStretchFactor(1, 1);
 
@@ -91,8 +95,8 @@ namespace simulator::controllers::lqr::view
         peakXLabel->setText("--");
         totalEffortLabel->setText("--");
 
-        stateChart->Clear();
-        controlChart->Clear();
+        stateChart.Clear();
+        controlChart.Clear();
     }
 
     void LqrEvaluationWidget::OnStateUpdated(float x, float xDot, float theta, float thetaDot, float force)
@@ -146,14 +150,16 @@ namespace simulator::controllers::lqr::view
 
     void LqrEvaluationWidget::UpdateCharts()
     {
-        stateChart->SetTimeAxis(time);
-        stateChart->SetPanels({
+        const auto& theme = ui::theme::Current();
+
+        stateChart.SetAxisValues(time);
+        stateChart.SetPanels({
             {
                 "Position & Angle",
                 "",
                 {
-                    { "x (m)", QColor(41, 128, 185), xHistory },
-                    { "\u03B8 (\u00B0)", QColor(231, 76, 60), thetaDegHistory },
+                    { "x (m)", theme.Series(0), xHistory },
+                    { "\u03B8 (\u00B0)", theme.Series(1), thetaDegHistory },
                 },
                 2,
             },
@@ -161,20 +167,20 @@ namespace simulator::controllers::lqr::view
                 "Velocities",
                 "",
                 {
-                    { "x\u0307 (m/s)", QColor(39, 174, 96), xDotHistory },
-                    { "\u03B8\u0307 (\u00B0/s)", QColor(142, 68, 173), thetaDotDegHistory },
+                    { "x\u0307 (m/s)", theme.Series(2), xDotHistory },
+                    { "\u03B8\u0307 (\u00B0/s)", theme.Series(3), thetaDotDegHistory },
                 },
                 1,
             },
         });
 
-        controlChart->SetTimeAxis(time);
-        controlChart->SetPanels({
+        controlChart.SetAxisValues(time);
+        controlChart.SetPanels({
             {
                 "Control Force",
                 "",
                 {
-                    { "Force (N)", QColor(230, 126, 34), forceHistory },
+                    { "Force (N)", theme.Series(4), forceHistory },
                 },
                 2,
             },
@@ -182,10 +188,13 @@ namespace simulator::controllers::lqr::view
                 "Cumulative Cost (J)",
                 "",
                 {
-                    { "J", QColor(192, 57, 43), costHistory },
+                    { "J", theme.Series(6), costHistory },
                 },
                 1,
             },
         });
+
+        stateView->update();
+        controlView->update();
     }
 }

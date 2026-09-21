@@ -9,7 +9,7 @@ target_include_directories(numerical.simulator.estimators.rls.view PUBLIC
 target_link_libraries(numerical.simulator.estimators.rls.view PUBLIC
     numerical.simulator.estimators.rls.application
     numerical.simulator.shell
-    numerical.simulator.widgets
+    ui.charts
     ui.backend.qt
     Qt6::Widgets
 )

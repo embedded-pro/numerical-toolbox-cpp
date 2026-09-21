@@ -25,33 +25,29 @@ namespace simulator::controllers::view
             "Configure parameters and press Run Pipeline"
         };
 
-        [[nodiscard]] QColor ToQt(ui::Color color)
-        {
-            return QColor{ color.red, color.green, color.blue };
-        }
-
-        [[nodiscard]] QColor Series(std::size_t index)
-        {
-            return ToQt(ui::theme::Current().Series(index));
-        }
     }
 
     BayesianMpcCalibrationView::BayesianMpcCalibrationView(QWidget* parent)
         : QMainWindow(parent)
         , formView(new ui::backend::qt::QtFormView{ this })
         , shell(*this, shellSpec)
-        , observationsChart(new widgets::TimeSeriesChartWidget{ this })
-        , emConvergenceChart(new widgets::TimeSeriesChartWidget{ this })
-        , boConvergenceChart(new widgets::TimeSeriesChartWidget{ this })
-        , stepResponseChart(new widgets::TimeSeriesChartWidget{ this })
+        , observationsView(new ui::backend::qt::QtPaintedWidget{ observationsChart, this })
+        , emConvergenceView(new ui::backend::qt::QtPaintedWidget{ emConvergenceChart, this })
+        , boConvergenceView(new ui::backend::qt::QtPaintedWidget{ boConvergenceChart, this })
+        , stepResponseView(new ui::backend::qt::QtPaintedWidget{ stepResponseChart, this })
     {
         formView->Build(form.Model());
         shell.SetPanel(formView);
 
-        shell.SetPage(0, observationsChart);
-        shell.SetPage(1, emConvergenceChart);
-        shell.SetPage(2, boConvergenceChart);
-        shell.SetPage(3, stepResponseChart);
+        observationsView->SetPanCursorEnabled(true);
+        emConvergenceView->SetPanCursorEnabled(true);
+        boConvergenceView->SetPanCursorEnabled(true);
+        stepResponseView->SetPanCursorEnabled(true);
+
+        shell.SetPage(0, observationsView);
+        shell.SetPage(1, emConvergenceView);
+        shell.SetPage(2, boConvergenceView);
+        shell.SetPage(3, stepResponseView);
 
         form.Model().onActionTriggered = [this](ui::model::ActionId)
         {
@@ -87,14 +83,16 @@ namespace simulator::controllers::view
 
     void BayesianMpcCalibrationView::DisplayResults(const CalibrationSimulationResults& results)
     {
-        observationsChart->SetTimeAxis(results.timeAxis);
-        observationsChart->SetPanels({
+        const auto& theme = ui::theme::Current();
+
+        observationsChart.SetAxisValues(results.timeAxis);
+        observationsChart.SetPanels({
             {
                 "Observations vs True Position",
                 "Position",
                 {
-                    { "True Position", Series(0), results.truePositions },
-                    { "Noisy Measurements", Series(1), results.rawMeasurements },
+                    { "True Position", theme.Series(0), results.truePositions },
+                    { "Noisy Measurements", theme.Series(1), results.rawMeasurements },
                 },
                 1,
             },
@@ -106,13 +104,13 @@ namespace simulator::controllers::view
         for (std::size_t i = 0; i < results.emLogLikelihoodHistory.size(); ++i)
             emIterationAxis.push_back(static_cast<float>(i + 1));
 
-        emConvergenceChart->SetTimeAxis(emIterationAxis);
-        emConvergenceChart->SetPanels({
+        emConvergenceChart.SetAxisValues(emIterationAxis);
+        emConvergenceChart.SetPanels({
             {
                 "EM Log-Likelihood vs Iteration",
                 "Log-Likelihood",
                 {
-                    { "Log-Likelihood", Series(2), results.emLogLikelihoodHistory },
+                    { "Log-Likelihood", theme.Series(2), results.emLogLikelihoodHistory },
                 },
                 1,
             },
@@ -131,14 +129,14 @@ namespace simulator::controllers::view
             runningMinimum.push_back(minimum);
         }
 
-        boConvergenceChart->SetTimeAxis(boIterationAxis);
-        boConvergenceChart->SetPanels({
+        boConvergenceChart.SetAxisValues(boIterationAxis);
+        boConvergenceChart.SetPanels({
             {
                 "BO: Best ISE Found vs Evaluation",
                 "ISE",
                 {
-                    { "All ISE values", Series(4), results.boIseHistory },
-                    { "Best so far", Series(1), runningMinimum },
+                    { "All ISE values", theme.Series(4), results.boIseHistory },
+                    { "Best so far", theme.Series(1), runningMinimum },
                 },
                 1,
             },
@@ -146,14 +144,14 @@ namespace simulator::controllers::view
 
         std::vector<float> referenceLine(results.stepResponseTime.size(), 1.0f);
 
-        stepResponseChart->SetTimeAxis(results.stepResponseTime);
-        stepResponseChart->SetPanels({
+        stepResponseChart.SetAxisValues(results.stepResponseTime);
+        stepResponseChart.SetPanels({
             {
                 "Position",
                 "m",
                 {
-                    { "Position", Series(0), results.stepResponsePosition },
-                    { "Reference", ToQt(ui::theme::Current().Get(ui::theme::ColorRole::TextMuted)), referenceLine },
+                    { "Position", theme.Series(0), results.stepResponsePosition },
+                    { "Reference", theme.Get(ui::theme::ColorRole::TextMuted), referenceLine },
                 },
                 2,
             },
@@ -161,7 +159,7 @@ namespace simulator::controllers::view
                 "Velocity",
                 "m/s",
                 {
-                    { "Velocity", Series(2), results.stepResponseVelocity },
+                    { "Velocity", theme.Series(2), results.stepResponseVelocity },
                 },
                 1,
             },
@@ -169,10 +167,15 @@ namespace simulator::controllers::view
                 "Control Input",
                 "N",
                 {
-                    { "Control", Series(1), results.stepResponseControl },
+                    { "Control", theme.Series(1), results.stepResponseControl },
                 },
                 1,
             },
         });
+
+        observationsView->update();
+        emConvergenceView->update();
+        boConvergenceView->update();
+        stepResponseView->update();
     }
 }

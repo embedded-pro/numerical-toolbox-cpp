@@ -9,7 +9,7 @@ target_link_libraries(numerical.simulator.controllers.lqr.view PUBLIC
     numerical.simulator.shell
     ui.backend.qt
     numerical.simulator.controllers.lqr.application
-    numerical.simulator.widgets
+    ui.charts
     Qt6::Widgets
 )
 
