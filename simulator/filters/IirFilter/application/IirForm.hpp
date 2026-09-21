@@ -22,8 +22,6 @@ namespace simulator::filters::iir
         inline constexpr ui::model::ActionId compute{ 1 };
     }
 
-    // The panel this replaces built the same five controls by hand across ninety lines. The
-    // description is the whole of what differed between it and its FIR twin.
     class IirForm
     {
     public:

@@ -8,8 +8,6 @@
 
 namespace simulator::shell
 {
-    // The two columns every signal-component table in this repository has. Kept here rather than
-    // per application so the four that share the widget today keep sharing one description.
     inline constexpr std::array<ui::model::ColumnSpec, 2> signalColumns{
         ui::model::ColumnSpec{ "Frequency (Hz)", { 0.0, 192000.0, 100.0, 1000.0, 1 } },
         ui::model::ColumnSpec{ "Amplitude", { 0.0, 10.0, 0.05, 0.5, 3 } }

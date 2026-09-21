@@ -14,8 +14,6 @@ namespace
     };
 }
 
-// Every value here is transcribed from IirConfigurationPanel.cpp as it stood before deletion, so
-// this fails if the migration moved a default rather than merely relocating it.
 TEST_F(IirFormTest, TheDefaultsMatchThePanelThisReplaced)
 {
     const auto config = form.BuildConfiguration();
@@ -37,7 +35,6 @@ TEST_F(IirFormTest, TheSampleRateIsSharedByTheFilterAndTheSimulation)
     EXPECT_NEAR(config.simulation.sampleRateHz, 44100.0f, 1e-3f);
 }
 
-// The combo carried the enum as its user data rather than relying on the item order.
 TEST_F(IirFormTest, TheFilterTypeComesFromTheOptionDataNotItsPosition)
 {
     form.Model().SetSelection(field::filterType, 1);

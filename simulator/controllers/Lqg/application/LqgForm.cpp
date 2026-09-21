@@ -15,9 +15,6 @@ namespace simulator::controllers::lqg
             GroupSpec{ field::simulation, "Simulation", {} }
         };
 
-        // Every range here takes Qt's default of two decimals, exactly as the panel did by never
-        // calling setDecimals - including the control weight, whose 0.001 lower bound the display
-        // has always rounded away.
         constexpr std::array<FieldSpec, 7> fields{
             FieldSpec{ field::stateWeight, field::weights, FieldKind::Number, "State Weight Q:", "", { 0.01, 1000.0, 1.0, 10.0, 2 }, {}, {}, {} },
             FieldSpec{ field::controlWeight, field::weights, FieldKind::Number, "Control Weight R:", "", { 0.001, 100.0, 0.01, 0.1, 2 }, {}, {}, {} },

@@ -17,8 +17,6 @@ namespace simulator::filters::fir
             OptionSpec{ "Band-Pass", static_cast<std::int64_t>(FilterType::BandPass) }
         };
 
-        // The upper cutoff is meaningful only for a band-pass, which the panel expressed as a
-        // handler wired after the initial selection; here it is the field's own description.
         constexpr Condition bandPassOnly{ field::filterType, 1u << 2u };
 
         constexpr std::array<GroupSpec, 3> groups{
@@ -72,8 +70,6 @@ namespace simulator::filters::fir
         config.filter.type = static_cast<FilterType>(model.SelectedData(field::filterType));
         config.filter.cutoffHz = model.Float(field::cutoff);
 
-        // Read unconditionally, exactly as the panel did: a disabled upper cutoff was greyed
-        // rather than excluded, and the simulator ignores it outside a band-pass.
         config.filter.cutoffHighHz = model.Float(field::cutoffHigh);
         config.filter.order = model.Count(field::order);
         config.filter.sampleRateHz = model.Float(field::sampleRate);

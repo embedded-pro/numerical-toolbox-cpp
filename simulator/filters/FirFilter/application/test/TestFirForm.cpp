@@ -14,7 +14,6 @@ namespace
     };
 }
 
-// Transcribed from FirConfigurationPanel.cpp as it stood before deletion.
 TEST_F(FirFormTest, TheDefaultsMatchThePanelThisReplaced)
 {
     const auto config = form.BuildConfiguration();
@@ -38,8 +37,6 @@ TEST_F(FirFormTest, TheUpperCutoffIsEnabledOnlyForABandPass)
     EXPECT_FALSE(form.Model().IsEnabled(field::cutoffHigh));
 }
 
-// The panel read the upper cutoff whether or not it was enabled: disabling greyed the control, it
-// did not exclude the value. Preserved deliberately, and pinned so nobody "fixes" it silently.
 TEST_F(FirFormTest, TheUpperCutoffIsStillReadWhileDisabled)
 {
     ASSERT_FALSE(form.Model().IsEnabled(field::cutoffHigh));

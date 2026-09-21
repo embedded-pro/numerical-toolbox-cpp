@@ -14,7 +14,6 @@ namespace
     };
 }
 
-// Transcribed from LqgConfigurationPanel.cpp as it stood before deletion.
 TEST_F(LqgFormTest, TheDefaultsMatchThePanelThisReplaced)
 {
     const auto config = form.BuildConfiguration();
@@ -28,8 +27,6 @@ TEST_F(LqgFormTest, TheDefaultsMatchThePanelThisReplaced)
     EXPECT_NEAR(config.initialPosition, 1.0f, 1e-5f);
 }
 
-// The configuration is nested three groups deep, so every field has to land in its own sub-struct
-// rather than a flat bag.
 TEST_F(LqgFormTest, EachFieldLandsInItsOwnSubStructure)
 {
     form.Model().SetNumber(field::stateWeight, 42.0);
@@ -43,8 +40,6 @@ TEST_F(LqgFormTest, EachFieldLandsInItsOwnSubStructure)
     EXPECT_NEAR(config.simulation.duration, 33.0f, 1e-4f);
 }
 
-// A discrete double integrator at the configured step: the plant is built from a form value, and
-// no matrix type appears anywhere in the UI library.
 TEST_F(LqgFormTest, ThePlantIsDiscretisedAtTheConfiguredSampleTime)
 {
     form.Model().SetNumber(field::sampleTime, 0.25);

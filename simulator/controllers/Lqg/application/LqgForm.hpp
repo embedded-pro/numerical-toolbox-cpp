@@ -33,8 +33,6 @@ namespace simulator::controllers::lqg
 
         [[nodiscard]] LqgSimulatorConfig BuildConfiguration() const;
 
-        // The plant is a domain object built from form values rather than a form feature. It is
-        // why nothing in ui-cpp ever names a matrix type.
         [[nodiscard]] LqgPlant CreatePlant() const;
 
     private:

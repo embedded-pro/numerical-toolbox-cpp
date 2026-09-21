@@ -7,8 +7,6 @@ namespace simulator::controllers::lqg::view
 {
     namespace
     {
-        // No pages: this window shows its chart directly in the splitter, which is the shape an
-        // empty pages span describes.
         const ui::shell::ShellSpec shellSpec{
             "LQG Controller Simulator",
             ui::Size{ 1280.0f, 800.0f },

@@ -5,7 +5,6 @@
 
 namespace simulator::shell
 {
-    // The twelve-line Main.cpp that was copied byte for byte into ten applications.
     template<class Window>
     int Run(int argc, char* argv[], const ui::theme::Theme& theme)
     {
