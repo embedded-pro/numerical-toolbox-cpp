@@ -1,12 +1,7 @@
 #include "simulator/estimators/RecursiveLeastSquares/view/RlsMainWindow.hpp"
-#include <QApplication>
+#include "simulator/shell/AppRunner.hpp"
 
 int main(int argc, char* argv[])
 {
-    QApplication app(argc, argv);
-
-    simulator::estimators::rls::view::RlsMainWindow window;
-    window.show();
-
-    return app.exec();
+    return simulator::shell::Run<simulator::estimators::rls::view::RlsMainWindow>(argc, argv, ui::theme::Light());
 }

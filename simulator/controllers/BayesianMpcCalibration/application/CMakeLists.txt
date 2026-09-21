@@ -10,12 +10,16 @@ target_link_libraries(numerical.simulator.controllers.bayesian_mpc_calibration.a
     numerical.estimators.offline
     numerical.filters.active
     numerical.optimization
+    numerical.simulator.shell
     numerical.solver
+    ui.model
 )
 
 target_sources(numerical.simulator.controllers.bayesian_mpc_calibration.application PRIVATE
     BayesianMpcCalibrationSimulator.cpp
     BayesianMpcCalibrationSimulator.hpp
+    BayesianMpcForm.cpp
+    BayesianMpcForm.hpp
     DoubleIntegratorPlant.cpp
     DoubleIntegratorPlant.hpp
     EmKfPipeline.cpp
@@ -30,4 +34,8 @@ else()
     target_compile_options(numerical.simulator.controllers.bayesian_mpc_calibration.application PRIVATE
         -Wno-error
     )
+endif()
+
+if (NUMERICAL_TOOLBOX_BUILD_TESTS)
+    add_subdirectory(test)
 endif()

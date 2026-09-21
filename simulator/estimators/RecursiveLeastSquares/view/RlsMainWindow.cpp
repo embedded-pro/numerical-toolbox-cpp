@@ -1,114 +1,125 @@
 #include "simulator/estimators/RecursiveLeastSquares/view/RlsMainWindow.hpp"
-#include "simulator/estimators/RecursiveLeastSquares/view/RlsConfigurationPanel.hpp"
+#include "simulator/shell/Guard.hpp"
 #include "simulator/widgets/TimeSeriesChartWidget.hpp"
-#include <QSplitter>
-#include <QStatusBar>
-#include <QTabWidget>
+#include "ui/theme/Theme.hpp"
+#include <array>
 
 namespace simulator::estimators::rls::view
 {
+    namespace
+    {
+        constexpr std::array<ui::shell::PageSpec, 3> pages{
+            ui::shell::PageSpec{ "Output Tracking" },
+            ui::shell::PageSpec{ "Coefficient Convergence" },
+            ui::shell::PageSpec{ "Estimation Metrics" }
+        };
+
+        const ui::shell::ShellSpec shellSpec{
+            "Recursive Least Squares Simulator",
+            ui::Size{ 1200.0f, 700.0f },
+            350.0f,
+            pages,
+            "Configure RLS parameters and press Compute"
+        };
+
+        [[nodiscard]] QColor Series(std::size_t index)
+        {
+            const auto color = ui::theme::Current().Series(index);
+            return QColor{ color.red, color.green, color.blue };
+        }
+    }
+
     RlsMainWindow::RlsMainWindow(QWidget* parent)
         : QMainWindow(parent)
+        , formView(new ui::backend::qt::QtFormView{ this })
+        , shell(*this, shellSpec)
+        , outputChart(new widgets::TimeSeriesChartWidget{ this })
+        , coefficientChart(new widgets::TimeSeriesChartWidget{ this })
+        , metricsChart(new widgets::TimeSeriesChartWidget{ this })
     {
-        setWindowTitle("Recursive Least Squares Simulator");
-        resize(1200, 700);
+        formView->Build(form.Model());
+        shell.SetPanel(formView);
 
-        auto* splitter = new QSplitter(Qt::Horizontal, this);
+        shell.SetPage(0, outputChart);
+        shell.SetPage(1, coefficientChart);
+        shell.SetPage(2, metricsChart);
 
-        configPanel = new RlsConfigurationPanel(splitter);
-        configPanel->setMaximumWidth(350);
-
-        tabWidget = new QTabWidget(splitter);
-
-        outputChart = new widgets::TimeSeriesChartWidget(tabWidget);
-        coefficientChart = new widgets::TimeSeriesChartWidget(tabWidget);
-        metricsChart = new widgets::TimeSeriesChartWidget(tabWidget);
-
-        tabWidget->addTab(outputChart, "Output Tracking");
-        tabWidget->addTab(coefficientChart, "Coefficient Convergence");
-        tabWidget->addTab(metricsChart, "Estimation Metrics");
-
-        splitter->addWidget(configPanel);
-        splitter->addWidget(tabWidget);
-        splitter->setStretchFactor(0, 0);
-        splitter->setStretchFactor(1, 1);
-
-        setCentralWidget(splitter);
-        statusBar()->showMessage("Configure RLS parameters and press Compute");
-
-        connect(configPanel, &RlsConfigurationPanel::ComputeRequested, this, &RlsMainWindow::OnComputeRequested);
+        form.Model().onActionTriggered = [this](ui::model::ActionId)
+        {
+            OnComputeRequested();
+        };
     }
 
     void RlsMainWindow::OnComputeRequested()
     {
-        auto config = configPanel->GetConfiguration();
-
-        RlsSimulator simulator;
-        simulator.Configure(config);
-        auto result = simulator.Run();
-
-        outputChart->SetTimeAxis(result.sampleIndex);
-        outputChart->SetPanels({
+        shell::Guard(shell, "Computation Error", [this]
             {
-                "True vs Estimated Output",
-                "Value",
-                {
-                    { "True", QColor(41, 128, 185), result.trueOutput },
-                    { "Estimated", QColor(231, 76, 60), result.estimatedOutput },
-                },
-                1,
-            },
-        });
+                auto config = form.BuildConfiguration();
 
-        std::vector<widgets::Series> coeffSeries;
-        const QColor coeffColors[] = {
-            QColor(41, 128, 185),
-            QColor(231, 76, 60),
-            QColor(39, 174, 96),
-            QColor(142, 68, 173),
-        };
-        for (std::size_t i = 0; i < result.coefficientHistory.size(); ++i)
-        {
-            auto trueVal = (i < config.rls.trueCoefficients.size()) ? config.rls.trueCoefficients[i] : 0.0f;
-            coeffSeries.push_back({
-                QString("θ%1 (true=%2)").arg(i).arg(static_cast<double>(trueVal), 0, 'f', 2),
-                coeffColors[i % 4],
-                result.coefficientHistory[i],
+                RlsSimulator simulator;
+                simulator.Configure(config);
+                auto result = simulator.Run();
+
+                outputChart->SetTimeAxis(result.sampleIndex);
+                outputChart->SetPanels({
+                    {
+                        "True vs Estimated Output",
+                        "Value",
+                        {
+                            { "True", Series(0), result.trueOutput },
+                            { "Estimated", Series(1), result.estimatedOutput },
+                        },
+                        1,
+                    },
+                });
+
+                std::vector<widgets::Series> coefficientSeries;
+
+                for (std::size_t i = 0; i < result.coefficientHistory.size(); ++i)
+                {
+                    const auto trueValue = i < config.rls.trueCoefficients.size() ? config.rls.trueCoefficients[i] : 0.0f;
+
+                    coefficientSeries.push_back({
+                        QString("θ%1 (true=%2)").arg(i).arg(static_cast<double>(trueValue), 0, 'f', 2),
+                        Series(i % 4),
+                        result.coefficientHistory[i],
+                    });
+                }
+
+                coefficientChart->SetTimeAxis(result.sampleIndex);
+                coefficientChart->SetPanels({
+                    {
+                        "Coefficient Convergence",
+                        "Coefficient Value",
+                        coefficientSeries,
+                        1,
+                    },
+                });
+
+                metricsChart->SetTimeAxis(result.sampleIndex);
+                metricsChart->SetPanels({
+                    {
+                        "Innovation (pre-update error)",
+                        "Error",
+                        {
+                            { "Innovation", Series(1), result.innovationHistory },
+                        },
+                        1,
+                    },
+                    {
+                        "Uncertainty (trace of P)",
+                        "Trace(P)",
+                        {
+                            { "Uncertainty", Series(3), result.uncertaintyHistory },
+                        },
+                        1,
+                    },
+                });
+
+                shell.SetStatus(QString("RLS estimation complete: %1 samples, λ=%2")
+                        .arg(config.rls.numSamples)
+                        .arg(static_cast<double>(config.rls.forgettingFactor), 0, 'f', 3)
+                        .toStdString());
             });
-        }
-
-        coefficientChart->SetTimeAxis(result.sampleIndex);
-        coefficientChart->SetPanels({
-            {
-                "Coefficient Convergence",
-                "Coefficient Value",
-                coeffSeries,
-                1,
-            },
-        });
-
-        metricsChart->SetTimeAxis(result.sampleIndex);
-        metricsChart->SetPanels({
-            {
-                "Innovation (pre-update error)",
-                "Error",
-                {
-                    { "Innovation", QColor(231, 76, 60), result.innovationHistory },
-                },
-                1,
-            },
-            {
-                "Uncertainty (trace of P)",
-                "Trace(P)",
-                {
-                    { "Uncertainty", QColor(142, 68, 173), result.uncertaintyHistory },
-                },
-                1,
-            },
-        });
-
-        statusBar()->showMessage(QString("RLS estimation complete: %1 samples, λ=%2")
-                .arg(config.rls.numSamples)
-                .arg(static_cast<double>(config.rls.forgettingFactor), 0, 'f', 3));
     }
 }

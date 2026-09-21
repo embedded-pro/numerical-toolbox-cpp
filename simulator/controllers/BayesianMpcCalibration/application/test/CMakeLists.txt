@@ -1,0 +1,12 @@
+add_executable(numerical.simulator.controllers.bayesian_mpc_calibration.application_test)
+emil_build_for(numerical.simulator.controllers.bayesian_mpc_calibration.application_test HOST All PREREQUISITE_BOOL NUMERICAL_TOOLBOX_BUILD_SIMULATOR)
+emil_add_test(numerical.simulator.controllers.bayesian_mpc_calibration.application_test)
+
+target_link_libraries(numerical.simulator.controllers.bayesian_mpc_calibration.application_test PUBLIC
+    gmock_main
+    numerical.simulator.controllers.bayesian_mpc_calibration.application
+)
+
+target_sources(numerical.simulator.controllers.bayesian_mpc_calibration.application_test PRIVATE
+    TestBayesianMpcForm.cpp
+)

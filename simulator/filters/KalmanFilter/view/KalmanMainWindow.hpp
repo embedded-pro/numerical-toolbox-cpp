@@ -1,9 +1,9 @@
 #pragma once
 
-#include "simulator/filters/KalmanFilter/application/KalmanFilterSimulator.hpp"
-#include "simulator/filters/KalmanFilter/view/KalmanConfigPanel.hpp"
+#include "simulator/filters/KalmanFilter/application/KalmanForm.hpp"
+#include "ui/backend/qt/QtAppShell.hpp"
+#include "ui/backend/qt/QtFormView.hpp"
 #include <QMainWindow>
-#include <QTabWidget>
 
 namespace simulator::widgets
 {
@@ -24,8 +24,10 @@ namespace simulator::filters::view
         void OnComputeRequested();
 
         KalmanFilterSimulator simulator;
-        KalmanConfigPanel* configPanel;
-        QTabWidget* tabWidget;
+        kalman::KalmanForm form;
+        ui::backend::qt::QtFormView* formView;
+        ui::backend::qt::QtAppShell shell;
+
         widgets::TimeSeriesChartWidget* thetaChart;
         widgets::TimeSeriesChartWidget* thetaDotChart;
         widgets::TimeSeriesChartWidget* covarianceChart;

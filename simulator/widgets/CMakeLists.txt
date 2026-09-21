@@ -21,8 +21,6 @@ target_sources(numerical.simulator.widgets PRIVATE
     ChartInteraction.hpp
     FrequencyChartWidget.cpp
     FrequencyChartWidget.hpp
-    SignalConfigWidget.cpp
-    SignalConfigWidget.hpp
     TimeSeriesChartWidget.cpp
     TimeSeriesChartWidget.hpp
 )

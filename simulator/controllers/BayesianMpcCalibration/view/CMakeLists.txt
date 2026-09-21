@@ -7,7 +7,9 @@ target_include_directories(numerical.simulator.controllers.bayesian_mpc_calibrat
 
 target_link_libraries(numerical.simulator.controllers.bayesian_mpc_calibration.view PUBLIC
     numerical.simulator.controllers.bayesian_mpc_calibration.application
+    numerical.simulator.shell
     numerical.simulator.widgets
+    ui.backend.qt
     Qt6::Widgets
 )
 

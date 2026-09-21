@@ -1,12 +1,9 @@
 #pragma once
 
+#include "simulator/estimators/RecursiveLeastSquares/application/RlsForm.hpp"
+#include "ui/backend/qt/QtAppShell.hpp"
+#include "ui/backend/qt/QtFormView.hpp"
 #include <QMainWindow>
-#include <QTabWidget>
-
-namespace simulator::estimators::rls::view
-{
-    class RlsConfigurationPanel;
-}
 
 namespace simulator::widgets
 {
@@ -23,12 +20,13 @@ namespace simulator::estimators::rls::view
     public:
         explicit RlsMainWindow(QWidget* parent = nullptr);
 
-    private slots:
+    private:
         void OnComputeRequested();
 
-    private:
-        RlsConfigurationPanel* configPanel;
-        QTabWidget* tabWidget;
+        RlsForm form;
+        ui::backend::qt::QtFormView* formView;
+        ui::backend::qt::QtAppShell shell;
+
         widgets::TimeSeriesChartWidget* outputChart;
         widgets::TimeSeriesChartWidget* coefficientChart;
         widgets::TimeSeriesChartWidget* metricsChart;

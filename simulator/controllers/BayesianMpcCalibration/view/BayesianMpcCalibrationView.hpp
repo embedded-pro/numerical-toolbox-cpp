@@ -1,17 +1,15 @@
 #pragma once
 
-#include "simulator/controllers/BayesianMpcCalibration/application/BayesianMpcCalibrationSimulator.hpp"
+#include "simulator/controllers/BayesianMpcCalibration/application/BayesianMpcForm.hpp"
 #include "simulator/widgets/TimeSeriesChartWidget.hpp"
-#include <QDoubleSpinBox>
-#include <QLabel>
+#include "ui/backend/qt/QtAppShell.hpp"
+#include "ui/backend/qt/QtFormView.hpp"
 #include <QMainWindow>
-#include <QPushButton>
-#include <QSpinBox>
-#include <QTabWidget>
 
 namespace simulator::controllers::view
 {
-    class BayesianMpcCalibrationView : public QMainWindow
+    class BayesianMpcCalibrationView
+        : public QMainWindow
     {
         Q_OBJECT
 
@@ -20,21 +18,15 @@ namespace simulator::controllers::view
 
     private:
         void OnRunRequested();
-        void SetupUi();
         void DisplayResults(const CalibrationSimulationResults& results);
 
-        widgets::TimeSeriesChartWidget* observationsChart_;
-        widgets::TimeSeriesChartWidget* emConvergenceChart_;
-        widgets::TimeSeriesChartWidget* boConvergenceChart_;
-        widgets::TimeSeriesChartWidget* stepResponseChart_;
+        bayesian::BayesianMpcForm form;
+        ui::backend::qt::QtFormView* formView;
+        ui::backend::qt::QtAppShell shell;
 
-        QTabWidget* tabWidget_;
-        QDoubleSpinBox* dtSpinBox_;
-        QDoubleSpinBox* sigmaQSpinBox_;
-        QDoubleSpinBox* sigmaRSpinBox_;
-        QSpinBox* emIterationsSpinBox_;
-        QSpinBox* boIterationsSpinBox_;
-        QPushButton* runButton_;
-        QLabel* statusLabel_;
+        widgets::TimeSeriesChartWidget* observationsChart;
+        widgets::TimeSeriesChartWidget* emConvergenceChart;
+        widgets::TimeSeriesChartWidget* boConvergenceChart;
+        widgets::TimeSeriesChartWidget* stepResponseChart;
     };
 }
