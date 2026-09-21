@@ -50,11 +50,11 @@ namespace simulator::controllers::lqg::view
                 DisplayResponse(result);
 
                 shell.SetStatus(QString("LQG: Q=%1 R=%2 | ProcessNoise=%3 MeasNoise=%4")
-                        .arg(static_cast<double>(config.weights.stateWeight), 0, 'f', 2)
-                        .arg(static_cast<double>(config.weights.controlWeight), 0, 'f', 3)
-                        .arg(static_cast<double>(config.noise.processNoise), 0, 'f', 3)
-                        .arg(static_cast<double>(config.noise.measurementNoise), 0, 'f', 3)
-                        .toStdString());
+                                    .arg(static_cast<double>(config.weights.stateWeight), 0, 'f', 2)
+                                    .arg(static_cast<double>(config.weights.controlWeight), 0, 'f', 3)
+                                    .arg(static_cast<double>(config.noise.processNoise), 0, 'f', 3)
+                                    .arg(static_cast<double>(config.noise.measurementNoise), 0, 'f', 3)
+                                    .toStdString());
             });
     }
 

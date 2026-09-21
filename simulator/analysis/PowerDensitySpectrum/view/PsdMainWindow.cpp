@@ -82,11 +82,11 @@ namespace simulator::analysis::psd::view
                 });
 
                 shell.SetStatus(QString("PSD computed: %1 input samples, %2-point segments, %3% overlap, %4 Hz")
-                        .arg(config.inputSize)
-                        .arg(config.segmentSize)
-                        .arg(config.overlapPercent)
-                        .arg(static_cast<double>(config.sampleRateHz), 0, 'f', 1)
-                        .toStdString());
+                                    .arg(config.inputSize)
+                                    .arg(config.segmentSize)
+                                    .arg(config.overlapPercent)
+                                    .arg(static_cast<double>(config.sampleRateHz), 0, 'f', 1)
+                                    .toStdString());
             });
     }
 }

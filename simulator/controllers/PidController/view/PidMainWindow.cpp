@@ -119,11 +119,11 @@ namespace simulator::controllers::view
                 const auto plant = form.PlantDescription();
 
                 shell.SetStatus(QString("PID: Kp=%1 Ki=%2 Kd=%3 | Plant: %4")
-                        .arg(static_cast<double>(config.tunings.kp), 0, 'f', 3)
-                        .arg(static_cast<double>(config.tunings.ki), 0, 'f', 3)
-                        .arg(static_cast<double>(config.tunings.kd), 0, 'f', 3)
-                        .arg(QString::fromUtf8(plant.data(), static_cast<qsizetype>(plant.size())))
-                        .toStdString());
+                                    .arg(static_cast<double>(config.tunings.kp), 0, 'f', 3)
+                                    .arg(static_cast<double>(config.tunings.ki), 0, 'f', 3)
+                                    .arg(static_cast<double>(config.tunings.kd), 0, 'f', 3)
+                                    .arg(QString::fromUtf8(plant.data(), static_cast<qsizetype>(plant.size())))
+                                    .toStdString());
             });
     }
 

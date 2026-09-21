@@ -65,10 +65,10 @@ namespace simulator::controllers::view
                 const auto plantDescription = form.PlantDescription();
 
                 shell.SetStatus(QString("MPC: Q=%1 R=%2 | Plant: %3")
-                        .arg(static_cast<double>(config.weights.stateWeight), 0, 'f', 2)
-                        .arg(static_cast<double>(config.weights.controlWeight), 0, 'f', 3)
-                        .arg(QString::fromUtf8(plantDescription.data(), static_cast<qsizetype>(plantDescription.size())))
-                        .toStdString());
+                                    .arg(static_cast<double>(config.weights.stateWeight), 0, 'f', 2)
+                                    .arg(static_cast<double>(config.weights.controlWeight), 0, 'f', 3)
+                                    .arg(QString::fromUtf8(plantDescription.data(), static_cast<qsizetype>(plantDescription.size())))
+                                    .toStdString());
             });
     }
 

@@ -141,9 +141,9 @@ namespace simulator::filters::view
                 });
 
                 shell.SetStatus(QString("Simulation complete — %1 steps, dt=%2s")
-                        .arg(result.time.size())
-                        .arg(static_cast<double>(config.dt), 0, 'f', 3)
-                        .toStdString());
+                                    .arg(result.time.size())
+                                    .arg(static_cast<double>(config.dt), 0, 'f', 3)
+                                    .toStdString());
             });
     }
 }

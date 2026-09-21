@@ -100,9 +100,9 @@ namespace simulator::filters::fir::view
                 });
 
                 shell.SetStatus(QString("FIR filter computed: order %1, cutoff %2 Hz")
-                        .arg(config.filter.order)
-                        .arg(static_cast<double>(config.filter.cutoffHz), 0, 'f', 1)
-                        .toStdString());
+                                    .arg(config.filter.order)
+                                    .arg(static_cast<double>(config.filter.cutoffHz), 0, 'f', 1)
+                                    .toStdString());
             });
     }
 }
