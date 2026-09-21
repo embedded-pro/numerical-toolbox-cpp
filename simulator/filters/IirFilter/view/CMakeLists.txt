@@ -7,7 +7,9 @@ target_include_directories(numerical.simulator.filters.iir.view PUBLIC
 
 target_link_libraries(numerical.simulator.filters.iir.view PUBLIC
     numerical.simulator.filters.iir.application
+    numerical.simulator.shell
     numerical.simulator.widgets
+    ui.backend.qt
     Qt6::Widgets
 )
 
@@ -16,8 +18,6 @@ set_target_properties(numerical.simulator.filters.iir.view PROPERTIES
 )
 
 target_sources(numerical.simulator.filters.iir.view PRIVATE
-    IirConfigurationPanel.cpp
-    IirConfigurationPanel.hpp
     IirMainWindow.cpp
     IirMainWindow.hpp
 )

@@ -1,12 +1,9 @@
 #pragma once
 
+#include "simulator/filters/IirFilter/application/IirForm.hpp"
+#include "ui/backend/qt/QtAppShell.hpp"
+#include "ui/backend/qt/QtFormView.hpp"
 #include <QMainWindow>
-#include <QTabWidget>
-
-namespace simulator::filters::iir::view
-{
-    class IirConfigurationPanel;
-}
 
 namespace simulator::widgets
 {
@@ -24,12 +21,13 @@ namespace simulator::filters::iir::view
     public:
         explicit IirMainWindow(QWidget* parent = nullptr);
 
-    private slots:
+    private:
         void OnComputeRequested();
 
-    private:
-        IirConfigurationPanel* configPanel;
-        QTabWidget* tabWidget;
+        IirForm form;
+        ui::backend::qt::QtFormView* formView;
+        ui::backend::qt::QtAppShell shell;
+
         widgets::TimeSeriesChartWidget* timeDomainChart;
         widgets::FrequencyChartWidget* frequencyChart;
         widgets::TimeSeriesChartWidget* impulseChart;

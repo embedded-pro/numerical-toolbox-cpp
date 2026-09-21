@@ -1,12 +1,7 @@
 #include "simulator/filters/IirFilter/view/IirMainWindow.hpp"
-#include <QApplication>
+#include "simulator/shell/AppRunner.hpp"
 
 int main(int argc, char* argv[])
 {
-    QApplication app(argc, argv);
-
-    simulator::filters::iir::view::IirMainWindow window;
-    window.show();
-
-    return app.exec();
+    return simulator::shell::Run<simulator::filters::iir::view::IirMainWindow>(argc, argv, ui::theme::Light());
 }
