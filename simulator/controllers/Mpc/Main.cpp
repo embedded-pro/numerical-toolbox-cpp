@@ -1,12 +1,7 @@
 #include "simulator/controllers/Mpc/view/MpcMainWindow.hpp"
-#include <QApplication>
+#include "simulator/shell/AppRunner.hpp"
 
 int main(int argc, char* argv[])
 {
-    QApplication app(argc, argv);
-
-    simulator::controllers::view::MpcMainWindow window;
-    window.show();
-
-    return app.exec();
+    return simulator::shell::Run<simulator::controllers::view::MpcMainWindow>(argc, argv, ui::theme::Light());
 }

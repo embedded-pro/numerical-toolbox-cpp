@@ -1,10 +1,9 @@
 #pragma once
 
-#include "simulator/controllers/PidController/application/PidSimulator.hpp"
-#include "simulator/controllers/PidController/view/PidConfigurationPanel.hpp"
+#include "simulator/controllers/PidController/application/PidForm.hpp"
+#include "ui/backend/qt/QtAppShell.hpp"
+#include "ui/backend/qt/QtFormView.hpp"
 #include <QMainWindow>
-#include <QStatusBar>
-#include <QTabWidget>
 #include <QTimer>
 
 namespace simulator::widgets
@@ -34,14 +33,15 @@ namespace simulator::controllers::view
         void DisplayBodeResponse(widgets::FrequencyChartWidget* chart, const BodeResult& result);
 
         PidSimulator pidSimulator;
-        PidConfigurationPanel* configPanel;
-        QTabWidget* tabWidget;
+        pid::PidForm form;
+        ui::backend::qt::QtFormView* formView;
+        ui::backend::qt::QtAppShell shell;
+
         widgets::TimeSeriesChartWidget* stepChart;
         widgets::TimeSeriesChartWidget* rampChart;
         widgets::FrequencyChartWidget* bodeChart;
         PidRootLocusWidget* rootLocusChart;
 
         QTimer* dragTimer;
-        float pendingGain = 0.0f;
     };
 }

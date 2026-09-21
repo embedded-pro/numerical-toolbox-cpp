@@ -9,6 +9,7 @@ emil_build_for(numerical.simulator.controllers.pid_controller HOST All PREREQUIS
 target_link_libraries(numerical.simulator.controllers.pid_controller PRIVATE
     numerical.simulator.controllers.pid.application
     numerical.simulator.controllers.pid.view
+    numerical.simulator.shell.qt
 )
 
 target_sources(numerical.simulator.controllers.pid_controller PRIVATE

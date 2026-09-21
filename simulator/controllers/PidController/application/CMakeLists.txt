@@ -10,12 +10,16 @@ target_link_libraries(numerical.simulator.controllers.pid.application PUBLIC
     numerical.control_analysis
     numerical.controllers.implementations
     numerical.simulator.controllers.common
+    numerical.simulator.shell
     numerical.solver
+    ui.model
 )
 
 target_sources(numerical.simulator.controllers.pid.application PRIVATE
     PidSimulator.cpp
     PidSimulator.hpp
+    PidForm.cpp
+    PidForm.hpp
 )
 
 if(MSVC)
@@ -24,4 +28,8 @@ else()
     target_compile_options(numerical.simulator.controllers.pid.application PRIVATE
         -Wno-error
     )
+endif()
+
+if (NUMERICAL_TOOLBOX_BUILD_TESTS)
+    add_subdirectory(test)
 endif()

@@ -1,12 +1,11 @@
 #pragma once
 
-#include "simulator/controllers/LqrCartPole/application/LqrCartPoleSimulator.hpp"
+#include "simulator/controllers/LqrCartPole/application/LqrForm.hpp"
 #include "simulator/controllers/LqrCartPole/view/CartPoleWidget.hpp"
-#include "simulator/controllers/LqrCartPole/view/LqrConfigurationPanel.hpp"
 #include "simulator/controllers/LqrCartPole/view/LqrEvaluationWidget.hpp"
+#include "ui/backend/qt/QtAppShell.hpp"
+#include "ui/backend/qt/QtFormView.hpp"
 #include <QMainWindow>
-#include <QStatusBar>
-#include <QTabWidget>
 
 namespace simulator::controllers::lqr::view
 {
@@ -19,16 +18,20 @@ namespace simulator::controllers::lqr::view
         explicit LqrMainWindow(QWidget* parent = nullptr);
 
     private:
+        void OnActionTriggered(ui::model::ActionId action);
         void OnConfigureRequested();
         void OnStartRequested();
         void OnStopRequested();
         void OnResetRequested();
         void OnDisturbRequested();
+        void OnStateUpdated(float x, float xDot, float theta, float thetaDot, float force);
 
         LqrCartPoleSimulator simulator;
-        LqrConfigurationPanel* configPanel;
+        LqrForm form;
+        ui::backend::qt::QtFormView* formView;
+        ui::backend::qt::QtAppShell shell;
+
         CartPoleWidget* cartPoleWidget;
         LqrEvaluationWidget* evaluationWidget;
-        QTabWidget* tabWidget;
     };
 }

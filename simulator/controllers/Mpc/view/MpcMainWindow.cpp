@@ -1,90 +1,86 @@
 #include "simulator/controllers/Mpc/view/MpcMainWindow.hpp"
+#include "simulator/shell/Guard.hpp"
 #include "simulator/widgets/TimeSeriesChartWidget.hpp"
-#include <QMessageBox>
-#include <QSplitter>
-#include <exception>
+#include "ui/theme/Theme.hpp"
+#include <array>
 
 namespace simulator::controllers::view
 {
+    namespace
+    {
+        constexpr std::array<ui::shell::PageSpec, 2> pages{
+            ui::shell::PageSpec{ "Step Response" },
+            ui::shell::PageSpec{ "Constrained Response" }
+        };
+
+        const ui::shell::ShellSpec shellSpec{
+            "MPC Controller Simulator",
+            ui::Size{ 1280.0f, 900.0f },
+            350.0f,
+            pages,
+            "Configure MPC parameters and press Compute"
+        };
+
+        [[nodiscard]] QColor ToQt(ui::Color color)
+        {
+            return QColor{ color.red, color.green, color.blue };
+        }
+
+        [[nodiscard]] QColor Series(std::size_t index)
+        {
+            return ToQt(ui::theme::Current().Series(index));
+        }
+    }
+
     MpcMainWindow::MpcMainWindow(QWidget* parent)
         : QMainWindow(parent)
+        , formView(new ui::backend::qt::QtFormView{ this })
+        , shell(*this, shellSpec)
+        , stepChart(new widgets::TimeSeriesChartWidget{ this })
+        , constrainedChart(new widgets::TimeSeriesChartWidget{ this })
     {
-        setWindowTitle("MPC Controller Simulator");
-        resize(1280, 900);
+        formView->Build(form.Model());
+        shell.SetPanel(formView);
 
-        auto* splitter = new QSplitter(Qt::Horizontal, this);
+        shell.SetPage(0, stepChart);
+        shell.SetPage(1, constrainedChart);
 
-        configPanel = new MpcConfigurationPanel(splitter);
-        configPanel->setMaximumWidth(350);
-
-        tabWidget = new QTabWidget(splitter);
-
-        stepChart = new widgets::TimeSeriesChartWidget(tabWidget);
-        constrainedChart = new widgets::TimeSeriesChartWidget(tabWidget);
-
-        tabWidget->addTab(stepChart, "Step Response");
-        tabWidget->addTab(constrainedChart, "Constrained Response");
-
-        splitter->addWidget(configPanel);
-        splitter->addWidget(tabWidget);
-        splitter->setStretchFactor(0, 0);
-        splitter->setStretchFactor(1, 1);
-
-        setCentralWidget(splitter);
-
-        statusBar()->showMessage("Configure MPC parameters and press Compute");
-
-        connect(configPanel, &MpcConfigurationPanel::ComputeRequested, this, &MpcMainWindow::OnComputeRequested);
+        form.Model().onActionTriggered = [this](ui::model::ActionId)
+        {
+            OnComputeRequested();
+        };
     }
 
     void MpcMainWindow::OnComputeRequested()
     {
-        try
-        {
-            auto config = configPanel->GetConfiguration();
-            auto plant = configPanel->CreatePlant();
-            mpcSimulator.Configure(plant, config);
+        shell::Guard(shell, "Computation Error", [this]
+            {
+                auto config = form.BuildConfiguration();
+                auto plant = form.CreatePlant();
+                mpcSimulator.Configure(plant, config);
 
-            auto stepResult = mpcSimulator.ComputeStepResponse();
-            DisplayResponse(stepChart, stepResult, config.referencePosition);
+                DisplayResponse(stepChart, mpcSimulator.ComputeStepResponse(), config.referencePosition);
+                DisplayResponse(constrainedChart, mpcSimulator.ComputeConstrainedResponse(), config.referencePosition);
 
-            auto constrainedResult = mpcSimulator.ComputeConstrainedResponse();
-            DisplayResponse(constrainedChart, constrainedResult, config.referencePosition);
+                const auto plantDescription = form.PlantDescription();
 
-            statusBar()->showMessage(
-                QString("MPC: Q=%1 R=%2 | Plant: %3")
-                    .arg(static_cast<double>(config.weights.stateWeight), 0, 'f', 2)
-                    .arg(static_cast<double>(config.weights.controlWeight), 0, 'f', 3)
-                    .arg(configPanel->GetPlantDescription()));
-        }
-        catch (const std::exception& e)
-        {
-            QMessageBox::warning(this, "Computation Error", e.what());
-            statusBar()->showMessage("Computation failed");
-        }
+                shell.SetStatus(QString("MPC: Q=%1 R=%2 | Plant: %3")
+                        .arg(static_cast<double>(config.weights.stateWeight), 0, 'f', 2)
+                        .arg(static_cast<double>(config.weights.controlWeight), 0, 'f', 3)
+                        .arg(QString::fromUtf8(plantDescription.data(), static_cast<qsizetype>(plantDescription.size())))
+                        .toStdString());
+            });
     }
 
     void MpcMainWindow::DisplayResponse(widgets::TimeSeriesChartWidget* chart, const MpcTimeResponse& result, float referencePosition)
     {
-        const QColor stateColors[] = {
-            QColor(41, 128, 185),
-            QColor(231, 76, 60),
-            QColor(39, 174, 96),
-            QColor(142, 68, 173),
-        };
-
         std::vector<widgets::Series> stateSeries;
-        for (std::size_t i = 0; i < result.states.size(); ++i)
-        {
-            stateSeries.push_back({
-                QString("x%1").arg(i),
-                stateColors[i % 4],
-                result.states[i],
-            });
-        }
 
-        std::vector<float> refLine(result.time.size(), referencePosition);
-        stateSeries.push_back({ "Reference", QColor(100, 100, 100), refLine });
+        for (std::size_t i = 0; i < result.states.size(); ++i)
+            stateSeries.push_back({ QString("x%1").arg(i), Series(i % 4), result.states[i] });
+
+        std::vector<float> referenceLine(result.time.size(), referencePosition);
+        stateSeries.push_back({ "Reference", ToQt(ui::theme::Current().Get(ui::theme::ColorRole::TextMuted)), referenceLine });
 
         chart->SetTimeAxis(result.time);
         chart->SetPanels({
@@ -98,7 +94,7 @@ namespace simulator::controllers::view
                 "Control Input",
                 "u",
                 {
-                    { "Control", QColor(231, 76, 60), result.control },
+                    { "Control", Series(1), result.control },
                 },
                 1,
             },
@@ -106,7 +102,7 @@ namespace simulator::controllers::view
                 "Cost",
                 "J",
                 {
-                    { "Cost", QColor(142, 68, 173), result.cost },
+                    { "Cost", Series(3), result.cost },
                 },
                 1,
             },

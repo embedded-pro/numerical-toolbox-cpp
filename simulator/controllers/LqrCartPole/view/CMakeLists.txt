@@ -6,6 +6,8 @@ target_include_directories(numerical.simulator.controllers.lqr.view PUBLIC
 )
 
 target_link_libraries(numerical.simulator.controllers.lqr.view PUBLIC
+    numerical.simulator.shell
+    ui.backend.qt
     numerical.simulator.controllers.lqr.application
     numerical.simulator.widgets
     Qt6::Widgets
@@ -18,8 +20,6 @@ set_target_properties(numerical.simulator.controllers.lqr.view PROPERTIES
 target_sources(numerical.simulator.controllers.lqr.view PRIVATE
     CartPoleWidget.cpp
     CartPoleWidget.hpp
-    LqrConfigurationPanel.cpp
-    LqrConfigurationPanel.hpp
     LqrEvaluationWidget.cpp
     LqrEvaluationWidget.hpp
     LqrMainWindow.cpp

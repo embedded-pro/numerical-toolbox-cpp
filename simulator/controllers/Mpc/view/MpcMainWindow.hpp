@@ -1,10 +1,9 @@
 #pragma once
 
-#include "simulator/controllers/Mpc/application/MpcSimulator.hpp"
-#include "simulator/controllers/Mpc/view/MpcConfigurationPanel.hpp"
+#include "simulator/controllers/Mpc/application/MpcForm.hpp"
+#include "ui/backend/qt/QtAppShell.hpp"
+#include "ui/backend/qt/QtFormView.hpp"
 #include <QMainWindow>
-#include <QStatusBar>
-#include <QTabWidget>
 
 namespace simulator::widgets
 {
@@ -26,8 +25,10 @@ namespace simulator::controllers::view
         void DisplayResponse(widgets::TimeSeriesChartWidget* chart, const MpcTimeResponse& result, float referencePosition);
 
         MpcSimulator mpcSimulator;
-        MpcConfigurationPanel* configPanel;
-        QTabWidget* tabWidget;
+        mpc::MpcForm form;
+        ui::backend::qt::QtFormView* formView;
+        ui::backend::qt::QtAppShell shell;
+
         widgets::TimeSeriesChartWidget* stepChart;
         widgets::TimeSeriesChartWidget* constrainedChart;
     };

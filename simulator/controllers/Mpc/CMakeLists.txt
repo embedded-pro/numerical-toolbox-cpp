@@ -9,6 +9,7 @@ emil_build_for(numerical.simulator.controllers.mpc HOST All PREREQUISITE_BOOL NU
 target_link_libraries(numerical.simulator.controllers.mpc PRIVATE
     numerical.simulator.controllers.mpc.application
     numerical.simulator.controllers.mpc.view
+    numerical.simulator.shell.qt
 )
 
 target_sources(numerical.simulator.controllers.mpc PRIVATE
