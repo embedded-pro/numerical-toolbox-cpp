@@ -8,9 +8,12 @@ target_include_directories(numerical.simulator.controllers.lqg.application PUBLI
 target_link_libraries(numerical.simulator.controllers.lqg.application PUBLIC
     numerical.controllers.implementations
     numerical.filters.active
+    ui.model
 )
 
 target_sources(numerical.simulator.controllers.lqg.application PRIVATE
+    LqgForm.cpp
+    LqgForm.hpp
     LqgSimulator.cpp
     LqgSimulator.hpp
 )
@@ -21,4 +24,8 @@ else()
     target_compile_options(numerical.simulator.controllers.lqg.application PRIVATE
         -Wno-error
     )
+endif()
+
+if (NUMERICAL_TOOLBOX_BUILD_TESTS)
+    add_subdirectory(test)
 endif()

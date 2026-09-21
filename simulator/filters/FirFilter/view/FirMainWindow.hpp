@@ -1,12 +1,9 @@
 #pragma once
 
+#include "simulator/filters/FirFilter/application/FirForm.hpp"
+#include "ui/backend/qt/QtAppShell.hpp"
+#include "ui/backend/qt/QtFormView.hpp"
 #include <QMainWindow>
-#include <QTabWidget>
-
-namespace simulator::filters::fir::view
-{
-    class FirConfigurationPanel;
-}
 
 namespace simulator::widgets
 {
@@ -24,12 +21,13 @@ namespace simulator::filters::fir::view
     public:
         explicit FirMainWindow(QWidget* parent = nullptr);
 
-    private slots:
+    private:
         void OnComputeRequested();
 
-    private:
-        FirConfigurationPanel* configPanel;
-        QTabWidget* tabWidget;
+        FirForm form;
+        ui::backend::qt::QtFormView* formView;
+        ui::backend::qt::QtAppShell shell;
+
         widgets::TimeSeriesChartWidget* timeDomainChart;
         widgets::FrequencyChartWidget* frequencyChart;
         widgets::TimeSeriesChartWidget* impulseChart;

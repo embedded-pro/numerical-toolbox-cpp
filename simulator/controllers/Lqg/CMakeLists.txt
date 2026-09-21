@@ -9,6 +9,7 @@ emil_build_for(numerical.simulator.controllers.lqg HOST All PREREQUISITE_BOOL NU
 target_link_libraries(numerical.simulator.controllers.lqg PRIVATE
     numerical.simulator.controllers.lqg.application
     numerical.simulator.controllers.lqg.view
+    numerical.simulator.shell.qt
 )
 
 target_sources(numerical.simulator.controllers.lqg PRIVATE
