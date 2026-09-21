@@ -1,7 +1,7 @@
 #include "simulator/analysis/FastFourierTransform/application/FftSimulator.hpp"
 #include "numerical/analysis/FastFourierTransformRadix2Impl.hpp"
 #include "numerical/analysis/windowing/Windowing.hpp"
-#include "simulator/utils/TwiddleFactorsTable.hpp"
+#include "numerical/analysis/TwiddleFactorsTable.hpp"
 #include <algorithm>
 #include <cmath>
 #include <memory>
@@ -42,7 +42,7 @@ namespace simulator::analysis
         template<std::size_t N>
         FftResult ComputeForSize(float sampleRateHz, const std::vector<float>& signal, const std::vector<float>& windowedSignal)
         {
-            utils::TwiddleFactorsTable<float, N / 2> twiddleFactors;
+            ::analysis::TwiddleFactorsTable<float, N / 2> twiddleFactors;
             ::analysis::FastFourierTransformRadix2Impl<float, N> fft(twiddleFactors);
 
             infra::BoundedVector<float>::WithMaxSize<N> input;

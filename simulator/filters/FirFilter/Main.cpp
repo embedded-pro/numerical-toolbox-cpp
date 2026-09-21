@@ -1,12 +1,7 @@
 #include "simulator/filters/FirFilter/view/FirMainWindow.hpp"
-#include <QApplication>
+#include "simulator/shell/AppRunner.hpp"
 
 int main(int argc, char* argv[])
 {
-    QApplication app(argc, argv);
-
-    simulator::filters::fir::view::FirMainWindow window;
-    window.show();
-
-    return app.exec();
+    return simulator::shell::Run<simulator::filters::fir::view::FirMainWindow>(argc, argv, ui::theme::Light());
 }

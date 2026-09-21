@@ -2,7 +2,7 @@
 #include "numerical/analysis/FastFourierTransformRadix2Impl.hpp"
 #include "numerical/analysis/PowerDensitySpectrum.hpp"
 #include "numerical/analysis/windowing/Windowing.hpp"
-#include "simulator/utils/TwiddleFactorsTable.hpp"
+#include "numerical/analysis/TwiddleFactorsTable.hpp"
 #include <algorithm>
 #include <cmath>
 #include <memory>
@@ -17,7 +17,7 @@ namespace simulator::analysis::psd
             const std::vector<float>& signal, windowing::Window<float>& window)
         {
             using FFT = ::analysis::FastFourierTransformRadix2Impl<float, SegmentSize>;
-            using TwiddleFactors = utils::TwiddleFactorsTable<float, SegmentSize / 2>;
+            using TwiddleFactors = ::analysis::TwiddleFactorsTable<float, SegmentSize / 2>;
 
             float samplingTime = 1.0f / sampleRateHz;
             float frequencyResolution = sampleRateHz / static_cast<float>(SegmentSize);

@@ -7,7 +7,9 @@ target_include_directories(numerical.simulator.controllers.lqg.view PUBLIC
 
 target_link_libraries(numerical.simulator.controllers.lqg.view PUBLIC
     numerical.simulator.controllers.lqg.application
+    numerical.simulator.shell
     numerical.simulator.widgets
+    ui.backend.qt
     Qt6::Widgets
 )
 
@@ -16,8 +18,6 @@ set_target_properties(numerical.simulator.controllers.lqg.view PROPERTIES
 )
 
 target_sources(numerical.simulator.controllers.lqg.view PRIVATE
-    LqgConfigurationPanel.cpp
-    LqgConfigurationPanel.hpp
     LqgMainWindow.cpp
     LqgMainWindow.hpp
 )

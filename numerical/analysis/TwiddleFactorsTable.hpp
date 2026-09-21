@@ -5,11 +5,11 @@
 #include <cmath>
 #include <numbers>
 
-namespace simulator::utils
+namespace analysis
 {
     template<typename QNumberType, std::size_t Length>
     class TwiddleFactorsTable
-        : public ::analysis::TwiddleFactors<QNumberType, Length>
+        : public TwiddleFactors<QNumberType, Length>
     {
     public:
         TwiddleFactorsTable()
@@ -30,3 +30,10 @@ namespace simulator::utils
         std::array<math::Complex<QNumberType>, Length> factors{};
     };
 }
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+namespace analysis
+{
+    extern template class TwiddleFactorsTable<float, 8>;
+}
+#endif

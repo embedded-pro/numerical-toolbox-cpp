@@ -5,14 +5,9 @@ target_include_directories(numerical.simulator.utils PUBLIC
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-target_link_libraries(numerical.simulator.utils PUBLIC
-    numerical.analysis
-)
-
 target_sources(numerical.simulator.utils PRIVATE
     SignalGenerator.cpp
     SignalGenerator.hpp
-    TwiddleFactorsTable.hpp
 )
 
 if(MSVC)

@@ -9,6 +9,7 @@ emil_build_for(numerical.simulator.filters.fir_filter HOST All PREREQUISITE_BOOL
 target_link_libraries(numerical.simulator.filters.fir_filter PRIVATE
     numerical.simulator.filters.fir.application
     numerical.simulator.filters.fir.view
+    numerical.simulator.shell.qt
 )
 
 target_sources(numerical.simulator.filters.fir_filter PRIVATE

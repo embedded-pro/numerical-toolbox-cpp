@@ -23,6 +23,7 @@ target_sources(numerical.analysis PRIVATE
     PowerDensitySpectrum.hpp
     RealFastFourierTransform.hpp
     SignalDetectors.hpp
+    TwiddleFactorsTable.hpp
 )
 
 numerical_add_coverage_sources(numerical.analysis
@@ -35,6 +36,7 @@ numerical_add_coverage_sources(numerical.analysis
     PowerDensitySpectrum.cpp
     RealFastFourierTransform.cpp
     SignalDetectors.cpp
+    TwiddleFactorsTable.cpp
 )
 
 add_subdirectory(test)

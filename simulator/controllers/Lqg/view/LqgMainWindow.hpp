@@ -1,9 +1,9 @@
 #pragma once
 
-#include "simulator/controllers/Lqg/application/LqgSimulator.hpp"
-#include "simulator/controllers/Lqg/view/LqgConfigurationPanel.hpp"
+#include "simulator/controllers/Lqg/application/LqgForm.hpp"
+#include "ui/backend/qt/QtAppShell.hpp"
+#include "ui/backend/qt/QtFormView.hpp"
 #include <QMainWindow>
-#include <QStatusBar>
 
 namespace simulator::widgets
 {
@@ -25,7 +25,9 @@ namespace simulator::controllers::lqg::view
         void DisplayResponse(const LqgTimeResponse& result);
 
         LqgSimulator lqgSimulator;
-        LqgConfigurationPanel* configPanel;
+        LqgForm form;
+        ui::backend::qt::QtFormView* formView;
+        ui::backend::qt::QtAppShell shell;
         widgets::TimeSeriesChartWidget* chart;
     };
 }

@@ -9,11 +9,15 @@ target_link_libraries(numerical.simulator.filters.fir.application PUBLIC
     numerical.analysis
     numerical.filters.passive
     numerical.simulator.utils
+    numerical.simulator.shell
+    ui.model
 )
 
 target_sources(numerical.simulator.filters.fir.application PRIVATE
     FirFilterSimulator.cpp
     FirFilterSimulator.hpp
+    FirForm.cpp
+    FirForm.hpp
 )
 
 if(MSVC)
@@ -22,4 +26,8 @@ else()
     target_compile_options(numerical.simulator.filters.fir.application PRIVATE
         -Wno-error
     )
+endif()
+
+if (NUMERICAL_TOOLBOX_BUILD_TESTS)
+    add_subdirectory(test)
 endif()

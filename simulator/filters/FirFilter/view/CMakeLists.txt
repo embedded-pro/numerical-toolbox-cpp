@@ -7,7 +7,9 @@ target_include_directories(numerical.simulator.filters.fir.view PUBLIC
 
 target_link_libraries(numerical.simulator.filters.fir.view PUBLIC
     numerical.simulator.filters.fir.application
+    numerical.simulator.shell
     numerical.simulator.widgets
+    ui.backend.qt
     Qt6::Widgets
 )
 
@@ -16,8 +18,6 @@ set_target_properties(numerical.simulator.filters.fir.view PROPERTIES
 )
 
 target_sources(numerical.simulator.filters.fir.view PRIVATE
-    FirConfigurationPanel.cpp
-    FirConfigurationPanel.hpp
     FirMainWindow.cpp
     FirMainWindow.hpp
 )
