@@ -3,12 +3,10 @@
 #include "simulator/filters/KalmanFilter/application/KalmanForm.hpp"
 #include "ui/backend/qt/QtAppShell.hpp"
 #include "ui/backend/qt/QtFormView.hpp"
+#include "ui/backend/qt/QtPaintedWidget.hpp"
+#include "ui/charts/ChartCore.hpp"
+#include "ui/charts/LinearAxis.hpp"
 #include <QMainWindow>
-
-namespace simulator::widgets
-{
-    class TimeSeriesChartWidget;
-}
 
 namespace simulator::filters::view
 {
@@ -28,9 +26,15 @@ namespace simulator::filters::view
         ui::backend::qt::QtFormView* formView;
         ui::backend::qt::QtAppShell shell;
 
-        widgets::TimeSeriesChartWidget* thetaChart;
-        widgets::TimeSeriesChartWidget* thetaDotChart;
-        widgets::TimeSeriesChartWidget* covarianceChart;
-        widgets::TimeSeriesChartWidget* errorChart;
+        ui::charts::LinearAxis timeAxis{ ui::charts::LinearAxis::Time() };
+        ui::charts::ChartCore thetaChart{ timeAxis, ui::charts::ChartConfig{} };
+        ui::charts::ChartCore thetaDotChart{ timeAxis, ui::charts::ChartConfig{} };
+        ui::charts::ChartCore covarianceChart{ timeAxis, ui::charts::ChartConfig{} };
+        ui::charts::ChartCore errorChart{ timeAxis, ui::charts::ChartConfig{} };
+
+        ui::backend::qt::QtPaintedWidget* thetaView;
+        ui::backend::qt::QtPaintedWidget* thetaDotView;
+        ui::backend::qt::QtPaintedWidget* covarianceView;
+        ui::backend::qt::QtPaintedWidget* errorView;
     };
 }

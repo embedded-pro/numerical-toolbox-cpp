@@ -8,7 +8,7 @@ target_include_directories(numerical.simulator.filters.kalman.view PUBLIC
 target_link_libraries(numerical.simulator.filters.kalman.view PUBLIC
     numerical.simulator.filters.kalman.application
     numerical.simulator.shell
-    numerical.simulator.widgets
+    ui.charts
     ui.backend.qt
     Qt6::Widgets
 )

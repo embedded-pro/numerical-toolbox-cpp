@@ -1,6 +1,5 @@
 #include "simulator/filters/KalmanFilter/view/KalmanMainWindow.hpp"
 #include "simulator/shell/Guard.hpp"
-#include "simulator/widgets/TimeSeriesChartWidget.hpp"
 #include "ui/theme/Theme.hpp"
 #include <array>
 #include <cmath>
@@ -24,38 +23,29 @@ namespace simulator::filters::view
             "Configure parameters and press Compute"
         };
 
-        [[nodiscard]] QColor ToQt(ui::Color color)
-        {
-            return QColor{ color.red, color.green, color.blue };
-        }
-
-        [[nodiscard]] QColor Role(ui::theme::ColorRole role)
-        {
-            return ToQt(ui::theme::Current().Get(role));
-        }
-
-        [[nodiscard]] QColor Series(std::size_t index)
-        {
-            return ToQt(ui::theme::Current().Series(index));
-        }
     }
 
     KalmanMainWindow::KalmanMainWindow(QWidget* parent)
         : QMainWindow(parent)
         , formView(new ui::backend::qt::QtFormView{ this })
         , shell(*this, shellSpec)
-        , thetaChart(new widgets::TimeSeriesChartWidget{ this })
-        , thetaDotChart(new widgets::TimeSeriesChartWidget{ this })
-        , covarianceChart(new widgets::TimeSeriesChartWidget{ this })
-        , errorChart(new widgets::TimeSeriesChartWidget{ this })
+        , thetaView(new ui::backend::qt::QtPaintedWidget{ thetaChart, this })
+        , thetaDotView(new ui::backend::qt::QtPaintedWidget{ thetaDotChart, this })
+        , covarianceView(new ui::backend::qt::QtPaintedWidget{ covarianceChart, this })
+        , errorView(new ui::backend::qt::QtPaintedWidget{ errorChart, this })
     {
         formView->Build(form.Model());
         shell.SetPanel(formView);
 
-        shell.SetPage(0, thetaChart);
-        shell.SetPage(1, thetaDotChart);
-        shell.SetPage(2, covarianceChart);
-        shell.SetPage(3, errorChart);
+        thetaView->SetPanCursorEnabled(true);
+        thetaDotView->SetPanCursorEnabled(true);
+        covarianceView->SetPanCursorEnabled(true);
+        errorView->SetPanCursorEnabled(true);
+
+        shell.SetPage(0, thetaView);
+        shell.SetPage(1, thetaDotView);
+        shell.SetPage(2, covarianceView);
+        shell.SetPage(3, errorView);
 
         form.Model().onActionTriggered = [this](ui::model::ActionId)
         {
@@ -70,46 +60,48 @@ namespace simulator::filters::view
                 auto config = form.BuildConfiguration();
                 auto result = simulator.Run(config);
 
-                thetaChart->SetTimeAxis(result.time);
-                thetaChart->SetPanels({
+                const auto& theme = ui::theme::Current();
+
+                thetaChart.SetAxisValues(result.time);
+                thetaChart.SetPanels({
                     {
                         "Angle (θ) Estimation",
                         "θ (rad)",
                         {
-                            { "Measurement", Role(ui::theme::ColorRole::TextMuted), result.measuredTheta },
-                            { "True", Role(ui::theme::ColorRole::Text), result.trueTheta },
-                            { "KF", Series(0), result.kf.theta },
-                            { "EKF", Series(1), result.ekf.theta },
-                            { "UKF", Series(2), result.ukf.theta },
+                            { "Measurement", theme.Get(ui::theme::ColorRole::TextMuted), result.measuredTheta },
+                            { "True", theme.Get(ui::theme::ColorRole::Text), result.trueTheta },
+                            { "KF", theme.Series(0), result.kf.theta },
+                            { "EKF", theme.Series(1), result.ekf.theta },
+                            { "UKF", theme.Series(2), result.ukf.theta },
                         },
                         1,
                     },
                 });
 
-                thetaDotChart->SetTimeAxis(result.time);
-                thetaDotChart->SetPanels({
+                thetaDotChart.SetAxisValues(result.time);
+                thetaDotChart.SetPanels({
                     {
                         "Angular Velocity (θ̇) Estimation",
                         "θ̇ (rad/s)",
                         {
-                            { "True", Role(ui::theme::ColorRole::Text), result.trueThetaDot },
-                            { "KF", Series(0), result.kf.thetaDot },
-                            { "EKF", Series(1), result.ekf.thetaDot },
-                            { "UKF", Series(2), result.ukf.thetaDot },
+                            { "True", theme.Get(ui::theme::ColorRole::Text), result.trueThetaDot },
+                            { "KF", theme.Series(0), result.kf.thetaDot },
+                            { "EKF", theme.Series(1), result.ekf.thetaDot },
+                            { "UKF", theme.Series(2), result.ukf.thetaDot },
                         },
                         1,
                     },
                 });
 
-                covarianceChart->SetTimeAxis(result.time);
-                covarianceChart->SetPanels({
+                covarianceChart.SetAxisValues(result.time);
+                covarianceChart.SetPanels({
                     {
                         "Position Covariance P(θ,θ)",
                         "Covariance",
                         {
-                            { "KF", Series(0), result.kf.covarianceTheta },
-                            { "EKF", Series(1), result.ekf.covarianceTheta },
-                            { "UKF", Series(2), result.ukf.covarianceTheta },
+                            { "KF", theme.Series(0), result.kf.covarianceTheta },
+                            { "EKF", theme.Series(1), result.ekf.covarianceTheta },
+                            { "UKF", theme.Series(2), result.ukf.covarianceTheta },
                         },
                         1,
                     },
@@ -126,19 +118,24 @@ namespace simulator::filters::view
                     ukfError[i] = std::abs(result.ukf.theta[i] - result.trueTheta[i]);
                 }
 
-                errorChart->SetTimeAxis(result.time);
-                errorChart->SetPanels({
+                errorChart.SetAxisValues(result.time);
+                errorChart.SetPanels({
                     {
                         "Estimation Error |θ̂ - θ|",
                         "Error (rad)",
                         {
-                            { "KF", Series(0), kfError },
-                            { "EKF", Series(1), ekfError },
-                            { "UKF", Series(2), ukfError },
+                            { "KF", theme.Series(0), kfError },
+                            { "EKF", theme.Series(1), ekfError },
+                            { "UKF", theme.Series(2), ukfError },
                         },
                         1,
                     },
                 });
+
+                thetaView->update();
+                thetaDotView->update();
+                covarianceView->update();
+                errorView->update();
 
                 shell.SetStatus(QString("Simulation complete — %1 steps, dt=%2s")
                                     .arg(result.time.size())
