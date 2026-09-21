@@ -1,88 +1,92 @@
 #include "simulator/analysis/PowerDensitySpectrum/view/PsdMainWindow.hpp"
-#include "simulator/widgets/FrequencyChartWidget.hpp"
-#include "simulator/widgets/TimeSeriesChartWidget.hpp"
-#include <QMessageBox>
-#include <QSplitter>
-#include <QTabWidget>
-#include <stdexcept>
+#include "simulator/shell/Guard.hpp"
+#include "ui/theme/Theme.hpp"
+#include <array>
 
 namespace simulator::analysis::psd::view
 {
+    namespace
+    {
+        constexpr std::array<ui::shell::PageSpec, 2> pages{
+            ui::shell::PageSpec{ "Time Domain" },
+            ui::shell::PageSpec{ "Power Spectral Density" }
+        };
+
+        const ui::shell::ShellSpec shellSpec{
+            "PSD Simulator",
+            ui::Size{ 1024.0f, 800.0f },
+            320.0f,
+            pages,
+            "Configure parameters and press Compute PSD"
+        };
+    }
+
     PsdMainWindow::PsdMainWindow(QWidget* parent)
         : QMainWindow(parent)
+        , formView(new ui::backend::qt::QtFormView{ this })
+        , shell(*this, shellSpec)
+        , timeDomainView(new ui::backend::qt::QtPaintedWidget{ timeDomainChart, this })
+        , psdView(new ui::backend::qt::QtPaintedWidget{ psdChart, this })
     {
-        setWindowTitle("PSD Simulator");
-        resize(1024, 800);
+        formView->Build(form.Model());
+        shell.SetPanel(formView);
 
-        auto* splitter = new QSplitter(Qt::Horizontal, this);
+        timeDomainView->SetPanCursorEnabled(true);
+        psdView->SetPanCursorEnabled(true);
 
-        configPanel = new PsdConfigurationPanel(splitter);
-        configPanel->setMaximumWidth(320);
+        shell.SetPage(0, timeDomainView);
+        shell.SetPage(1, psdView);
 
-        tabWidget = new QTabWidget(splitter);
-
-        timeDomainChart = new widgets::TimeSeriesChartWidget(tabWidget);
-        psdChart = new widgets::FrequencyChartWidget(tabWidget);
-
-        tabWidget->addTab(timeDomainChart, "Time Domain");
-        tabWidget->addTab(psdChart, "Power Spectral Density");
-
-        splitter->addWidget(configPanel);
-        splitter->addWidget(tabWidget);
-        splitter->setStretchFactor(0, 0);
-        splitter->setStretchFactor(1, 1);
-
-        setCentralWidget(splitter);
-
-        statusBar()->showMessage("Configure parameters and press Compute PSD");
-
-        connect(configPanel, &PsdConfigurationPanel::ComputeRequested, this, &PsdMainWindow::OnComputeRequested);
+        form.Model().onActionTriggered = [this](ui::model::ActionId)
+        {
+            OnComputeRequested();
+        };
     }
 
     void PsdMainWindow::OnComputeRequested()
     {
-        auto config = configPanel->GetConfiguration();
-        psdSimulator.Configure(config);
+        shell::Guard(shell, "Computation Error", [this]
+            {
+                auto config = form.BuildConfiguration();
+                psdSimulator.Configure(config);
 
-        try
-        {
-            auto result = psdSimulator.Compute();
+                auto result = psdSimulator.Compute();
 
-            timeDomainChart->SetTimeAxis(result.time);
-            timeDomainChart->SetPanels({
-                {
-                    "Input Signal",
-                    "Amplitude",
+                const auto& theme = ui::theme::Current();
+
+                timeDomainChart.SetAxisValues(result.time);
+                timeDomainChart.SetPanels({
                     {
-                        { "Signal", QColor(41, 128, 185), result.signal },
+                        "Input Signal",
+                        "Amplitude",
+                        {
+                            { "Signal", theme.Series(0), result.signal },
+                        },
+                        1,
                     },
-                    1,
-                },
-            });
+                });
 
-            psdChart->SetFrequencyAxis(result.frequencies);
-            psdChart->SetPanels({
-                {
-                    "Power Spectral Density",
-                    "Power (dB/Hz)",
+                psdChart.SetAxisValues(result.frequencies);
+                psdChart.SetPanels({
                     {
-                        { "PSD (dB)", QColor(231, 76, 60), result.powerDensityDb },
+                        "Power Spectral Density",
+                        "Power (dB/Hz)",
+                        {
+                            { "PSD (dB)", theme.Series(1), result.powerDensityDb },
+                        },
+                        1,
                     },
-                    1,
-                },
-            });
+                });
 
-            statusBar()->showMessage(
-                QString("PSD computed: %1 input samples, %2-point segments, %3% overlap, %4 Hz")
-                    .arg(config.inputSize)
-                    .arg(config.segmentSize)
-                    .arg(config.overlapPercent)
-                    .arg(static_cast<double>(config.sampleRateHz), 0, 'f', 1));
-        }
-        catch (const std::exception& e)
-        {
-            QMessageBox::warning(this, "Computation Error", e.what());
-            statusBar()->showMessage("Computation failed");
-        }
+                timeDomainView->update();
+                psdView->update();
+
+                shell.SetStatus(QString("PSD computed: %1 input samples, %2-point segments, %3% overlap, %4 Hz")
+                        .arg(config.inputSize)
+                        .arg(config.segmentSize)
+                        .arg(config.overlapPercent)
+                        .arg(static_cast<double>(config.sampleRateHz), 0, 'f', 1)
+                        .toStdString());
+            });
     }
 }

@@ -9,11 +9,15 @@ target_link_libraries(numerical.simulator.analysis.psd.application PUBLIC
     numerical.analysis
     numerical.analysis.windowing
     numerical.simulator.utils
+    numerical.simulator.shell
+    ui.model
 )
 
 target_sources(numerical.simulator.analysis.psd.application PRIVATE
     PsdSimulator.cpp
     PsdSimulator.hpp
+    PsdForm.cpp
+    PsdForm.hpp
 )
 
 if(MSVC)
@@ -22,4 +26,8 @@ else()
     target_compile_options(numerical.simulator.analysis.psd.application PRIVATE
         -Wno-error
     )
+endif()
+
+if (NUMERICAL_TOOLBOX_BUILD_TESTS)
+    add_subdirectory(test)
 endif()

@@ -8,7 +8,7 @@ target_include_directories(numerical.simulator.filters.fir.view PUBLIC
 target_link_libraries(numerical.simulator.filters.fir.view PUBLIC
     numerical.simulator.filters.fir.application
     numerical.simulator.shell
-    numerical.simulator.widgets
+    ui.charts
     ui.backend.qt
     Qt6::Widgets
 )

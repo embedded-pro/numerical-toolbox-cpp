@@ -6,6 +6,8 @@ target_include_directories(numerical.simulator.controllers.mpc.application PUBLI
 )
 
 target_link_libraries(numerical.simulator.controllers.mpc.application PUBLIC
+    numerical.simulator.shell
+    ui.model
     numerical.controllers.implementations
     numerical.solver
 )
@@ -13,6 +15,8 @@ target_link_libraries(numerical.simulator.controllers.mpc.application PUBLIC
 target_sources(numerical.simulator.controllers.mpc.application PRIVATE
     MpcSimulator.cpp
     MpcSimulator.hpp
+    MpcForm.cpp
+    MpcForm.hpp
     StateSpacePlant.cpp
     StateSpacePlant.hpp
 )
@@ -23,4 +27,8 @@ else()
     target_compile_options(numerical.simulator.controllers.mpc.application PRIVATE
         -Wno-error
     )
+endif()
+
+if (NUMERICAL_TOOLBOX_BUILD_TESTS)
+    add_subdirectory(test)
 endif()

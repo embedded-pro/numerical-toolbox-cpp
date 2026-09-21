@@ -1,12 +1,7 @@
 #include "simulator/controllers/PidController/view/PidMainWindow.hpp"
-#include <QApplication>
+#include "simulator/shell/AppRunner.hpp"
 
 int main(int argc, char* argv[])
 {
-    QApplication app(argc, argv);
-
-    simulator::controllers::view::PidMainWindow window;
-    window.show();
-
-    return app.exec();
+    return simulator::shell::Run<simulator::controllers::view::PidMainWindow>(argc, argv, ui::theme::Light());
 }

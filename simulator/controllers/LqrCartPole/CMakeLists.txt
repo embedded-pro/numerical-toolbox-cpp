@@ -9,6 +9,7 @@ emil_build_for(numerical.simulator.controllers.lqr_cart_pole HOST All PREREQUISI
 target_link_libraries(numerical.simulator.controllers.lqr_cart_pole PRIVATE
     numerical.simulator.controllers.lqr.application
     numerical.simulator.controllers.lqr.view
+    numerical.simulator.shell.qt
 )
 
 target_sources(numerical.simulator.controllers.lqr_cart_pole PRIVATE

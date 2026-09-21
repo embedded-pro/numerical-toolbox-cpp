@@ -1,17 +1,17 @@
 #pragma once
 
-#include "simulator/controllers/BayesianMpcCalibration/application/BayesianMpcCalibrationSimulator.hpp"
-#include "simulator/widgets/TimeSeriesChartWidget.hpp"
-#include <QDoubleSpinBox>
-#include <QLabel>
+#include "simulator/controllers/BayesianMpcCalibration/application/BayesianMpcForm.hpp"
+#include "ui/backend/qt/QtAppShell.hpp"
+#include "ui/backend/qt/QtFormView.hpp"
+#include "ui/backend/qt/QtPaintedWidget.hpp"
+#include "ui/charts/ChartCore.hpp"
+#include "ui/charts/LinearAxis.hpp"
 #include <QMainWindow>
-#include <QPushButton>
-#include <QSpinBox>
-#include <QTabWidget>
 
 namespace simulator::controllers::view
 {
-    class BayesianMpcCalibrationView : public QMainWindow
+    class BayesianMpcCalibrationView
+        : public QMainWindow
     {
         Q_OBJECT
 
@@ -20,21 +20,23 @@ namespace simulator::controllers::view
 
     private:
         void OnRunRequested();
-        void SetupUi();
         void DisplayResults(const CalibrationSimulationResults& results);
 
-        widgets::TimeSeriesChartWidget* observationsChart_;
-        widgets::TimeSeriesChartWidget* emConvergenceChart_;
-        widgets::TimeSeriesChartWidget* boConvergenceChart_;
-        widgets::TimeSeriesChartWidget* stepResponseChart_;
+        bayesian::BayesianMpcForm form;
+        ui::backend::qt::QtFormView* formView;
+        ui::backend::qt::QtAppShell shell;
 
-        QTabWidget* tabWidget_;
-        QDoubleSpinBox* dtSpinBox_;
-        QDoubleSpinBox* sigmaQSpinBox_;
-        QDoubleSpinBox* sigmaRSpinBox_;
-        QSpinBox* emIterationsSpinBox_;
-        QSpinBox* boIterationsSpinBox_;
-        QPushButton* runButton_;
-        QLabel* statusLabel_;
+        ui::charts::LinearAxis timeAxis{ ui::charts::LinearAxis::Time() };
+        ui::charts::LinearAxis iterationAxis{ "Iteration", 5, 0, "i = ", "" };
+        ui::charts::LinearAxis evaluationAxis{ "Evaluation", 5, 0, "i = ", "" };
+        ui::charts::ChartCore observationsChart{ timeAxis, ui::charts::ChartConfig{} };
+        ui::charts::ChartCore emConvergenceChart{ iterationAxis, ui::charts::ChartConfig{} };
+        ui::charts::ChartCore boConvergenceChart{ evaluationAxis, ui::charts::ChartConfig{} };
+        ui::charts::ChartCore stepResponseChart{ timeAxis, ui::charts::ChartConfig{} };
+
+        ui::backend::qt::QtPaintedWidget* observationsView;
+        ui::backend::qt::QtPaintedWidget* emConvergenceView;
+        ui::backend::qt::QtPaintedWidget* boConvergenceView;
+        ui::backend::qt::QtPaintedWidget* stepResponseView;
     };
 }

@@ -7,7 +7,9 @@ target_include_directories(numerical.simulator.filters.kalman.view PUBLIC
 
 target_link_libraries(numerical.simulator.filters.kalman.view PUBLIC
     numerical.simulator.filters.kalman.application
-    numerical.simulator.widgets
+    numerical.simulator.shell
+    ui.charts
+    ui.backend.qt
     Qt6::Widgets
 )
 
@@ -16,8 +18,6 @@ set_target_properties(numerical.simulator.filters.kalman.view PROPERTIES
 )
 
 target_sources(numerical.simulator.filters.kalman.view PRIVATE
-    KalmanConfigPanel.cpp
-    KalmanConfigPanel.hpp
     KalmanMainWindow.cpp
     KalmanMainWindow.hpp
 )

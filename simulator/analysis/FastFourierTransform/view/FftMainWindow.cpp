@@ -1,93 +1,90 @@
 #include "simulator/analysis/FastFourierTransform/view/FftMainWindow.hpp"
+#include "simulator/shell/Guard.hpp"
 #include "ui/theme/Theme.hpp"
-#include <QMessageBox>
-#include <QSplitter>
-#include <QTabWidget>
-#include <stdexcept>
+#include <array>
 
 namespace simulator::analysis::view
 {
+    namespace
+    {
+        constexpr std::array<ui::shell::PageSpec, 2> pages{
+            ui::shell::PageSpec{ "Time Domain" },
+            ui::shell::PageSpec{ "Frequency Spectrum" }
+        };
+
+        const ui::shell::ShellSpec shellSpec{
+            "FFT Simulator",
+            ui::Size{ 1024.0f, 800.0f },
+            320.0f,
+            pages,
+            "Configure parameters and press Compute FFT"
+        };
+    }
+
     FftMainWindow::FftMainWindow(QWidget* parent)
         : QMainWindow(parent)
+        , formView(new ui::backend::qt::QtFormView{ this })
+        , shell(*this, shellSpec)
+        , timeDomainView(new ui::backend::qt::QtPaintedWidget{ timeDomainChart, this })
+        , frequencyView(new ui::backend::qt::QtPaintedWidget{ frequencyChart, this })
     {
-        setWindowTitle("FFT Simulator");
-        resize(1024, 800);
-
-        auto* splitter = new QSplitter(Qt::Horizontal, this);
-
-        configPanel = new FftConfigurationPanel(splitter);
-        configPanel->setMaximumWidth(320);
-
-        tabWidget = new QTabWidget(splitter);
-
-        timeDomainView = new ui::backend::qt::QtPaintedWidget(timeDomainChart, tabWidget);
-        frequencyView = new ui::backend::qt::QtPaintedWidget(frequencyChart, tabWidget);
+        formView->Build(form.Model());
+        shell.SetPanel(formView);
 
         timeDomainView->SetPanCursorEnabled(true);
         frequencyView->SetPanCursorEnabled(true);
 
-        tabWidget->addTab(timeDomainView, "Time Domain");
-        tabWidget->addTab(frequencyView, "Frequency Spectrum");
+        shell.SetPage(0, timeDomainView);
+        shell.SetPage(1, frequencyView);
 
-        splitter->addWidget(configPanel);
-        splitter->addWidget(tabWidget);
-        splitter->setStretchFactor(0, 0);
-        splitter->setStretchFactor(1, 1);
-
-        setCentralWidget(splitter);
-
-        statusBar()->showMessage("Configure parameters and press Compute FFT");
-
-        connect(configPanel, &FftConfigurationPanel::ComputeRequested, this, &FftMainWindow::OnComputeRequested);
+        form.Model().onActionTriggered = [this](ui::model::ActionId)
+        {
+            OnComputeRequested();
+        };
     }
 
     void FftMainWindow::OnComputeRequested()
     {
-        auto config = configPanel->GetConfiguration();
-        fftSimulator.Configure(config);
+        shell::Guard(shell, "Computation Error", [this]
+            {
+                auto config = form.BuildConfiguration();
+                fftSimulator.Configure(config);
 
-        try
-        {
-            auto result = fftSimulator.Compute();
-            const auto& theme = ui::theme::Current();
+                auto result = fftSimulator.Compute();
+                const auto& theme = ui::theme::Current();
 
-            timeDomainChart.SetAxisValues(result.time);
-            timeDomainChart.SetPanels({
-                {
-                    "Input Signal",
-                    "Amplitude",
+                timeDomainChart.SetAxisValues(result.time);
+                timeDomainChart.SetPanels({
                     {
-                        { "Signal", theme.Series(0), result.signal },
-                        { "Windowed", theme.Series(1), result.windowedSignal },
+                        "Input Signal",
+                        "Amplitude",
+                        {
+                            { "Signal", theme.Series(0), result.signal },
+                            { "Windowed", theme.Series(1), result.windowedSignal },
+                        },
+                        1,
                     },
-                    1,
-                },
-            });
+                });
 
-            frequencyChart.SetAxisValues(result.frequencies);
-            frequencyChart.SetPanels({
-                {
-                    "FFT Magnitude",
-                    "Magnitude",
+                frequencyChart.SetAxisValues(result.frequencies);
+                frequencyChart.SetPanels({
                     {
-                        { "Magnitude", theme.Series(0), result.magnitudes },
+                        "FFT Magnitude",
+                        "Magnitude",
+                        {
+                            { "Magnitude", theme.Series(0), result.magnitudes },
+                        },
+                        1,
                     },
-                    1,
-                },
+                });
+
+                timeDomainView->update();
+                frequencyView->update();
+
+                shell.SetStatus(QString("FFT computed: %1 points, sample rate %2 Hz")
+                        .arg(config.fftSize)
+                        .arg(static_cast<double>(config.sampleRateHz), 0, 'f', 1)
+                        .toStdString());
             });
-
-            timeDomainView->update();
-            frequencyView->update();
-
-            statusBar()->showMessage(
-                QString("FFT computed: %1 points, sample rate %2 Hz")
-                    .arg(config.fftSize)
-                    .arg(static_cast<double>(config.sampleRateHz), 0, 'f', 1));
-        }
-        catch (const std::exception& e)
-        {
-            QMessageBox::warning(this, "Computation Error", e.what());
-            statusBar()->showMessage("Computation failed");
-        }
     }
 }

@@ -9,6 +9,7 @@ emil_build_for(numerical.simulator.estimators.rls HOST All PREREQUISITE_BOOL NUM
 target_link_libraries(numerical.simulator.estimators.rls PRIVATE
     numerical.simulator.estimators.rls.application
     numerical.simulator.estimators.rls.view
+    numerical.simulator.shell.qt
 )
 
 target_sources(numerical.simulator.estimators.rls PRIVATE

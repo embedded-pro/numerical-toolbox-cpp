@@ -1,12 +1,7 @@
 #include "simulator/filters/KalmanFilter/view/KalmanMainWindow.hpp"
-#include <QApplication>
+#include "simulator/shell/AppRunner.hpp"
 
 int main(int argc, char* argv[])
 {
-    QApplication app(argc, argv);
-
-    simulator::filters::view::KalmanMainWindow window;
-    window.show();
-
-    return app.exec();
+    return simulator::shell::Run<simulator::filters::view::KalmanMainWindow>(argc, argv, ui::theme::Light());
 }

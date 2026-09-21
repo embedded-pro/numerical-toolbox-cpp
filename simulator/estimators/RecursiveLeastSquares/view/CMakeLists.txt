@@ -8,13 +8,13 @@ target_include_directories(numerical.simulator.estimators.rls.view PUBLIC
 
 target_link_libraries(numerical.simulator.estimators.rls.view PUBLIC
     numerical.simulator.estimators.rls.application
-    numerical.simulator.widgets
+    numerical.simulator.shell
+    ui.charts
+    ui.backend.qt
     Qt6::Widgets
 )
 
 target_sources(numerical.simulator.estimators.rls.view PRIVATE
-    RlsConfigurationPanel.hpp
-    RlsConfigurationPanel.cpp
     RlsMainWindow.hpp
     RlsMainWindow.cpp
 )

@@ -9,6 +9,7 @@ emil_build_for(numerical.simulator.analysis.fast_fourier_transform HOST All PRER
 target_link_libraries(numerical.simulator.analysis.fast_fourier_transform PRIVATE
     numerical.simulator.analysis.fft.application
     numerical.simulator.analysis.fft.view
+    numerical.simulator.shell.qt
 )
 
 target_sources(numerical.simulator.analysis.fast_fourier_transform PRIVATE

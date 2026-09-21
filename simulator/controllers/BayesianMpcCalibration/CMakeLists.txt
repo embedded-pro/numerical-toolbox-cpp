@@ -9,6 +9,7 @@ emil_build_for(numerical.simulator.controllers.bayesian_mpc_calibration HOST All
 target_link_libraries(numerical.simulator.controllers.bayesian_mpc_calibration PRIVATE
     numerical.simulator.controllers.bayesian_mpc_calibration.application
     numerical.simulator.controllers.bayesian_mpc_calibration.view
+    numerical.simulator.shell.qt
 )
 
 target_sources(numerical.simulator.controllers.bayesian_mpc_calibration PRIVATE

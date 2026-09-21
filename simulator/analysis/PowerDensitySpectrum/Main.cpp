@@ -1,12 +1,7 @@
 #include "simulator/analysis/PowerDensitySpectrum/view/PsdMainWindow.hpp"
-#include <QApplication>
+#include "simulator/shell/AppRunner.hpp"
 
 int main(int argc, char* argv[])
 {
-    QApplication app(argc, argv);
-
-    simulator::analysis::psd::view::PsdMainWindow window;
-    window.show();
-
-    return app.exec();
+    return simulator::shell::Run<simulator::analysis::psd::view::PsdMainWindow>(argc, argv, ui::theme::Light());
 }

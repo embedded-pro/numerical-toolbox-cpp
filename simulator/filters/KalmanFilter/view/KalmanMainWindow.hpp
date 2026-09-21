@@ -1,14 +1,12 @@
 #pragma once
 
-#include "simulator/filters/KalmanFilter/application/KalmanFilterSimulator.hpp"
-#include "simulator/filters/KalmanFilter/view/KalmanConfigPanel.hpp"
+#include "simulator/filters/KalmanFilter/application/KalmanForm.hpp"
+#include "ui/backend/qt/QtAppShell.hpp"
+#include "ui/backend/qt/QtFormView.hpp"
+#include "ui/backend/qt/QtPaintedWidget.hpp"
+#include "ui/charts/ChartCore.hpp"
+#include "ui/charts/LinearAxis.hpp"
 #include <QMainWindow>
-#include <QTabWidget>
-
-namespace simulator::widgets
-{
-    class TimeSeriesChartWidget;
-}
 
 namespace simulator::filters::view
 {
@@ -24,11 +22,19 @@ namespace simulator::filters::view
         void OnComputeRequested();
 
         KalmanFilterSimulator simulator;
-        KalmanConfigPanel* configPanel;
-        QTabWidget* tabWidget;
-        widgets::TimeSeriesChartWidget* thetaChart;
-        widgets::TimeSeriesChartWidget* thetaDotChart;
-        widgets::TimeSeriesChartWidget* covarianceChart;
-        widgets::TimeSeriesChartWidget* errorChart;
+        kalman::KalmanForm form;
+        ui::backend::qt::QtFormView* formView;
+        ui::backend::qt::QtAppShell shell;
+
+        ui::charts::LinearAxis timeAxis{ ui::charts::LinearAxis::Time() };
+        ui::charts::ChartCore thetaChart{ timeAxis, ui::charts::ChartConfig{} };
+        ui::charts::ChartCore thetaDotChart{ timeAxis, ui::charts::ChartConfig{} };
+        ui::charts::ChartCore covarianceChart{ timeAxis, ui::charts::ChartConfig{} };
+        ui::charts::ChartCore errorChart{ timeAxis, ui::charts::ChartConfig{} };
+
+        ui::backend::qt::QtPaintedWidget* thetaView;
+        ui::backend::qt::QtPaintedWidget* thetaDotView;
+        ui::backend::qt::QtPaintedWidget* covarianceView;
+        ui::backend::qt::QtPaintedWidget* errorView;
     };
 }

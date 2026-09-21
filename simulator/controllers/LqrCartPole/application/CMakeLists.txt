@@ -6,6 +6,8 @@ target_include_directories(numerical.simulator.controllers.lqr.application PUBLI
 )
 
 target_link_libraries(numerical.simulator.controllers.lqr.application PUBLIC
+    numerical.simulator.shell
+    ui.model
     numerical.controllers.implementations
     numerical.solver
 )
@@ -15,6 +17,8 @@ target_sources(numerical.simulator.controllers.lqr.application PRIVATE
     CartPolePlant.hpp
     LqrCartPoleSimulator.cpp
     LqrCartPoleSimulator.hpp
+    LqrForm.cpp
+    LqrForm.hpp
 )
 
 if(MSVC)
@@ -23,4 +27,8 @@ else()
     target_compile_options(numerical.simulator.controllers.lqr.application PRIVATE
         -Wno-error
     )
+endif()
+
+if (NUMERICAL_TOOLBOX_BUILD_TESTS)
+    add_subdirectory(test)
 endif()

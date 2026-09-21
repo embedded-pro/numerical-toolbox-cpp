@@ -7,7 +7,9 @@ target_include_directories(numerical.simulator.controllers.pid.view PUBLIC
 
 target_link_libraries(numerical.simulator.controllers.pid.view PUBLIC
     numerical.simulator.controllers.pid.application
-    numerical.simulator.widgets
+    numerical.simulator.shell
+    ui.charts
+    ui.backend.qt
     Qt6::Widgets
 )
 
@@ -16,8 +18,6 @@ set_target_properties(numerical.simulator.controllers.pid.view PROPERTIES
 )
 
 target_sources(numerical.simulator.controllers.pid.view PRIVATE
-    PidConfigurationPanel.cpp
-    PidConfigurationPanel.hpp
     PidMainWindow.cpp
     PidMainWindow.hpp
     PidRootLocusWidget.cpp

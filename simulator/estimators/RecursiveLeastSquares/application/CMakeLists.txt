@@ -6,15 +6,23 @@ target_include_directories(numerical.simulator.estimators.rls.application PUBLIC
 
 target_link_libraries(numerical.simulator.estimators.rls.application PUBLIC
     numerical.estimators.online
+    numerical.simulator.shell
+    ui.model
 )
 
 target_sources(numerical.simulator.estimators.rls.application PRIVATE
     RlsSimulator.hpp
     RlsSimulator.cpp
+    RlsForm.hpp
+    RlsForm.cpp
 )
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     target_compile_options(numerical.simulator.estimators.rls.application PRIVATE -Wno-error)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(numerical.simulator.estimators.rls.application PRIVATE /W4 /wd4244 /wd4100)
+endif()
+
+if (NUMERICAL_TOOLBOX_BUILD_TESTS)
+    add_subdirectory(test)
 endif()
