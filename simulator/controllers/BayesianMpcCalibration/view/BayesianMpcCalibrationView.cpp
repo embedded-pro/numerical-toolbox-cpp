@@ -70,12 +70,12 @@ namespace simulator::controllers::view
                 DisplayResults(results);
 
                 shell.SetStatus(QString("Done. EM: %1 iters (%2) | Opt Q=%3 R=%4 ISE=%5")
-                                    .arg(static_cast<int>(results.emIterations))
-                                    .arg(results.emConverged ? "converged" : "max iters")
-                                    .arg(static_cast<double>(results.optimalQ), 0, 'f', 2)
-                                    .arg(static_cast<double>(results.optimalR), 0, 'f', 2)
-                                    .arg(static_cast<double>(results.finalIse), 0, 'e', 3)
-                                    .toStdString());
+                        .arg(static_cast<int>(results.emIterations))
+                        .arg(results.emConverged ? "converged" : "max iters")
+                        .arg(static_cast<double>(results.optimalQ), 0, 'f', 2)
+                        .arg(static_cast<double>(results.optimalR), 0, 'f', 2)
+                        .arg(static_cast<double>(results.finalIse), 0, 'e', 3)
+                        .toStdString());
             });
 
         formView->SetActionEnabled(bayesian::field::run, true);

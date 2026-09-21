@@ -82,9 +82,9 @@ namespace simulator::analysis::view
                 frequencyView->update();
 
                 shell.SetStatus(QString("FFT computed: %1 points, sample rate %2 Hz")
-                                    .arg(config.fftSize)
-                                    .arg(static_cast<double>(config.sampleRateHz), 0, 'f', 1)
-                                    .toStdString());
+                        .arg(config.fftSize)
+                        .arg(static_cast<double>(config.sampleRateHz), 0, 'f', 1)
+                        .toStdString());
             });
     }
 }

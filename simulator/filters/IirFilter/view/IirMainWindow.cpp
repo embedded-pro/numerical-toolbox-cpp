@@ -102,9 +102,9 @@ namespace simulator::filters::iir::view
                 impulseView->update();
 
                 shell.SetStatus(QString("IIR filter computed: cutoff %1 Hz, Q = %2")
-                                    .arg(static_cast<double>(config.filter.cutoffHz), 0, 'f', 1)
-                                    .arg(static_cast<double>(config.filter.qualityFactor), 0, 'f', 3)
-                                    .toStdString());
+                        .arg(static_cast<double>(config.filter.cutoffHz), 0, 'f', 1)
+                        .arg(static_cast<double>(config.filter.qualityFactor), 0, 'f', 3)
+                        .toStdString());
             });
     }
 }
