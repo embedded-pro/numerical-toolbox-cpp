@@ -1,8 +1,6 @@
 #include "simulator/controllers/PidController/view/PidMainWindow.hpp"
 #include "simulator/controllers/PidController/view/PidRootLocusWidget.hpp"
 #include "simulator/shell/Guard.hpp"
-#include "simulator/widgets/FrequencyChartWidget.hpp"
-#include "simulator/widgets/TimeSeriesChartWidget.hpp"
 #include "ui/theme/Theme.hpp"
 #include <array>
 
@@ -24,30 +22,28 @@ namespace simulator::controllers::view
             pages,
             "Configure PID parameters and press Compute"
         };
-
-        [[nodiscard]] QColor Series(std::size_t index)
-        {
-            const auto color = ui::theme::Current().Series(index);
-            return QColor{ color.red, color.green, color.blue };
-        }
     }
 
     PidMainWindow::PidMainWindow(QWidget* parent)
         : QMainWindow(parent)
         , formView(new ui::backend::qt::QtFormView{ this })
         , shell(*this, shellSpec)
-        , stepChart(new widgets::TimeSeriesChartWidget{ this })
-        , rampChart(new widgets::TimeSeriesChartWidget{ this })
-        , bodeChart(new widgets::FrequencyChartWidget{ this })
+        , stepView(new ui::backend::qt::QtPaintedWidget{ stepChart, this })
+        , rampView(new ui::backend::qt::QtPaintedWidget{ rampChart, this })
+        , bodeView(new ui::backend::qt::QtPaintedWidget{ bodeChart, this })
         , rootLocusChart(new PidRootLocusWidget{ this })
         , dragTimer(new QTimer{ this })
     {
         formView->Build(form.Model());
         shell.SetPanel(formView);
 
-        shell.SetPage(0, stepChart);
-        shell.SetPage(1, rampChart);
-        shell.SetPage(2, bodeChart);
+        stepView->SetPanCursorEnabled(true);
+        rampView->SetPanCursorEnabled(true);
+        bodeView->SetPanCursorEnabled(true);
+
+        shell.SetPage(0, stepView);
+        shell.SetPage(1, rampView);
+        shell.SetPage(2, bodeView);
         shell.SetPage(3, rootLocusChart);
 
         dragTimer->setSingleShot(true);
@@ -62,39 +58,47 @@ namespace simulator::controllers::view
         };
     }
 
-    void PidMainWindow::DisplayTimeResponse(widgets::TimeSeriesChartWidget* chart, const TimeResponse& result)
+    void PidMainWindow::DisplayTimeResponse(ui::charts::ChartCore& chart, ui::backend::qt::QtPaintedWidget* view, const TimeResponse& result)
     {
-        chart->SetTimeAxis(result.time);
-        chart->SetPanels({
-            widgets::ChartPanel{ "Output", "Amplitude", {
-                                                            widgets::Series{ "Reference", Series(0), result.reference },
-                                                            widgets::Series{ "Output", Series(1), result.output },
-                                                        },
-                2 },
-            widgets::ChartPanel{ "Control Signal", "u(t)", {
-                                                               widgets::Series{ "Control", Series(2), result.controlSignal },
-                                                           },
-                1 },
-            widgets::ChartPanel{ "Error", "e(t)", {
-                                                      widgets::Series{ "Error", Series(4), result.error },
-                                                  },
-                1 },
-        });
-    }
+        const auto& theme = ui::theme::Current();
 
-    void PidMainWindow::DisplayBodeResponse(widgets::FrequencyChartWidget* chart, const BodeResult& result)
-    {
-        chart->SetFrequencyAxis(result.frequencies);
-        chart->SetPanels({
-            widgets::ChartPanel{ "Magnitude", "dB", {
-                                                        widgets::Series{ "Magnitude", Series(0), result.magnitudeDb },
-                                                    },
+        chart.SetAxisValues(result.time);
+        chart.SetPanels({
+            ui::charts::ChartPanel{ "Output", "Amplitude", {
+                                                               ui::charts::Series{ "Reference", theme.Series(0), result.reference },
+                                                               ui::charts::Series{ "Output", theme.Series(1), result.output },
+                                                           },
+                2 },
+            ui::charts::ChartPanel{ "Control Signal", "u(t)", {
+                                                                  ui::charts::Series{ "Control", theme.Series(2), result.controlSignal },
+                                                              },
                 1 },
-            widgets::ChartPanel{ "Phase", "degrees", {
-                                                         widgets::Series{ "Phase", Series(1), result.phaseDeg },
+            ui::charts::ChartPanel{ "Error", "e(t)", {
+                                                         ui::charts::Series{ "Error", theme.Series(4), result.error },
                                                      },
                 1 },
         });
+
+        view->update();
+    }
+
+    void PidMainWindow::DisplayBodeResponse(ui::charts::ChartCore& chart, ui::backend::qt::QtPaintedWidget* view, const BodeResult& result)
+    {
+        const auto& theme = ui::theme::Current();
+
+        chart.SetAxisValues(result.frequencies);
+        chart.SetPanels({
+            ui::charts::ChartPanel{ "Magnitude", "dB", {
+                                                           ui::charts::Series{ "Magnitude", theme.Series(0), result.magnitudeDb },
+                                                       },
+                1 },
+            ui::charts::ChartPanel{ "Phase", "degrees", {
+                                                            ui::charts::Series{ "Phase", theme.Series(1), result.phaseDeg },
+                                                        },
+                1 },
+        });
+
+        view->update();
     }
 
     void PidMainWindow::RecomputeAndUpdateCharts()
@@ -102,9 +106,9 @@ namespace simulator::controllers::view
         auto config = form.BuildConfiguration();
         pidSimulator.Configure(form.CreatePlant(), config);
 
-        DisplayTimeResponse(stepChart, pidSimulator.ComputeStepResponse());
-        DisplayTimeResponse(rampChart, pidSimulator.ComputeRampResponse());
-        DisplayBodeResponse(bodeChart, pidSimulator.ComputeBodeResponse());
+        DisplayTimeResponse(stepChart, stepView, pidSimulator.ComputeStepResponse());
+        DisplayTimeResponse(rampChart, rampView, pidSimulator.ComputeRampResponse());
+        DisplayBodeResponse(bodeChart, bodeView, pidSimulator.ComputeBodeResponse());
 
         rootLocusChart->SetData(pidSimulator.ComputeRootLocus());
     }

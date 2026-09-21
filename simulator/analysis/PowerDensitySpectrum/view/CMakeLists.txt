@@ -8,7 +8,7 @@ target_include_directories(numerical.simulator.analysis.psd.view PUBLIC
 target_link_libraries(numerical.simulator.analysis.psd.view PUBLIC
     numerical.simulator.analysis.psd.application
     numerical.simulator.shell
-    numerical.simulator.widgets
+    ui.charts
     ui.backend.qt
     Qt6::Widgets
 )

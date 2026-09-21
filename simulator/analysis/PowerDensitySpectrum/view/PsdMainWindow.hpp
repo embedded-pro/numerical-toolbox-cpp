@@ -3,13 +3,11 @@
 #include "simulator/analysis/PowerDensitySpectrum/application/PsdForm.hpp"
 #include "ui/backend/qt/QtAppShell.hpp"
 #include "ui/backend/qt/QtFormView.hpp"
+#include "ui/backend/qt/QtPaintedWidget.hpp"
+#include "ui/charts/ChartCore.hpp"
+#include "ui/charts/LinearAxis.hpp"
+#include "ui/charts/Log10Axis.hpp"
 #include <QMainWindow>
-
-namespace simulator::widgets
-{
-    class TimeSeriesChartWidget;
-    class FrequencyChartWidget;
-}
 
 namespace simulator::analysis::psd::view
 {
@@ -29,7 +27,12 @@ namespace simulator::analysis::psd::view
         ui::backend::qt::QtFormView* formView;
         ui::backend::qt::QtAppShell shell;
 
-        widgets::TimeSeriesChartWidget* timeDomainChart;
-        widgets::FrequencyChartWidget* psdChart;
+        ui::charts::LinearAxis timeAxis{ ui::charts::LinearAxis::Time() };
+        ui::charts::Log10Axis frequencyAxis;
+        ui::charts::ChartCore timeDomainChart{ timeAxis, ui::charts::ChartConfig{} };
+        ui::charts::ChartCore psdChart{ frequencyAxis, ui::charts::ChartConfig{ 1, 2 } };
+
+        ui::backend::qt::QtPaintedWidget* timeDomainView;
+        ui::backend::qt::QtPaintedWidget* psdView;
     };
 }

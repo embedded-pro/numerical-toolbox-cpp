@@ -1,7 +1,5 @@
 #include "simulator/analysis/PowerDensitySpectrum/view/PsdMainWindow.hpp"
 #include "simulator/shell/Guard.hpp"
-#include "simulator/widgets/FrequencyChartWidget.hpp"
-#include "simulator/widgets/TimeSeriesChartWidget.hpp"
 #include "ui/theme/Theme.hpp"
 #include <array>
 
@@ -21,26 +19,23 @@ namespace simulator::analysis::psd::view
             pages,
             "Configure parameters and press Compute PSD"
         };
-
-        [[nodiscard]] QColor Series(std::size_t index)
-        {
-            const auto color = ui::theme::Current().Series(index);
-            return QColor{ color.red, color.green, color.blue };
-        }
     }
 
     PsdMainWindow::PsdMainWindow(QWidget* parent)
         : QMainWindow(parent)
         , formView(new ui::backend::qt::QtFormView{ this })
         , shell(*this, shellSpec)
-        , timeDomainChart(new widgets::TimeSeriesChartWidget{ this })
-        , psdChart(new widgets::FrequencyChartWidget{ this })
+        , timeDomainView(new ui::backend::qt::QtPaintedWidget{ timeDomainChart, this })
+        , psdView(new ui::backend::qt::QtPaintedWidget{ psdChart, this })
     {
         formView->Build(form.Model());
         shell.SetPanel(formView);
 
-        shell.SetPage(0, timeDomainChart);
-        shell.SetPage(1, psdChart);
+        timeDomainView->SetPanCursorEnabled(true);
+        psdView->SetPanCursorEnabled(true);
+
+        shell.SetPage(0, timeDomainView);
+        shell.SetPage(1, psdView);
 
         form.Model().onActionTriggered = [this](ui::model::ActionId)
         {
@@ -57,29 +52,34 @@ namespace simulator::analysis::psd::view
 
                 auto result = psdSimulator.Compute();
 
-                timeDomainChart->SetTimeAxis(result.time);
-                timeDomainChart->SetPanels({
+                const auto& theme = ui::theme::Current();
+
+                timeDomainChart.SetAxisValues(result.time);
+                timeDomainChart.SetPanels({
                     {
                         "Input Signal",
                         "Amplitude",
                         {
-                            { "Signal", Series(0), result.signal },
+                            { "Signal", theme.Series(0), result.signal },
                         },
                         1,
                     },
                 });
 
-                psdChart->SetFrequencyAxis(result.frequencies);
-                psdChart->SetPanels({
+                psdChart.SetAxisValues(result.frequencies);
+                psdChart.SetPanels({
                     {
                         "Power Spectral Density",
                         "Power (dB/Hz)",
                         {
-                            { "PSD (dB)", Series(1), result.powerDensityDb },
+                            { "PSD (dB)", theme.Series(1), result.powerDensityDb },
                         },
                         1,
                     },
                 });
+
+                timeDomainView->update();
+                psdView->update();
 
                 shell.SetStatus(QString("PSD computed: %1 input samples, %2-point segments, %3% overlap, %4 Hz")
                                     .arg(config.inputSize)

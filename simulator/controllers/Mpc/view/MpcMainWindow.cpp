@@ -1,8 +1,8 @@
 #include "simulator/controllers/Mpc/view/MpcMainWindow.hpp"
 #include "simulator/shell/Guard.hpp"
-#include "simulator/widgets/TimeSeriesChartWidget.hpp"
 #include "ui/theme/Theme.hpp"
 #include <array>
+#include <format>
 
 namespace simulator::controllers::view
 {
@@ -21,29 +21,23 @@ namespace simulator::controllers::view
             "Configure MPC parameters and press Compute"
         };
 
-        [[nodiscard]] QColor ToQt(ui::Color color)
-        {
-            return QColor{ color.red, color.green, color.blue };
-        }
-
-        [[nodiscard]] QColor Series(std::size_t index)
-        {
-            return ToQt(ui::theme::Current().Series(index));
-        }
     }
 
     MpcMainWindow::MpcMainWindow(QWidget* parent)
         : QMainWindow(parent)
         , formView(new ui::backend::qt::QtFormView{ this })
         , shell(*this, shellSpec)
-        , stepChart(new widgets::TimeSeriesChartWidget{ this })
-        , constrainedChart(new widgets::TimeSeriesChartWidget{ this })
+        , stepView(new ui::backend::qt::QtPaintedWidget{ stepChart, this })
+        , constrainedView(new ui::backend::qt::QtPaintedWidget{ constrainedChart, this })
     {
         formView->Build(form.Model());
         shell.SetPanel(formView);
 
-        shell.SetPage(0, stepChart);
-        shell.SetPage(1, constrainedChart);
+        stepView->SetPanCursorEnabled(true);
+        constrainedView->SetPanCursorEnabled(true);
+
+        shell.SetPage(0, stepView);
+        shell.SetPage(1, constrainedView);
 
         form.Model().onActionTriggered = [this](ui::model::ActionId)
         {
@@ -59,8 +53,8 @@ namespace simulator::controllers::view
                 auto plant = form.CreatePlant();
                 mpcSimulator.Configure(plant, config);
 
-                DisplayResponse(stepChart, mpcSimulator.ComputeStepResponse(), config.referencePosition);
-                DisplayResponse(constrainedChart, mpcSimulator.ComputeConstrainedResponse(), config.referencePosition);
+                DisplayResponse(stepChart, stepView, mpcSimulator.ComputeStepResponse(), config.referencePosition);
+                DisplayResponse(constrainedChart, constrainedView, mpcSimulator.ComputeConstrainedResponse(), config.referencePosition);
 
                 const auto plantDescription = form.PlantDescription();
 
@@ -72,18 +66,20 @@ namespace simulator::controllers::view
             });
     }
 
-    void MpcMainWindow::DisplayResponse(widgets::TimeSeriesChartWidget* chart, const MpcTimeResponse& result, float referencePosition)
+    void MpcMainWindow::DisplayResponse(ui::charts::ChartCore& chart, ui::backend::qt::QtPaintedWidget* view, const MpcTimeResponse& result, float referencePosition)
     {
-        std::vector<widgets::Series> stateSeries;
+        const auto& theme = ui::theme::Current();
+
+        std::vector<ui::charts::Series> stateSeries;
 
         for (std::size_t i = 0; i < result.states.size(); ++i)
-            stateSeries.push_back({ QString("x%1").arg(i), Series(i % 4), result.states[i] });
+            stateSeries.push_back({ std::format("x{}", i), theme.Series(i % 4), result.states[i] });
 
         std::vector<float> referenceLine(result.time.size(), referencePosition);
-        stateSeries.push_back({ "Reference", ToQt(ui::theme::Current().Get(ui::theme::ColorRole::TextMuted)), referenceLine });
+        stateSeries.push_back({ "Reference", theme.Get(ui::theme::ColorRole::TextMuted), referenceLine });
 
-        chart->SetTimeAxis(result.time);
-        chart->SetPanels({
+        chart.SetAxisValues(result.time);
+        chart.SetPanels({
             {
                 "States",
                 "Value",
@@ -94,7 +90,7 @@ namespace simulator::controllers::view
                 "Control Input",
                 "u",
                 {
-                    { "Control", Series(1), result.control },
+                    { "Control", theme.Series(1), result.control },
                 },
                 1,
             },
@@ -102,10 +98,12 @@ namespace simulator::controllers::view
                 "Cost",
                 "J",
                 {
-                    { "Cost", Series(3), result.cost },
+                    { "Cost", theme.Series(3), result.cost },
                 },
                 1,
             },
         });
+
+        view->update();
     }
 }
