@@ -36,6 +36,7 @@ numerical_add_coverage_sources(numerical.analysis
     PowerDensitySpectrum.cpp
     RealFastFourierTransform.cpp
     SignalDetectors.cpp
+    TwiddleFactorsTable.cpp
 )
 
 add_subdirectory(test)

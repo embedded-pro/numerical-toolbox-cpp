@@ -30,3 +30,10 @@ namespace analysis
         std::array<math::Complex<QNumberType>, Length> factors{};
     };
 }
+
+#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD
+namespace analysis
+{
+    extern template class TwiddleFactorsTable<float, 8>;
+}
+#endif

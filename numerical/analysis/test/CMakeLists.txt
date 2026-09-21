@@ -21,4 +21,5 @@ target_sources(numerical.analysis_test PRIVATE
     TestPowerDensitySpectrum.cpp
     TestRealFastFourierTransform.cpp
     TestSignalDetectors.cpp
+    TestTwiddleFactorsTable.cpp
 )
