@@ -1,5 +1,22 @@
 # Changelog
 
+## [3.2.0](https://github.com/embedded-pro/numerical-toolbox-cpp/compare/v3.1.2...v3.2.0) (2026-09-24)
+
+
+### Features
+
+* Add SetPreviousOutput to PidIncrementalBase ([#328](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/328)) ([762b59e](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/762b59ef15ea7d54bd6b703ff4bd75b25ae0c99f))
+* **filters:** Let ComplementaryFilter integrate over a measured interval ([#335](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/335)) ([1225b3c](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/1225b3c422beab93e0ff8fd7231f8d7e087f6da4))
+* **simulator:** Render every panel and chart through ui-cpp ([#332](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/332)) ([cff9616](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/cff9616b206352cbb89e786d4fef7aaca4a6350d))
+* **simulator:** Render the FFT charts through ui-cpp ([#331](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/331)) ([09d8986](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/09d8986c7e67d6e3524b856859dcad1f222e012f))
+
+
+### Build System
+
+* **deps:** Bump the patch-minor-action-updates group with 2 updates ([#330](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/330)) ([7d1e7de](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/7d1e7de61371043eb4783834413855710292dd29))
+* **deps:** Bump the patch-minor-action-updates group with 2 updates ([#333](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/333)) ([bd29584](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/bd2958427f44847bfd5a97565af598240997bee7))
+* **deps:** Bump the patch-minor-action-updates group with 3 updates ([#326](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/326)) ([c580f38](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/c580f38ccc835c0b8cd2286f3e1d9c3d99b713cd))
+
 ## [3.1.2](https://github.com/embedded-pro/numerical-toolbox-cpp/compare/v3.1.1...v3.1.2) (2026-09-05)
 
 

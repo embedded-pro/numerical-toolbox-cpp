@@ -65,7 +65,7 @@ if (NUMERICAL_TOOLBOX_STANDALONE)
     endif()
 endif()
 
-project(numerical-toolbox LANGUAGES C CXX ASM VERSION 3.1.2) # x-release-please-version
+project(numerical-toolbox LANGUAGES C CXX ASM VERSION 3.2.0) # x-release-please-version
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
