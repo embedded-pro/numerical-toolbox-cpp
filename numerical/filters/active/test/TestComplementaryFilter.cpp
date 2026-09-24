@@ -216,3 +216,49 @@ TEST_F(TestComplementaryFilter, no_nan_inf_on_large_rate)
     EXPECT_FALSE(std::isnan(output));
     EXPECT_FALSE(std::isinf(output));
 }
+
+TEST_F(TestComplementaryFilter, measured_interval_integrates_over_that_interval)
+{
+    constexpr float rate{ 0.5f };
+    constexpr float accel{ 0.02f };
+    constexpr float alpha{ 0.98f };
+    constexpr float measuredTs{ 0.013f };
+
+    const float expected{ alpha * (rate * measuredTs) + (1.0f - alpha) * accel };
+
+    EXPECT_NEAR(filter.Update(rate, accel, measuredTs), expected, math::Tolerance<float>());
+}
+
+TEST_F(TestComplementaryFilter, nominal_interval_update_matches_measured_update_at_the_nominal_interval)
+{
+    filters::ComplementaryFilter<float> measured{ 0.98f, 0.01f };
+
+    for (int i = 0; i != 50; ++i)
+        EXPECT_FLOAT_EQ(filter.Update(0.3f, 0.1f), measured.Update(0.3f, 0.1f, 0.01f));
+}
+
+TEST_F(TestComplementaryFilter, gyro_only_integrates_varying_intervals_exactly)
+{
+    filters::ComplementaryFilter<float> gyroOnly{ 1.0f, 0.01f };
+    constexpr std::array<float, 4> intervals{ 0.009f, 0.011f, 0.010f, 0.012f };
+    constexpr float rate{ 2.0f };
+
+    float output{};
+    float expected{};
+    for (auto interval : intervals)
+    {
+        output = gyroOnly.Update(rate, 0.0f, interval);
+        expected += rate * interval;
+    }
+
+    EXPECT_NEAR(output, expected, math::Tolerance<float>());
+}
+
+TEST_F(TestComplementaryFilter, measured_interval_respects_heading_wrap)
+{
+    filters::ComplementaryFilter<float> headingFilter{ 1.0f, 0.01f, 3.1f, true };
+
+    const float output{ headingFilter.Update(10.0f, 0.0f, 0.01f) };
+
+    EXPECT_LE(std::abs(output), std::numbers::pi_v<float> + math::Tolerance<float>());
+}
