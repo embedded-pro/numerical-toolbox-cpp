@@ -21,6 +21,7 @@ namespace filters
         explicit ComplementaryFilter(T alpha, T Ts, T initial = T{}, bool wrapAngle = false) noexcept;
 
         OPTIMIZE_FOR_SPEED T Update(T rate, T measuredAngle) noexcept;
+        OPTIMIZE_FOR_SPEED T Update(T rate, T measuredAngle, T measuredTs) noexcept;
         void Reset(T angle = T{}) noexcept;
         void SetAlpha(T alpha) noexcept;
 
@@ -51,7 +52,15 @@ namespace filters
     template<typename T>
     OPTIMIZE_FOR_SPEED T ComplementaryFilter<T>::Update(T rate, T measuredAngle) noexcept
     {
-        T predicted{ angle + rate * Ts };
+        return Update(rate, measuredAngle, Ts);
+    }
+
+    template<typename T>
+    OPTIMIZE_FOR_SPEED T ComplementaryFilter<T>::Update(T rate, T measuredAngle, T measuredTs) noexcept
+    {
+        assert(measuredTs > T{});
+
+        T predicted{ angle + rate * measuredTs };
         if (wrapAngle)
         {
             T delta{ WrapToPi(measuredAngle - predicted) };
