@@ -41,15 +41,24 @@ To replace a function with a platform-specific implementation, define the corres
 
 ## Embedded Optimizations
 
-Every algorithm header MUST include:
+Every algorithm header MUST bracket its body with a scoped pragma, so the options never leak into the including translation unit:
 
 ```cpp
 #pragma once
 
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC push_options
 #pragma GCC optimize("O3", "fast-math")
 #endif
+
+// ... includes and header body ...
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC pop_options
+#endif
 ```
+
+The `pop_options` block is the last thing in the header. Never use the pragma in test `.cpp` files.
 
 Apply `OPTIMIZE_FOR_SPEED` (from `numerical/math/CompilerOptimizations.hpp`) on hot-path methods: `Compute()`, `Filter()`, `Calculate()`, `Solve()`, `Update()`, `Step()`.
 

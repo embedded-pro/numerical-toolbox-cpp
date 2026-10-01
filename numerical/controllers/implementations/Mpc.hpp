@@ -8,7 +8,8 @@
 #include <algorithm>
 #include <optional>
 
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC push_options
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
@@ -308,3 +309,7 @@ namespace controllers
     extern template class Mpc<float, 2, 1, 10, 5>;
 #endif
 }
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC pop_options
+#endif

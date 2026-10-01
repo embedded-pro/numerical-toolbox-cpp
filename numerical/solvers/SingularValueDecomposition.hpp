@@ -1,6 +1,7 @@
 #pragma once
 
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC push_options
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
@@ -532,3 +533,7 @@ namespace solvers
     extern template class SingularValueDecomposition<float, 3, 3>;
 #endif
 }
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC pop_options
+#endif

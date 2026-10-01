@@ -4,8 +4,8 @@ Turn one `roadmap/<domain>/<Name>/` spec into shipped code. Rules: `../AGENTS.md
 Read the spec's three files first (`implementation.md`, `tests.md`, `explanation.md`), then:
 
 1. **Header** `numerical/<domain>/<Name>.hpp`
-   - `#pragma once` → `#pragma GCC optimize("O3","fast-math")` (GCC/Clang guard) →
-     `#include "numerical/math/CompilerOptimizations.hpp"`.
+   - `#pragma once` → `#pragma GCC push_options` + `#pragma GCC optimize("O3","fast-math")` (GCC-only guard) →
+     `#include "numerical/math/CompilerOptimizations.hpp"`; end the file with `#pragma GCC pop_options`.
    - `template<typename T[, std::size_t sizes...]>` with
      `static_assert(std::is_floating_point_v<T>, "<Name> supports floating-point types");`.
    - Implement per `implementation.md`; `OPTIMIZE_FOR_SPEED` on the hot path(s).

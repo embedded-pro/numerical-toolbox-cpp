@@ -26,11 +26,23 @@ resource-constrained embedded systems. Real-time, deterministic, no heap.
 
 ```cpp
 #pragma once
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC push_options
 #pragma GCC optimize("O3", "fast-math")
 #endif
 #include "numerical/math/CompilerOptimizations.hpp"
+
+// ... header body ...
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC pop_options
+#endif
 ```
+
+The `pop_options` block is the **last thing in the header**: the pragma must never leak into the
+including translation unit (it would silently apply fast-math, e.g. folded NaN checks and
+reassociation, to unrelated code). Use `math::IsFinite` for finiteness checks. Test `.cpp` files
+never use the pragma.
 
 `OPTIMIZE_FOR_SPEED` on hot paths (`Filter/Compute/Update/Solve/Step`). Pure interfaces exempt.
 

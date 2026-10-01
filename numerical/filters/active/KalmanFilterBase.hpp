@@ -5,7 +5,8 @@
 #include "numerical/math/MatrixOperations.hpp"
 #include "numerical/solvers/GaussianElimination.hpp"
 
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC push_options
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
@@ -175,3 +176,7 @@ namespace filters
     extern template class KalmanFilterBase<float, 4, 2, 0>;
 #endif
 }
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC pop_options
+#endif

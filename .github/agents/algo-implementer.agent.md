@@ -31,5 +31,5 @@ Authoritative rules: `AGENTS.md`. Recipe: `roadmap/DEPLOYMENT.md`. Follow both e
 - **No comments** (except license/`NOLINT`). Allman braces, brace-init.
 - **Tests**: `TEST_F` on `float`, `StrictMock` only, anonymous-namespace fixture; implement EXACTLY
   the spec's cases — no redundant or extra tests.
-- **Embedded**: `#pragma GCC optimize` + `OPTIMIZE_FOR_SPEED` on hot paths.
+- **Embedded**: scoped `#pragma GCC push_options`/`optimize`/`pop_options` + `OPTIMIZE_FOR_SPEED` on hot paths.
 - **Terse**: no preamble/postamble, no plan restatement, no narration; don't re-read files; batch reads.

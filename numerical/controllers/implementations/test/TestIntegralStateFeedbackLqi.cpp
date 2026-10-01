@@ -1,7 +1,3 @@
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC optimize("O3", "fast-math")
-#endif
-
 #include "numerical/controllers/implementations/IntegralStateFeedbackLqi.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/math/Tolerance.hpp"

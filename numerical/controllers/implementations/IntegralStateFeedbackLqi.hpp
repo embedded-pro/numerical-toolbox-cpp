@@ -1,6 +1,7 @@
 #pragma once
 
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC push_options
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
@@ -171,3 +172,7 @@ namespace controllers
     extern template class IntegralStateFeedbackLqi<float, 2, 1, 1, 1>;
 #endif
 }
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC pop_options
+#endif

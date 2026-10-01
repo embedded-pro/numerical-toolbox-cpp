@@ -3,6 +3,11 @@
 #include "numerical/math/QNumber.hpp"
 #include <type_traits>
 
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC push_options
+#pragma GCC optimize("O3", "fast-math")
+#endif
+
 namespace math
 {
     template<typename QNumberType>
@@ -135,3 +140,7 @@ namespace math
     extern template class Complex<Q31>;
 #endif
 }
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC pop_options
+#endif

@@ -35,7 +35,7 @@ End with totals + verdict: APPROVE / REQUEST CHANGES.
 - [ ] `extern template` guarded by `#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD`.
 
 **Embedded optimizations (WARNING)**
-- [ ] `#pragma GCC optimize("O3","fast-math")` after `#pragma once` in algorithm headers.
+- [ ] `#pragma GCC push_options` + `optimize("O3","fast-math")` after `#pragma once`, matching `pop_options` at end of algorithm headers (no TU leak; none in test `.cpp`).
 - [ ] `OPTIMIZE_FOR_SPEED` on `Filter/Compute/Update/Solve/Step`.
 
 **Namespaces (WARNING)**
