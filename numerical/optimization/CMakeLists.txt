@@ -12,15 +12,20 @@ target_link_libraries(numerical.optimization ${NUMERICAL_VISIBILITY}
 )
 
 target_sources(numerical.optimization PRIVATE
+    Adam.hpp
     BayesianOptimization.hpp
     GradientDescent.hpp
     ObjectiveFunction.hpp
     Optimizer.hpp
+    Sgd.hpp
+    StepOptimizer.hpp
 )
 
 numerical_add_coverage_sources(numerical.optimization
+    Adam.cpp
     BayesianOptimization.cpp
     GradientDescent.cpp
+    Sgd.cpp
 )
 
 add_subdirectory(test)
