@@ -18,6 +18,8 @@ target_sources(numerical.analysis_test PRIVATE
     TestFastFourierTransformRadix2Impl.cpp
     TestGoertzelAlgorithm.cpp
     TestHilbertTransform.cpp
+    TestMelFilterbank.cpp
+    TestMfcc.cpp
     TestPowerDensitySpectrum.cpp
     TestRealFastFourierTransform.cpp
     TestSignalDetectors.cpp

@@ -4,17 +4,18 @@ Signal analysis algorithms for frequency-domain decomposition and spectral estim
 
 ## Algorithms
 
-| Algorithm                                               | Description                                                                                      |
-|---------------------------------------------------------|--------------------------------------------------------------------------------------------------|
-| [Fast Fourier Transform](FastFourierTransform.md)       | Efficient computation of the Discrete Fourier Transform using the Cooley-Tukey radix-2 algorithm |
-| [Real-Input FFT](RealFastFourierTransform.md)                            | Length-N real FFT via even/odd split into two N/2-point complex DFTs, halving compute and memory |
-| [Power Spectral Density](PowerDensitySpectrum.md)       | Estimation of signal power distribution across frequencies using Welch's method                  |
-| [Discrete Cosine Transform](DiscreteCosineTransform.md) | Real-valued frequency decomposition via cosine basis functions, computed through FFT             |
-| [Signal Detectors](SignalDetectors.md)                  | Peak hold, zero-crossing counter, and RMS envelope detectors for real-time signal monitoring     |
-| [Decibels](Decibels.md)                                 | `ToDecibels` / `FromDecibels` conversion helpers with zero-floor guard, plus attenuation and ripple utilities |
-| [Goertzel Algorithm](GoertzelAlgorithm.md)              | Single-bin DFT via a second-order recurrence for O(N) tone detection with O(1) memory                         |
-| [Discrete Wavelet Transform](DiscreteWaveletTransform.md) | Multilevel Haar / Daubechies filter bank for O(N) time-frequency decomposition with perfect reconstruction   |
-| [Hilbert Transform](HilbertTransform.md)                | Analytic signal and instantaneous amplitude/phase/frequency via FFT one-sided spectrum or FIR approximation   |
+| Algorithm                                                 | Description                                                                                                    |
+|-----------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| [Fast Fourier Transform](FastFourierTransform.md)         | Efficient computation of the Discrete Fourier Transform using the Cooley-Tukey radix-2 algorithm               |
+| [Real-Input FFT](RealFastFourierTransform.md)             | Length-N real FFT via even/odd split into two N/2-point complex DFTs, halving compute and memory               |
+| [Power Spectral Density](PowerDensitySpectrum.md)         | Estimation of signal power distribution across frequencies using Welch's method                                |
+| [Discrete Cosine Transform](DiscreteCosineTransform.md)   | Real-valued frequency decomposition via cosine basis functions, computed through FFT                           |
+| [Signal Detectors](SignalDetectors.md)                    | Peak hold, zero-crossing counter, and RMS envelope detectors for real-time signal monitoring                   |
+| [Decibels](Decibels.md)                                   | `ToDecibels` / `FromDecibels` conversion helpers with zero-floor guard, plus attenuation and ripple utilities  |
+| [Goertzel Algorithm](GoertzelAlgorithm.md)                | Single-bin DFT via a second-order recurrence for O(N) tone detection with O(1) memory                          |
+| [Discrete Wavelet Transform](DiscreteWaveletTransform.md) | Multilevel Haar / Daubechies filter bank for O(N) time-frequency decomposition with perfect reconstruction     |
+| [Hilbert Transform](HilbertTransform.md)                  | Analytic signal and instantaneous amplitude/phase/frequency via FFT one-sided spectrum or FIR approximation    |
+| [Mel Filterbank / MFCC](MelFilterbankMfcc.md)             | Sparse triangular mel filterbank (HTK/Slaney scale and normalisation), log-mel and orthonormal DCT-II cepstrum |
 
 ## Sub-domains
 
