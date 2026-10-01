@@ -9,6 +9,12 @@ target_link_libraries(numerical.math ${NUMERICAL_VISIBILITY}
     infra.util
 )
 
+if (NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS)
+    target_compile_definitions(numerical.math ${NUMERICAL_VISIBILITY}
+        NumericalToolbox_ENABLE_OPTIMIZATIONS=1
+    )
+endif()
+
 target_sources(numerical.math PRIVATE
     CholeskyDecomposition.hpp
     ConstexprMath.hpp
