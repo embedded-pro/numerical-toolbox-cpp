@@ -1,6 +1,7 @@
 #pragma once
 
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC push_options
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
@@ -511,3 +512,7 @@ namespace filters::passive
     extern template class IirFilterDesign<float, 8>;
 #endif
 }
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC pop_options
+#endif

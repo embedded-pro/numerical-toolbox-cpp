@@ -207,12 +207,17 @@ set(CMAKE_CXX_FLAGS_DEBUG "-Og -g" CACHE STRING "Debug flags" FORCE)
 ### Solution 2: Per-File Optimization Pragmas
 
 ```cpp
-// At the top of performance-critical .cpp files
-#if defined(__GNUC__) || defined(__clang__)
+// Bracket the performance-critical code; never leave the options active for the rest of the TU
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC push_options
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
-// Rest of implementation...
+// Performance-critical implementation...
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC pop_options
+#endif
 ```
 
 ### Solution 3: Per-Function Attributes

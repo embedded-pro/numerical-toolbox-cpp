@@ -52,7 +52,7 @@ on bounded `math::Vector`/`math::Matrix` inputs; tests are `TEST_F` on `float`.
 Every new component should follow the established repository conventions:
 
 - [ ] Header-only template supporting `float` / `math::Q15` / `math::Q31` (or *float-first* where noted)
-- [ ] `#pragma GCC optimize("O3", "fast-math")` after `#pragma once`; `OPTIMIZE_FOR_SPEED` on hot paths
+- [ ] Scoped `#pragma GCC push_options` / `optimize("O3", "fast-math")` after `#pragma once`, `pop_options` at end of file; `OPTIMIZE_FOR_SPEED` on hot paths
 - [ ] No heap, no recursion, bounded containers (`infra::BoundedVector`, `std::array`)
 - [ ] `static_assert` on supported types and dimensions
 - [ ] Typed tests (`TYPED_TEST`) for multi-type components; `TEST_F` for single-type; `StrictMock` only

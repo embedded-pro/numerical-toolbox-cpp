@@ -1,7 +1,3 @@
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC optimize("O3", "fast-math")
-#endif
-
 #include "numerical/controllers/implementations/Lqr.hpp"
 #include "numerical/controllers/implementations/Mpc.hpp"
 #include "numerical/controllers/interfaces/StateFeedbackController.hpp"

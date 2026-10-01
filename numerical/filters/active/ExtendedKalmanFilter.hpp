@@ -5,7 +5,8 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/MatrixOperations.hpp"
 
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC push_options
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
@@ -125,3 +126,7 @@ namespace filters
     extern template class ExtendedKalmanFilter<float, 3, 1, 0>;
 #endif
 }
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC pop_options
+#endif
