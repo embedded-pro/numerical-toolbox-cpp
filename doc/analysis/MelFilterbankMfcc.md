@@ -68,14 +68,14 @@ coefficients are computed once at construction.
 
 ## Complexity Analysis
 
-| Stage | Time | Memory (words) | Notes |
-|---|---|---|---|
-| Construction | $O(N + M + C M)$ | — | Mel points, bin→segment map, window, DCT basis |
-| Window + real FFT | $O(N \log N)$ | $O(N)$ | Dominant cost |
-| Power spectrum | $O(N)$ | $N/2+1$ | |
-| Filterbank | $O(N)$ | $2(N/2+1) + M$ | Two weights per bin plus a gain per band |
-| Log | $O(M)$ | $M$ | |
-| DCT-II | $O(C M)$ | $C M$ | Direct product with the precomputed basis |
+| Stage             | Time             | Memory (words) | Notes                                          |
+|-------------------|------------------|----------------|------------------------------------------------|
+| Construction      | $O(N + M + C M)$ | —              | Mel points, bin→segment map, window, DCT basis |
+| Window + real FFT | $O(N \log N)$    | $O(N)$         | Dominant cost                                  |
+| Power spectrum    | $O(N)$           | $N/2+1$        |                                                |
+| Filterbank        | $O(N)$           | $2(N/2+1) + M$ | Two weights per bin plus a gain per band       |
+| Log               | $O(M)$           | $M$            |                                                |
+| DCT-II            | $O(C M)$         | $C M$          | Direct product with the precomputed basis      |
 
 With $N=512$, $M=40$, $C=13$, the tables take about 1.6 k words, where a dense filterbank matrix
 would need 10 k.
