@@ -48,10 +48,10 @@ Typical hyper-parameters: $\eta = 10^{-3}$, $\beta_1 = 0.9$, $\beta_2 = 0.999$, 
 
 ## Complexity Analysis
 
-| Algorithm   | Time per step | Extra state (floats) | Notes                                      |
-|-------------|---------------|----------------------|--------------------------------------------|
-| SGD         | $O(N)$        | $N$                  | One velocity vector (equals the gradient when momentum is 0) |
-| Adam        | $O(N)$        | $2N + 2$             | Two moment vectors plus the running powers $\beta_1^t$, $\beta_2^t$ |
+| Algorithm | Time per step | Extra state (floats) | Notes                                                               |
+|-----------|---------------|----------------------|---------------------------------------------------------------------|
+| SGD       | $O(N)$        | $N$                  | One velocity vector (equals the gradient when momentum is 0)        |
+| Adam      | $O(N)$        | $2N + 2$             | Two moment vectors plus the running powers $\beta_1^t$, $\beta_2^t$ |
 
 $N$ is the number of parameters. All operations are in-place; no heap allocation is required.
 
@@ -60,20 +60,20 @@ $N$ is the number of parameters. All operations are in-place; no heap allocation
 **SGD with momentum** on $\mathcal{L}(\theta) = \frac{1}{2}\|\theta\|^2$, $N=1$, $\theta_0 = 1$, $\eta = 0.1$, $\beta = 0.9$:
 
 | $t$ | $g_t = \theta_t$ | $v_t = 0.9 v_{t-1} + g_t$ | $\theta_{t+1} = \theta_t - 0.1 v_t$ |
-|-----|------------------|---------------------------|--------------------------------------|
-| 1   | 1.000            | 1.000                     | 0.900                                |
-| 2   | 0.900            | 1.800                     | 0.720                                |
-| 3   | 0.720            | 2.340                     | 0.486                                |
+|-----|------------------|---------------------------|-------------------------------------|
+| 1   | 1.000            | 1.000                     | 0.900                               |
+| 2   | 0.900            | 1.800                     | 0.720                               |
+| 3   | 0.720            | 2.340                     | 0.486                               |
 
 **Adam** on the same objective, $\beta_1 = 0.9$, $\beta_2 = 0.999$, $\varepsilon = 10^{-8}$, $\theta_0 = 0$, $g_1 = 1$:
 
-| Quantity      | Value           |
-|---------------|-----------------|
-| $m_1$         | $0.1$           |
-| $v_1$         | $0.001$         |
-| $\hat{m}_1$   | $1.0$           |
-| $\hat{v}_1$   | $1.0$           |
-| $\theta_1$    | $-\eta \approx -0.001$ |
+| Quantity    | Value                  |
+|-------------|------------------------|
+| $m_1$       | $0.1$                  |
+| $v_1$       | $0.001$                |
+| $\hat{m}_1$ | $1.0$                  |
+| $\hat{v}_1$ | $1.0$                  |
+| $\theta_1$  | $-\eta \approx -0.001$ |
 
 Bias correction is the critical step: without it, $m_1/\sqrt{v_1} \approx 3.16$, giving a first step roughly $\sqrt{1000}$ times larger than the bias-corrected value.
 
@@ -87,12 +87,12 @@ Bias correction is the critical step: without it, $m_1/\sqrt{v_1} \approx 3.16$,
 
 ## Variants & Generalizations
 
-| Variant               | Change from base                                                      |
-|-----------------------|-----------------------------------------------------------------------|
-| AdaGrad               | Non-decaying sum of squared gradients (no $\beta_2$ decay); aggressive learning rate shrinkage |
-| RMSProp               | Adam without first-moment tracking; lacks bias correction             |
-| AdamW                 | Decoupled weight-decay applied directly to $\theta$ before the gradient step |
-| AMSGrad               | Replaces $\hat{v}$ with the running maximum to guarantee monotone effective step-size |
+| Variant | Change from base                                                                               |
+|---------|------------------------------------------------------------------------------------------------|
+| AdaGrad | Non-decaying sum of squared gradients (no $\beta_2$ decay); aggressive learning rate shrinkage |
+| RMSProp | Adam without first-moment tracking; lacks bias correction                                      |
+| AdamW   | Decoupled weight-decay applied directly to $\theta$ before the gradient step                   |
+| AMSGrad | Replaces $\hat{v}$ with the running maximum to guarantee monotone effective step-size          |
 
 ## Applications
 
@@ -103,11 +103,11 @@ Bias correction is the critical step: without it, $m_1/\sqrt{v_1} \approx 3.16$,
 
 ## Connections to Other Algorithms
 
-| Component                                       | Relationship                                                                         |
-|-------------------------------------------------|--------------------------------------------------------------------------------------|
-| [Gradient Descent](Optimizer.md)                | Batch counterpart; shares the learning-rate update rule but recomputes the objective each time |
-| [LMS Adaptive Filter](../estimators/README.md)  | Equivalent to online SGD for a linear regression model under MSE loss               |
-| [Regularization](../regularization/README.md)   | Adds a penalty gradient to $g_t$; compatible with any step optimiser                |
+| Component                                      | Relationship                                                                                   |
+|------------------------------------------------|------------------------------------------------------------------------------------------------|
+| [Gradient Descent](Optimizer.md)               | Batch counterpart; shares the learning-rate update rule but recomputes the objective each time |
+| [LMS Adaptive Filter](../estimators/README.md) | Equivalent to online SGD for a linear regression model under MSE loss                          |
+| [Regularization](../regularization/README.md)  | Adds a penalty gradient to $g_t$; compatible with any step optimiser                           |
 
 ## References & Further Reading
 
