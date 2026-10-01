@@ -79,6 +79,9 @@ resource-constrained embedded systems. Real-time, deterministic, no heap.
   `${NUMERICAL_VISIBILITY}`.
 - Coverage `.cpp`: `template class <Name><float, ...>;`. `extern template` guarded by
   `#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD`.
+- `NumericalToolbox_ENABLE_OPTIMIZATIONS` (enables `OPTIMIZE_FOR_SPEED`) is a usage requirement of
+  `numerical.math`, gated by `NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS`. Never move it to
+  `add_definitions`, and downstream repos must not rename it: link `numerical.*` to inherit it.
 
 ## Docs
 
