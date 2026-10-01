@@ -5,6 +5,17 @@ its family**, not golden output. This is the reference for the `unit-tester` age
 writing **unit tests** for `numerical/`. It answers one question per algorithm: *which mathematical
 properties must a correct implementation satisfy, and how do we assert them?*
 
+## Gradient-check test helper
+
+`numerical/math/test_doubles/GradientCheck.hpp` (namespace `math::test`, `numerical.math_test_helper`):
+
+- `CentralDifferenceGradient(f, x[, h])` — central differences; `h` is a scalar, a per-component
+  vector, or omitted for the default `cbrt(eps) · max(1, |x_i|)` (`DefaultFiniteDifferenceSteps`).
+- `ExpectGradientNear(analytic, f, x[, h], tol)` — `ADD_FAILURE` per component whose absolute **and**
+  relative errors both exceed `tol`.
+
+Use it for the **M1 gradient check** of every `Gradient`/`Backward` implementation (§7, §10).
+
 ## Rationale
 
 A numerical algorithm is not validated by "it compiles and doesn't crash." Every family has a small

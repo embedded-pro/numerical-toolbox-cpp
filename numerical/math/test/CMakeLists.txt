@@ -13,6 +13,7 @@ numerical_link_qemu_runtime(numerical.math_test)
 target_sources(numerical.math_test PRIVATE
     TestCholeskyDecomposition.cpp
     TestComplexNumber.cpp
+    TestGradientCheck.cpp
     TestMath.cpp
     TestConsistencyMetrics.cpp
     TestCordic.cpp

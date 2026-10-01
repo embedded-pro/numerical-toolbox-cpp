@@ -7,5 +7,6 @@ target_link_libraries(numerical.math_test_helper INTERFACE
 )
 
 target_sources(numerical.math_test_helper PRIVATE
+    GradientCheck.hpp
     MatrixTestSupport.hpp
 )

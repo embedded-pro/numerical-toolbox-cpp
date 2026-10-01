@@ -54,6 +54,16 @@ The skew-symmetric part $\tfrac{1}{2}(M - M^\top)$ is `Symmetrize`'s companion. 
 
 Operate on `math::Matrix` / `math::SquareMatrix`. Consumed by the `filters::active` Kalman family and `estimators::ExpectationMaximization`; `CongruenceTransform` pairs naturally with `Symmetrize` for covariance-positivity hygiene.
 
+## Zero-dimension Vectors
+
+Matrix and vector dimensions must be strictly positive; a zero-length parameter vector is not
+representable. Element access on an empty fixed-size array has no valid index, so allowing it would
+trade a compile-time error for silent undefined behaviour.
+
+A component without trainable parameters (for example a pooling or pure activation stage) should
+report the absence of parameters explicitly — an optional parameter vector that is empty, or an
+interface that has no parameter accessor at all — rather than returning a zero-length vector.
+
 ## References & Further Reading
 
 - Golub, G. H. & Van Loan, C. F., "Matrix Computations", 4th ed., §2 (symmetric/skew decomposition)
