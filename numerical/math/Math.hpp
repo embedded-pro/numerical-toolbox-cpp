@@ -1,10 +1,5 @@
 #pragma once
 
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC push_options
-#pragma GCC optimize("O3", "fast-math")
-#endif
-
 #include <bit>
 #include <cmath>
 #include <cstdint>
@@ -331,7 +326,3 @@ namespace math
 #endif
 #endif
 }
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC pop_options
-#endif

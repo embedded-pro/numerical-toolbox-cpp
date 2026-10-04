@@ -115,7 +115,7 @@ $$\hat{x} = [1.0,\; 2.0,\; 3.0,\; 4.0] \checkmark$$
 - **Filter length vs. signal length.** At each level the signal halves; once it equals $P$ the
   periodic convolution wraps completely. Stop decomposition before the signal shorter than the
   filter length to avoid artefacts.
-- **Fast-math reordering.** With `#pragma GCC optimize("fast-math")` floating-point associativity
+- **Fast-math reordering.** With `-ffast-math` floating-point associativity
   relaxes; reconstruction residuals may reach $10^{-5}$ rather than $10^{-7}$ for 32-bit floats.
 
 ## Variants & Generalizations

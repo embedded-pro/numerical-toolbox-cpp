@@ -1,10 +1,5 @@
 #pragma once
 
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC push_options
-#pragma GCC optimize("O3", "fast-math")
-#endif
-
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Math.hpp"
 #include "numerical/optimization/StepOptimizer.hpp"
@@ -86,7 +81,3 @@ namespace optimization
     extern template class Adam<float, 2>;
 #endif
 }
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC pop_options
-#endif

@@ -37,10 +37,6 @@ Header shape (mirroring existing components such as `Fir.hpp`):
 
 ```cpp
 #pragma once
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC push_options
-#pragma GCC optimize("O3", "fast-math")
-#endif
 #include "numerical/math/CompilerOptimizations.hpp"
 
 namespace <ns>
@@ -57,10 +53,6 @@ namespace <ns>
     extern template class <Name><float /*, sizes... */>;
 #endif
 }
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC pop_options
-#endif
 ```
 
 Coverage `.cpp`:

@@ -3,7 +3,7 @@
 Prioritized backlog of reusable numerical components for generic embedded applications,
 ordered **easiest → hardest to implement** within the constraints of this library
 (templated on `float` / `math::Q15` / `math::Q31`, no heap, bounded containers,
-`#pragma GCC optimize` + `OPTIMIZE_FOR_SPEED` hot paths, typed tests, `doc/` page).
+`OPTIMIZE_FOR_SPEED` hot paths, typed tests, `doc/` page).
 
 Difficulty legend:
 
@@ -52,7 +52,7 @@ on bounded `math::Vector`/`math::Matrix` inputs; tests are `TEST_F` on `float`.
 Every new component should follow the established repository conventions:
 
 - [ ] Header-only template supporting `float` / `math::Q15` / `math::Q31` (or *float-first* where noted)
-- [ ] Scoped `#pragma GCC push_options` / `optimize("O3", "fast-math")` after `#pragma once`, `pop_options` at end of file; `OPTIMIZE_FOR_SPEED` on hot paths
+- [ ] No `#pragma GCC optimize` / `optimize` attribute; `OPTIMIZE_FOR_SPEED` on hot paths
 - [ ] No heap, no recursion, bounded containers (`infra::BoundedVector`, `std::array`)
 - [ ] `static_assert` on supported types and dimensions
 - [ ] Typed tests (`TYPED_TEST`) for multi-type components; `TEST_F` for single-type; `StrictMock` only

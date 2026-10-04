@@ -1,11 +1,6 @@
 // Copyright (c) 2024, Numerical Toolbox Contributors. All rights reserved.
 #pragma once
 
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC push_options
-#pragma GCC optimize("O3", "fast-math")
-#endif
-
 #include "numerical/filters/passive/BiquadCascade.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
@@ -163,7 +158,3 @@ namespace robust_control
     extern template class DisturbanceObserver<float, 1, 1, 1>;
 #endif
 }
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC pop_options
-#endif

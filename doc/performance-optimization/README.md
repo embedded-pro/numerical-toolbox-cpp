@@ -44,19 +44,23 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--gc-sections")
 
 ### Fast-Math Considerations
 
-```cpp
-// Enables aggressive floating-point optimizations
-// WARNING: May change numerical behavior slightly
-#pragma GCC optimize("fast-math")
+```cmake
+# Aggressive floating-point optimizations for whole translation units, keeping NaN/Inf checks
+add_compile_options(-ffast-math -fno-finite-math-only)
 ```
 
 Effects of `-ffast-math`:
-- Assumes no NaN or Infinity
-- Allows reordering of operations
+- No `errno` from math functions, so `sqrtf` becomes a single `vsqrt.f32`
+- Allows reordering of operations and reciprocal multiplication instead of division
 - Enables FMA (Fused Multiply-Add) instructions
+- `-ffinite-math-only` (part of `-ffast-math`) assumes no NaN or Infinity and folds `std::isnan`/`std::isfinite`
 - May break IEEE 754 compliance
 
-**Use only when**: You control all inputs and don't need strict IEEE behavior.
+**Use only when**: You control all inputs and don't need strict IEEE behavior. Keep
+`-fno-finite-math-only` unless no code relies on NaN or Infinity checks.
+
+Set these options for whole translation units, never per function: see
+[Optimization Options Must Match Across Calls](#optimization-options-must-match-across-calls).
 
 ---
 
@@ -135,9 +139,16 @@ inline constexpr std::array<float, 512> sineLUT = []() {
 #define HOT_FUNCTION __attribute__((hot))
 
 // Combined macro for critical functions
-#define OPTIMIZE_FOR_SPEED \
-    __attribute__((always_inline, hot, optimize("-O3"), optimize("-ffast-math"))) inline
+#define OPTIMIZE_FOR_SPEED __attribute__((always_inline, hot)) inline
 ```
+
+#### Optimization Options Must Match Across Calls
+
+GCC does not inline a function into a caller whose optimization options differ from its own.
+`#pragma GCC optimize` and `__attribute__((optimize(...)))` give the functions they cover options of
+their own, so every small helper such a function calls — element access, accessors, unit wrappers —
+stays an out-of-line call, and the functions themselves are no longer inlined into their callers.
+Choose the optimization level and floating-point flags for whole translation units instead.
 
 ### 5. Prefer Fixed-Size Types
 
@@ -204,32 +215,16 @@ set(CMAKE_CXX_FLAGS_DEBUG "-Og -g" CACHE STRING "Debug flags" FORCE)
 - Register allocation
 - Still debuggable (variable inspection works)
 
-### Solution 2: Per-File Optimization Pragmas
+### Solution 2: Per-Translation-Unit Options
 
-```cpp
-// Bracket the performance-critical code; never leave the options active for the rest of the TU
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC push_options
-#pragma GCC optimize("O3", "fast-math")
-#endif
-
-// Performance-critical implementation...
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC pop_options
-#endif
+```cmake
+# Build the performance-critical sources optimized while the rest stays debuggable
+set_source_files_properties(Controller.cpp PROPERTIES COMPILE_OPTIONS "$<$<CONFIG:Debug>:-O2>")
 ```
 
-### Solution 3: Per-Function Attributes
-
-```cpp
-__attribute__((optimize("-O3")))
-void CriticalFunction() {
-    // This function is always optimized
-}
-```
-
-**Note**: Function-level attributes don't propagate to callees. Use file-level pragmas for better results.
+Every function in a translation unit shares its options, so inlining is unaffected. Do not use
+`#pragma GCC optimize` or `__attribute__((optimize(...)))` instead: see
+[Optimization Options Must Match Across Calls](#optimization-options-must-match-across-calls).
 
 ---
 
@@ -430,13 +425,11 @@ struct GoodStruct {
 
 ## Quick Reference Card
 
-### GCC Optimization Pragmas
-```cpp
-#pragma GCC optimize("O3")           // Maximum speed
-#pragma GCC optimize("Os")           // Minimum size  
-#pragma GCC optimize("fast-math")    // Aggressive FP
-#pragma GCC push_options             // Save current options
-#pragma GCC pop_options              // Restore options
+### Optimization Flags (whole translation units)
+```cmake
+add_compile_options(-O3)                                 # Maximum speed
+add_compile_options(-Os)                                 # Minimum size
+add_compile_options(-ffast-math -fno-finite-math-only)   # Aggressive FP, NaN/Inf checks kept
 ```
 
 ### Function Attributes

@@ -22,29 +22,18 @@ resource-constrained embedded systems. Real-time, deterministic, no heap.
   `infra::BoundedDeque<T>::WithMaxSize<N>`, `infra::BoundedList<T>::WithMaxSize<N>`,
   `std::array<T,N>`, `std::optional<T>`. Stack/static only. No recursion. **Tests too.**
 
-## Embedded optimizations (algorithm headers)
+## Embedded optimizations
 
-```cpp
-#pragma once
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC push_options
-#pragma GCC optimize("O3", "fast-math")
-#endif
-#include "numerical/math/CompilerOptimizations.hpp"
-
-// ... header body ...
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC pop_options
-#endif
-```
-
-The `pop_options` block is the **last thing in the header**: the pragma must never leak into the
-including translation unit (it would silently apply fast-math, e.g. folded NaN checks and
-reassociation, to unrelated code). Use `math::IsFinite` for finiteness checks. Test `.cpp` files
-never use the pragma.
-
-`OPTIMIZE_FOR_SPEED` on hot paths (`Filter/Compute/Update/Solve/Step`). Pure interfaces exempt.
+- **No `#pragma GCC optimize` and no `optimize` attribute**, in headers or sources. GCC does not
+  inline a callee whose optimization options differ from its caller's, so options set per header or
+  per function turn every small helper on a hot path (element access, accessors, `math::` wrappers)
+  into an out-of-line call.
+- The optimization level and floating-point model belong to the consumer and apply to whole
+  translation units. For embedded targets: `-O2` or `-O3` with `-ffast-math -fno-finite-math-only`.
+- `OPTIMIZE_FOR_SPEED` on hot paths (`Filter/Compute/Update/Solve/Step`). Pure interfaces exempt.
+  With `NumericalToolbox_ENABLE_OPTIMIZATIONS` it forces inlining (`always_inline`, `hot`, `inline`);
+  without it, it expands to nothing.
+- Use `math::IsFinite` for finiteness checks: a consumer may still build with `-ffinite-math-only`.
 
 ## Style
 

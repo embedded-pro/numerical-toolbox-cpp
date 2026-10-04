@@ -94,8 +94,8 @@ Input $[1, 0, 0, \ldots]$ → output $[1, 0, 0, \ldots]$ — identity passthroug
   $|z| = 1$. Finite-precision rounding can move a pole just outside, causing instability.
   Use $Q \leq 30$ in single precision; double precision or lattice realizations for higher $Q$.
 - **Denormal floats**: small state values approaching the denormal range stall the FPU pipeline
-  on many embedded cores. Enabling flush-to-zero (FTZ) or the fast-math pragma prevents this
-  at the cost of negligible numerical error.
+  on many embedded cores. Enabling flush-to-zero (FTZ) prevents this at the cost of negligible
+  numerical error.
 - **DC gain normalization**: the RBJ low-pass has unity DC gain by construction. Gain-staging
   between sections is not required; each section's output is well-scaled relative to its input.
 

@@ -1,5 +1,5 @@
 ---
-description: "Numerical C++ rules (float-only): no heap, bounded containers, generic template<typename T> instantiated for float, embedded pragmas, Allman/brace-init, SOLID, const-correct. Canonical: AGENTS.md."
+description: "Numerical C++ rules (float-only): no heap, bounded containers, generic template<typename T> instantiated for float, forced inlining on hot paths, Allman/brace-init, SOLID, const-correct. Canonical: AGENTS.md."
 applyTo: "**/*.{hpp,cpp,h}"
 ---
 
@@ -41,26 +41,11 @@ To replace a function with a platform-specific implementation, define the corres
 
 ## Embedded Optimizations
 
-Every algorithm header MUST bracket its body with a scoped pragma, so the options never leak into the including translation unit:
+Never use `#pragma GCC optimize` or the `optimize` attribute. GCC does not inline a callee whose optimization options differ from its caller's, so options set per header or per function turn every small helper on a hot path into an out-of-line call. Optimization level and floating-point flags are the consumer's, applied to whole translation units (embedded: `-O2`/`-O3` with `-ffast-math -fno-finite-math-only`).
 
-```cpp
-#pragma once
+Apply `OPTIMIZE_FOR_SPEED` (from `numerical/math/CompilerOptimizations.hpp`) on hot-path methods: `Compute()`, `Filter()`, `Calculate()`, `Solve()`, `Update()`, `Step()`. It forces inlining when `NumericalToolbox_ENABLE_OPTIMIZATIONS` is defined and expands to nothing otherwise.
 
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC push_options
-#pragma GCC optimize("O3", "fast-math")
-#endif
-
-// ... includes and header body ...
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC pop_options
-#endif
-```
-
-The `pop_options` block is the last thing in the header. Never use the pragma in test `.cpp` files.
-
-Apply `OPTIMIZE_FOR_SPEED` (from `numerical/math/CompilerOptimizations.hpp`) on hot-path methods: `Compute()`, `Filter()`, `Calculate()`, `Solve()`, `Update()`, `Step()`.
+Use `math::IsFinite` for finiteness checks: a consumer may still build with `-ffinite-math-only`.
 
 ## Naming
 

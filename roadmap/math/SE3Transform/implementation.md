@@ -77,8 +77,8 @@ function Log():                                 # inverse of Exp
 
 ## Deployment
 
-- Header: `numerical/math/SE3Transform.hpp` — `#pragma once` →
-  `#pragma GCC optimize("O3","fast-math")`, `OPTIMIZE_FOR_SPEED` on `operator*`/`Apply`, and
+- Header: `numerical/math/SE3Transform.hpp` — `#pragma once`, `OPTIMIZE_FOR_SPEED` on
+  `operator*`/`Apply`, and
   `extern template class SE3<float>;` under `#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD`.
 - Coverage: `numerical/math/SE3Transform.cpp` → `template class SE3<float>;`
 - Test: `numerical/math/test/TestSE3Transform.cpp`

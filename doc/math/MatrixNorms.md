@@ -59,7 +59,7 @@ Vector $\mathbf{v} = [3,\, 4]^\top$: $\|\mathbf{v}\|_2 = 5$, and $\hat{\mathbf{v
 
 **Zero vector normalisation** — dividing by $\|\mathbf{v}\|_2 = 0$ is undefined. The implementation returns an empty optional for near-zero norms.
 
-**Fast-math semantics** — `#pragma GCC optimize("fast-math")` may reorder floating-point operations. The norms are sums of non-negative values, so reordering does not change the sign of the result, but catastrophic cancellation can still occur for near-zero off-diagonal entries.
+**Fast-math semantics** — `-ffast-math` may reorder floating-point operations. The norms are sums of non-negative values, so reordering does not change the sign of the result, but catastrophic cancellation can still occur for near-zero off-diagonal entries.
 
 **Non-square matrices** — FrobeniusNorm, OneNorm, and InfinityNorm apply to any $m \times n$ matrix.
 

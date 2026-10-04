@@ -6,7 +6,7 @@ Code-file specifics: `.github/instructions/`. Deployment recipe: `roadmap/DEPLOY
 Essentials (full detail in AGENTS.md):
 - **No heap** — bounded containers / `std::array` / `std::optional`; no recursion; tests too.
 - **Float-only** — generic `template<typename T>` + `static_assert(std::is_floating_point_v<T>)`; instantiate/test `float`; no Q15/Q31.
-- **Embedded** — scoped `#pragma GCC push_options` / `optimize("O3","fast-math")` … `pop_options` (never leak to the TU) + `OPTIMIZE_FOR_SPEED` on hot paths.
+- **Embedded** — no `#pragma GCC optimize` / `optimize` attribute (they block inlining); the consumer sets optimization flags per TU; `OPTIMIZE_FOR_SPEED` (forced inlining) on hot paths.
 - **No comments** (except license/NOLINT). Allman braces, brace-init, PascalCase/camelCase.
 - **Tests** — `TEST_F` on `float`, `StrictMock` only, never plain `TEST()`, no redundant cases.
 - **No exceptions** — `std::optional`/status enums; interfaces `virtual ~I() = default`.

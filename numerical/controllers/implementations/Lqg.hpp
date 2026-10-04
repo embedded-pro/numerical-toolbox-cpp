@@ -1,10 +1,5 @@
 #pragma once
 
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC push_options
-#pragma GCC optimize("O3", "fast-math")
-#endif
-
 #include "numerical/controllers/implementations/Lqr.hpp"
 #include "numerical/controllers/interfaces/OutputFeedbackController.hpp"
 #include "numerical/filters/active/KalmanFilter.hpp"
@@ -103,7 +98,3 @@ namespace controllers
     extern template class Lqg<float, 4, 1, 1>;
 #endif
 }
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC pop_options
-#endif

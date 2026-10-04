@@ -5,11 +5,6 @@
 #include <array>
 #include <type_traits>
 
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC push_options
-#pragma GCC optimize("O3", "fast-math")
-#endif
-
 namespace math
 {
     template<typename T, size_t Rows, size_t Cols>
@@ -368,7 +363,3 @@ namespace math
     extern template class Matrix<float, 3, 3>;
 #endif
 }
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC pop_options
-#endif

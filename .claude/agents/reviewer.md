@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: Review code changes against numerical-toolbox standards — no heap, float-only templates, embedded pragmas, TEST_F on float, SOLID, docs. Does NOT modify files.
+description: Review code changes against numerical-toolbox standards — no heap, float-only templates, forced inlining on hot paths, TEST_F on float, SOLID, docs. Does NOT modify files.
 model: claude-sonnet-4-6
 tools: [Read, Bash]
 ---
@@ -35,7 +35,7 @@ End with totals + verdict: APPROVE / REQUEST CHANGES.
 - [ ] `extern template` guarded by `#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD`.
 
 **Embedded optimizations (WARNING)**
-- [ ] `#pragma GCC push_options` + `optimize("O3","fast-math")` after `#pragma once`, matching `pop_options` at end of algorithm headers (no TU leak; none in test `.cpp`).
+- [ ] No `#pragma GCC optimize` and no `optimize` attribute anywhere (they stop GCC inlining across the boundary).
 - [ ] `OPTIMIZE_FOR_SPEED` on `Filter/Compute/Update/Solve/Step`.
 
 **Namespaces (WARNING)**

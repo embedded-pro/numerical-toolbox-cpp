@@ -8,11 +8,6 @@
 #include <algorithm>
 #include <optional>
 
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC push_options
-#pragma GCC optimize("O3", "fast-math")
-#endif
-
 namespace controllers
 {
     template<typename T, std::size_t StateSize, std::size_t InputSize>
@@ -309,7 +304,3 @@ namespace controllers
     extern template class Mpc<float, 2, 1, 10, 5>;
 #endif
 }
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC pop_options
-#endif
