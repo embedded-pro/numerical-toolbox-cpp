@@ -1,11 +1,6 @@
 // Copyright 2024 Numerical Toolbox Contributors. All rights reserved.
 #pragma once
 
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC push_options
-#pragma GCC optimize("O3", "fast-math")
-#endif
-
 #include "numerical/math/CholeskyDecomposition.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include <array>
@@ -128,7 +123,3 @@ namespace filters::passive
     extern template class SavitzkyGolayFilter<float, 5, 2, 1>;
 #endif
 }
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC pop_options
-#endif

@@ -1,10 +1,5 @@
 #pragma once
 
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC push_options
-#pragma GCC optimize("O3", "fast-math")
-#endif
-
 #include "numerical/math/CompilerOptimizations.hpp"
 #include <array>
 #include <cassert>
@@ -94,7 +89,3 @@ namespace controllers
     extern template class GainScheduledController<float, 3, 2>;
 #endif
 }
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC pop_options
-#endif

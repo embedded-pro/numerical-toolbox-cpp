@@ -1,10 +1,5 @@
 #pragma once
 
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC push_options
-#pragma GCC optimize("O3", "fast-math")
-#endif
-
 #include "numerical/math/CompilerOptimizations.hpp"
 #include <array>
 #include <cstddef>
@@ -121,7 +116,3 @@ namespace filters::passive
     extern template class CicDecimator<float, 2, 4, 1>;
 #endif
 }
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC pop_options
-#endif

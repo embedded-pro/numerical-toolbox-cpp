@@ -1,10 +1,5 @@
 #pragma once
 
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC push_options
-#pragma GCC optimize("O3", "fast-math")
-#endif
-
 #include "numerical/analysis/FastFourierTransform.hpp"
 #include "numerical/analysis/windowing/Windowing.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
@@ -129,7 +124,3 @@ namespace analysis
     extern template class PowerSpectralDensity<float, 512, test::FftStub<float, 512>, test::TwiddleFactorsStub<float, 256>, 0>;
 #endif
 }
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC pop_options
-#endif

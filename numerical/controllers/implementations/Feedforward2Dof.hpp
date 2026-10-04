@@ -1,10 +1,5 @@
 #pragma once
 
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC push_options
-#pragma GCC optimize("O3", "fast-math")
-#endif
-
 #include "numerical/controllers/implementations/SaturationRateLimiter.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include <type_traits>
@@ -78,7 +73,3 @@ namespace controllers
     extern template class Feedforward2Dof<float>;
 #endif
 }
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC pop_options
-#endif

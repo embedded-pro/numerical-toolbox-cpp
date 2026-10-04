@@ -1,8 +1,4 @@
 #pragma once
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC push_options
-#pragma GCC optimize("O3", "fast-math")
-#endif
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/math/Math.hpp"
@@ -179,7 +175,3 @@ namespace control_analysis
     extern template class ContinuousToDiscrete<float, 2, 1, 1>;
 #endif
 }
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC pop_options
-#endif

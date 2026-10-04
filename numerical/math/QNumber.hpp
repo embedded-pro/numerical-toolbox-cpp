@@ -7,11 +7,6 @@
 #include <limits>
 #include <numbers>
 
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC push_options
-#pragma GCC optimize("O3", "fast-math")
-#endif
-
 namespace math
 {
     inline constexpr double pi = std::numbers::pi;
@@ -266,7 +261,3 @@ namespace math
     extern template class QNumber<int16_t, 15>;
 #endif
 }
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC pop_options
-#endif

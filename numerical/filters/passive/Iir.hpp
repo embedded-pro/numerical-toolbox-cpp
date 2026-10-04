@@ -3,11 +3,6 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/RecursiveBuffer.hpp"
 
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC push_options
-#pragma GCC optimize("O3", "fast-math")
-#endif
-
 namespace filters::passive
 {
     template<typename QNumberType, std::size_t P, std::size_t Q>
@@ -71,7 +66,3 @@ namespace filters::passive
     extern template class Iir<float, 3, 3>;
 #endif
 }
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC pop_options
-#endif

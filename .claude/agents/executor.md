@@ -1,6 +1,6 @@
 ---
 name: executor
-description: Implement code changes in numerical-toolbox — float-only templates, no heap, embedded pragmas, TEST_F on float, CMake wiring, docs. Needs a clear task or plan.
+description: Implement code changes in numerical-toolbox — float-only templates, no heap, forced inlining on hot paths, TEST_F on float, CMake wiring, docs. Needs a clear task or plan.
 model: claude-sonnet-4-6
 tools: [Read, Write, Edit, Bash, TodoWrite]
 ---

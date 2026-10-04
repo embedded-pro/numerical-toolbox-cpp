@@ -5,11 +5,6 @@
 #include "numerical/math/LinearTimeInvariant.hpp"
 #include "numerical/math/MatrixOperations.hpp"
 
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC push_options
-#pragma GCC optimize("O3", "fast-math")
-#endif
-
 namespace filters
 {
     template<typename QNumberType, std::size_t StateSize, std::size_t MeasurementSize, std::size_t ControlSize = 0>
@@ -136,7 +131,3 @@ namespace filters
     extern template class KalmanFilter<float, 2, 1, 1>;
 #endif
 }
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC pop_options
-#endif
