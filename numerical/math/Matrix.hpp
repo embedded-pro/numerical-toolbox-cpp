@@ -63,7 +63,7 @@ namespace math
 
         [[nodiscard]] OPTIMIZE_FOR_SPEED friend constexpr Matrix operator+(const Matrix& lhs, const Matrix& rhs)
         {
-            Matrix result;
+            Matrix result{ Uninitialized{} };
             for (size_type i = 0; i < size; ++i)
                 result.data[i] = lhs.data[i] + rhs.data[i];
             return result;
@@ -71,7 +71,7 @@ namespace math
 
         [[nodiscard]] OPTIMIZE_FOR_SPEED friend constexpr Matrix operator-(const Matrix& lhs, const Matrix& rhs)
         {
-            Matrix result;
+            Matrix result{ Uninitialized{} };
             for (size_type i = 0; i < size; ++i)
                 result.data[i] = lhs.data[i] - rhs.data[i];
             return result;
@@ -80,7 +80,7 @@ namespace math
         template<size_t RhsCols>
         [[nodiscard]] OPTIMIZE_FOR_SPEED friend constexpr Matrix<T, Rows, RhsCols> operator*(const Matrix& lhs, const Matrix<T, Cols, RhsCols>& rhs)
         {
-            Matrix<T, Rows, RhsCols> result;
+            Matrix<T, Rows, RhsCols> result{ typename Matrix<T, Rows, RhsCols>::Uninitialized{} };
             for (size_type i = 0; i < Rows; ++i)
             {
                 for (size_type j = 0; j < RhsCols; ++j)
@@ -96,7 +96,7 @@ namespace math
 
         [[nodiscard]] OPTIMIZE_FOR_SPEED friend constexpr Matrix operator*(const Matrix& lhs, const T& scalar)
         {
-            Matrix result;
+            Matrix result{ Uninitialized{} };
             for (size_type i = 0; i < size; ++i)
                 result.data[i] = lhs.data[i] * scalar;
             return result;
@@ -121,7 +121,16 @@ namespace math
         [[nodiscard]] constexpr Matrix<T, Rows, 1> GetColumn(size_type col) const;
 
     private:
-        std::array<T, Rows * Cols> data = {};
+        template<typename, size_t, size_t>
+        friend class Matrix;
+
+        struct Uninitialized
+        {};
+
+        constexpr explicit Matrix(Uninitialized) noexcept
+        {}
+
+        std::array<T, Rows * Cols> data;
     };
 
     template<typename T, typename... U>
@@ -141,10 +150,13 @@ namespace math
     }
 
     template<typename T, size_t Rows, size_t Cols>
-    constexpr Matrix<T, Rows, Cols>::Matrix() noexcept = default;
+    constexpr Matrix<T, Rows, Cols>::Matrix() noexcept
+        : data{}
+    {}
 
     template<typename T, size_t Rows, size_t Cols>
     OPTIMIZE_FOR_SPEED constexpr Matrix<T, Rows, Cols>::Matrix(std::initializer_list<std::initializer_list<T>> init)
+        : data{}
     {
         size_t row = 0;
         for (const auto& row_list : init)
@@ -267,7 +279,7 @@ namespace math
     OPTIMIZE_FOR_SPEED constexpr Matrix<T, Cols, Rows>
     Matrix<T, Rows, Cols>::Transpose() const
     {
-        Matrix<T, Cols, Rows> result;
+        Matrix<T, Cols, Rows> result{ typename Matrix<T, Cols, Rows>::Uninitialized{} };
         for (size_type i = 0; i < Rows; ++i)
             for (size_type j = 0; j < Cols; ++j)
                 result.at(j, i) = at(i, j);
@@ -328,7 +340,7 @@ namespace math
     {
         static_assert(BlockRows <= Rows && BlockCols <= Cols,
             "Requested block exceeds source matrix dimensions");
-        Matrix<T, BlockRows, BlockCols> result;
+        Matrix<T, BlockRows, BlockCols> result{ typename Matrix<T, BlockRows, BlockCols>::Uninitialized{} };
         for (size_type r = 0; r < BlockRows; ++r)
             for (size_type c = 0; c < BlockCols; ++c)
                 result.at(r, c) = at(rowOffset + r, colOffset + c);
@@ -339,7 +351,7 @@ namespace math
     [[nodiscard]] OPTIMIZE_FOR_SPEED constexpr Matrix<T, Rows, 1>
     Matrix<T, Rows, Cols>::GetColumn(size_type col) const
     {
-        Vector<T, Rows> result;
+        Vector<T, Rows> result{ typename Vector<T, Rows>::Uninitialized{} };
         for (size_type r = 0; r < Rows; ++r)
             result.at(r, 0) = at(r, col);
         return result;
