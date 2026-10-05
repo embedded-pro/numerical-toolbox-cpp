@@ -80,18 +80,7 @@ namespace math
         template<size_t RhsCols>
         [[nodiscard]] OPTIMIZE_FOR_SPEED friend constexpr Matrix<T, Rows, RhsCols> operator*(const Matrix& lhs, const Matrix<T, Cols, RhsCols>& rhs)
         {
-            Matrix<T, Rows, RhsCols> result{ typename Matrix<T, Rows, RhsCols>::Uninitialized{} };
-            for (size_type i = 0; i < Rows; ++i)
-            {
-                for (size_type j = 0; j < RhsCols; ++j)
-                {
-                    T sum{};
-                    for (size_type k = 0; k < Cols; ++k)
-                        sum += lhs.at(i, k) * rhs.at(k, j);
-                    result.at(i, j) = sum;
-                }
-            }
-            return result;
+            return lhs.Multiply(rhs);
         }
 
         [[nodiscard]] OPTIMIZE_FOR_SPEED friend constexpr Matrix operator*(const Matrix& lhs, const T& scalar)
@@ -129,6 +118,9 @@ namespace math
 
         constexpr explicit Matrix(Uninitialized) noexcept
         {}
+
+        template<size_t RhsCols>
+        [[nodiscard]] constexpr Matrix<T, Rows, RhsCols> Multiply(const Matrix<T, Cols, RhsCols>& rhs) const;
 
         std::array<T, Rows * Cols> data;
     };
@@ -273,6 +265,25 @@ namespace math
             data[i] *= scalar;
 
         return *this;
+    }
+
+    template<typename T, size_t Rows, size_t Cols>
+    template<size_t RhsCols>
+    OPTIMIZE_FOR_SPEED constexpr Matrix<T, Rows, RhsCols>
+    Matrix<T, Rows, Cols>::Multiply(const Matrix<T, Cols, RhsCols>& rhs) const
+    {
+        Matrix<T, Rows, RhsCols> result{ typename Matrix<T, Rows, RhsCols>::Uninitialized{} };
+        for (size_type i = 0; i < Rows; ++i)
+        {
+            for (size_type j = 0; j < RhsCols; ++j)
+            {
+                T sum{};
+                for (size_type k = 0; k < Cols; ++k)
+                    sum += at(i, k) * rhs.at(k, j);
+                result.at(i, j) = sum;
+            }
+        }
+        return result;
     }
 
     template<typename T, size_t Rows, size_t Cols>
