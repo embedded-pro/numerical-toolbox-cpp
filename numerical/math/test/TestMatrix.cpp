@@ -427,6 +427,24 @@ TEST_F(MatrixFloatShapeTest, three_by_three_compound_assignment_and_trace)
     EXPECT_NEAR(square3.Transpose().at(0, 2), 7.0f, math::Tolerance<float>());
 }
 
+TEST_F(MatrixFloatShapeTest, operators_write_every_element_of_their_result)
+{
+    constexpr math::Matrix<float, 3, 1> column{ { 1.0f }, { 2.0f }, { 3.0f } };
+    constexpr auto outer = column * column.Transpose();
+    constexpr auto sum = outer + outer;
+    constexpr auto difference = sum - outer;
+    constexpr auto scaled = difference * 0.5f;
+    constexpr auto block = scaled.GetBlock<2, 2>(1, 1);
+    constexpr auto lastColumn = scaled.GetColumn(2);
+
+    EXPECT_NEAR(outer.at(2, 1), 6.0f, math::Tolerance<float>());
+    EXPECT_NEAR(sum.at(0, 2), 6.0f, math::Tolerance<float>());
+    EXPECT_NEAR(difference.at(1, 1), 4.0f, math::Tolerance<float>());
+    EXPECT_NEAR(scaled.at(2, 2), 4.5f, math::Tolerance<float>());
+    EXPECT_NEAR(block.at(1, 0), 3.0f, math::Tolerance<float>());
+    EXPECT_NEAR(lastColumn.at(0, 0), 1.5f, math::Tolerance<float>());
+}
+
 TEST_F(MatrixFloatShapeTest, non_square_shapes_transpose_and_index)
 {
     math::Matrix<float, 1, 4> row{ { 1.0f, 2.0f, 3.0f, 4.0f } };
