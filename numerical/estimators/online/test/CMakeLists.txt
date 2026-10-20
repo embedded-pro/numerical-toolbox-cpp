@@ -10,6 +10,7 @@ target_link_libraries(numerical.estimators.online_test PUBLIC
 numerical_link_qemu_runtime(numerical.estimators.online_test)
 
 target_sources(numerical.estimators.online_test PRIVATE
+    TestRecursiveInstrumentalVariables.cpp
     TestRecursiveLeastSquares.cpp
     TestLmsAdaptiveFilter.cpp
 )
