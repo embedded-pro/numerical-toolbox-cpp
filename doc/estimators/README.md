@@ -14,6 +14,7 @@ Statistical estimation algorithms for fitting models to observed data and making
 
 ## Online Estimators (Streaming)
 
-| Algorithm                                           | Description                                                              |
-|-----------------------------------------------------|--------------------------------------------------------------------------|
-| [Recursive Least Squares](RecursiveLeastSquares.md) | Sample-by-sample parameter estimation with exponential forgetting factor |
+| Algorithm                                                             | Description                                                                           |
+|-----------------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| [Recursive Least Squares](RecursiveLeastSquares.md)                   | Sample-by-sample parameter estimation with exponential forgetting factor              |
+| [Recursive Instrumental Variables](RecursiveInstrumentalVariables.md) | Recursive least squares that stays unbiased when the regressor is measured with noise |
