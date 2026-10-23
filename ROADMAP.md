@@ -26,7 +26,6 @@ Difficulty legend:
 
 | #  | Component                                             | Target module           | Difficulty |
 |----|-------------------------------------------------------|-------------------------|------------|
-| 56 | Trapezoidal (LSPB) profile + duration sync            | `motion_profiles` (new) | ★☆☆☆☆      |
 | 53 | SE(3) transform, twists, wrenches, adjoint, exp/log   | `math`                  | ★★☆☆☆      |
 | 60 | S-curve (jerk-limited) profile                        | `motion_profiles` (new) | ★★☆☆☆      |
 | 61 | Cubic spline interpolation (vector-valued)            | `math`                  | ★★☆☆☆      |
@@ -52,17 +51,6 @@ Items 48–52 are the **evaluation & metrics primitives** — reusable quantitie
 unit-test reference [`TESTING.md`](TESTING.md) depends on but which
 the library does not yet expose. Detailed below under
 [Evaluation & metrics primitives](#evaluation--metrics-primitives).
-
-## Tier 1 — Trivial primitives ★☆☆☆☆
-
-### 56. Trapezoidal (LSPB) profile
-- **What:** Minimum-time velocity/acceleration-limited rest-to-rest move, triangular for short moves, plus
-  a fixed-duration plan for multi-axis synchronization.
-- **Embedded value:** The standard servo-axis move (robot joints, CNC, conveyors, motor position loops).
-- **Algorithm / paper:** L. Biagiotti, C. Melchiorri, *Trajectory Planning for Automatic Machines and
-  Robots* (2008), Ch. 3.
-- **Reuses:** Item 55 types.
-- **Spec:** [roadmap/motion_profiles/TrapezoidalProfile](roadmap/motion_profiles/TrapezoidalProfile/implementation.md).
 
 ## Tier 2 — Easy ★★☆☆☆
 
