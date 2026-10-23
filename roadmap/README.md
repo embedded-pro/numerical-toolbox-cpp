@@ -83,7 +83,10 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 `AlphaBetaFilter` (8) · `ComplementaryFilter` (9) · `AhrsMadgwickMahony` (33) · `SquareRootKalmanFilter` (39)
 
 ### `controllers`
-`SaturationRateLimiter` (3) · `BangBangHysteresis` (4) · `Feedforward2Dof` (7) · `GainScheduledController` (10) · `LeadLagCompensator` (17) · `LuenbergerObserver` (19) · `IntegralStateFeedbackLqi` (20)
+`SaturationRateLimiter` (3) · `BangBangHysteresis` (4) · `Feedforward2Dof` (7) · `GainScheduledController` (10) · `LeadLagCompensator` (17) · `LuenbergerObserver` (19) · `IntegralStateFeedbackLqi` (20) · `FrictionCompensation` (57)
+
+### `motion_profiles`
+`PolynomialProfile` (55) · `TrapezoidalProfile` (56) · `SCurveProfile` (60)
 
 ### `robust_control`
 `SlidingModeControl` (34) · `DisturbanceObserver` (35) · `ActiveDisturbanceRejection` (36) · `HInfinityStateFeedback` (46)
@@ -95,16 +98,19 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 `SignalDetectors` (5) · `ConvolutionCorrelation` (11) · `GoertzelAlgorithm` (13) · `RealFastFourierTransform` (25) · `HilbertTransform` (37) · `DiscreteWaveletTransform` (38)
 
 ### `estimators/offline`
-`PolynomialFitting` (12) · `TotalLeastSquares` (44)
+`PolynomialFitting` (12) · `TotalLeastSquares` (44) · `IncrementalQrLeastSquares` (63)
 
 ### `estimators/online`
 `LmsAdaptiveFilter` (21)
 
 ### `math`
-`Quaternion` (18) · `Cordic` (23) · `MatrixExponential` (29) · `ContinuousToDiscrete` (30) · `SE3Transform` (53)
+`Quaternion` (18) · `Cordic` (23) · `MatrixExponential` (29) · `ContinuousToDiscrete` (30) · `SE3Transform` (53) · `AngleUtilities` (54) · `TridiagonalSolver` (59) · `CubicSpline` (61)
+
+### `optimization`
+`LevenbergMarquardt` (64)
 
 ### `control_analysis`
 `ControllabilityObservability` (26) · `TransferFunctionStateSpace` (32)
 
 ### `solvers`
-`RungeKuttaIntegrators` (24) · `QrDecomposition` (27) · `LuDecomposition` (28) · `LyapunovSylvester` (31) · `JacobiEigenSolver` (42) · `SingularValueDecomposition` (43)
+`RungeKuttaIntegrators` (24) · `QrDecomposition` (27) · `LuDecomposition` (28) · `LyapunovSylvester` (31) · `JacobiEigenSolver` (42) · `SingularValueDecomposition` (43) · `SymplecticIntegrators` (58) · `DampedPseudoInverse` (62) · `ActiveSetQp` (65)
