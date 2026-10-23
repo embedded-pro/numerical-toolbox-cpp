@@ -1,17 +1,37 @@
 #include "simulator/analysis/PowerDensitySpectrum/application/PsdSimulator.hpp"
 #include "numerical/analysis/FastFourierTransformRadix2Impl.hpp"
 #include "numerical/analysis/PowerDensitySpectrum.hpp"
-#include "numerical/analysis/windowing/Windowing.hpp"
 #include "numerical/analysis/TwiddleFactorsTable.hpp"
+#include "numerical/analysis/windowing/Windowing.hpp"
 #include <algorithm>
 #include <cmath>
-#include <memory>
 #include <stdexcept>
 
 namespace simulator::analysis::psd
 {
     namespace
     {
+        windowing::Window<float>& SelectWindow(WindowType windowType)
+        {
+            static windowing::HammingWindow<float> hamming;
+            static windowing::HanningWindow<float> hanning;
+            static windowing::BlackmanWindow<float> blackman;
+            static windowing::RectangularWindow<float> rectangular;
+
+            switch (windowType)
+            {
+                case WindowType::Hamming:
+                    return hamming;
+                case WindowType::Hanning:
+                    return hanning;
+                case WindowType::Blackman:
+                    return blackman;
+                case WindowType::Rectangular:
+                default:
+                    return rectangular;
+            }
+        }
+
         template<std::size_t SegmentSize, std::size_t Overlap>
         PsdResult ComputeForSizeAndOverlap(float sampleRateHz, std::size_t inputSize,
             const std::vector<float>& signal, windowing::Window<float>& window)
@@ -94,36 +114,20 @@ namespace simulator::analysis::psd
         auto signal = utils::SignalGenerator::Generate(configuration.inputSize, configuration.sampleRateHz,
             configuration.signalComponents, configuration.noise);
 
-        std::unique_ptr<windowing::Window<float>> window;
-        switch (configuration.windowType)
-        {
-            case WindowType::Hamming:
-                window = std::make_unique<windowing::HammingWindow<float>>();
-                break;
-            case WindowType::Hanning:
-                window = std::make_unique<windowing::HanningWindow<float>>();
-                break;
-            case WindowType::Blackman:
-                window = std::make_unique<windowing::BlackmanWindow<float>>();
-                break;
-            case WindowType::Rectangular:
-            default:
-                window = std::make_unique<windowing::RectangularWindow<float>>();
-                break;
-        }
+        windowing::Window<float>& window{ SelectWindow(configuration.windowType) };
 
         switch (configuration.segmentSize)
         {
             case 64:
-                return DispatchOverlap<64>(configuration.overlapPercent, configuration.sampleRateHz, configuration.inputSize, signal, *window);
+                return DispatchOverlap<64>(configuration.overlapPercent, configuration.sampleRateHz, configuration.inputSize, signal, window);
             case 128:
-                return DispatchOverlap<128>(configuration.overlapPercent, configuration.sampleRateHz, configuration.inputSize, signal, *window);
+                return DispatchOverlap<128>(configuration.overlapPercent, configuration.sampleRateHz, configuration.inputSize, signal, window);
             case 256:
-                return DispatchOverlap<256>(configuration.overlapPercent, configuration.sampleRateHz, configuration.inputSize, signal, *window);
+                return DispatchOverlap<256>(configuration.overlapPercent, configuration.sampleRateHz, configuration.inputSize, signal, window);
             case 512:
-                return DispatchOverlap<512>(configuration.overlapPercent, configuration.sampleRateHz, configuration.inputSize, signal, *window);
+                return DispatchOverlap<512>(configuration.overlapPercent, configuration.sampleRateHz, configuration.inputSize, signal, window);
             case 1024:
-                return DispatchOverlap<1024>(configuration.overlapPercent, configuration.sampleRateHz, configuration.inputSize, signal, *window);
+                return DispatchOverlap<1024>(configuration.overlapPercent, configuration.sampleRateHz, configuration.inputSize, signal, window);
             default:
                 throw std::invalid_argument("Unsupported segment size. Must be a power of 2 between 64 and 1024.");
         }

@@ -18,11 +18,12 @@ namespace nonlinear_control
     public:
         using StateVector = std::array<T, Order>;
 
-        virtual ~StrictFeedbackModel() = default;
-
         virtual T Drift(std::size_t i, const StateVector& x) const = 0;
         virtual T Gain(std::size_t i, const StateVector& x) const = 0;
         virtual T VirtualDerivative(std::size_t i, const StateVector& x, T alpha) const = 0;
+
+    protected:
+        ~StrictFeedbackModel() = default;
     };
 
     template<typename T, std::size_t Order>

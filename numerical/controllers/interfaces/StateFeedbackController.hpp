@@ -19,7 +19,9 @@ namespace controllers
         using StateVector = math::Vector<T, StateSize>;
         using InputVector = math::Vector<T, InputSize>;
 
-        virtual ~StateFeedbackController() = default;
         virtual InputVector ComputeControl(const StateVector& state) = 0;
+
+    protected:
+        ~StateFeedbackController() = default;
     };
 }

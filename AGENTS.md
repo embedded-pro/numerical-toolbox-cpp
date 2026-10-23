@@ -44,7 +44,8 @@ resource-constrained embedded systems. Real-time, deterministic, no heap.
 
 ## Interfaces & errors
 
-- Interfaces = pure virtual classes; `virtual ~I() = default` — **never** `= 0` destructors.
+- Interfaces = pure virtual classes with a `protected:`, non-virtual `~I() = default` — **never** a `virtual` or `= 0` destructor. A virtual one puts a deleting destructor in every vtable, which links `operator delete`/`free` into heap-free firmware.
+- Concrete classes declare no destructor unless they need one. Never own or delete through an interface pointer (no `std::unique_ptr<I>`): hold the concrete type, pass `I&`.
 - No exceptions. Use `std::optional<T>` or status enums. `assert`/`really_assert` for preconditions.
 - SOLID + DIP: constructor injection; depend on abstractions. RAII. No virtual calls in real-time paths.
 

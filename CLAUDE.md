@@ -9,5 +9,5 @@ Essentials (full detail in AGENTS.md):
 - **Embedded** — no `#pragma GCC optimize` / `optimize` attribute (they block inlining); the consumer sets optimization flags per TU; `OPTIMIZE_FOR_SPEED` (forced inlining) on hot paths.
 - **No comments** (except license/NOLINT). Allman braces, brace-init, PascalCase/camelCase.
 - **Tests** — `TEST_F` on `float`, `StrictMock` only, never plain `TEST()`, no redundant cases.
-- **No exceptions** — `std::optional`/status enums; interfaces `virtual ~I() = default`.
+- **No exceptions** — `std::optional`/status enums; interfaces get a `protected:` non-virtual `~I() = default`, never a virtual destructor.
 - **Be terse** — minimal prose; report file paths + pass/fail.

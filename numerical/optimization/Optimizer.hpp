@@ -12,8 +12,6 @@ namespace optimization
             "Optimizer can only be instantiated with math::QNumber types.");
 
     public:
-        virtual ~Optimizer() = default;
-
         using Vector = math::Vector<QNumberType, NumberOfFeatures>;
 
         struct Result
@@ -30,5 +28,8 @@ namespace optimization
         };
 
         virtual const Result& Minimize(const Vector& initialGuess, ObjectiveFunction<QNumberType, NumberOfFeatures>& objective) = 0;
+
+    protected:
+        ~Optimizer() = default;
     };
 }

@@ -9,8 +9,10 @@ namespace analysis
     class TwiddleFactors
     {
     public:
-        virtual ~TwiddleFactors() = default;
         virtual math::Complex<QNumberType>& operator[](std::size_t n) = 0;
+
+    protected:
+        ~TwiddleFactors() = default;
     };
 
     template<typename QNumberType>
@@ -21,8 +23,6 @@ namespace analysis
             "FastFourierTransform can only be instantiated with math::QNumber types.");
 
     public:
-        virtual ~FastFourierTransform() = default;
-
         static constexpr std::size_t Log2(std::size_t n)
         {
             std::size_t result = 0;
@@ -41,6 +41,8 @@ namespace analysis
         virtual VectorReal& Inverse(VectorComplex& input) = 0;
 
     protected:
+        ~FastFourierTransform() = default;
+
         template<typename T>
         inline T BitReverse(T x, T logr_n, T bits, T radix)
         {

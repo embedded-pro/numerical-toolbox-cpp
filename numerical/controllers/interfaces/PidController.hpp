@@ -26,10 +26,12 @@ namespace controllers
             "Pid can only be instantiated with math::QNumber types.");
 
     public:
-        virtual ~AsynchronousPidController() = default;
         virtual void Reset() = 0;
         virtual void SetTunings(PidTunings<QNumberType> tunings) = 0;
         virtual void SetPoint(QNumberType setPoint) = 0;
+
+    protected:
+        ~AsynchronousPidController() = default;
     };
 
     template<typename QNumberType>
@@ -38,5 +40,8 @@ namespace controllers
     {
     public:
         virtual QNumberType Process(QNumberType processVariable) = 0;
+
+    protected:
+        ~SynchronousPidController() = default;
     };
 }

@@ -12,11 +12,13 @@ namespace solvers
         static_assert(std::is_floating_point_v<T>, "OdeSystem supports floating-point types only");
 
     public:
-        virtual ~OdeSystem() = default;
         [[nodiscard]] virtual math::Vector<T, StateSize> Derivative(
             const math::Vector<T, StateSize>& x,
             const math::Vector<T, InputSize>& u,
             T t) = 0;
+
+    protected:
+        ~OdeSystem() = default;
     };
 
     template<typename T, std::size_t StateSize>
@@ -25,9 +27,11 @@ namespace solvers
         static_assert(std::is_floating_point_v<T>, "OdeSystem supports floating-point types only");
 
     public:
-        virtual ~OdeSystem() = default;
         [[nodiscard]] virtual math::Vector<T, StateSize> Derivative(
             const math::Vector<T, StateSize>& x,
             T t) = 0;
+
+    protected:
+        ~OdeSystem() = default;
     };
 }

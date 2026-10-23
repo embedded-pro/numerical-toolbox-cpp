@@ -12,9 +12,11 @@ namespace controllers
     public:
         static_assert(std::is_floating_point_v<T>, "Feedforward supports floating-point types");
 
-        virtual ~Feedforward() = default;
         virtual T Evaluate(T reference) = 0;
         virtual void Reset() = 0;
+
+    protected:
+        ~Feedforward() = default;
     };
 
     template<typename T>
@@ -23,9 +25,11 @@ namespace controllers
     public:
         static_assert(std::is_floating_point_v<T>, "FeedbackLaw supports floating-point types");
 
-        virtual ~FeedbackLaw() = default;
         virtual T Process(T error) = 0;
         virtual void Reset() = 0;
+
+    protected:
+        ~FeedbackLaw() = default;
     };
 
     template<typename T>

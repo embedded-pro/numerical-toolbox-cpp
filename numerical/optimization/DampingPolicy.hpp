@@ -12,9 +12,10 @@ namespace optimization
         static_assert(std::is_floating_point_v<T>, "DampingPolicy supports floating-point types only");
 
     public:
-        virtual ~DampingPolicy() = default;
-
         [[nodiscard]] virtual T DampingSquared(const math::Matrix<T, Residuals, Parameters>& jacobian) const = 0;
+
+    protected:
+        ~DampingPolicy() = default;
     };
 
     template<typename T, std::size_t Residuals, std::size_t Parameters>

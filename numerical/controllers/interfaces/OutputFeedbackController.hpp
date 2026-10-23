@@ -21,7 +21,9 @@ namespace controllers
         using MeasurementVector = math::Vector<T, MeasurementSize>;
         using InputVector = math::Vector<T, InputSize>;
 
-        virtual ~OutputFeedbackController() = default;
         virtual InputVector ComputeControl(const MeasurementVector& measurement) = 0;
+
+    protected:
+        ~OutputFeedbackController() = default;
     };
 }

@@ -1,40 +1,43 @@
 #include "simulator/analysis/FastFourierTransform/application/FftSimulator.hpp"
 #include "numerical/analysis/FastFourierTransformRadix2Impl.hpp"
-#include "numerical/analysis/windowing/Windowing.hpp"
 #include "numerical/analysis/TwiddleFactorsTable.hpp"
+#include "numerical/analysis/windowing/Windowing.hpp"
 #include <algorithm>
 #include <cmath>
-#include <memory>
 #include <stdexcept>
 
 namespace simulator::analysis
 {
     namespace
     {
-        std::vector<float> ApplyWindow(const std::vector<float>& signal, WindowType windowType)
+        windowing::Window<float>& SelectWindow(WindowType windowType)
         {
-            std::unique_ptr<windowing::Window<float>> window;
+            static windowing::HammingWindow<float> hamming;
+            static windowing::HanningWindow<float> hanning;
+            static windowing::BlackmanWindow<float> blackman;
+            static windowing::RectangularWindow<float> rectangular;
 
             switch (windowType)
             {
                 case WindowType::Hamming:
-                    window = std::make_unique<windowing::HammingWindow<float>>();
-                    break;
+                    return hamming;
                 case WindowType::Hanning:
-                    window = std::make_unique<windowing::HanningWindow<float>>();
-                    break;
+                    return hanning;
                 case WindowType::Blackman:
-                    window = std::make_unique<windowing::BlackmanWindow<float>>();
-                    break;
+                    return blackman;
                 case WindowType::Rectangular:
                 default:
-                    window = std::make_unique<windowing::RectangularWindow<float>>();
-                    break;
+                    return rectangular;
             }
+        }
+
+        std::vector<float> ApplyWindow(const std::vector<float>& signal, WindowType windowType)
+        {
+            windowing::Window<float>& window{ SelectWindow(windowType) };
 
             std::vector<float> windowed(signal.size());
             for (std::size_t i = 0; i < signal.size(); ++i)
-                windowed[i] = signal[i] * (*window)(i, signal.size());
+                windowed[i] = signal[i] * window(i, signal.size());
 
             return windowed;
         }
