@@ -28,7 +28,6 @@ Difficulty legend:
 |----|-------------------------------------------------------|-------------------------|------------|
 | 55 | Polynomial (cubic/quintic) point-to-point profile     | `motion_profiles` (new) | ★☆☆☆☆      |
 | 56 | Trapezoidal (LSPB) profile + duration sync            | `motion_profiles` (new) | ★☆☆☆☆      |
-| 58 | Symplectic integrators (semi-implicit Euler, Verlet)  | `solvers`               | ★☆☆☆☆      |
 | 53 | SE(3) transform, twists, wrenches, adjoint, exp/log   | `math`                  | ★★☆☆☆      |
 | 60 | S-curve (jerk-limited) profile                        | `motion_profiles` (new) | ★★☆☆☆      |
 | 61 | Cubic spline interpolation (vector-valued)            | `math`                  | ★★☆☆☆      |
@@ -73,14 +72,6 @@ the library does not yet expose. Detailed below under
   Robots* (2008), Ch. 3.
 - **Reuses:** Item 55 types.
 - **Spec:** [roadmap/motion_profiles/TrapezoidalProfile](roadmap/motion_profiles/TrapezoidalProfile/implementation.md).
-
-### 58. Symplectic integrators
-- **What:** Semi-implicit Euler and velocity Verlet for second-order systems `q̈ = a(q, q̇, u)`.
-- **Embedded value:** Bounded energy error for simulated mechanical plants at one or two evaluations per
-  step (RK4 needs four and still drifts).
-- **Algorithm / paper:** E. Hairer, C. Lubich, G. Wanner, *Geometric Numerical Integration* (2006).
-- **Reuses:** `math::Vector`; complements `RungeKuttaIntegrators`.
-- **Spec:** [roadmap/solvers/SymplecticIntegrators](roadmap/solvers/SymplecticIntegrators/implementation.md).
 
 ## Tier 2 — Easy ★★☆☆☆
 

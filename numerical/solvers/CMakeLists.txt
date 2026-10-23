@@ -23,9 +23,11 @@ target_sources(numerical.solver PRIVATE
     OdeSystem.hpp
     QrDecomposition.hpp
     RungeKuttaIntegrators.hpp
+    SecondOrderSystem.hpp
     SingularValueDecomposition.hpp
     Solver.hpp
     SpectralRadius.hpp
+    SymplecticIntegrators.hpp
 )
 
 numerical_add_coverage_sources(numerical.solver
@@ -40,6 +42,7 @@ numerical_add_coverage_sources(numerical.solver
     RungeKuttaIntegrators.cpp
     SingularValueDecomposition.cpp
     SpectralRadius.cpp
+    SymplecticIntegrators.cpp
 )
 
 add_subdirectory(test)
