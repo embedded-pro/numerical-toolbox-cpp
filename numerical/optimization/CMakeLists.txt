@@ -14,7 +14,10 @@ target_link_libraries(numerical.optimization ${NUMERICAL_VISIBILITY}
 target_sources(numerical.optimization PRIVATE
     Adam.hpp
     BayesianOptimization.hpp
+    DampingPolicy.hpp
     GradientDescent.hpp
+    LeastSquaresProblem.hpp
+    LevenbergMarquardt.hpp
     ObjectiveFunction.hpp
     Optimizer.hpp
     Sgd.hpp
@@ -25,6 +28,7 @@ numerical_add_coverage_sources(numerical.optimization
     Adam.cpp
     BayesianOptimization.cpp
     GradientDescent.cpp
+    LevenbergMarquardt.cpp
     Sgd.cpp
 )
 

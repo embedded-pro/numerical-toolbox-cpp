@@ -12,5 +12,6 @@ numerical_link_qemu_runtime(numerical.optimization_test)
 target_sources(numerical.optimization_test PRIVATE
     TestBayesianOptimization.cpp
     TestGradientDescent.cpp
+    TestLevenbergMarquardt.cpp
     TestStepOptimizer.cpp
 )

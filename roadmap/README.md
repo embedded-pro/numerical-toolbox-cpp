@@ -85,7 +85,6 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 ### `controllers`
 `SaturationRateLimiter` (3) · `BangBangHysteresis` (4) · `Feedforward2Dof` (7) · `GainScheduledController` (10) · `LeadLagCompensator` (17) · `LuenbergerObserver` (19) · `IntegralStateFeedbackLqi` (20)
 
-
 ### `robust_control`
 `SlidingModeControl` (34) · `DisturbanceObserver` (35) · `ActiveDisturbanceRejection` (36) · `HInfinityStateFeedback` (46)
 
@@ -104,11 +103,8 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 ### `math`
 `Quaternion` (18) · `Cordic` (23) · `MatrixExponential` (29) · `ContinuousToDiscrete` (30)
 
-### `optimization`
-`LevenbergMarquardt` (64)
-
 ### `control_analysis`
 `ControllabilityObservability` (26) · `TransferFunctionStateSpace` (32)
 
 ### `solvers`
-`RungeKuttaIntegrators` (24) · `QrDecomposition` (27) · `LuDecomposition` (28) · `LyapunovSylvester` (31) · `JacobiEigenSolver` (42) · `SingularValueDecomposition` (43) · `ActiveSetQp` (65)
+`RungeKuttaIntegrators` (24) · `QrDecomposition` (27) · `LuDecomposition` (28) · `LyapunovSylvester` (31) · `JacobiEigenSolver` (42) · `SingularValueDecomposition` (43)

@@ -28,19 +28,16 @@ Difficulty legend:
 |----|-------------------------------------------------------|-------------------------|------------|
 | 66 | SE(2) transform, twists, exp/log, pose error          | `math`                  | ★★☆☆☆      |
 | 67 | Kabsch / Umeyama point-set alignment                  | `solvers`               | ★★☆☆☆      |
-| 64 | Levenberg–Marquardt (retraction, pluggable damping)   | `optimization`          | ★★★☆☆      |
 | 68 | Lie-group Jacobians and ⊕/⊖ for SO(3), SE(3), SE(2)   | `math`                  | ★★★☆☆      |
 | 69 | Control allocation (redistributed pseudo-inverse, QP) | `controllers`           | ★★★☆☆      |
 | 70 | Particle filter (bounded, systematic resampling)      | `filters/active`        | ★★★☆☆      |
-| 65 | Dense convex QP (Goldfarb–Idnani dual active set)     | `solvers`               | ★★★★☆      |
 | 71 | Error-state (multiplicative) EKF on Lie groups        | `filters/active`        | ★★★★☆      |
 | 72 | Minimum-derivative (min-snap) piecewise polynomials   | `motion_profiles` (new) | ★★★★☆      |
 | 73 | Online jerk-limited trajectory from arbitrary state   | `motion_profiles` (new) | ★★★★★      |
 
-Items 53–73 are the generic building blocks of robotics-toolbox-cpp's roadmap (referenced there as
-NT53–NT73); each also serves non-robotics consumers (motor control, navigation, calibration). All are
-*(float-first)*. Items 66–73 serve its mobile, aerial, legged, marine and localization families and
-have no spec yet.
+Items 66–73 are generic building blocks of robotics-toolbox-cpp's roadmap (referenced there as
+NT66–NT73; NT53–NT65 are deployed). They serve its mobile, aerial, legged, marine and localization
+families, also have non-robotics consumers, and have no spec yet. All are *(float-first)*.
 
 Items 48–52 are the **evaluation & metrics primitives** — reusable quantities the per-family
 unit-test reference [`TESTING.md`](TESTING.md) depends on but which
@@ -69,15 +66,6 @@ the library does not yet expose. Detailed below under
 ---
 
 ## Tier 3 — Moderate ★★★☆☆
-
-### 64. Levenberg–Marquardt
-- **What:** Damped Gauss–Newton for small nonlinear least squares with a problem-supplied retraction
-  (vectors, bounds, rotations) and a pluggable damping policy.
-- **Embedded value:** One bounded, heap-free solver for IK, parallel-robot forward kinematics, calibration
-  and scan matching.
-- **Algorithm / paper:** K. Levenberg (1944); D. Marquardt (1963); J. Nocedal, S. Wright (2006), Ch. 10.
-- **Reuses:** `LuDecomposition`.
-- **Spec:** [roadmap/optimization/LevenbergMarquardt](roadmap/optimization/LevenbergMarquardt/implementation.md).
 
 ### 68. Lie-group Jacobians and ⊕/⊖
 - **What:** Left and right Jacobians (and inverses) of SO(3), SE(3) and SE(2), the `⊕`/`⊖` operators
@@ -108,16 +96,6 @@ the library does not yet expose. Detailed below under
 ---
 
 ## Tier 4 — Advanced ★★★★☆
-
-### 65. Dense convex QP
-- **What:** Goldfarb–Idnani dual active-set solver for strictly convex QPs with equality and inequality
-  constraints; finite, bounded iterations.
-- **Embedded value:** Exact constrained allocation (cable tensions, thrusters), task-priority control and
-  constrained MPC without heuristics.
-- **Algorithm / paper:** D. Goldfarb, A. Idnani, *Mathematical Programming*, 27(1), 1983; M. J. D. Powell
-  (1985).
-- **Reuses:** `CholeskyDecomposition`, `TriangularSolve`, `GivensRotation`.
-- **Spec:** [roadmap/solvers/ActiveSetQp](roadmap/solvers/ActiveSetQp/implementation.md).
 
 ### 71. Error-state Kalman filter on Lie groups
 - **What:** Multiplicative EKF whose nominal state lives on a group (quaternion/SO(3), SE(3)) and whose

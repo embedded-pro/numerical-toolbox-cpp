@@ -4,8 +4,9 @@ General-purpose optimization algorithms for parameter fitting, training, and con
 
 ## Algorithms
 
-| Algorithm                                        | Description                                                                                 |
-|--------------------------------------------------|---------------------------------------------------------------------------------------------|
-| [Bayesian Optimization](BayesianOptimization.md) | Gradient-free global optimization using Gaussian Process surrogate and Expected Improvement |
-| [Gradient Descent](Optimizer.md)                 | Iterative batch optimization via gradient-based weight updates                              |
-| [SGD / Adam Step Optimisers](StepOptimizer.md)   | Stateful per-step SGD (with optional momentum/Nesterov) and Adam with bias correction       |
+| Algorithm                                        | Description                                                                                                               |
+|--------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| [Bayesian Optimization](BayesianOptimization.md) | Gradient-free global optimization using Gaussian Process surrogate and Expected Improvement                               |
+| [Gradient Descent](Optimizer.md)                 | Iterative batch optimization via gradient-based weight updates                                                            |
+| [SGD / Adam Step Optimisers](StepOptimizer.md)   | Stateful per-step SGD (with optional momentum/Nesterov) and Adam with bias correction                                     |
+| [Levenberg–Marquardt](LevenbergMarquardt.md)     | Damped Gauss–Newton for small nonlinear least squares with a retraction (manifold / bounded states) and pluggable damping |

@@ -10,6 +10,7 @@ target_link_libraries(numerical.solvers_test PUBLIC
 numerical_link_qemu_runtime(numerical.solvers_test)
 
 target_sources(numerical.solvers_test PRIVATE
+    TestActiveSetQp.cpp
     TestConditionNumber.cpp
     TestDampedPseudoInverse.cpp
     TestDiscreteAlgebraicRiccatiEquation.cpp
