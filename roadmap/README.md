@@ -104,7 +104,7 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 `LmsAdaptiveFilter` (21)
 
 ### `math`
-`Quaternion` (18) · `Cordic` (23) · `MatrixExponential` (29) · `ContinuousToDiscrete` (30) · `SE3Transform` (53) · `AngleUtilities` (54) · `TridiagonalSolver` (59) · `CubicSpline` (61)
+`Quaternion` (18) · `Cordic` (23) · `MatrixExponential` (29) · `ContinuousToDiscrete` (30) · `SE3Transform` (53) · `TridiagonalSolver` (59) · `CubicSpline` (61)
 
 ### `optimization`
 `LevenbergMarquardt` (64)

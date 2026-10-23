@@ -26,7 +26,6 @@ Difficulty legend:
 
 | #  | Component                                             | Target module           | Difficulty |
 |----|-------------------------------------------------------|-------------------------|------------|
-| 54 | Angle utilities (wrap, shortest difference, unwrap)   | `math`                  | ★☆☆☆☆      |
 | 55 | Polynomial (cubic/quintic) point-to-point profile     | `motion_profiles` (new) | ★☆☆☆☆      |
 | 56 | Trapezoidal (LSPB) profile + duration sync            | `motion_profiles` (new) | ★☆☆☆☆      |
 | 57 | Friction compensation (Coulomb + viscous + Stribeck)  | `controllers`           | ★☆☆☆☆      |
@@ -59,15 +58,6 @@ the library does not yet expose. Detailed below under
 [Evaluation & metrics primitives](#evaluation--metrics-primitives).
 
 ## Tier 1 — Trivial primitives ★☆☆☆☆
-
-### 54. Angle utilities
-- **What:** `WrapToPi` `(−π, π]`, `WrapToTwoPi` `[0, 2π)`, shortest signed `AngleDifference`, and
-  `UnwrapAngle` for continuous signals.
-- **Embedded value:** One convention for every angle consumer — heading controllers, odometry, encoder
-  unwrapping, analytical IK; replaces `ComplementaryFilter`'s private wrap.
-- **Algorithm / paper:** range reduction with `fmod`; D. Goldberg, *ACM Computing Surveys*, 23(1), 1991.
-- **Reuses:** `math::Fmod`.
-- **Spec:** [roadmap/math/AngleUtilities](roadmap/math/AngleUtilities/implementation.md).
 
 ### 55. Polynomial point-to-point profile
 - **What:** Cubic (position + velocity) or quintic (+ acceleration) time law between two states over a

@@ -17,3 +17,4 @@ Core mathematical primitives for numerical computation.
 | [Step Response Metrics](StepResponseMetrics.md)     | Rise time, settling time, percent overshoot, peak time, and steady-state error from a bounded step-response vector |
 | [Matrix Exponential](MatrixExponential.md)          | Scaling-and-squaring with diagonal (6,6) Padé approximant — exact ODE solution operator and discretisation engine |
 | [Consistency Metrics](ConsistencyMetrics.md)        | NEES/NIS estimator consistency with χ² gates — normalised estimation error squared and normalised innovation squared |
+| [Angle Utilities](AngleUtilities.md)                | Wrap to $(-\pi, \pi]$ / $[0, 2\pi)$, shortest signed angle difference, and unwrapping of wrapped measurements |

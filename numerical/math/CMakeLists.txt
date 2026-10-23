@@ -16,6 +16,7 @@ if (NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS)
 endif()
 
 target_sources(numerical.math PRIVATE
+    AngleUtilities.hpp
     CholeskyDecomposition.hpp
     ConstexprMath.hpp
     ComplexNumber.hpp
@@ -42,6 +43,7 @@ target_sources(numerical.math PRIVATE
 
 numerical_add_coverage_sources(numerical.math
     Math.cpp
+    AngleUtilities.cpp
     CholeskyDecomposition.cpp
     ComplexNumber.cpp
     ConsistencyMetrics.cpp
