@@ -20,7 +20,7 @@ All pseudocode respects the library constraints: **no heap**, bounded containers
 `template<typename T>` interface that is validated and instantiated for **`float`** only
 (no `Q15`/`Q31`). The generic signature keeps a future fixed-point specialisation cheap to add.
 
-The canonical worked example is [math/SE3Transform](math/SE3Transform/implementation.md).
+For a deployed example of the artifact set a spec turns into, see [SE3Transform](../numerical/math/SE3Transform.hpp), its [test](../numerical/math/test/TestSE3Transform.cpp) and [doc page](../doc/math/SE3Transform.md).
 
 ## Deployment shape (float-only)
 
@@ -102,7 +102,7 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 `LmsAdaptiveFilter` (21)
 
 ### `math`
-`Quaternion` (18) · `Cordic` (23) · `MatrixExponential` (29) · `ContinuousToDiscrete` (30) · `SE3Transform` (53)
+`Quaternion` (18) · `Cordic` (23) · `MatrixExponential` (29) · `ContinuousToDiscrete` (30)
 
 ### `optimization`
 `LevenbergMarquardt` (64)

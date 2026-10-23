@@ -30,6 +30,7 @@ target_sources(numerical.math_test PRIVATE
     TestMatrix.cpp
     TestQuaternion.cpp
     TestRecursiveBuffer.cpp
+    TestSE3Transform.cpp
     TestStatistics.cpp
     TestStepResponseMetrics.cpp
     TestToeplitz.cpp
