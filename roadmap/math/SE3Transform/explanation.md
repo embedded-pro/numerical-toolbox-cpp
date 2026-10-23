@@ -1,34 +1,38 @@
-# SE(3) Transform — Overview
+# SE(3) Transform, Twists and Wrenches — Overview
 
 ## What it is
-`SE(3)` is the group of rigid-body motions in 3D: a rotation plus a translation, stored as a 4×4
-homogeneous matrix `[[R, p],[0, 1]]`. Its "velocity" companions are **twists** (6-vectors pairing
-angular and linear velocity) and **wrenches** (moment plus force); the **adjoint** map moves those
-6-vectors between coordinate frames.
+The algebra of rigid-body motion: a transform is a rotation plus a translation; a *twist* is a rigid
+body's instantaneous velocity (linear and angular); a *wrench* is a force together with a moment. The
+adjoint map moves twists and wrenches between frames, and the exponential/logarithm maps convert
+between a constant twist held for some time and the finite motion it produces.
 
 ## Why it matters (embedded)
-This is the algebra every modern manipulator, drone, and SLAM stack is built on. Forward kinematics
-chains `SE(3)` products; Jacobians and dynamics are expressed with twists and the adjoint; trajectory
-interpolation lives on this group. A compact, correct `SE(3)` type is the foundation the whole
-robotics layer reuses.
+Every pose-level algorithm — manipulator kinematics and Jacobians, pose inverse kinematics, Cartesian
+interpolation, task-space control, drone attitude/position control, visual odometry — needs the same
+small set of operations. Defining them once, with one ordering convention, prevents the silent sign
+and ordering mismatches that otherwise appear when independently written modules exchange 6-vectors.
 
 ## How it works (intuition)
-Composing two motions multiplies their homogeneous matrices, which reduces to `R = R₁R₂`,
-`p = R₁p₂ + p₁` — no full 4×4 multiply needed. The inverse has the closed form `(Rᵀ, −Rᵀp)`. The
-**exponential map** turns a constant twist (a screw axis) applied for a "time" `θ` into the finite
-motion it produces — the rigid-body generalization of Rodrigues' rotation formula — and its inverse
-**log** recovers the screw from a transform. The **adjoint** is the 6×6 that re-expresses a twist or
-wrench in another frame.
+A transform stores a 3×3 rotation and a 3-vector translation; composing two transforms rotates and
+shifts the second by the first, and the inverse has the closed form `(Rᵀ, −Rᵀp)`. A twist written in one
+frame is re-expressed in another with the adjoint: rotate both parts, then add the "lever-arm" effect
+of the frame offset on the linear part. Wrenches transform with the dual rule so that power (force
+times velocity) is the same in every frame. The exponential turns "rotate about this line while
+sliding along it" into a finite motion — Rodrigues' formula for the rotation plus a matching integral
+for the translation — and the logarithm recovers that motion, which is exactly what pose-error
+feedback needs.
 
 ## Key parameters
-- **Twist ordering** — `(ω; v)` (angular first) here; the adjoint layout follows this convention.
-- **Screw parameter `θ`** — how far along a twist/screw axis the exponential integrates.
-- **Orthonormality of `R`** — must be maintained on `SO(3)`; reorthonormalize against drift.
+- **Ordering convention** — linear part first for twists `(v; ω)` and wrenches `(f; n)`.
+- **Singular regions** — small angles and angles near 180° in the logarithm.
+- **Orthonormality of `R`** — maintained on SO(3); re-orthonormalize against drift.
 
 ## Reference
 K. M. Lynch, F. C. Park, *Modern Robotics* (2017), Ch. 3; R. M. Murray, Z. Li, S. S. Sastry,
-*A Mathematical Introduction to Robotic Manipulation* (1994).
+*A Mathematical Introduction to Robotic Manipulation* (1994), Ch. 2; J. Solà, J. Deray, D. Atchuthan,
+"A micro Lie theory for state estimation in robotics," arXiv:1812.01537 (2018). (The first two use
+`(ω; v)` ordering; this library uses `(v; ω)`, which only permutes the blocks.)
 
 ## See also
-`Quaternion` (item 18, the `SO(3)` rotation part), `Geometry3D` (`RotationAboutAxis`,
-`SkewSymmetric`), `MatrixExponential` (item 29, the `se(3)→SE(3)` analogue), `DenavitHartenberg` (M7).
+`Quaternion` (the SO(3) rotation part), `Geometry3D` (`RotationAboutAxis`, `SkewSymmetric`),
+`MatrixExponential` (the general matrix analogue of `Exp`).
