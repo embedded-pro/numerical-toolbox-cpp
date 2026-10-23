@@ -74,12 +74,12 @@ Equalities are added first, in order; an equality whose residual is positive is 
 
 With $n$ variables, $m$ constraints, $q \le n$ active, and $K$ the iteration cap:
 
-| Case | Time | Space | Notes |
-|------|------|-------|-------|
-| Setup | $O(n^3)$ | $O(n^2)$ | Cholesky, triangular inverse $J = L^{-\top}$, start point $x = -J J^\top g$ |
-| Best | $O(n^3 + mn)$ | $O(n^2 + m)$ | Unconstrained minimum already feasible: one residual scan |
-| Average | $O(n^3 + k\,(n^2 + mn))$ | $O(n^2 + m)$ | $k$ additions, a few drops; per addition $d$, $z$, $r$ and rotations cost $O(n^2)$, the scan $O(mn)$ |
-| Worst | $O(n^3 + K\,(n + m)\,n^2)$ | $O(n^2 + m)$ | Cap reached; loose bound, each addition allows at most $n + m + 1$ add/drop passes |
+| Case    | Time                       | Space        | Notes                                                                                                |
+|---------|----------------------------|--------------|------------------------------------------------------------------------------------------------------|
+| Setup   | $O(n^3)$                   | $O(n^2)$     | Cholesky, triangular inverse $J = L^{-\top}$, start point $x = -J J^\top g$                          |
+| Best    | $O(n^3 + mn)$              | $O(n^2 + m)$ | Unconstrained minimum already feasible: one residual scan                                            |
+| Average | $O(n^3 + k\,(n^2 + mn))$   | $O(n^2 + m)$ | $k$ additions, a few drops; per addition $d$, $z$, $r$ and rotations cost $O(n^2)$, the scan $O(mn)$ |
+| Worst   | $O(n^3 + K\,(n + m)\,n^2)$ | $O(n^2 + m)$ | Cap reached; loose bound, each addition allows at most $n + m + 1$ add/drop passes                   |
 
 Storage is $J$ and $R$ ($n \times n$ each), multipliers, signs and an active-set list of length at most $n$; all on the stack, no heap.
 
@@ -87,11 +87,11 @@ Storage is $J$ and $R$ ($n \times n$ each), multipliers, signs and an active-set
 
 Minimise $\tfrac12\|x\|^2$ ($H = I$, $g = 0$) subject to $x_2 \ge 1$ and $0.1\,x_1 + 0.5\,x_2 \ge 0.9$. Start at $x = 0$ with $J = I$; residuals are $-1$ and $-0.9$, so the first row is the most violated.
 
-| Step | Action | $t_1$ | $t_2$ | Result |
-|------|--------|-------|-------|--------|
-| 1 | Add row 1: $z = (0,1)$, no active set | $\infty$ | $1/1 = 1$ | $x = (0, 1)$, $u_1 = 1$, row 1 active |
-| 2 | Add row 2: $n^+ = (0.1, 0.5)$; component along row 1 is $d_1 = 0.5$, orthogonal part $z = (0.1, 0)$, $r = 0.5$, residual $-0.4$ | $1/0.5 = 2$ | $0.4/0.01 = 40$ | Partial step $t = 2$: $x = (0.2, 1)$, $u_1 = 0$, $u_2 = 2$; row 1 dropped |
-| 3 | Repeat row 2 with empty active set: $z = n^+$, residual $-0.38$ | $\infty$ | $0.38/0.26 = 1.4615$ | $x = (0.346154, 1.730769)$, $u_2 = 3.461538$ |
+| Step | Action                                                                                                                          | $t_1$       | $t_2$                | Result                                                                    |
+|------|---------------------------------------------------------------------------------------------------------------------------------|-------------|----------------------|---------------------------------------------------------------------------|
+| 1    | Add row 1: $z = (0,1)$, no active set                                                                                           | $\infty$    | $1/1 = 1$            | $x = (0, 1)$, $u_1 = 1$, row 1 active                                     |
+| 2    | Add row 2: $n^+ = (0.1, 0.5)$; component along row 1 is $d_1 = 0.5$, orthogonal part $z = (0.1, 0)$, $r = 0.5$, residual $-0.4$ | $1/0.5 = 2$ | $0.4/0.01 = 40$      | Partial step $t = 2$: $x = (0.2, 1)$, $u_1 = 0$, $u_2 = 2$; row 1 dropped |
+| 3    | Repeat row 2 with empty active set: $z = n^+$, residual $-0.38$                                                                 | $\infty$    | $0.38/0.26 = 1.4615$ | $x = (0.346154, 1.730769)$, $u_2 = 3.461538$                              |
 
 No inactive row is violated ($x_2 = 1.73 \ge 1$), so the solver stops: $x = 0.9\,(0.1, 0.5)/0.26$, the projection onto the second row, with multiplier $0.9/0.26 = 3.461538$ and row 1 inactive.
 
@@ -132,13 +132,13 @@ Other reference points:
 
 ## Connections to Other Algorithms
 
-| Algorithm | Relationship |
-|-----------|--------------|
-| Cholesky decomposition | Supplies $L$ with $H = L L^\top$, and is the test for strict convexity |
-| Triangular solve | Builds $J = L^{-\top}$ once and back-substitutes $R^{-1} d_1$ every pass |
-| Givens rotation | Restores the triangular form of $R$ when a constraint is added or dropped |
-| QR decomposition | $J$ and $R$ are an incrementally updated QR of the active normals in the $H^{-1}$ metric |
-| Damped pseudo-inverse | The unconstrained counterpart: with no active constraint the answer is $-H^{-1} g$; this solver adds exact limits |
+| Algorithm                | Relationship                                                                                                                    |
+|--------------------------|---------------------------------------------------------------------------------------------------------------------------------|
+| Cholesky decomposition   | Supplies $L$ with $H = L L^\top$, and is the test for strict convexity                                                          |
+| Triangular solve         | Builds $J = L^{-\top}$ once and back-substitutes $R^{-1} d_1$ every pass                                                        |
+| Givens rotation          | Restores the triangular form of $R$ when a constraint is added or dropped                                                       |
+| QR decomposition         | $J$ and $R$ are an incrementally updated QR of the active normals in the $H^{-1}$ metric                                        |
+| Damped pseudo-inverse    | The unconstrained counterpart: with no active constraint the answer is $-H^{-1} g$; this solver adds exact limits               |
 | Model predictive control | Its input bounds are a direct use of the bound rows; the current fixed-count projected descent could be replaced by this solver |
 
 ## References & Further Reading

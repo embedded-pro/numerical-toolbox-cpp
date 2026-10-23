@@ -34,10 +34,10 @@ $$
 
 The push-through identity $(J^\top J + \lambda^2 I)^{-1}J^\top = J^\top (JJ^\top + \lambda^2 I)^{-1}$ gives an equivalent form, so the solver always factors the smaller system:
 
-| Shape | Condition | System | Step |
-|-------|-----------|--------|------|
-| Tall | $R > P$ | $P \times P$, parameter space | $\delta = -(J^\top J + \lambda^2 I)^{-1}J^\top r$ |
-| Wide or square | $R \le P$ | $R \times R$, residual space | $\delta = -J^\top (JJ^\top + \lambda^2 I)^{-1} r$ |
+| Shape          | Condition | System                        | Step                                              |
+|----------------|-----------|-------------------------------|---------------------------------------------------|
+| Tall           | $R > P$   | $P \times P$, parameter space | $\delta = -(J^\top J + \lambda^2 I)^{-1}J^\top r$ |
+| Wide or square | $R \le P$ | $R \times R$, residual space  | $\delta = -J^\top (JJ^\top + \lambda^2 I)^{-1} r$ |
 
 For $\lambda = 0$ and full row rank, the wide form is the minimum-norm solution of $J\delta = -r$: the shortest correction that cancels the linearized residual. The system is solved by LU decomposition with partial pivoting, never by an explicit inverse. If the factorization finds a pivot below a relative $10^{-6}$ (for example $\lambda = 0$ with a rank-deficient $J$), the solve ends unconverged at the current state instead of dividing by zero. For $\lambda^2 > 0$ the matrix is symmetric positive definite.
 
@@ -58,31 +58,31 @@ The damped step vanishes exactly when $J^\top r = 0$. For a tall problem this is
 
 ## Complexity Analysis
 
-| Item | Cost | Justification |
-|------|------|---------------|
-| Normal matrix | $O(R\,P\,m)$ | $J^\top J$ costs $R P^2$, $JJ^\top$ costs $P R^2$; $m = \min(R, P)$ |
-| Factorization and solve | $O(m^3)$ | LU of an $m \times m$ matrix dominates the $O(m^2)$ triangular solves |
-| Whole solve | at most $N$ iterations | each adds one residual and one Jacobian from the problem; $N + 1$ residual evaluations in all, the last at the returned state |
-| Memory | one $R \times P$ Jacobian, one $m \times m$ system | stack only; no heap, no recursion |
+| Item                    | Cost                                               | Justification                                                                                                                 |
+|-------------------------|----------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| Normal matrix           | $O(R\,P\,m)$                                       | $J^\top J$ costs $R P^2$, $JJ^\top$ costs $P R^2$; $m = \min(R, P)$                                                           |
+| Factorization and solve | $O(m^3)$                                           | LU of an $m \times m$ matrix dominates the $O(m^2)$ triangular solves                                                         |
+| Whole solve             | at most $N$ iterations                             | each adds one residual and one Jacobian from the problem; $N + 1$ residual evaluations in all, the last at the returned state |
+| Memory                  | one $R \times P$ Jacobian, one $m \times m$ system | stack only; no heap, no recursion                                                                                             |
 
 ## Step-by-Step Walkthrough
 
 **Rosenbrock residuals.** $r = (10(y - x^2),\; 1 - x)$, $J = \begin{pmatrix} -20x & 10 \\ -1 & 0 \end{pmatrix}$, zero residual at $(1, 1)$. Start at $(-1.2, 1)$ with $\lambda = 0$; $R = P = 2$, so the step is solved in residual space.
 
-| Iteration | State | $r$ | $J$ | Step $\delta$ | New state |
-|-----------|-------|-----|-----|---------------|-----------|
-| 1 | $(-1.2, 1)$ | $(-4.4, 2.2)$, $\|r\| = 4.919$ | $\begin{pmatrix} 24 & 10 \\ -1 & 0 \end{pmatrix}$ | $(2.2, -4.84)$ | $(1, -3.84)$ |
-| 2 | $(1, -3.84)$ | $(-48.4, 0)$, $\|r\| = 48.4$ | $\begin{pmatrix} -20 & 10 \\ -1 & 0 \end{pmatrix}$ | $(0, 4.84)$ | $(1, 1)$ |
+| Iteration | State        | $r$                            | $J$                                                | Step $\delta$  | New state    |
+|-----------|--------------|--------------------------------|----------------------------------------------------|----------------|--------------|
+| 1         | $(-1.2, 1)$  | $(-4.4, 2.2)$, $\|r\| = 4.919$ | $\begin{pmatrix} 24 & 10 \\ -1 & 0 \end{pmatrix}$  | $(2.2, -4.84)$ | $(1, -3.84)$ |
+| 2         | $(1, -3.84)$ | $(-48.4, 0)$, $\|r\| = 48.4$   | $\begin{pmatrix} -20 & 10 \\ -1 & 0 \end{pmatrix}$ | $(0, 4.84)$    | $(1, 1)$     |
 
 The second residual is linear in $x$, so step 1 zeroes it exactly. The first is then linear in $y$, so step 2 finishes exactly. The residual norm rises from $4.9$ to $48.4$ on the way: the iteration is not monotone. With a step cap $\Delta = 1$, the first step of norm $5.316540$ is scaled to unit length, giving $(-0.786197,\; 0.089634)$.
 
 **Angle on the unit circle.** State $\theta$, $r = (\cos\theta, \sin\theta) - (\cos 2.5, \sin 2.5)$, $J = (-\sin\theta,\; \cos\theta)^\top$. Here $R = 2 > P = 1$ and $J^\top J = 1$, so with $\lambda = 0$ each step is $\theta \leftarrow \theta - \sin(\theta - 2.5)$, wrapped into $(-\pi, \pi]$. Start at $\theta = -2.5$, which is only $1.28$ rad from the target across the $\pm\pi$ seam.
 
-| Iteration | $\theta$ | $\sin(\theta - 2.5)$ | Before wrap | After wrap |
-|-----------|----------|----------------------|-------------|------------|
-| 1 | $-2.500000$ | $0.958924$ | $-3.458924$ | $2.824261$ |
-| 2 | $2.824261$ | $0.318608$ | $2.505653$ | $2.505653$ |
-| 3 | $2.505653$ | $0.005653$ | $2.500000$ | $2.500000$ |
+| Iteration | $\theta$    | $\sin(\theta - 2.5)$ | Before wrap | After wrap |
+|-----------|-------------|----------------------|-------------|------------|
+| 1         | $-2.500000$ | $0.958924$           | $-3.458924$ | $2.824261$ |
+| 2         | $2.824261$  | $0.318608$           | $2.505653$  | $2.505653$ |
+| 3         | $2.505653$  | $0.005653$           | $2.500000$  | $2.500000$ |
 
 The wrap keeps the state in its canonical range, so the answer is $2.5$ and not $2.5 - 2\pi$. The error falls $0.324 \to 0.0057 \to 3\times10^{-8}$, faster than quadratic because of the circle's symmetry.
 
@@ -99,11 +99,11 @@ The wrap keeps the state in its canonical range, so the answer is $2.5$ and not 
 
 ## Variants & Generalizations
 
-| Variant | Key difference |
-|---------|----------------|
-| **Gauss–Newton ($\lambda = 0$)** | Quadratic convergence for zero-residual problems; fails on rank deficiency |
-| **Constant or problem-aware damping (this)** | Fixed $\lambda$ gives robust linear convergence; a Jacobian-dependent $\lambda^2$ (zero away from singularities) keeps the fast rate where safe |
-| **Gain-ratio (Nielsen) adaptation** | Raises or lowers $\lambda$ from the ratio of actual to predicted cost reduction; needs a trial evaluation and accept/reject, a possible later variant |
+| Variant                                      | Key difference                                                                                                                                        |
+|----------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Gauss–Newton ($\lambda = 0$)**             | Quadratic convergence for zero-residual problems; fails on rank deficiency                                                                            |
+| **Constant or problem-aware damping (this)** | Fixed $\lambda$ gives robust linear convergence; a Jacobian-dependent $\lambda^2$ (zero away from singularities) keeps the fast rate where safe       |
+| **Gain-ratio (Nielsen) adaptation**          | Raises or lowers $\lambda$ from the ratio of actual to predicted cost reduction; needs a trial evaluation and accept/reject, a possible later variant |
 
 ## Applications
 
@@ -114,13 +114,13 @@ The wrap keeps the state in its canonical range, so the answer is $2.5$ and not 
 
 ## Connections to Other Algorithms
 
-| Algorithm | Relationship |
-|-----------|--------------|
-| [LU Decomposition](../solvers/LuDecomposition.md) | Solves the damped normal system; its singularity report ends the solve unconverged |
-| [Damped Pseudo-Inverse](../solvers/DampedPseudoInverse.md) | The same damped step in SVD form for one linear solve; avoids squaring the condition number at higher cost |
-| [SE(3) Transform](../math/SE3Transform.md) | Supplies the manifold retraction for pose states |
-| [Angle Utilities](../math/AngleUtilities.md) | Supplies the wrapped retraction for angle states |
-| [Gradient Descent](Optimizer.md) | First-order method for general costs; this method exploits the sum-of-squares structure through the Gauss–Newton curvature and needs far fewer iterations on small problems |
+| Algorithm                                                  | Relationship                                                                                                                                                                |
+|------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [LU Decomposition](../solvers/LuDecomposition.md)          | Solves the damped normal system; its singularity report ends the solve unconverged                                                                                          |
+| [Damped Pseudo-Inverse](../solvers/DampedPseudoInverse.md) | The same damped step in SVD form for one linear solve; avoids squaring the condition number at higher cost                                                                  |
+| [SE(3) Transform](../math/SE3Transform.md)                 | Supplies the manifold retraction for pose states                                                                                                                            |
+| [Angle Utilities](../math/AngleUtilities.md)               | Supplies the wrapped retraction for angle states                                                                                                                            |
+| [Gradient Descent](Optimizer.md)                           | First-order method for general costs; this method exploits the sum-of-squares structure through the Gauss–Newton curvature and needs far fewer iterations on small problems |
 
 ## References & Further Reading
 
