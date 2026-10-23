@@ -11,6 +11,7 @@ target_link_libraries(numerical.solver ${NUMERICAL_VISIBILITY}
 )
 
 target_sources(numerical.solver PRIVATE
+    ActiveSetQp.hpp
     ConditionNumber.hpp
     DampedPseudoInverse.hpp
     DiscreteAlgebraicRiccatiEquation.hpp
@@ -32,6 +33,7 @@ target_sources(numerical.solver PRIVATE
 )
 
 numerical_add_coverage_sources(numerical.solver
+    ActiveSetQp.cpp
     DampedPseudoInverse.cpp
     DiscreteAlgebraicRiccatiEquation.cpp
     DurandKerner.cpp

@@ -19,4 +19,5 @@ Numerical solvers for linear systems, polynomial roots, and matrix equations.
 | [Singular Value Decomposition](SingularValueDecomposition.md)              | Golub-Kahan bidiagonalization and implicit-shift QR for SVD, pseudo-inverse, rank, and condition number        |
 | [Jacobi Eigenvalue Solver](JacobiEigenSolver.md)                           | Cyclic Jacobi rotations for the full symmetric eigenvalue/eigenvector problem                                  |
 | [Symplectic Integrators](SymplecticIntegrators.md)                         | Semi-implicit Euler and velocity Verlet for second-order systems — bounded energy error on conservative plants |
-| [Damped Pseudo-Inverse](DampedPseudoInverse.md)                            | Damped (Tikhonov) least-squares inverse and exact null-space projector from one SVD — tall or wide matrices    |
+| [Damped Pseudo-Inverse](DampedPseudoInverse.md)                           | Damped (Tikhonov) least-squares inverse and exact null-space projector from one SVD — tall or wide matrices |
+| [Active-Set QP (Goldfarb–Idnani)](ActiveSetQp.md)                         | Dense strictly convex QP with equality and inequality constraints via the dual active-set method — no feasible start needed |
