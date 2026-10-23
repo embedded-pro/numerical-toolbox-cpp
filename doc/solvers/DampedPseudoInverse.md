@@ -56,12 +56,12 @@ with $\sigma_{\min}$ the smallest nonzero singular value. Robustness costs accur
 
 ## Complexity Analysis
 
-| Operation | Time | Space | Notes |
-|-----------|------|-------|-------|
-| Factor | $O(Mk^2)$ | $O(mk + nk)$ | One Golub–Kahan SVD; wide matrices through their transpose |
-| Solve | $O((m + n)\,k)$ | $O(n)$ | $k$ inner products of length $m$, $k$ updates of length $n$; no division |
-| Project | $O(n\,r)$ | $O(n)$ | $r$ inner products and updates; $P$ never formed |
-| Explicit inverse, projector | $O(mnk)$, $O(n^2 r)$ | $O(mn)$, $O(n^2)$ | Diagnostics; sums of rank-one terms |
+| Operation                   | Time                 | Space             | Notes                                                                    |
+|-----------------------------|----------------------|-------------------|--------------------------------------------------------------------------|
+| Factor                      | $O(Mk^2)$            | $O(mk + nk)$      | One Golub–Kahan SVD; wide matrices through their transpose               |
+| Solve                       | $O((m + n)\,k)$      | $O(n)$            | $k$ inner products of length $m$, $k$ updates of length $n$; no division |
+| Project                     | $O(n\,r)$            | $O(n)$            | $r$ inner products and updates; $P$ never formed                         |
+| Explicit inverse, projector | $O(mnk)$, $O(n^2 r)$ | $O(mn)$, $O(n^2)$ | Diagnostics; sums of rank-one terms                                      |
 
 Here $M = \max(m, n)$. The SVD factors are the only persistent storage: $U$ is $m \times k$, $V$ is $n \times k$, plus $k$ singular values. No heap is used, and the factorization is paid once per matrix; later solves and projections are inner products only.
 
@@ -74,9 +74,9 @@ Here $M = \max(m, n)$. The SVD factors are the only persistent storage: $U$ is $
 **Gains and projections** at $\lambda = 0.1$:
 
 | $i$ | $\sigma_i$ | $u_i^\top b$ | $1/\sigma_i$ | $g(\sigma_i)$ |
-|-----|-----------|--------------|--------------|---------------|
-| 0 | $1.732051$ | $2.121320$ | $0.577350$ | $0.575432$ |
-| 1 | $1$ | $-0.707107$ | $1$ | $0.990099$ |
+|-----|------------|--------------|--------------|---------------|
+| 0   | $1.732051$ | $2.121320$   | $0.577350$   | $0.575432$    |
+| 1   | $1$        | $-0.707107$  | $1$          | $0.990099$    |
 
 **Solution.** Without damping, $x = A^\dagger b = (0, 1, 1)$: it satisfies $Ax = b$ and is orthogonal to the null space ($0 + 1 - 1 = 0$). With $\lambda = 0.1$, $x = (0.003289, 0.993388, 0.996678)$. The residual is $b - Ax = \lambda^2(AA^\top + \lambda^2 I)^{-1}b$, of norm $0.009934$, within the bound $0.022139$ (the looser $\lambda^2\|b\|/\sigma_{\min}^2$ gives $0.022361$).
 

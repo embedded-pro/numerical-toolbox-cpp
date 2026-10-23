@@ -4,13 +4,13 @@ Statistical estimation algorithms for fitting models to observed data and making
 
 ## Offline Estimators (Batch)
 
-| Algorithm                                              | Description                                                               |
-|--------------------------------------------------------|---------------------------------------------------------------------------|
-| [Linear Regression](LinearRegression.md)               | Ordinary least-squares regression using the normal equation               |
-| [Polynomial Fitting](PolynomialFitting.md)             | Degree-d polynomial fit via Vandermonde normal equations                  |
-| [Total Least Squares](TotalLeastSquares.md)            | Errors-in-variables fit (noisy regressors) via the SVD of `[A | b]`       |
-| [Yule-Walker](YuleWalker.md)                           | Autoregressive model parameter estimation via the Yule-Walker equations   |
-| [Expectation-Maximization](ExpectationMaximization.md) | EM algorithm for Kalman filter parameter identification (Shumway-Stoffer) |
+| Algorithm                                                    | Description                                                                                                   |
+|--------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
+| [Linear Regression](LinearRegression.md)                     | Ordinary least-squares regression using the normal equation                                                   |
+| [Polynomial Fitting](PolynomialFitting.md)                   | Degree-d polynomial fit via Vandermonde normal equations                                                      |
+| [Total Least Squares](TotalLeastSquares.md)                  | Errors-in-variables fit (noisy regressors) via the SVD of `[A | b]`                                           |
+| [Yule-Walker](YuleWalker.md)                                 | Autoregressive model parameter estimation via the Yule-Walker equations                                       |
+| [Expectation-Maximization](ExpectationMaximization.md)       | EM algorithm for Kalman filter parameter identification (Shumway-Stoffer)                                     |
 | [Incremental QR Least Squares](IncrementalQrLeastSquares.md) | Streaming Givens QR in fixed memory with a rank-revealing SVD solve (minimum-norm, identifiable combinations) |
 
 ## Online Estimators (Streaming)

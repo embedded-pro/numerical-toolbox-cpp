@@ -26,10 +26,10 @@ Each row couples a knot to its two neighbours only, so the system is tridiagonal
 
 ### End conditions
 
-| Condition | First row | Last row |
-|-----------|-----------|----------|
+| Condition                                       | First row                                  | Last row                                                       |
+|-------------------------------------------------|--------------------------------------------|----------------------------------------------------------------|
 | **Clamped** (end slopes $\sigma_0$, $\sigma_1$) | $2h_0 M_0 + h_0 M_1 = 6\,(s_0 - \sigma_0)$ | $h_{K-2} M_{K-2} + 2h_{K-2} M_{K-1} = 6\,(\sigma_1 - s_{K-2})$ |
-| **Natural** | $M_0 = 0$ | $M_{K-1} = 0$ |
+| **Natural**                                     | $M_0 = 0$                                  | $M_{K-1} = 0$                                                  |
 
 Clamping fixes the end slopes and leaves the end second derivatives free; natural ends do the reverse. Default slopes are zero.
 
@@ -47,11 +47,11 @@ An abscissa exactly on an interior knot selects the interval starting there; the
 
 ## Complexity Analysis
 
-| Operation | Time | Space | Notes |
-|-----------|------|-------|-------|
-| Factorization | $O(K)$ | three bands | Once per fit, shared by all channels |
-| Fit | $O(D\,K)$ | $K_{\max}(2 + 2D)$ scalars | $D$ channels, each one right-hand side build and one solve of $O(K)$; no iteration |
-| Evaluate | $O(\log K + D)$ | $O(1)$ | Binary search, then three Horner polynomials per channel |
+| Operation     | Time            | Space                      | Notes                                                                              |
+|---------------|-----------------|----------------------------|------------------------------------------------------------------------------------|
+| Factorization | $O(K)$          | three bands                | Once per fit, shared by all channels                                               |
+| Fit           | $O(D\,K)$       | $K_{\max}(2 + 2D)$ scalars | $D$ channels, each one right-hand side build and one solve of $O(K)$; no iteration |
+| Evaluate      | $O(\log K + D)$ | $O(1)$                     | Binary search, then three Horner polynomials per channel                           |
 
 Storage holds the knots, their reciprocal spans, the values and the second derivatives: $K_{\max}(2 + 2D)$ scalars, where $K_{\max}$ is the compile-time capacity, plus the three bands of the solver. All of it is bounded and on the stack or inside the object; no heap.
 
@@ -62,11 +62,11 @@ Knots $(0, 1, 2)$, values $(0, 1, 0)$, so $h_0 = h_1 = 1$ and $s_0 = 1$, $s_1 = 
 **Clamped, zero end slopes.** The system is
 $$\begin{pmatrix} 2 & 1 & 0 \\ 1 & 4 & 1 \\ 0 & 1 & 2 \end{pmatrix} M = \begin{pmatrix} 6 \\ -12 \\ 6 \end{pmatrix}$$
 
-| $k$ | Pivot $p_k$ | $c'_k$ | Forward $y_k$ | Back $M_k$ |
-|-----|-------------|--------|---------------|------------|
-| 0 | $2$ | $1/2$ | $3$ | $3 + 3 = 6$ |
-| 1 | $4 - 1/2 = 7/2$ | $2/7$ | $-30/7$ | $-30/7 - 12/7 = -6$ |
-| 2 | $2 - 2/7 = 12/7$ | unused | $6$ | $6$ |
+| $k$ | Pivot $p_k$      | $c'_k$ | Forward $y_k$ | Back $M_k$          |
+|-----|------------------|--------|---------------|---------------------|
+| 0   | $2$              | $1/2$  | $3$           | $3 + 3 = 6$         |
+| 1   | $4 - 1/2 = 7/2$  | $2/7$  | $-30/7$       | $-30/7 - 12/7 = -6$ |
+| 2   | $2 - 2/7 = 12/7$ | unused | $6$           | $6$                 |
 
 So $M = (6, -6, 6)$. Interval 0 has $\beta_0 = 1 - (12 - 6)/6 = 0$ and $d_0 = -2$, giving $y(\tau) = 3\tau^2 - 2\tau^3$. Hence $y(0.5) = 0.75 - 0.25 = 0.5$, $y'(0.5) = 3 - 1.5 = 1.5$ and $y''(0.5) = 0$. The curve leaves and enters every knot flat, like a smooth step.
 
@@ -102,11 +102,11 @@ Random fits are checked for interpolation of every knot, for continuity of first
 
 ## Connections to Other Algorithms
 
-| Algorithm | Relationship |
-|-----------|--------------|
-| [Tridiagonal Solver](TridiagonalSolver.md) | Solves the second-derivative system; its factorization is reused across channels |
+| Algorithm                                                     | Relationship                                                                                                             |
+|---------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| [Tridiagonal Solver](TridiagonalSolver.md)                    | Solves the second-derivative system; its factorization is reused across channels                                         |
 | [Polynomial Profile](../motion_profiles/PolynomialProfile.md) | The two-knot clamped case is the same cubic Hermite polynomial; the spline generalizes it to many knots with $C^2$ joins |
-| Polynomial fitting | Least-squares fit instead of interpolation |
+| Polynomial fitting                                            | Least-squares fit instead of interpolation                                                                               |
 
 ## References & Further Reading
 

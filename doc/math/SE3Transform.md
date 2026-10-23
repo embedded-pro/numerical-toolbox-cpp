@@ -89,15 +89,15 @@ the translation difference stacked on the rotation vector that carries the curre
 
 ## Complexity Analysis
 
-| Operation | Time | Space | Notes |
-|-----------|------|-------|-------|
-| Compose | O(1) | O(1) | one $3\times3$ product, one matrix–vector product |
-| Inverse | O(1) | O(1) | transpose and one matrix–vector product; no solve |
-| Apply / rotate | O(1) | O(1) | one matrix–vector product (plus 3 additions for apply) |
-| Twist / wrench transform | O(1) | O(1) | two matrix–vector products and one cross product, no $6\times6$ formed |
-| Adjoint | O(1) | O(1) | $36$ scalars, one extra $3\times3$ product; built only on request |
-| Exp | O(1) | O(1) | two sines of $\varphi$ and $\varphi/2$, none below $\varphi = 0.1$ |
-| Log | O(1) | O(1) | one atan2; a half-angle sine/cosine pair above $\varphi = 0.1$; one square root for large angles |
+| Operation                | Time | Space | Notes                                                                                            |
+|--------------------------|------|-------|--------------------------------------------------------------------------------------------------|
+| Compose                  | O(1) | O(1)  | one $3\times3$ product, one matrix–vector product                                                |
+| Inverse                  | O(1) | O(1)  | transpose and one matrix–vector product; no solve                                                |
+| Apply / rotate           | O(1) | O(1)  | one matrix–vector product (plus 3 additions for apply)                                           |
+| Twist / wrench transform | O(1) | O(1)  | two matrix–vector products and one cross product, no $6\times6$ formed                           |
+| Adjoint                  | O(1) | O(1)  | $36$ scalars, one extra $3\times3$ product; built only on request                                |
+| Exp                      | O(1) | O(1)  | two sines of $\varphi$ and $\varphi/2$, none below $\varphi = 0.1$                               |
+| Log                      | O(1) | O(1)  | one atan2; a half-angle sine/cosine pair above $\varphi = 0.1$; one square root for large angles |
 
 A transform holds $12$ scalars; the $6\times6$ adjoint appears only when requested. All operations are stack-only: no heap, no recursion, constant work per call.
 
@@ -107,13 +107,13 @@ A transform holds $12$ scalars; the $6\times6$ adjoint appears only when request
 
 **Exp of a screw.** Rotation about $\hat z$ through the point $(1,0,0)$: $\omega = \hat z$, $v = -\hat z \times (1,0,0) = (0,-1,0)$, $\theta = \pi/2$.
 
-| Step | Value |
-|------|-------|
-| $\varphi = \theta\|\omega\|$ | $\pi/2 \ge 0.1$, direct forms |
-| Coefficients | $a_1 = 2/\pi$, $a_2 = 4/\pi^2$, $a_3 = (\pi/2 - 1)/(\pi/2)^3$ |
-| Vectors | $Kv = \hat z \times v = (1,0,0)$, $K^2 v = (0,1,0)$ |
-| $R$ | $\theta a_1 = 1$, $\theta^2 a_2 = 1$: $R = I + K + K^2 = R_z(\pi/2)$ |
-| $p$ | $\tfrac{\pi}{2}(0,-1,0) + (1,0,0) + (\tfrac{\pi}{2} - 1)(0,1,0) = (1,-1,0)$ |
+| Step                         | Value                                                                       |
+|------------------------------|-----------------------------------------------------------------------------|
+| $\varphi = \theta\|\omega\|$ | $\pi/2 \ge 0.1$, direct forms                                               |
+| Coefficients                 | $a_1 = 2/\pi$, $a_2 = 4/\pi^2$, $a_3 = (\pi/2 - 1)/(\pi/2)^3$               |
+| Vectors                      | $Kv = \hat z \times v = (1,0,0)$, $K^2 v = (0,1,0)$                         |
+| $R$                          | $\theta a_1 = 1$, $\theta^2 a_2 = 1$: $R = I + K + K^2 = R_z(\pi/2)$        |
+| $p$                          | $\tfrac{\pi}{2}(0,-1,0) + (1,0,0) + (\tfrac{\pi}{2} - 1)(0,1,0) = (1,-1,0)$ |
 
 Check: the origin sits at $(-1,0,0)$ relative to the axis; a quarter turn takes it to $(0,-1,0)$, and adding the axis point gives $(1,-1,0)$.
 
@@ -138,13 +138,13 @@ The result $\big((0,-\tfrac\pi2,0);\,(0,0,\tfrac\pi2)\big)$ is $\theta\xi$, as e
 
 ## Variants & Generalizations
 
-| Variant | Key difference |
-|---------|----------------|
-| **Angular-first ordering** $(\omega;\, v)$ | Same algebra with blocks permuted; used by Lynch & Park and Murray et al. |
-| **Body vs. spatial twist** | Body twists are $T^{-1}\dot T$, spatial twists $\dot T\,T^{-1}$; related by the adjoint |
-| **Quaternion rotation part** | Four scalars and cheap renormalisation; the rotation vector is the vector part scaled by $\varphi/\sin(\varphi/2)$ |
-| **Dual quaternions** | Rotation and translation in one algebra; screw interpolation |
-| **Similarity group** | Adds a uniform scale for monocular visual odometry |
+| Variant                                    | Key difference                                                                                                     |
+|--------------------------------------------|--------------------------------------------------------------------------------------------------------------------|
+| **Angular-first ordering** $(\omega;\, v)$ | Same algebra with blocks permuted; used by Lynch & Park and Murray et al.                                          |
+| **Body vs. spatial twist**                 | Body twists are $T^{-1}\dot T$, spatial twists $\dot T\,T^{-1}$; related by the adjoint                            |
+| **Quaternion rotation part**               | Four scalars and cheap renormalisation; the rotation vector is the vector part scaled by $\varphi/\sin(\varphi/2)$ |
+| **Dual quaternions**                       | Rotation and translation in one algebra; screw interpolation                                                       |
+| **Similarity group**                       | Adds a uniform scale for monocular visual odometry                                                                 |
 
 ## Applications
 
