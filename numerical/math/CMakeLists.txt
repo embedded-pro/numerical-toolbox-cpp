@@ -37,6 +37,7 @@ target_sources(numerical.math PRIVATE
     StepResponseMetrics.hpp
     Toeplitz.hpp
     Tolerance.hpp
+    TridiagonalSolver.hpp
     Math.hpp
     TriangularSolve.hpp
 )
@@ -54,6 +55,7 @@ numerical_add_coverage_sources(numerical.math
     Quaternion.cpp
     RecursiveBuffer.cpp
     Toeplitz.cpp
+    TridiagonalSolver.cpp
 )
 
 add_subdirectory(test)

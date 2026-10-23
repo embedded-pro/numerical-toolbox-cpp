@@ -30,7 +30,6 @@ Difficulty legend:
 | 56 | Trapezoidal (LSPB) profile + duration sync            | `motion_profiles` (new) | ★☆☆☆☆      |
 | 57 | Friction compensation (Coulomb + viscous + Stribeck)  | `controllers`           | ★☆☆☆☆      |
 | 58 | Symplectic integrators (semi-implicit Euler, Verlet)  | `solvers`               | ★☆☆☆☆      |
-| 59 | Tridiagonal (Thomas) solver                           | `math`                  | ★☆☆☆☆      |
 | 53 | SE(3) transform, twists, wrenches, adjoint, exp/log   | `math`                  | ★★☆☆☆      |
 | 60 | S-curve (jerk-limited) profile                        | `motion_profiles` (new) | ★★☆☆☆      |
 | 61 | Cubic spline interpolation (vector-valued)            | `math`                  | ★★☆☆☆      |
@@ -92,15 +91,6 @@ the library does not yet expose. Detailed below under
 - **Algorithm / paper:** E. Hairer, C. Lubich, G. Wanner, *Geometric Numerical Integration* (2006).
 - **Reuses:** `math::Vector`; complements `RungeKuttaIntegrators`.
 - **Spec:** [roadmap/solvers/SymplecticIntegrators](roadmap/solvers/SymplecticIntegrators/implementation.md).
-
-### 59. Tridiagonal solver
-- **What:** Thomas algorithm, factor once / solve many, pivot-failure reporting.
-- **Embedded value:** `O(n)` instead of `O(n³)` for splines and implicit difference schemes.
-- **Algorithm / paper:** L. H. Thomas (1949); G. Golub, C. Van Loan, *Matrix Computations*, §4.3.
-- **Reuses:** Bounded `std::array` bands.
-- **Spec:** [roadmap/math/TridiagonalSolver](roadmap/math/TridiagonalSolver/implementation.md).
-
----
 
 ## Tier 2 — Easy ★★☆☆☆
 

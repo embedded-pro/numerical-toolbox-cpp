@@ -33,4 +33,5 @@ target_sources(numerical.math_test PRIVATE
     TestStepResponseMetrics.cpp
     TestToeplitz.cpp
     TestTriangularSolve.cpp
+    TestTridiagonalSolver.cpp
 )
