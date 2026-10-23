@@ -50,24 +50,24 @@ With zero end velocities (and accelerations, for the quintic) the cubic peaks at
 
 ## Complexity Analysis
 
-| Operation | Time | Space | Notes |
-|-----------|------|-------|-------|
-| Coefficient solve | $O(1)$ | $O(1)$ | Closed-form expressions, once at construction or reset |
-| Sample | $O(\text{degree})$ | $O(1)$ | Four Horner evaluations, at most 14 multiply-adds; no state change, so deterministic |
-| Stored state | n/a | $O(1)$ | Six coefficients, the duration and the degree; stack only, no heap |
+| Operation         | Time               | Space  | Notes                                                                                |
+|-------------------|--------------------|--------|--------------------------------------------------------------------------------------|
+| Coefficient solve | $O(1)$             | $O(1)$ | Closed-form expressions, once at construction or reset                               |
+| Sample            | $O(\text{degree})$ | $O(1)$ | Four Horner evaluations, at most 14 multiply-adds; no state change, so deterministic |
+| Stored state      | n/a                | $O(1)$ | Six coefficients, the duration and the degree; stack only, no heap                   |
 
 ## Step-by-Step Walkthrough
 
 Rest-to-rest cubic with $q_0 = 0$, $q_f = 1$, $T = 2$, $v_0 = v_f = 0$, so $\Delta q = 1$ and $a_0 = a_1 = 0$.
 
-| Step | Computation | Result |
-|------|-------------|--------|
-| $a_2$ | $(3\cdot 1 - 0)/2^2$ | $0.75$ |
-| $a_3$ | $(-2\cdot 1 + 0)/2^3$ | $-0.25$ |
-| Position | $0.75\,t^2 - 0.25\,t^3 = 3(t/2)^2 - 2(t/2)^3$ | $q(1) = 0.5$, $q(2) = 1$ |
-| Velocity | $1.5\,t - 0.75\,t^2$ | $v(1) = 0.75 = 1.5\,\Delta q / T$ (the peak) |
-| Acceleration | $1.5 - 1.5\,t$ | $+1.5$ at $t=0$, $-1.5$ at $t=2$ |
-| Jerk | $6 a_3$ | $-1.5$, constant |
+| Step         | Computation                                   | Result                                       |
+|--------------|-----------------------------------------------|----------------------------------------------|
+| $a_2$        | $(3\cdot 1 - 0)/2^2$                          | $0.75$                                       |
+| $a_3$        | $(-2\cdot 1 + 0)/2^3$                         | $-0.25$                                      |
+| Position     | $0.75\,t^2 - 0.25\,t^3 = 3(t/2)^2 - 2(t/2)^3$ | $q(1) = 0.5$, $q(2) = 1$                     |
+| Velocity     | $1.5\,t - 0.75\,t^2$                          | $v(1) = 0.75 = 1.5\,\Delta q / T$ (the peak) |
+| Acceleration | $1.5 - 1.5\,t$                                | $+1.5$ at $t=0$, $-1.5$ at $t=2$             |
+| Jerk         | $6 a_3$                                       | $-1.5$, constant                             |
 
 The position is the smoothstep of $t/2$, symmetric about the midpoint, where the velocity peaks. The acceleration jumps from $0$ at rest to $1.5$ at the first instant and from $-1.5$ back to $0$ at the end.
 
@@ -81,10 +81,10 @@ The position is the smoothstep of $t/2$, symmetric about the midpoint, where the
 
 ## Variants & Generalizations
 
-| Variant | Key difference |
-|---------|----------------|
-| **Cubic (this)** | Position and velocity matched; constant jerk; acceleration discontinuous at the ends |
-| **Quintic (this)** | Adds acceleration matching; continuous acceleration at about $25\%$ higher peak velocity for rest-to-rest |
+| Variant                     | Key difference                                                                                                            |
+|-----------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| **Cubic (this)**            | Position and velocity matched; constant jerk; acceleration discontinuous at the ends                                      |
+| **Quintic (this)**          | Adds acceleration matching; continuous acceleration at about $25\%$ higher peak velocity for rest-to-rest                 |
 | **Path-parameter time law** | A 0 to 1 instance maps time to a normalized path coordinate; with $v_0 = v_f = 1$, $T = 1$ the cubic collapses to $s = t$ |
 
 ## Applications
@@ -95,11 +95,11 @@ The position is the smoothstep of $t/2$, symmetric about the midpoint, where the
 
 ## Connections to Other Algorithms
 
-| Algorithm | Relationship |
-|-----------|--------------|
+| Algorithm                    | Relationship                                                                                                          |
+|------------------------------|-----------------------------------------------------------------------------------------------------------------------|
 | Trapezoidal velocity profile | Respects velocity and acceleration limits with a free duration; polynomials fix the duration and let the peaks follow |
-| S-curve profile | Bounds jerk explicitly under limits; the quintic only smooths the endpoints |
-| Cubic spline interpolation | Handles many via points with continuous acceleration; for two knots it reduces to this cubic |
+| S-curve profile              | Bounds jerk explicitly under limits; the quintic only smooths the endpoints                                           |
+| Cubic spline interpolation   | Handles many via points with continuous acceleration; for two knots it reduces to this cubic                          |
 
 ## References & Further Reading
 

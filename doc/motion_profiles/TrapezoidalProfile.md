@@ -29,11 +29,11 @@ The total time is $T = 2t_a + t_c$. The cases agree at $d = v_{max}^2/a_{max}$, 
 
 With $v$, $t_a$, $t_c$, $T$ precomputed, the unsigned state is:
 
-| Phase | Interval | Acceleration | Velocity | Position |
-|-------|----------|--------------|----------|----------|
-| Parabolic ramp-up | $0 \le t < t_a$ | $a_{max}$ | $a_{max}\,t$ | $\tfrac12 a_{max}\,t^2$ |
-| Linear cruise | $t_a \le t < t_a + t_c$ | $0$ | $v$ | $v\,(t - t_a/2)$ |
-| Parabolic ramp-down | $t_a + t_c \le t < T$ | $-a_{max}$ | $a_{max}\,(T-t)$ | $d - \tfrac12 a_{max}\,(T-t)^2$ |
+| Phase               | Interval                | Acceleration | Velocity         | Position                        |
+|---------------------|-------------------------|--------------|------------------|---------------------------------|
+| Parabolic ramp-up   | $0 \le t < t_a$         | $a_{max}$    | $a_{max}\,t$     | $\tfrac12 a_{max}\,t^2$         |
+| Linear cruise       | $t_a \le t < t_a + t_c$ | $0$          | $v$              | $v\,(t - t_a/2)$                |
+| Parabolic ramp-down | $t_a + t_c \le t < T$   | $-a_{max}$   | $a_{max}\,(T-t)$ | $d - \tfrac12 a_{max}\,(T-t)^2$ |
 
 Velocity, acceleration and the position offset are multiplied by $\sigma$. At and beyond $t = T$ the profile holds the goal at rest (velocity and acceleration zero); times before $0$ are treated as $t = 0$, holding the start with zero velocity. The reported jerk is zero in every phase.
 
@@ -61,11 +61,11 @@ The fixed-duration plan is the alternative. It keeps $a_{max}$ and only lowers t
 
 ## Complexity Analysis
 
-| Operation | Time | Space | Notes |
-|-----------|------|-------|-------|
-| Minimum-time plan | $O(1)$ | $O(1)$ | One comparison, one square root (triangle only) |
-| Fixed-duration plan | $O(1)$ | $O(1)$ | One square root, one division |
-| Sample | $O(1)$ | $O(1)$ | One phase branch, a few multiply-adds; no state change |
+| Operation           | Time   | Space  | Notes                                                  |
+|---------------------|--------|--------|--------------------------------------------------------|
+| Minimum-time plan   | $O(1)$ | $O(1)$ | One comparison, one square root (triangle only)        |
+| Fixed-duration plan | $O(1)$ | $O(1)$ | One square root, one division                          |
+| Sample              | $O(1)$ | $O(1)$ | One phase branch, a few multiply-adds; no state change |
 
 Memory is a fixed handful of scalars: start, direction, distance, acceleration, peak speed and three phase times.
 
@@ -73,12 +73,12 @@ Memory is a fixed handful of scalars: start, direction, distance, acceleration, 
 
 **Trapezoid.** $d = 5$, $v_{max} = 1$, $a_{max} = 2$. The blend distance is $1/2 = 0.5 \le 5$, so a cruise exists: $t_a = 0.5$, $t_c = (5 - 0.5)/1 = 4.5$, $T = 2(0.5) + 4.5 = 5.5$.
 
-| $t$ | Phase | Position | Velocity | Acceleration |
-|-----|-------|----------|----------|--------------|
-| $0.25$ | ramp-up | $\tfrac12\cdot 2\cdot 0.25^2 = 0.0625$ | $0.5$ | $2$ |
-| $3$ | cruise | $1\cdot(3 - 0.25) = 2.75$ | $1$ | $0$ |
-| $5.25$ | ramp-down | $5 - \tfrac12\cdot 2\cdot 0.25^2 = 4.9375$ | $0.5$ | $-2$ |
-| $\ge 5.5$ | held | $5$ | $0$ | $0$ |
+| $t$       | Phase     | Position                                   | Velocity | Acceleration |
+|-----------|-----------|--------------------------------------------|----------|--------------|
+| $0.25$    | ramp-up   | $\tfrac12\cdot 2\cdot 0.25^2 = 0.0625$     | $0.5$    | $2$          |
+| $3$       | cruise    | $1\cdot(3 - 0.25) = 2.75$                  | $1$      | $0$          |
+| $5.25$    | ramp-down | $5 - \tfrac12\cdot 2\cdot 0.25^2 = 4.9375$ | $0.5$    | $-2$         |
+| $\ge 5.5$ | held      | $5$                                        | $0$      | $0$          |
 
 The ramp-up ends at position $0.25$, and the cruise formula gives the same value at $t = 0.5$. The triangle threshold for these limits is $d = 0.5$; for $d = 0.25$, $v = \sqrt{0.5} \approx 0.7071$ and $T \approx 0.7071$, with no cruise.
 

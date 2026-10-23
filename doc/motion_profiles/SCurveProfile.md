@@ -12,15 +12,15 @@ For a rest-to-rest move the phase durations have a closed form: planning is a ha
 
 A rest-to-rest move of length $h > 0$ is built from seven constant-jerk phases:
 
-| Phase | Jerk | Acceleration | Duration |
-|-------|------|--------------|----------|
-| 1 | $+j_{\max}$ | ramps $0 \to a_{lim}$ | $T_j$ |
-| 2 | $0$ | constant $a_{lim}$ | $T_a - 2T_j$ |
-| 3 | $-j_{\max}$ | ramps $a_{lim} \to 0$ | $T_j$ |
-| 4 | $0$ | zero, cruise at $v_{lim}$ | $T_v$ |
-| 5 | $-j_{\max}$ | ramps $0 \to -a_{lim}$ | $T_j$ |
-| 6 | $0$ | constant $-a_{lim}$ | $T_a - 2T_j$ |
-| 7 | $+j_{\max}$ | ramps $-a_{lim} \to 0$ | $T_j$ |
+| Phase | Jerk        | Acceleration              | Duration     |
+|-------|-------------|---------------------------|--------------|
+| 1     | $+j_{\max}$ | ramps $0 \to a_{lim}$     | $T_j$        |
+| 2     | $0$         | constant $a_{lim}$        | $T_a - 2T_j$ |
+| 3     | $-j_{\max}$ | ramps $a_{lim} \to 0$     | $T_j$        |
+| 4     | $0$         | zero, cruise at $v_{lim}$ | $T_v$        |
+| 5     | $-j_{\max}$ | ramps $0 \to -a_{lim}$    | $T_j$        |
+| 6     | $0$         | constant $-a_{lim}$       | $T_a - 2T_j$ |
+| 7     | $+j_{\max}$ | ramps $-a_{lim} \to 0$    | $T_j$        |
 
 Phases 1–3 form the acceleration stage of length $T_a$; phases 5–7 mirror it, so the profile is symmetric about its midpoint and the total time is $T = 2T_a + T_v$. Integrating the stage gives the peaks and the distance:
 
@@ -66,10 +66,10 @@ Replanning with $(v_{\max}/\lambda,\; a_{\max}/\lambda^2,\; j_{\max}/\lambda^3)$
 
 ## Complexity Analysis
 
-| Operation | Time | Space | Notes |
-|-----------|------|-------|-------|
-| Plan | $O(1)$ | $O(1)$ | At most one square root and one cube root, no iteration |
-| Sample | $O(1)$ | $O(1)$ | Locate one of seven phases, evaluate one cubic |
+| Operation | Time   | Space  | Notes                                                   |
+|-----------|--------|--------|---------------------------------------------------------|
+| Plan      | $O(1)$ | $O(1)$ | At most one square root and one cube root, no iteration |
+| Sample    | $O(1)$ | $O(1)$ | Locate one of seven phases, evaluate one cubic          |
 
 Stored state is a few fixed-size tables of phase boundaries on the stack; no heap is used. Cost is independent of $h$ and of the branch taken.
 
@@ -82,12 +82,12 @@ Limits $(v_{\max}, a_{\max}, j_{\max}) = (1, 2, 10)$, $h = 0.3$.
 
 Boundary states $(a, v, s)$ of the acceleration stage: at $t = 0.2$, $(2,\, 0.2,\, 0.0133)$; at $t = 0.3$, $(2,\, 0.4,\, 0.0433)$; at $t = 0.5$, $(0,\, 0.6,\, 0.15)$. The mirrored stage ends at $s = 0.3$, at rest. A sample at $t = 0.4$ lies in phase 3 with $\tau = 0.1$: $a = 1$, $v = 0.55$, $s = 0.0917$.
 
-| $(v_{\max}, a_{\max}, j_{\max})$ | $h$ | Branch | $T_j$ | $T_a$ | $T_v$ | $T$ |
-|----------------------------------|-----|--------|-------|-------|-------|-----|
-| (1, 2, 10) | 5 | 1, plateau | 0.2 | 0.7 | 4.3 | 5.7 |
-| (1, 2, 1) | 5 | 1, triangle | 1 | 2 | 3 | 7 |
-| (1, 2, 10) | 0.3 | 2 | 0.2 | 0.5 | 0 | 1.0 |
-| (1, 2, 10) | 0.02 | 3 | 0.1 | 0.2 | 0 | 0.4 |
+| $(v_{\max}, a_{\max}, j_{\max})$ | $h$  | Branch      | $T_j$ | $T_a$ | $T_v$ | $T$ |
+|----------------------------------|------|-------------|-------|-------|-------|-----|
+| (1, 2, 10)                       | 5    | 1, plateau  | 0.2   | 0.7   | 4.3   | 5.7 |
+| (1, 2, 1)                        | 5    | 1, triangle | 1     | 2     | 3     | 7   |
+| (1, 2, 10)                       | 0.3  | 2           | 0.2   | 0.5   | 0     | 1.0 |
+| (1, 2, 10)                       | 0.02 | 3           | 0.1   | 0.2   | 0     | 0.4 |
 
 For $(1, 2, 10)$ the thresholds are $h \ge 0.7$ for step 1 and $h \ge 2a_{\max}^3/j_{\max}^2 = 0.16$ for step 2. The last row has $a_{lim} = 1$ and $v_{lim} = 0.1$.
 
@@ -110,9 +110,9 @@ For $(1, 2, 10)$ the thresholds are $h \ge 0.7$ for step 1 and $h \ge 2a_{\max}^
 
 ## Connections to Other Algorithms
 
-| Algorithm | Relationship |
-|-----------|--------------|
-| Trapezoidal profile | Jerk-unbounded predecessor; shares the synchronization scheme |
+| Algorithm                  | Relationship                                                    |
+|----------------------------|-----------------------------------------------------------------|
+| Trapezoidal profile        | Jerk-unbounded predecessor; shares the synchronization scheme   |
 | Quintic polynomial profile | Fixed duration and smooth, but limits are not enforced directly |
 
 ## References & Further Reading
