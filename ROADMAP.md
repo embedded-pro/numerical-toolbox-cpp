@@ -27,7 +27,6 @@ Difficulty legend:
 | #  | Component                                             | Target module           | Difficulty |
 |----|-------------------------------------------------------|-------------------------|------------|
 | 53 | SE(3) transform, twists, wrenches, adjoint, exp/log   | `math`                  | ★★☆☆☆      |
-| 61 | Cubic spline interpolation (vector-valued)            | `math`                  | ★★☆☆☆      |
 | 62 | Damped pseudo-inverse + null-space projector          | `solvers`               | ★★☆☆☆      |
 | 66 | SE(2) transform, twists, exp/log, pose error          | `math`                  | ★★☆☆☆      |
 | 67 | Kabsch / Umeyama point-set alignment                  | `solvers`               | ★★☆☆☆      |
@@ -64,15 +63,6 @@ the library does not yet expose. Detailed below under
   S. Sastry (1994), Ch. 2; J. Solà et al., "A micro Lie theory for state estimation in robotics" (2018).
 - **Reuses:** `Geometry3D` (`RotationAboutAxis`, `SkewSymmetric`), `Quaternion`.
 - **Spec:** [roadmap/math/SE3Transform](roadmap/math/SE3Transform/implementation.md).
-
-### 61. Cubic spline interpolation
-- **What:** C² vector-valued spline through `K` knots, clamped or natural ends, shared factorization across
-  channels.
-- **Embedded value:** Smooth interpolation of waypoint lists and calibration tables in linear time on fixed
-  storage.
-- **Algorithm / paper:** C. de Boor, *A Practical Guide to Splines* (2001), Ch. IV.
-- **Reuses:** Item 59.
-- **Spec:** [roadmap/math/CubicSpline](roadmap/math/CubicSpline/implementation.md).
 
 ### 62. Damped pseudo-inverse and null-space projector
 - **What:** `A⁺_λ·b` and the exact projector `I − A⁺A` for any `Rows × Cols` matrix from one SVD.

@@ -21,6 +21,7 @@ target_sources(numerical.math PRIVATE
     ConstexprMath.hpp
     ComplexNumber.hpp
     ConsistencyMetrics.hpp
+    CubicSpline.hpp
     Cordic.hpp
     Geometry3D.hpp
     GivensRotation.hpp
@@ -48,6 +49,7 @@ numerical_add_coverage_sources(numerical.math
     CholeskyDecomposition.cpp
     ComplexNumber.cpp
     ConsistencyMetrics.cpp
+    CubicSpline.cpp
     Cordic.cpp
     Matrix.cpp
     MatrixExponential.cpp

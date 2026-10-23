@@ -17,6 +17,7 @@ target_sources(numerical.math_test PRIVATE
     TestGradientCheck.cpp
     TestMath.cpp
     TestConsistencyMetrics.cpp
+    TestCubicSpline.cpp
     TestCordic.cpp
     TestGivensRotation.cpp
     TestHouseholderTransform.cpp
