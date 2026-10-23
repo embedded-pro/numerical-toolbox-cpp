@@ -24,25 +24,34 @@ Difficulty legend:
 
 ## Master list (by priority)
 
-| #  | Component                                            | Target module           | Difficulty |
-|----|------------------------------------------------------|-------------------------|------------|
-| 54 | Angle utilities (wrap, shortest difference, unwrap)  | `math`                  | ★☆☆☆☆      |
-| 55 | Polynomial (cubic/quintic) point-to-point profile    | `motion_profiles` (new) | ★☆☆☆☆      |
-| 56 | Trapezoidal (LSPB) profile + duration sync           | `motion_profiles` (new) | ★☆☆☆☆      |
-| 57 | Friction compensation (Coulomb + viscous + Stribeck) | `controllers`           | ★☆☆☆☆      |
-| 58 | Symplectic integrators (semi-implicit Euler, Verlet) | `solvers`               | ★☆☆☆☆      |
-| 59 | Tridiagonal (Thomas) solver                          | `math`                  | ★☆☆☆☆      |
-| 53 | SE(3) transform, twists, wrenches, adjoint, exp/log  | `math`                  | ★★☆☆☆      |
-| 60 | S-curve (jerk-limited) profile                       | `motion_profiles` (new) | ★★☆☆☆      |
-| 61 | Cubic spline interpolation (vector-valued)           | `math`                  | ★★☆☆☆      |
-| 62 | Damped pseudo-inverse + null-space projector         | `solvers`               | ★★☆☆☆      |
-| 63 | Incremental QR least squares (rank-revealing)        | `estimators/offline`    | ★★★☆☆      |
-| 64 | Levenberg–Marquardt (retraction, pluggable damping)  | `optimization`          | ★★★☆☆      |
-| 65 | Dense convex QP (Goldfarb–Idnani dual active set)    | `solvers`               | ★★★★☆      |
+| #  | Component                                             | Target module           | Difficulty |
+|----|-------------------------------------------------------|-------------------------|------------|
+| 54 | Angle utilities (wrap, shortest difference, unwrap)   | `math`                  | ★☆☆☆☆      |
+| 55 | Polynomial (cubic/quintic) point-to-point profile     | `motion_profiles` (new) | ★☆☆☆☆      |
+| 56 | Trapezoidal (LSPB) profile + duration sync            | `motion_profiles` (new) | ★☆☆☆☆      |
+| 57 | Friction compensation (Coulomb + viscous + Stribeck)  | `controllers`           | ★☆☆☆☆      |
+| 58 | Symplectic integrators (semi-implicit Euler, Verlet)  | `solvers`               | ★☆☆☆☆      |
+| 59 | Tridiagonal (Thomas) solver                           | `math`                  | ★☆☆☆☆      |
+| 53 | SE(3) transform, twists, wrenches, adjoint, exp/log   | `math`                  | ★★☆☆☆      |
+| 60 | S-curve (jerk-limited) profile                        | `motion_profiles` (new) | ★★☆☆☆      |
+| 61 | Cubic spline interpolation (vector-valued)            | `math`                  | ★★☆☆☆      |
+| 62 | Damped pseudo-inverse + null-space projector          | `solvers`               | ★★☆☆☆      |
+| 66 | SE(2) transform, twists, exp/log, pose error          | `math`                  | ★★☆☆☆      |
+| 67 | Kabsch / Umeyama point-set alignment                  | `solvers`               | ★★☆☆☆      |
+| 63 | Incremental QR least squares (rank-revealing)         | `estimators/offline`    | ★★★☆☆      |
+| 64 | Levenberg–Marquardt (retraction, pluggable damping)   | `optimization`          | ★★★☆☆      |
+| 68 | Lie-group Jacobians and ⊕/⊖ for SO(3), SE(3), SE(2)   | `math`                  | ★★★☆☆      |
+| 69 | Control allocation (redistributed pseudo-inverse, QP) | `controllers`           | ★★★☆☆      |
+| 70 | Particle filter (bounded, systematic resampling)      | `filters/active`        | ★★★☆☆      |
+| 65 | Dense convex QP (Goldfarb–Idnani dual active set)     | `solvers`               | ★★★★☆      |
+| 71 | Error-state (multiplicative) EKF on Lie groups        | `filters/active`        | ★★★★☆      |
+| 72 | Minimum-derivative (min-snap) piecewise polynomials   | `motion_profiles` (new) | ★★★★☆      |
+| 73 | Online jerk-limited trajectory from arbitrary state   | `motion_profiles` (new) | ★★★★★      |
 
-Items 53–65 are the generic building blocks of robotics-toolbox-cpp's roadmap (referenced there as
-NT53–NT65); each also serves non-robotics consumers (motor control, navigation, calibration). All are
-*(float-first)*.
+Items 53–73 are the generic building blocks of robotics-toolbox-cpp's roadmap (referenced there as
+NT53–NT73); each also serves non-robotics consumers (motor control, navigation, calibration). All are
+*(float-first)*. Items 66–73 serve its mobile, aerial, legged, marine and localization families and
+have no spec yet.
 
 Items 48–52 are the **evaluation & metrics primitives** — reusable quantities the per-family
 unit-test reference [`TESTING.md`](TESTING.md) depends on but which
@@ -142,6 +151,23 @@ the library does not yet expose. Detailed below under
 - **Reuses:** `SingularValueDecomposition` (tall and wide).
 - **Spec:** [roadmap/solvers/DampedPseudoInverse](roadmap/solvers/DampedPseudoInverse/implementation.md).
 
+### 66. SE(2) transform
+- **What:** Planar rigid transform `(R(θ), p)` with composition, closed-form inverse, adjoint, exp/log of
+  planar twists `(vx, vy, ω)` and a pose error, ordered linear part first like item 53.
+- **Embedded value:** The pose type of every ground vehicle and planar mechanism — odometry, path
+  tracking, scan matching — at a fraction of SE(3)'s cost.
+- **Algorithm / paper:** J. Solà, J. Deray, D. Atchuthan, "A micro Lie theory for state estimation in
+  robotics" (2018), Appendix C.
+- **Reuses:** Item 54 (angle wrapping).
+
+### 67. Kabsch / Umeyama alignment
+- **What:** Least-squares rotation, translation and optional scale between two corresponding point sets
+  (orthogonal Procrustes), with the reflection fix, in 2-D and 3-D.
+- **Embedded value:** The inner step of ICP scan matching, hand-eye and frame calibration, motion-capture
+  and fiducial registration.
+- **Algorithm / paper:** W. Kabsch, *Acta Cryst.* A32, 1976; S. Umeyama, *IEEE T-PAMI*, 13(4), 1991.
+- **Reuses:** `SingularValueDecomposition`.
+
 ---
 
 ## Tier 3 — Moderate ★★★☆☆
@@ -164,6 +190,32 @@ the library does not yet expose. Detailed below under
 - **Reuses:** `LuDecomposition`.
 - **Spec:** [roadmap/optimization/LevenbergMarquardt](roadmap/optimization/LevenbergMarquardt/implementation.md).
 
+### 68. Lie-group Jacobians and ⊕/⊖
+- **What:** Left and right Jacobians (and inverses) of SO(3), SE(3) and SE(2), the `⊕`/`⊖` operators
+  on the tangent space, and adjoint-based covariance transport between frames.
+- **Embedded value:** What every on-manifold estimator and optimizer needs to linearize correctly —
+  error-state Kalman filters, IMU preintegration, pose-graph and calibration solvers.
+- **Algorithm / paper:** J. Solà et al. (2018); T. Barfoot, *State Estimation for Robotics* (2017), Ch. 7.
+- **Reuses:** Items 53 and 66.
+
+### 69. Control allocation
+- **What:** Map a desired generalized force (thrust/torque, wrench) to `m` actuator commands with limits:
+  weighted pseudo-inverse with iterative redistribution of saturated actuators, and an exact QP variant.
+- **Embedded value:** Multirotor and hexacopter mixers, marine thruster allocation, over-actuated
+  vehicles and redundant drives — graceful saturation instead of clipping each motor.
+- **Algorithm / paper:** T. A. Johansen, T. I. Fossen, "Control allocation — A survey," *Automatica*,
+  49(5), 2013; J. Bordignon, *Constrained control allocation* (PhD thesis, Virginia Tech, 1996).
+- **Reuses:** Items 62 and 65.
+
+### 70. Particle filter
+- **What:** Sequential importance resampling with a compile-time particle count, systematic resampling
+  triggered by the effective sample size, and weighted-mean / MAP estimates.
+- **Embedded value:** Multimodal, non-Gaussian estimation — Monte Carlo localization, terrain-aided
+  navigation, fault detection — on fixed memory.
+- **Algorithm / paper:** N. Gordon, D. Salmond, A. Smith, *IEE Proc. F*, 140(2), 1993; A. Doucet,
+  A. Johansen, "A tutorial on particle filtering and smoothing" (2009).
+- **Reuses:** A caller-injected deterministic PRNG; `math::Statistics`.
+
 ---
 
 ## Tier 4 — Advanced ★★★★☆
@@ -177,6 +229,39 @@ the library does not yet expose. Detailed below under
   (1985).
 - **Reuses:** `CholeskyDecomposition`, `TriangularSolve`, `GivensRotation`.
 - **Spec:** [roadmap/solvers/ActiveSetQp](roadmap/solvers/ActiveSetQp/implementation.md).
+
+### 71. Error-state Kalman filter on Lie groups
+- **What:** Multiplicative EKF whose nominal state lives on a group (quaternion/SO(3), SE(3)) and whose
+  error state lives in the tangent space; predict, update, reset with the right Jacobians.
+- **Embedded value:** The standard INS/AHRS and legged/aerial state estimator — no quaternion
+  normalization hacks, covariance consistent with the manifold.
+- **Algorithm / paper:** J. Solà, "Quaternion kinematics for the error-state Kalman filter," arXiv:1711.02508
+  (2017); F. L. Markley, *J. Guidance, Control, and Dynamics*, 26(2), 2003.
+- **Reuses:** Items 53 and 68, `KalmanFilterBase`.
+
+### 72. Minimum-derivative piecewise polynomials
+- **What:** Piecewise polynomials through timed waypoints minimizing the integral of a chosen derivative
+  squared (jerk, snap), per axis, with optional corridor constraints; closed-form KKT solve without
+  inequalities, QP with them.
+- **Embedded value:** Smooth references for multirotors (minimum snap), manipulators and CNC paths with
+  continuity up to the third or fourth derivative.
+- **Algorithm / paper:** D. Mellinger, V. Kumar, *ICRA* 2011; C. Richter, A. Bry, N. Roy, *ISRR* 2013.
+- **Reuses:** Item 65, `CholeskyDecomposition`.
+
+---
+
+## Tier 5 — Hard / research-grade ★★★★★
+
+### 73. Online jerk-limited trajectory from arbitrary state
+- **What:** Time-optimal single-axis trajectory from any current state (position, velocity, acceleration)
+  to any target state under velocity, acceleration and jerk limits, plus multi-axis time
+  synchronization — recomputable every control cycle.
+- **Embedded value:** Reactive motion (target changes mid-move, emergency re-plans) for robot joints and
+  servo axes without the rest-to-rest restriction of item 60.
+- **Algorithm / paper:** T. Kröger, F. Wahl, *IEEE T-RO*, 26(1), 2010; L. Berscheid, T. Kröger,
+  "Jerk-limited real-time trajectory generation with arbitrary target states," *RSS* 2021.
+- **Reuses:** Items 55, 56 and 60 (types, synchronization scheme), `DurandKerner` for the polynomial
+  roots of the timing profiles.
 
 ---
 
