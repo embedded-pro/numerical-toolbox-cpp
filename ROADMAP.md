@@ -26,11 +26,28 @@ Difficulty legend:
 
 | #  | Component                                            | Target module             | Difficulty |
 |----|------------------------------------------------------|---------------------------|------------|
+| 53 | SE(3) transform, twists, wrenches, adjoint, exp/log  | `math`                    | ★★☆☆☆      |
 
 Items 48–52 are the **evaluation & metrics primitives** — reusable quantities the per-family
 unit-test reference [`TESTING.md`](TESTING.md) depends on but which
 the library does not yet expose. Detailed below under
 [Evaluation & metrics primitives](#evaluation--metrics-primitives).
+
+## Tier 2 — Easy ★★☆☆☆
+
+### 53. SE(3) transform, twists and wrenches
+- **What:** Rigid transform (rotation + translation) with closed-form inverse, adjoint, twist/wrench
+  transforms, exponential/logarithm (SO(3) and SE(3)) and a log-map pose error. 6-vectors are ordered
+  linear part first: twists `(v; ω)`, wrenches `(f; n)`.
+- **Embedded value:** The algebra every pose-level consumer shares — robot kinematics, Jacobians and
+  task-space control in robotics-toolbox-cpp, drone attitude/position control, visual odometry. One
+  type and one ordering convention prevent silent block-order mismatches between modules.
+- **Algorithm / paper:** K. Lynch, F. Park, *Modern Robotics* (2017), Ch. 3; R. Murray, Z. Li,
+  S. Sastry (1994), Ch. 2; J. Solà et al., "A micro Lie theory for state estimation in robotics" (2018).
+- **Reuses:** `Geometry3D` (`RotationAboutAxis`, `SkewSymmetric`), `Quaternion`.
+- **Spec:** [roadmap/math/SE3Transform](roadmap/math/SE3Transform/implementation.md).
+
+---
 
 ## Evaluation & metrics primitives
 

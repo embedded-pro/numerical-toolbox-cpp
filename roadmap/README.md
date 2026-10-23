@@ -20,8 +20,7 @@ All pseudocode respects the library constraints: **no heap**, bounded containers
 `template<typename T>` interface that is validated and instantiated for **`float`** only
 (no `Q15`/`Q31`). The generic signature keeps a future fixed-point specialisation cheap to add.
 
-The canonical worked example is
-[filters/passive/ExponentialMovingAverage](filters/passive/ExponentialMovingAverage/implementation.md).
+The canonical worked example is [math/SE3Transform](math/SE3Transform/implementation.md).
 
 ## Deployment shape (float-only)
 
@@ -96,13 +95,13 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 `SignalDetectors` (5) · `ConvolutionCorrelation` (11) · `GoertzelAlgorithm` (13) · `RealFastFourierTransform` (25) · `HilbertTransform` (37) · `DiscreteWaveletTransform` (38)
 
 ### `estimators/offline`
-`PolynomialFitting` (12) · `TotalLeastSquares` (44) · `DynamicParameterIdentification` (M22)
+`PolynomialFitting` (12) · `TotalLeastSquares` (44)
 
 ### `estimators/online`
-`LmsAdaptiveFilter` (21) · `MomentumObserver` (M16)
+`LmsAdaptiveFilter` (21)
 
 ### `math`
-`Quaternion` (18) · `Cordic` (23) · `MatrixExponential` (29) · `ContinuousToDiscrete` (30) · `SE3Transform` (M6)
+`Quaternion` (18) · `Cordic` (23) · `MatrixExponential` (29) · `ContinuousToDiscrete` (30) · `SE3Transform` (53)
 
 ### `control_analysis`
 `ControllabilityObservability` (26) · `TransferFunctionStateSpace` (32)
