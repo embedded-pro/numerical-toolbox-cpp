@@ -34,12 +34,12 @@ This recovers the true continuous angle as long as consecutive true samples diff
 
 ## Complexity Analysis
 
-| Operation               | Time   | Space  | Notes                                        |
-|-------------------------|--------|--------|----------------------------------------------|
-| Wrap to $(-\pi,\pi]$    | $O(1)$ | $O(1)$ | One fmod, one compare, a few adds            |
-| Wrap to $[0,2\pi)$      | $O(1)$ | $O(1)$ | One fmod, two compares, one conditional add  |
-| Shortest difference     | $O(1)$ | $O(1)$ | One subtraction plus one signed wrap         |
-| Unwrap                  | $O(1)$ | $O(1)$ | One shortest difference plus one add; no state |
+| Operation            | Time   | Space  | Notes                                          |
+|----------------------|--------|--------|------------------------------------------------|
+| Wrap to $(-\pi,\pi]$ | $O(1)$ | $O(1)$ | One fmod, one compare, a few adds              |
+| Wrap to $[0,2\pi)$   | $O(1)$ | $O(1)$ | One fmod, two compares, one conditional add    |
+| Shortest difference  | $O(1)$ | $O(1)$ | One subtraction plus one signed wrap           |
+| Unwrap               | $O(1)$ | $O(1)$ | One shortest difference plus one add; no state |
 
 Cost does not depend on the magnitude of the input: the remainder is a single operation, not a loop subtracting $2\pi$.
 

@@ -4,16 +4,16 @@ Feedback control algorithms for regulating dynamic systems in real time.
 
 ## Algorithms
 
-| Algorithm                | Description                                                                             |
-|--------------------------|-----------------------------------------------------------------------------------------|
-| [Bang-Bang / Hysteresis Controller](BangBangHysteresis.md) | Two-state relay controller with Schmitt-trigger dead-band to prevent chatter |
-| [Deadbeat Control](DeadbeatControl.md) | Discrete-time N-step deadbeat controller — exact convergence in N samples via reachability pseudo-inverse |
-| [PID Controller](Pid.md) | Proportional-Integral-Derivative controller using a discrete recursive formulation      |
-| [LQR Controller](Lqr.md) | Linear Quadratic Regulator — optimal state-feedback control minimizing a quadratic cost |
-| [LQI / Servo Controller](IntegralStateFeedbackLqi.md) | Integral state feedback (LQI) — LQR augmented with integrators on the tracking error for zero steady-state offset |
-| [LQG Controller](Lqg.md) | Linear Quadratic Gaussian — output-feedback optimal control via LQR + Kalman Filter     |
-| [MPC Controller](Mpc.md) | Model Predictive Controller — receding-horizon optimal control with constraint handling |
-| [Linear Time-Invariant Model](LinearTimeInvariant.md) | Discrete-time state-space plant model (A, B, C, D) shared across controllers and filters |
-| [Feedforward / 2-DOF Controller](Feedforward2Dof.md) | Feedforward + feedback wrapper for decoupled reference tracking and disturbance rejection |
-| [Luenberger Observer](LuenbergerObserver.md) | Deterministic state estimator using pole placement (Ackermann's formula) to reconstruct unmeasured states |
-| [Friction Compensation](FrictionCompensation.md) | Coulomb + viscous + Stribeck feedforward with a tanh boundary layer and output clamp, per axis |
+| Algorithm                                                  | Description                                                                                                       |
+|------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
+| [Bang-Bang / Hysteresis Controller](BangBangHysteresis.md) | Two-state relay controller with Schmitt-trigger dead-band to prevent chatter                                      |
+| [Deadbeat Control](DeadbeatControl.md)                     | Discrete-time N-step deadbeat controller — exact convergence in N samples via reachability pseudo-inverse         |
+| [PID Controller](Pid.md)                                   | Proportional-Integral-Derivative controller using a discrete recursive formulation                                |
+| [LQR Controller](Lqr.md)                                   | Linear Quadratic Regulator — optimal state-feedback control minimizing a quadratic cost                           |
+| [LQI / Servo Controller](IntegralStateFeedbackLqi.md)      | Integral state feedback (LQI) — LQR augmented with integrators on the tracking error for zero steady-state offset |
+| [LQG Controller](Lqg.md)                                   | Linear Quadratic Gaussian — output-feedback optimal control via LQR + Kalman Filter                               |
+| [MPC Controller](Mpc.md)                                   | Model Predictive Controller — receding-horizon optimal control with constraint handling                           |
+| [Linear Time-Invariant Model](LinearTimeInvariant.md)      | Discrete-time state-space plant model (A, B, C, D) shared across controllers and filters                          |
+| [Feedforward / 2-DOF Controller](Feedforward2Dof.md)       | Feedforward + feedback wrapper for decoupled reference tracking and disturbance rejection                         |
+| [Luenberger Observer](LuenbergerObserver.md)               | Deterministic state estimator using pole placement (Ackermann's formula) to reconstruct unmeasured states         |
+| [Friction Compensation](FrictionCompensation.md)           | Coulomb + viscous + Stribeck feedforward with a tanh boundary layer and output clamp, per axis                    |

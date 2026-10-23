@@ -45,8 +45,8 @@ For fixed $v_s$, $\delta$ and $\varepsilon$, $\tau$ is linear in the force coeff
 
 ## Complexity Analysis
 
-| Case | Time | Space | Notes |
-|------|------|-------|-------|
+| Case | Time   | Space  | Notes                                                                                                                                      |
+|------|--------|--------|--------------------------------------------------------------------------------------------------------------------------------------------|
 | All  | $O(N)$ | $O(N)$ | $N$ axes; per axis one exponential, one power, one hyperbolic tangent, two divisions and a clamp; $N$ parameter sets stored, no allocation |
 
 Cost is dominated by the three transcendental calls; there is no iteration and no dependence on history, so the latency is constant per sample.
@@ -55,11 +55,11 @@ Cost is dominated by the three transcendental calls; there is no iteration and n
 
 Parameters: $F_c = 0.5$, $F_s = 0.8$, $F_v = 0.1$, $v_s = 0.05$, $\delta = 2$, $\varepsilon = 10^{-3}$, with a non-binding cap $\tau_{max} = 1$.
 
-| $v$ | $(\lvert v\rvert/v_s)^2$ | Level $L$ | $\tanh(v/\varepsilon)$ | $F_v v$ | $\tau$ |
-|-----|---------------|-----------|------------------------|---------|--------|
-| 1    | 400 | $0.5 + 0.3\,e^{-400} \approx 0.5$ | 1 | 0.1   | 0.6 |
-| 0.01 | 0.04 | $0.5 + 0.3\,e^{-0.04} \approx 0.788$ | $\tanh 10 \approx 1$ | 0.001 | 0.789 |
-| 0.05 ($=v_s$) | 1 | $0.5 + 0.3/e \approx 0.610$ | $\tanh 50 \approx 1$ | 0.005 | 0.615 |
+| $v$           | $(\lvert v\rvert/v_s)^2$ | Level $L$                            | $\tanh(v/\varepsilon)$ | $F_v v$ | $\tau$ |
+|---------------|--------------------------|--------------------------------------|------------------------|---------|--------|
+| 1             | 400                      | $0.5 + 0.3\,e^{-400} \approx 0.5$    | 1                      | 0.1     | 0.6    |
+| 0.01          | 0.04                     | $0.5 + 0.3\,e^{-0.04} \approx 0.788$ | $\tanh 10 \approx 1$   | 0.001   | 0.789  |
+| 0.05 ($=v_s$) | 1                        | $0.5 + 0.3/e \approx 0.610$          | $\tanh 50 \approx 1$   | 0.005   | 0.615  |
 
 At high speed the Stribeck term has vanished and only Coulomb plus viscous drag remain. At $v = 0.01$ the axis is still deep in the Stribeck region, so the level is close to $F_s$. At $v = v_s$ the stiction excess has decayed to a fraction $1/e$ of its initial value. At $v = 0$ the output is exactly zero, and $v = -0.01$ gives $-0.789$ by symmetry.
 
@@ -75,13 +75,13 @@ At high speed the Stribeck term has vanished and only Coulomb plus viscous drag 
 
 ## Variants & Generalizations
 
-| Variant | Key Difference |
-|---------|----------------|
-| **Coulomb + viscous only** | $F_s = F_c$ removes the Stribeck term; the level is constant |
-| **Asymmetric friction** | Separate parameters per direction of motion; handles direction-dependent drag |
-| **Karnopp model** | Replaces the smooth layer with a velocity dead-zone and a stick state |
-| **Dahl / LuGre** | Dynamic models with internal bristle state; capture presliding and hysteresis at the cost of state and a stiffer ODE |
-| **Inverse-dynamics term** | Same static model folded into a robot inverse-dynamics computation |
+| Variant                    | Key Difference                                                                                                       |
+|----------------------------|----------------------------------------------------------------------------------------------------------------------|
+| **Coulomb + viscous only** | $F_s = F_c$ removes the Stribeck term; the level is constant                                                         |
+| **Asymmetric friction**    | Separate parameters per direction of motion; handles direction-dependent drag                                        |
+| **Karnopp model**          | Replaces the smooth layer with a velocity dead-zone and a stick state                                                |
+| **Dahl / LuGre**           | Dynamic models with internal bristle state; capture presliding and hysteresis at the cost of state and a stiffer ODE |
+| **Inverse-dynamics term**  | Same static model folded into a robot inverse-dynamics computation                                                   |
 
 ## Applications
 
@@ -92,13 +92,13 @@ At high speed the Stribeck term has vanished and only Coulomb plus viscous drag 
 
 ## Connections to Other Algorithms
 
-| Algorithm | Relationship |
-|-----------|--------------|
-| [Feedforward / 2-DOF](Feedforward2Dof.md) | Same additive-feedforward structure; friction is a velocity-driven feedforward term |
-| [PID Controller](Pid.md) | The feedback loop this term is added to; compensation reduces integrator work and stick-slip hunting |
-| [Bang-Bang / Hysteresis](BangBangHysteresis.md) | The $\varepsilon \to 0$ limit is a relay on velocity, with the same chattering mechanism |
-| [Saturation / Rate Limiter](SaturationRateLimiter.md) | The output clamp is the same saturation, applied to the compensation term alone |
-| [QR Decomposition](../solvers/QrDecomposition.md) | Backbone of the least-squares fit of the linear friction coefficients |
+| Algorithm                                             | Relationship                                                                                         |
+|-------------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| [Feedforward / 2-DOF](Feedforward2Dof.md)             | Same additive-feedforward structure; friction is a velocity-driven feedforward term                  |
+| [PID Controller](Pid.md)                              | The feedback loop this term is added to; compensation reduces integrator work and stick-slip hunting |
+| [Bang-Bang / Hysteresis](BangBangHysteresis.md)       | The $\varepsilon \to 0$ limit is a relay on velocity, with the same chattering mechanism             |
+| [Saturation / Rate Limiter](SaturationRateLimiter.md) | The output clamp is the same saturation, applied to the compensation term alone                      |
+| [QR Decomposition](../solvers/QrDecomposition.md)     | Backbone of the least-squares fit of the linear friction coefficients                                |
 
 ## References & Further Reading
 

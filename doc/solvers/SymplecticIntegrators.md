@@ -44,10 +44,10 @@ $$
 
 The conserved modified energies and the resulting error of the true energy $E = \tfrac12(v^2 + \omega^2 q^2)$ are:
 
-| Method | Conserved quantity ($\omega = 1$) | Relative energy error |
-|--------|-----------------------------------|-----------------------|
-| Semi-implicit Euler | $\tfrac12\left(v^2 + q^2 - h\,q\,v\right)$ | oscillates, amplitude $\approx h\omega/2$ |
-| Velocity Verlet | $\tfrac12\left(v^2 + (1 - \tfrac{\theta^2}{4})\,q^2\right)$ | oscillates, amplitude $\approx (h\omega)^2/8$ |
+| Method              | Conserved quantity ($\omega = 1$)                           | Relative energy error                         |
+|---------------------|-------------------------------------------------------------|-----------------------------------------------|
+| Semi-implicit Euler | $\tfrac12\left(v^2 + q^2 - h\,q\,v\right)$                  | oscillates, amplitude $\approx h\omega/2$     |
+| Velocity Verlet     | $\tfrac12\left(v^2 + (1 - \tfrac{\theta^2}{4})\,q^2\right)$ | oscillates, amplitude $\approx (h\omega)^2/8$ |
 
 ### Velocity-Dependent Forces
 
@@ -55,10 +55,10 @@ With damping or Coriolis terms the system is not Hamiltonian, so neither method 
 
 ## Complexity Analysis
 
-| Method | Acceleration evaluations | Order | Arithmetic | Memory |
-|--------|--------------------------|-------|------------|--------|
-| Semi-implicit Euler | 1 | 1 | $O(n)$ | two state copies |
-| Velocity Verlet | 2 | 2 | $O(n)$ | two state copies |
+| Method              | Acceleration evaluations | Order | Arithmetic | Memory           |
+|---------------------|--------------------------|-------|------------|------------------|
+| Semi-implicit Euler | 1                        | 1     | $O(n)$     | two state copies |
+| Velocity Verlet     | 2                        | 2     | $O(n)$     | two state copies |
 
 Here $n$ is the number of generalized coordinates. The cost of a step is the cost of its evaluations plus a handful of vector operations; no heap is used. Each step is a pure function of its arguments; the second Verlet evaluation is not reused as the next step's first. Every evaluation goes through a virtual call: fine for simulation and model-in-the-loop tests; for interrupt-service use, bind the concrete system type instead.
 
@@ -68,10 +68,10 @@ Unit oscillator $a = -q$, $h = 0.1$, start $(q, v) = (1, 0)$, true energy $E = 0
 
 **Semi-implicit Euler**
 
-| Step | Velocity update | Position update | True $E$ | Modified energy |
-|------|-----------------|-----------------|----------|-----------------|
-| 1 | $0 + 0.1(-1) = -0.1$ | $1 + 0.1(-0.1) = 0.99$ | $0.4950$ | $0.5000$ |
-| 2 | $-0.1 + 0.1(-0.99) = -0.199$ | $0.99 + 0.1(-0.199) = 0.9701$ | $0.4903$ | $0.5000$ |
+| Step | Velocity update              | Position update               | True $E$ | Modified energy |
+|------|------------------------------|-------------------------------|----------|-----------------|
+| 1    | $0 + 0.1(-1) = -0.1$         | $1 + 0.1(-0.1) = 0.99$        | $0.4950$ | $0.5000$        |
+| 2    | $-0.1 + 0.1(-0.99) = -0.199$ | $0.99 + 0.1(-0.199) = 0.9701$ | $0.4903$ | $0.5000$        |
 
 The true energy wanders (about $1\%$ and $2\%$ low), yet the modified energy is conserved exactly; the offset is $\tfrac12 h\,q\,v$, which cannot grow beyond $h/4$.
 
@@ -87,11 +87,11 @@ The true energy wanders (about $1\%$ and $2\%$ low), yet the modified energy is 
 
 ## Variants & Generalizations
 
-| Variant | Key difference |
-|---------|----------------|
+| Variant                                         | Key difference                                                                                                       |
+|-------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|
 | **Semi-implicit Euler, velocity Verlet (this)** | Symplectic, orders 1 and 2; explicit Euler differs only in using the old velocity for the drift and its energy grows |
-| **Higher-order composition** | Chains of Verlet steps with weights (Yoshida, Suzuki) reach orders 4, 6, ... |
-| **Implicit midpoint / Gauss** | Symplectic and implicit; suited to stiff or non-separable systems at the cost of a nonlinear solve |
+| **Higher-order composition**                    | Chains of Verlet steps with weights (Yoshida, Suzuki) reach orders 4, 6, ...                                         |
+| **Implicit midpoint / Gauss**                   | Symplectic and implicit; suited to stiff or non-separable systems at the cost of a nonlinear solve                   |
 
 ## Applications
 
@@ -100,10 +100,10 @@ The true energy wanders (about $1\%$ and $2\%$ low), yet the modified energy is 
 
 ## Connections to Other Algorithms
 
-| Algorithm | Relationship |
-|-----------|--------------|
-| Runge–Kutta 4 | Four evaluations per step, fourth order, general first-order systems; energy drifts slowly on conservative problems |
-| Dormand–Prince | Adaptive step and error control for first-order systems; higher accuracy per step, no structure preservation |
+| Algorithm      | Relationship                                                                                                        |
+|----------------|---------------------------------------------------------------------------------------------------------------------|
+| Runge–Kutta 4  | Four evaluations per step, fourth order, general first-order systems; energy drifts slowly on conservative problems |
+| Dormand–Prince | Adaptive step and error control for first-order systems; higher accuracy per step, no structure preservation        |
 
 ## References & Further Reading
 

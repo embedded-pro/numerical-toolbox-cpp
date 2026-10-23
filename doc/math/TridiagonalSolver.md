@@ -44,12 +44,12 @@ Storage is three bands of fixed capacity; nothing is allocated dynamically. Fact
 
 Take $A = \operatorname{tridiag}(-1, 2, -1)$ with $n = 4$, so $a_k = c_k = -1$, $b_k = 2$.
 
-| $k$ | $p_k$ | $1/p_k$ | $c'_k$ |
-|-----|-------|---------|--------|
-| 0   | $2$   | $1/2$   | $-1/2$ |
-| 1   | $2 - (-1)(-1/2) = 3/2$ | $2/3$ | $-2/3$ |
-| 2   | $2 - (-1)(-2/3) = 4/3$ | $3/4$ | $-3/4$ |
-| 3   | $2 - (-1)(-3/4) = 5/4$ | $4/5$ | unused |
+| $k$ | $p_k$                  | $1/p_k$ | $c'_k$ |
+|-----|------------------------|---------|--------|
+| 0   | $2$                    | $1/2$   | $-1/2$ |
+| 1   | $2 - (-1)(-1/2) = 3/2$ | $2/3$   | $-2/3$ |
+| 2   | $2 - (-1)(-2/3) = 4/3$ | $3/4$   | $-3/4$ |
+| 3   | $2 - (-1)(-3/4) = 5/4$ | $4/5$   | unused |
 
 **Right-hand side** $d = (1, 0, 0, 1)$: forward $y = (1/2,\ 1/3,\ 1/4,\ 1)$; back substitution gives $x_3 = 1$, $x_2 = 1/4 + \tfrac34 = 1$, $x_1 = 1/3 + \tfrac23 = 1$, $x_0 = 1/2 + 1/2 = 1$, so $x = (1, 1, 1, 1)$.
 
@@ -80,11 +80,11 @@ Take $A = \operatorname{tridiag}(-1, 2, -1)$ with $n = 4$, so $a_k = c_k = -1$, 
 
 ## Connections to Other Algorithms
 
-| Algorithm                                         | Relationship                                                                 |
-|---------------------------------------------------|------------------------------------------------------------------------------|
-| [LU Decomposition](../solvers/LuDecomposition.md) | General fallback with partial pivoting; $O(n^3)$ and dense                   |
-| [Triangular Solve](TriangularSolve.md)            | Same forward/back substitution idea, applied to full triangular factors           |
-| [Levinson–Durbin](../solvers/LevinsonDurbin.md)   | Another structured solver, for Toeplitz systems                              |
+| Algorithm                                         | Relationship                                                                  |
+|---------------------------------------------------|-------------------------------------------------------------------------------|
+| [LU Decomposition](../solvers/LuDecomposition.md) | General fallback with partial pivoting; $O(n^3)$ and dense                    |
+| [Triangular Solve](TriangularSolve.md)            | Same forward/back substitution idea, applied to full triangular factors       |
+| [Levinson–Durbin](../solvers/LevinsonDurbin.md)   | Another structured solver, for Toeplitz systems                               |
 | Cubic spline interpolation                        | Main consumer; plans the second derivatives by solving one tridiagonal system |
 
 ## References & Further Reading
