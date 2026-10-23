@@ -24,21 +24,21 @@ Difficulty legend:
 
 ## Master list (by priority)
 
-| #  | Component                                            | Target module             | Difficulty |
-|----|------------------------------------------------------|---------------------------|------------|
-| 54 | Angle utilities (wrap, shortest difference, unwrap)  | `math`                    | ★☆☆☆☆      |
-| 55 | Polynomial (cubic/quintic) point-to-point profile    | `motion_profiles` (new)   | ★☆☆☆☆      |
-| 56 | Trapezoidal (LSPB) profile + duration sync           | `motion_profiles` (new)   | ★☆☆☆☆      |
-| 57 | Friction compensation (Coulomb + viscous + Stribeck) | `controllers`             | ★☆☆☆☆      |
-| 58 | Symplectic integrators (semi-implicit Euler, Verlet) | `solvers`                 | ★☆☆☆☆      |
-| 59 | Tridiagonal (Thomas) solver                          | `math`                    | ★☆☆☆☆      |
-| 53 | SE(3) transform, twists, wrenches, adjoint, exp/log  | `math`                    | ★★☆☆☆      |
-| 60 | S-curve (jerk-limited) profile                       | `motion_profiles` (new)   | ★★☆☆☆      |
-| 61 | Cubic spline interpolation (vector-valued)           | `math`                    | ★★☆☆☆      |
-| 62 | Damped pseudo-inverse + null-space projector         | `solvers`                 | ★★☆☆☆      |
-| 63 | Incremental QR least squares (rank-revealing)        | `estimators/offline`      | ★★★☆☆      |
-| 64 | Levenberg–Marquardt (retraction, pluggable damping)  | `optimization`            | ★★★☆☆      |
-| 65 | Dense convex QP (Goldfarb–Idnani dual active set)    | `solvers`                 | ★★★★☆      |
+| #  | Component                                            | Target module           | Difficulty |
+|----|------------------------------------------------------|-------------------------|------------|
+| 54 | Angle utilities (wrap, shortest difference, unwrap)  | `math`                  | ★☆☆☆☆      |
+| 55 | Polynomial (cubic/quintic) point-to-point profile    | `motion_profiles` (new) | ★☆☆☆☆      |
+| 56 | Trapezoidal (LSPB) profile + duration sync           | `motion_profiles` (new) | ★☆☆☆☆      |
+| 57 | Friction compensation (Coulomb + viscous + Stribeck) | `controllers`           | ★☆☆☆☆      |
+| 58 | Symplectic integrators (semi-implicit Euler, Verlet) | `solvers`               | ★☆☆☆☆      |
+| 59 | Tridiagonal (Thomas) solver                          | `math`                  | ★☆☆☆☆      |
+| 53 | SE(3) transform, twists, wrenches, adjoint, exp/log  | `math`                  | ★★☆☆☆      |
+| 60 | S-curve (jerk-limited) profile                       | `motion_profiles` (new) | ★★☆☆☆      |
+| 61 | Cubic spline interpolation (vector-valued)           | `math`                  | ★★☆☆☆      |
+| 62 | Damped pseudo-inverse + null-space projector         | `solvers`               | ★★☆☆☆      |
+| 63 | Incremental QR least squares (rank-revealing)        | `estimators/offline`    | ★★★☆☆      |
+| 64 | Levenberg–Marquardt (retraction, pluggable damping)  | `optimization`          | ★★★☆☆      |
+| 65 | Dense convex QP (Goldfarb–Idnani dual active set)    | `solvers`               | ★★★★☆      |
 
 Items 53–65 are the generic building blocks of robotics-toolbox-cpp's roadmap (referenced there as
 NT53–NT65); each also serves non-robotics consumers (motor control, navigation, calibration). All are
