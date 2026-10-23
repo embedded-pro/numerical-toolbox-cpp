@@ -15,6 +15,8 @@ namespace optimization
 
         virtual QNumberType Cost(const Vector& parameters) = 0;
         virtual Vector Gradient(const Vector& parameters) = 0;
-        virtual ~ObjectiveFunction() = default;
+
+    protected:
+        ~ObjectiveFunction() = default;
     };
 }

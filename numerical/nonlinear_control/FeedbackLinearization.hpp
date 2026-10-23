@@ -18,10 +18,11 @@ namespace nonlinear_control
         using StateVector = math::Vector<T, Dim>;
         using DecouplingMatrix = math::SquareMatrix<T, Dim>;
 
-        virtual ~ControlAffineModel() = default;
-
         [[nodiscard]] virtual DecouplingMatrix DecouplingMatrixAt(const StateVector& x) const = 0;
         [[nodiscard]] virtual StateVector DriftTerm(const StateVector& x) const = 0;
+
+    protected:
+        ~ControlAffineModel() = default;
     };
 
     template<typename T, std::size_t Dim>

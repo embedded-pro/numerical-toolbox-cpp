@@ -11,8 +11,6 @@ namespace estimators
             "OfflineEstimator only supports float or QNumber types");
 
     public:
-        virtual ~OfflineEstimator() = default;
-
         using CoefficientsMatrix = math::Matrix<T, Features + 1, 1>;
         using DesignMatrix = math::Matrix<T, Features + 1, Features + 1>;
         using InputMatrix = math::Matrix<T, Features, 1>;
@@ -20,6 +18,9 @@ namespace estimators
         virtual bool Fit(const math::Matrix<T, Samples, Features>& X, const math::Matrix<T, Samples, 1>& y) = 0;
         virtual T Predict(const InputMatrix& X) const = 0;
         virtual const CoefficientsMatrix& Coefficients() const = 0;
+
+    protected:
+        ~OfflineEstimator() = default;
     };
 
     template<typename T, std::size_t Features>
@@ -29,8 +30,6 @@ namespace estimators
             "OnlineEstimator only supports float or QNumber types");
 
     public:
-        virtual ~OnlineEstimator() = default;
-
         using CoefficientsMatrix = math::Matrix<T, Features, 1>;
         using DesignMatrix = math::Matrix<T, Features, Features>;
         using InputMatrix = math::Matrix<T, Features, 1>;
@@ -44,5 +43,8 @@ namespace estimators
 
         virtual EstimationMetrics Update(const InputMatrix& x, const math::Matrix<T, 1, 1>& y) = 0;
         virtual const CoefficientsMatrix& Coefficients() const = 0;
+
+    protected:
+        ~OnlineEstimator() = default;
     };
 }

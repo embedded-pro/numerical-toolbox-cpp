@@ -68,7 +68,7 @@ Use `math::IsFinite` for finiteness checks: a consumer may still build with `-ff
 - SOLID principles — constructor injection, depend on abstractions
 - DRY — extract shared logic into helpers or templates
 - RAII for resource management
-- **No pure virtual destructors**: Never declare `virtual ~Interface() = 0`. Pure virtual destructors force the compiler to emit a thunk and a separate body, wasting memory on embedded targets. Use `virtual ~Interface() = default` if a virtual destructor is required, or omit it entirely when the class is never deleted through a base pointer.
+- **Protected, non-virtual interface destructors**: declare `~Interface() = default` in a `protected:` section, never `virtual ~Interface()` (defaulted or `= 0`). A virtual destructor puts a deleting destructor in every implementation's vtable, which links `operator delete` (and with it `malloc`/`free`) into heap-free firmware, and under multiple inheritance adds a thunk per base. The protected destructor makes deletion through an interface pointer a compile error. Concrete classes declare no destructor unless they need one, and callers hold the concrete type rather than a `std::unique_ptr` to the interface.
 - No virtual calls in ISR-callable or real-time critical paths
 
 ## Documentation — MANDATORY

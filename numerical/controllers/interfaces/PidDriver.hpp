@@ -9,10 +9,12 @@ namespace controllers
     class PidDriver
     {
     public:
-        virtual ~PidDriver() = default;
         virtual void Read(const infra::Function<void(QNumberType)>& onDone) = 0;
         virtual void ControlAction(QNumberType) = 0;
         virtual void Start(std::chrono::system_clock::duration sampleTime) = 0;
         virtual void Stop() = 0;
+
+    protected:
+        ~PidDriver() = default;
     };
 }

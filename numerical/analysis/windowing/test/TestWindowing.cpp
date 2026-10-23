@@ -11,7 +11,6 @@ namespace
     {
     protected:
         static constexpr float kEpsilon = 1e-3f;
-        std::unique_ptr<windowing::Window<QNumType>> window;
     };
 
     using WindowingTypes = ::testing::Types<math::Q31, math::Q15, float>;
@@ -20,7 +19,7 @@ namespace
 
 TYPED_TEST(WindowingTest, HammingWindowValues)
 {
-    this->window = std::make_unique<windowing::HammingWindow<TypeParam>>();
+    windowing::HammingWindow<TypeParam> window;
 
     struct TestCase
     {
@@ -36,7 +35,7 @@ TYPED_TEST(WindowingTest, HammingWindowValues)
 
     for (const auto& testCase : testCases)
     {
-        TypeParam result = (*this->window)(testCase.n, testCase.order);
+        TypeParam result = window(testCase.n, testCase.order);
         EXPECT_NEAR(math::ToFloat(result), testCase.expected, this->kEpsilon)
             << "Failed for n=" << testCase.n
             << ", order=" << testCase.order;
@@ -45,7 +44,7 @@ TYPED_TEST(WindowingTest, HammingWindowValues)
 
 TYPED_TEST(WindowingTest, HanningWindowValues)
 {
-    this->window = std::make_unique<windowing::HanningWindow<TypeParam>>();
+    windowing::HanningWindow<TypeParam> window;
 
     struct TestCase
     {
@@ -61,7 +60,7 @@ TYPED_TEST(WindowingTest, HanningWindowValues)
 
     for (const auto& testCase : testCases)
     {
-        TypeParam result = (*this->window)(testCase.n, testCase.order);
+        TypeParam result = window(testCase.n, testCase.order);
         EXPECT_NEAR(math::ToFloat(result), testCase.expected, this->kEpsilon)
             << "Failed for n=" << testCase.n
             << ", order=" << testCase.order;
@@ -70,7 +69,7 @@ TYPED_TEST(WindowingTest, HanningWindowValues)
 
 TYPED_TEST(WindowingTest, BlackmanWindowValues)
 {
-    this->window = std::make_unique<windowing::BlackmanWindow<TypeParam>>();
+    windowing::BlackmanWindow<TypeParam> window;
 
     struct TestCase
     {
@@ -85,7 +84,7 @@ TYPED_TEST(WindowingTest, BlackmanWindowValues)
 
     for (const auto& testCase : testCases)
     {
-        TypeParam result = (*this->window)(testCase.n, testCase.order);
+        TypeParam result = window(testCase.n, testCase.order);
         EXPECT_NEAR(math::ToFloat(result), testCase.expected, this->kEpsilon)
             << "Failed for n=" << testCase.n
             << ", order=" << testCase.order;
@@ -94,11 +93,11 @@ TYPED_TEST(WindowingTest, BlackmanWindowValues)
 
 TYPED_TEST(WindowingTest, RectangularWindowValues)
 {
-    this->window = std::make_unique<windowing::RectangularWindow<TypeParam>>();
+    windowing::RectangularWindow<TypeParam> window;
 
     for (std::size_t n = 0; n <= 8; n += 2)
     {
-        TypeParam result = (*this->window)(n, 8);
+        TypeParam result = window(n, 8);
         EXPECT_NEAR(math::ToFloat(result), 0.999f, this->kEpsilon)
             << "Failed for n=" << n;
     }
@@ -106,14 +105,14 @@ TYPED_TEST(WindowingTest, RectangularWindowValues)
 
 TYPED_TEST(WindowingTest, WindowSymmetry)
 {
-    std::vector<std::unique_ptr<windowing::Window<TypeParam>>> windows;
-    windows.push_back(std::make_unique<windowing::HammingWindow<TypeParam>>());
-    windows.push_back(std::make_unique<windowing::HanningWindow<TypeParam>>());
-    windows.push_back(std::make_unique<windowing::BlackmanWindow<TypeParam>>());
+    windowing::HammingWindow<TypeParam> hamming;
+    windowing::HanningWindow<TypeParam> hanning;
+    windowing::BlackmanWindow<TypeParam> blackman;
+    std::array<windowing::Window<TypeParam>*, 3> windows{ &hamming, &hanning, &blackman };
 
     const std::size_t order = 16;
 
-    for (const auto& window : windows)
+    for (auto* window : windows)
     {
         for (std::size_t n = 0; n < order / 2; ++n)
         {

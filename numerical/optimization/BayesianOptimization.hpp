@@ -52,8 +52,10 @@ namespace optimization
         class BlackBoxObjective
         {
         public:
-            virtual ~BlackBoxObjective() = default;
             virtual float Evaluate(const ParameterVector& params) = 0;
+
+        protected:
+            ~BlackBoxObjective() = default;
         };
 
         BayesianOptimization(const BoundsArray& bounds,

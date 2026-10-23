@@ -14,6 +14,8 @@ namespace regularization
         using Vector = math::Vector<T, Size>;
         virtual T Calculate(const Vector& parameters) const = 0;
         virtual Vector Gradient(const Vector& parameters) const = 0;
-        virtual ~Regularization() = default;
+
+    protected:
+        ~Regularization() = default;
     };
 }

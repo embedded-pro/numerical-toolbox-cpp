@@ -48,7 +48,7 @@ End with totals + verdict: APPROVE / REQUEST CHANGES.
 - [ ] SOLID: one concern per class, constructor injection, depend on abstractions, no duplicated logic.
 
 **Interfaces & errors (WARNING)**
-- [ ] `virtual ~I() = default` — never `= 0`. No exceptions — `std::optional`/status enums.
+- [ ] Interfaces: `protected:` non-virtual `~I() = default` — no `virtual` or `= 0` destructor, no ownership or deletion through an interface pointer. No exceptions — `std::optional`/status enums.
 
 **Testing (WARNING)**
 - [ ] `TEST_F` on `float` — no `TYPED_TEST`, no multi-type, never plain `TEST()`.
