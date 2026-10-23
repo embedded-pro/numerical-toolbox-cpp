@@ -107,11 +107,21 @@ jobs:
           path: build/${{ matrix.preset }}/Testing/Temporary/
 
   host_build_test:
-    name: Host Build & Test
+    name: Host Build & Test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        include:
+          - os: macos-latest
+            cache-variant: ccache
+            cmake-args: "['-DCMAKE_C_COMPILER_LAUNCHER=ccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=ccache']"
+          # The Visual Studio generator ignores compiler launchers; sccache cannot cache /Zi, so debug info is embedded (/Z7).
+          # CC/CXX make run-cmake skip its vcpkg-based MSVC setup; msvc-dev-cmd already did it.
+          - os: windows-latest
+            cache-variant: sccache
+            cmake-args: "['-GNinja', '-DCMAKE_C_COMPILER_LAUNCHER=sccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=sccache', '-DCMAKE_POLICY_DEFAULT_CMP0141=NEW', '-DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded']"
+            cc: cl
+      fail-fast: false
     steps:
       - name: Configure Git
         run: |
@@ -121,20 +131,28 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - if: ${{ runner.os == 'Windows' }}
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+      - if: ${{ runner.os == 'Windows' }}
+        uses: seanmiddleditch/gha-setup-ninja@3b1f8f94a2f8254bd26914c4ab9474d4f0015f67 # v6
       - uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
         with:
+          variant: ${{ matrix.cache-variant }}
           key: ${{ github.job }}-${{ matrix.os }}
           max-size: 2G
           save: ${{ github.ref == 'refs/heads/main' }}
       - uses: lukka/run-cmake@5d55ea7949e25f69f0ecb516d8d572297e03a956 # v10.9
+        env:
+          CC: ${{ matrix.cc }}
+          CXX: ${{ matrix.cc }}
         with:
           configurePreset: "host-single-Debug"
           buildPreset: "host-single-Debug"
           testPreset: "host-single-Debug"
-          configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=ccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=ccache']"
+          configurePresetAdditionalArgs: ${{ matrix.cmake-args }}
       - name: Upload test logs
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: test-logs
-          path: build/host/Testing/Temporary/
+          name: test-logs-${{ matrix.os }}
+          path: build/host-single-Debug/Testing/Temporary/
