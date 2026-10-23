@@ -29,7 +29,6 @@ Difficulty legend:
 | 53 | SE(3) transform, twists, wrenches, adjoint, exp/log   | `math`                  | ★★☆☆☆      |
 | 66 | SE(2) transform, twists, exp/log, pose error          | `math`                  | ★★☆☆☆      |
 | 67 | Kabsch / Umeyama point-set alignment                  | `solvers`               | ★★☆☆☆      |
-| 63 | Incremental QR least squares (rank-revealing)         | `estimators/offline`    | ★★★☆☆      |
 | 64 | Levenberg–Marquardt (retraction, pluggable damping)   | `optimization`          | ★★★☆☆      |
 | 68 | Lie-group Jacobians and ⊕/⊖ for SO(3), SE(3), SE(2)   | `math`                  | ★★★☆☆      |
 | 69 | Control allocation (redistributed pseudo-inverse, QP) | `controllers`           | ★★★☆☆      |
@@ -83,15 +82,6 @@ the library does not yet expose. Detailed below under
 ---
 
 ## Tier 3 — Moderate ★★★☆☆
-
-### 63. Incremental QR least squares
-- **What:** Streaming Givens-QR accumulation of an unbounded number of rows into a `P×P` factor, with a
-  rank-revealing SVD solve (minimum-norm solution, identifiable directions, residual RMS).
-- **Embedded value:** Parameter identification from long logs in fixed memory without squaring the
-  condition number.
-- **Algorithm / paper:** G. Golub, C. Van Loan, §5.1.8 and §5.5; Å. Björck (1996), Ch. 2.
-- **Reuses:** `GivensRotation`, `SingularValueDecomposition`.
-- **Spec:** [roadmap/estimators/offline/IncrementalQrLeastSquares](roadmap/estimators/offline/IncrementalQrLeastSquares/implementation.md).
 
 ### 64. Levenberg–Marquardt
 - **What:** Damped Gauss–Newton for small nonlinear least squares with a problem-supplied retraction

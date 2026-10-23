@@ -96,7 +96,7 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 `SignalDetectors` (5) · `ConvolutionCorrelation` (11) · `GoertzelAlgorithm` (13) · `RealFastFourierTransform` (25) · `HilbertTransform` (37) · `DiscreteWaveletTransform` (38)
 
 ### `estimators/offline`
-`PolynomialFitting` (12) · `TotalLeastSquares` (44) · `IncrementalQrLeastSquares` (63)
+`PolynomialFitting` (12) · `TotalLeastSquares` (44)
 
 ### `estimators/online`
 `LmsAdaptiveFilter` (21)
