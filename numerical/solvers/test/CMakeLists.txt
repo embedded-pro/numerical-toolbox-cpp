@@ -11,6 +11,7 @@ numerical_link_qemu_runtime(numerical.solvers_test)
 
 target_sources(numerical.solvers_test PRIVATE
     TestConditionNumber.cpp
+    TestDampedPseudoInverse.cpp
     TestDiscreteAlgebraicRiccatiEquation.cpp
     TestDurandKerner.cpp
     TestGaussianElimination.cpp

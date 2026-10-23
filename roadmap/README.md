@@ -111,4 +111,4 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 `ControllabilityObservability` (26) · `TransferFunctionStateSpace` (32)
 
 ### `solvers`
-`RungeKuttaIntegrators` (24) · `QrDecomposition` (27) · `LuDecomposition` (28) · `LyapunovSylvester` (31) · `JacobiEigenSolver` (42) · `SingularValueDecomposition` (43) · `DampedPseudoInverse` (62) · `ActiveSetQp` (65)
+`RungeKuttaIntegrators` (24) · `QrDecomposition` (27) · `LuDecomposition` (28) · `LyapunovSylvester` (31) · `JacobiEigenSolver` (42) · `SingularValueDecomposition` (43) · `ActiveSetQp` (65)

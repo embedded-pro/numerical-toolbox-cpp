@@ -27,7 +27,6 @@ Difficulty legend:
 | #  | Component                                             | Target module           | Difficulty |
 |----|-------------------------------------------------------|-------------------------|------------|
 | 53 | SE(3) transform, twists, wrenches, adjoint, exp/log   | `math`                  | ★★☆☆☆      |
-| 62 | Damped pseudo-inverse + null-space projector          | `solvers`               | ★★☆☆☆      |
 | 66 | SE(2) transform, twists, exp/log, pose error          | `math`                  | ★★☆☆☆      |
 | 67 | Kabsch / Umeyama point-set alignment                  | `solvers`               | ★★☆☆☆      |
 | 63 | Incremental QR least squares (rank-revealing)         | `estimators/offline`    | ★★★☆☆      |
@@ -63,15 +62,6 @@ the library does not yet expose. Detailed below under
   S. Sastry (1994), Ch. 2; J. Solà et al., "A micro Lie theory for state estimation in robotics" (2018).
 - **Reuses:** `Geometry3D` (`RotationAboutAxis`, `SkewSymmetric`), `Quaternion`.
 - **Spec:** [roadmap/math/SE3Transform](roadmap/math/SE3Transform/implementation.md).
-
-### 62. Damped pseudo-inverse and null-space projector
-- **What:** `A⁺_λ·b` and the exact projector `I − A⁺A` for any `Rows × Cols` matrix from one SVD.
-- **Embedded value:** Singularity-robust inversion for redundant robots, over-actuated control allocation
-  and regularized calibration; the projector exposes spare actuation to a secondary objective.
-- **Algorithm / paper:** C. Wampler, *IEEE Trans. SMC*, 16(1), 1986; A. Liégeois, *IEEE Trans. SMC*,
-  7(12), 1977.
-- **Reuses:** `SingularValueDecomposition` (tall and wide).
-- **Spec:** [roadmap/solvers/DampedPseudoInverse](roadmap/solvers/DampedPseudoInverse/implementation.md).
 
 ### 66. SE(2) transform
 - **What:** Planar rigid transform `(R(θ), p)` with composition, closed-form inverse, adjoint, exp/log of
