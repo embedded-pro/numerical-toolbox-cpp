@@ -15,6 +15,7 @@ target_sources(numerical.controllers.implementations PRIVATE
     BangBangHysteresis.hpp
     DeadbeatControl.hpp
     Feedforward2Dof.hpp
+    FrictionCompensation.hpp
     GainScheduledController.hpp
     IntegralStateFeedbackLqi.hpp
     LeadLagCompensator.hpp
@@ -30,6 +31,7 @@ numerical_add_coverage_sources(numerical.controllers.implementations
     BangBangHysteresis.cpp
     DeadbeatControl.cpp
     Feedforward2Dof.cpp
+    FrictionCompensation.cpp
     GainScheduledController.cpp
     IntegralStateFeedbackLqi.cpp
     LeadLagCompensator.cpp

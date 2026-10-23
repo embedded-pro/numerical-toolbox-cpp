@@ -83,7 +83,7 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 `AlphaBetaFilter` (8) · `ComplementaryFilter` (9) · `AhrsMadgwickMahony` (33) · `SquareRootKalmanFilter` (39)
 
 ### `controllers`
-`SaturationRateLimiter` (3) · `BangBangHysteresis` (4) · `Feedforward2Dof` (7) · `GainScheduledController` (10) · `LeadLagCompensator` (17) · `LuenbergerObserver` (19) · `IntegralStateFeedbackLqi` (20) · `FrictionCompensation` (57)
+`SaturationRateLimiter` (3) · `BangBangHysteresis` (4) · `Feedforward2Dof` (7) · `GainScheduledController` (10) · `LeadLagCompensator` (17) · `LuenbergerObserver` (19) · `IntegralStateFeedbackLqi` (20)
 
 ### `motion_profiles`
 `PolynomialProfile` (55) · `TrapezoidalProfile` (56) · `SCurveProfile` (60)

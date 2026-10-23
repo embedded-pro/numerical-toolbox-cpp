@@ -28,7 +28,6 @@ Difficulty legend:
 |----|-------------------------------------------------------|-------------------------|------------|
 | 55 | Polynomial (cubic/quintic) point-to-point profile     | `motion_profiles` (new) | ★☆☆☆☆      |
 | 56 | Trapezoidal (LSPB) profile + duration sync            | `motion_profiles` (new) | ★☆☆☆☆      |
-| 57 | Friction compensation (Coulomb + viscous + Stribeck)  | `controllers`           | ★☆☆☆☆      |
 | 58 | Symplectic integrators (semi-implicit Euler, Verlet)  | `solvers`               | ★☆☆☆☆      |
 | 53 | SE(3) transform, twists, wrenches, adjoint, exp/log   | `math`                  | ★★☆☆☆      |
 | 60 | S-curve (jerk-limited) profile                        | `motion_profiles` (new) | ★★☆☆☆      |
@@ -74,15 +73,6 @@ the library does not yet expose. Detailed below under
   Robots* (2008), Ch. 3.
 - **Reuses:** Item 55 types.
 - **Spec:** [roadmap/motion_profiles/TrapezoidalProfile](roadmap/motion_profiles/TrapezoidalProfile/implementation.md).
-
-### 57. Friction compensation
-- **What:** Feedforward Coulomb + viscous + Stribeck friction per axis with a `tanh` zero-crossing and an
-  output clamp.
-- **Embedded value:** Removes stick-slip and tracking lag in geared drives and joints for one `exp` and one
-  `tanh` per axis.
-- **Algorithm / paper:** B. Armstrong-Hélouvry, P. Dupont, C. Canudas de Wit, *Automatica*, 30(7), 1994.
-- **Reuses:** `math::Vector`.
-- **Spec:** [roadmap/controllers/FrictionCompensation](roadmap/controllers/FrictionCompensation/implementation.md).
 
 ### 58. Symplectic integrators
 - **What:** Semi-implicit Euler and velocity Verlet for second-order systems `q̈ = a(q, q̇, u)`.

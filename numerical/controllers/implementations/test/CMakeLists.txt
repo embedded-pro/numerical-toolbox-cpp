@@ -14,6 +14,7 @@ target_sources(numerical.controllers_test PRIVATE
     TestBangBangHysteresis.cpp
     TestDeadbeatControl.cpp
     TestFeedforward2Dof.cpp
+    TestFrictionCompensation.cpp
     TestGainScheduledController.cpp
     TestIntegralStateFeedbackLqi.cpp
     TestLeadLagCompensator.cpp

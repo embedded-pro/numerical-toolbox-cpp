@@ -16,3 +16,4 @@ Feedback control algorithms for regulating dynamic systems in real time.
 | [Linear Time-Invariant Model](LinearTimeInvariant.md) | Discrete-time state-space plant model (A, B, C, D) shared across controllers and filters |
 | [Feedforward / 2-DOF Controller](Feedforward2Dof.md) | Feedforward + feedback wrapper for decoupled reference tracking and disturbance rejection |
 | [Luenberger Observer](LuenbergerObserver.md) | Deterministic state estimator using pole placement (Ackermann's formula) to reconstruct unmeasured states |
+| [Friction Compensation](FrictionCompensation.md) | Coulomb + viscous + Stribeck feedforward with a tanh boundary layer and output clamp, per axis |
