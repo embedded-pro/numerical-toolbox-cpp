@@ -12,6 +12,7 @@ target_link_libraries(numerical.solver ${NUMERICAL_VISIBILITY}
 
 target_sources(numerical.solver PRIVATE
     ConditionNumber.hpp
+    DampedPseudoInverse.hpp
     DiscreteAlgebraicRiccatiEquation.hpp
     DormandPrince45.hpp
     DurandKerner.hpp
@@ -31,6 +32,7 @@ target_sources(numerical.solver PRIVATE
 )
 
 numerical_add_coverage_sources(numerical.solver
+    DampedPseudoInverse.cpp
     DiscreteAlgebraicRiccatiEquation.cpp
     DurandKerner.cpp
     GaussianElimination.cpp

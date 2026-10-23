@@ -20,7 +20,7 @@ All pseudocode respects the library constraints: **no heap**, bounded containers
 `template<typename T>` interface that is validated and instantiated for **`float`** only
 (no `Q15`/`Q31`). The generic signature keeps a future fixed-point specialisation cheap to add.
 
-The canonical worked example is [math/SE3Transform](math/SE3Transform/implementation.md).
+For a deployed example of the artifact set a spec turns into, see [SE3Transform](../numerical/math/SE3Transform.hpp), its [test](../numerical/math/test/TestSE3Transform.cpp) and [doc page](../doc/math/SE3Transform.md).
 
 ## Deployment shape (float-only)
 
@@ -96,13 +96,13 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 `SignalDetectors` (5) · `ConvolutionCorrelation` (11) · `GoertzelAlgorithm` (13) · `RealFastFourierTransform` (25) · `HilbertTransform` (37) · `DiscreteWaveletTransform` (38)
 
 ### `estimators/offline`
-`PolynomialFitting` (12) · `TotalLeastSquares` (44) · `IncrementalQrLeastSquares` (63)
+`PolynomialFitting` (12) · `TotalLeastSquares` (44)
 
 ### `estimators/online`
 `LmsAdaptiveFilter` (21)
 
 ### `math`
-`Quaternion` (18) · `Cordic` (23) · `MatrixExponential` (29) · `ContinuousToDiscrete` (30) · `SE3Transform` (53) · `CubicSpline` (61)
+`Quaternion` (18) · `Cordic` (23) · `MatrixExponential` (29) · `ContinuousToDiscrete` (30)
 
 ### `optimization`
 `LevenbergMarquardt` (64)
@@ -111,4 +111,4 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 `ControllabilityObservability` (26) · `TransferFunctionStateSpace` (32)
 
 ### `solvers`
-`RungeKuttaIntegrators` (24) · `QrDecomposition` (27) · `LuDecomposition` (28) · `LyapunovSylvester` (31) · `JacobiEigenSolver` (42) · `SingularValueDecomposition` (43) · `DampedPseudoInverse` (62) · `ActiveSetQp` (65)
+`RungeKuttaIntegrators` (24) · `QrDecomposition` (27) · `LuDecomposition` (28) · `LyapunovSylvester` (31) · `JacobiEigenSolver` (42) · `SingularValueDecomposition` (43) · `ActiveSetQp` (65)

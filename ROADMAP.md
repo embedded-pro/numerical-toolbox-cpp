@@ -26,12 +26,8 @@ Difficulty legend:
 
 | #  | Component                                             | Target module           | Difficulty |
 |----|-------------------------------------------------------|-------------------------|------------|
-| 53 | SE(3) transform, twists, wrenches, adjoint, exp/log   | `math`                  | ★★☆☆☆      |
-| 61 | Cubic spline interpolation (vector-valued)            | `math`                  | ★★☆☆☆      |
-| 62 | Damped pseudo-inverse + null-space projector          | `solvers`               | ★★☆☆☆      |
 | 66 | SE(2) transform, twists, exp/log, pose error          | `math`                  | ★★☆☆☆      |
 | 67 | Kabsch / Umeyama point-set alignment                  | `solvers`               | ★★☆☆☆      |
-| 63 | Incremental QR least squares (rank-revealing)         | `estimators/offline`    | ★★★☆☆      |
 | 64 | Levenberg–Marquardt (retraction, pluggable damping)   | `optimization`          | ★★★☆☆      |
 | 68 | Lie-group Jacobians and ⊕/⊖ for SO(3), SE(3), SE(2)   | `math`                  | ★★★☆☆      |
 | 69 | Control allocation (redistributed pseudo-inverse, QP) | `controllers`           | ★★★☆☆      |
@@ -53,36 +49,6 @@ the library does not yet expose. Detailed below under
 
 ## Tier 2 — Easy ★★☆☆☆
 
-### 53. SE(3) transform, twists and wrenches
-- **What:** Rigid transform (rotation + translation) with closed-form inverse, adjoint, twist/wrench
-  transforms, exponential/logarithm (SO(3) and SE(3)) and a log-map pose error. 6-vectors are ordered
-  linear part first: twists `(v; ω)`, wrenches `(f; n)`.
-- **Embedded value:** The algebra every pose-level consumer shares — robot kinematics, Jacobians and
-  task-space control in robotics-toolbox-cpp, drone attitude/position control, visual odometry. One
-  type and one ordering convention prevent silent block-order mismatches between modules.
-- **Algorithm / paper:** K. Lynch, F. Park, *Modern Robotics* (2017), Ch. 3; R. Murray, Z. Li,
-  S. Sastry (1994), Ch. 2; J. Solà et al., "A micro Lie theory for state estimation in robotics" (2018).
-- **Reuses:** `Geometry3D` (`RotationAboutAxis`, `SkewSymmetric`), `Quaternion`.
-- **Spec:** [roadmap/math/SE3Transform](roadmap/math/SE3Transform/implementation.md).
-
-### 61. Cubic spline interpolation
-- **What:** C² vector-valued spline through `K` knots, clamped or natural ends, shared factorization across
-  channels.
-- **Embedded value:** Smooth interpolation of waypoint lists and calibration tables in linear time on fixed
-  storage.
-- **Algorithm / paper:** C. de Boor, *A Practical Guide to Splines* (2001), Ch. IV.
-- **Reuses:** Item 59.
-- **Spec:** [roadmap/math/CubicSpline](roadmap/math/CubicSpline/implementation.md).
-
-### 62. Damped pseudo-inverse and null-space projector
-- **What:** `A⁺_λ·b` and the exact projector `I − A⁺A` for any `Rows × Cols` matrix from one SVD.
-- **Embedded value:** Singularity-robust inversion for redundant robots, over-actuated control allocation
-  and regularized calibration; the projector exposes spare actuation to a secondary objective.
-- **Algorithm / paper:** C. Wampler, *IEEE Trans. SMC*, 16(1), 1986; A. Liégeois, *IEEE Trans. SMC*,
-  7(12), 1977.
-- **Reuses:** `SingularValueDecomposition` (tall and wide).
-- **Spec:** [roadmap/solvers/DampedPseudoInverse](roadmap/solvers/DampedPseudoInverse/implementation.md).
-
 ### 66. SE(2) transform
 - **What:** Planar rigid transform `(R(θ), p)` with composition, closed-form inverse, adjoint, exp/log of
   planar twists `(vx, vy, ω)` and a pose error, ordered linear part first like item 53.
@@ -103,15 +69,6 @@ the library does not yet expose. Detailed below under
 ---
 
 ## Tier 3 — Moderate ★★★☆☆
-
-### 63. Incremental QR least squares
-- **What:** Streaming Givens-QR accumulation of an unbounded number of rows into a `P×P` factor, with a
-  rank-revealing SVD solve (minimum-norm solution, identifiable directions, residual RMS).
-- **Embedded value:** Parameter identification from long logs in fixed memory without squaring the
-  condition number.
-- **Algorithm / paper:** G. Golub, C. Van Loan, §5.1.8 and §5.5; Å. Björck (1996), Ch. 2.
-- **Reuses:** `GivensRotation`, `SingularValueDecomposition`.
-- **Spec:** [roadmap/estimators/offline/IncrementalQrLeastSquares](roadmap/estimators/offline/IncrementalQrLeastSquares/implementation.md).
 
 ### 64. Levenberg–Marquardt
 - **What:** Damped Gauss–Newton for small nonlinear least squares with a problem-supplied retraction

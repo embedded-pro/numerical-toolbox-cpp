@@ -11,6 +11,7 @@ numerical_link_qemu_runtime(numerical.estimators.offline_test)
 
 target_sources(numerical.estimators.offline_test PRIVATE
     TestExpectationMaximization.cpp
+    TestIncrementalQrLeastSquares.cpp
     TestLinearRegression.cpp
     TestPolynomialFitting.cpp
     TestTotalLeastSquares.cpp

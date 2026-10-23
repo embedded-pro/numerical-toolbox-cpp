@@ -14,6 +14,7 @@ target_link_libraries(numerical.estimators.offline ${NUMERICAL_VISIBILITY}
 
 target_sources(numerical.estimators.offline PRIVATE
     ExpectationMaximization.hpp
+    IncrementalQrLeastSquares.hpp
     LinearRegression.hpp
     PolynomialFitting.hpp
     TotalLeastSquares.hpp
@@ -22,6 +23,7 @@ target_sources(numerical.estimators.offline PRIVATE
 
 numerical_add_coverage_sources(numerical.estimators.offline
     ExpectationMaximization.cpp
+    IncrementalQrLeastSquares.cpp
     LinearRegression.cpp
     PolynomialFitting.cpp
     TotalLeastSquares.cpp

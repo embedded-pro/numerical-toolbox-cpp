@@ -21,6 +21,7 @@ target_sources(numerical.math PRIVATE
     ConstexprMath.hpp
     ComplexNumber.hpp
     ConsistencyMetrics.hpp
+    CubicSpline.hpp
     Cordic.hpp
     Geometry3D.hpp
     GivensRotation.hpp
@@ -33,6 +34,7 @@ target_sources(numerical.math PRIVATE
     QNumber.hpp
     Quaternion.hpp
     RecursiveBuffer.hpp
+    SE3Transform.hpp
     Statistics.hpp
     StepResponseMetrics.hpp
     Toeplitz.hpp
@@ -48,12 +50,14 @@ numerical_add_coverage_sources(numerical.math
     CholeskyDecomposition.cpp
     ComplexNumber.cpp
     ConsistencyMetrics.cpp
+    CubicSpline.cpp
     Cordic.cpp
     Matrix.cpp
     MatrixExponential.cpp
     QNumber.cpp
     Quaternion.cpp
     RecursiveBuffer.cpp
+    SE3Transform.cpp
     Toeplitz.cpp
     TridiagonalSolver.cpp
 )

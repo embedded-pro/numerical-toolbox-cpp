@@ -19,3 +19,5 @@ Core mathematical primitives for numerical computation.
 | [Consistency Metrics](ConsistencyMetrics.md)       | NEES/NIS estimator consistency with χ² gates — normalised estimation error squared and normalised innovation squared     |
 | [Angle Utilities](AngleUtilities.md)               | Wrap to $(-\pi, \pi]$ / $[0, 2\pi)$, shortest signed angle difference, and unwrapping of wrapped measurements            |
 | [Tridiagonal Solver](TridiagonalSolver.md)         | Thomas algorithm — $O(n)$ factorization reused across right-hand sides for diagonally dominant / SPD tridiagonal systems |
+| [Cubic Spline](CubicSpline.md)                     | Vector-valued $C^2$ cubic spline (clamped / natural ends) fitted with one shared tridiagonal factorization               |
+| [SE(3) Transform](SE3Transform.md)                 | Rigid transforms with twist/wrench adjoints and an accurate exp/log (linear-first $(v;\omega)$ ordering)                 |
