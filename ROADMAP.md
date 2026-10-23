@@ -28,7 +28,6 @@ Difficulty legend:
 |----|-------------------------------------------------------|-------------------------|------------|
 | 66 | SE(2) transform, twists, exp/log, pose error          | `math`                  | ★★☆☆☆      |
 | 67 | Kabsch / Umeyama point-set alignment                  | `solvers`               | ★★☆☆☆      |
-| 64 | Levenberg–Marquardt (retraction, pluggable damping)   | `optimization`          | ★★★☆☆      |
 | 68 | Lie-group Jacobians and ⊕/⊖ for SO(3), SE(3), SE(2)   | `math`                  | ★★★☆☆      |
 | 69 | Control allocation (redistributed pseudo-inverse, QP) | `controllers`           | ★★★☆☆      |
 | 70 | Particle filter (bounded, systematic resampling)      | `filters/active`        | ★★★☆☆      |
@@ -69,15 +68,6 @@ the library does not yet expose. Detailed below under
 ---
 
 ## Tier 3 — Moderate ★★★☆☆
-
-### 64. Levenberg–Marquardt
-- **What:** Damped Gauss–Newton for small nonlinear least squares with a problem-supplied retraction
-  (vectors, bounds, rotations) and a pluggable damping policy.
-- **Embedded value:** One bounded, heap-free solver for IK, parallel-robot forward kinematics, calibration
-  and scan matching.
-- **Algorithm / paper:** K. Levenberg (1944); D. Marquardt (1963); J. Nocedal, S. Wright (2006), Ch. 10.
-- **Reuses:** `LuDecomposition`.
-- **Spec:** [roadmap/optimization/LevenbergMarquardt](roadmap/optimization/LevenbergMarquardt/implementation.md).
 
 ### 68. Lie-group Jacobians and ⊕/⊖
 - **What:** Left and right Jacobians (and inverses) of SO(3), SE(3) and SE(2), the `⊕`/`⊖` operators

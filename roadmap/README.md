@@ -104,8 +104,6 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 ### `math`
 `Quaternion` (18) · `Cordic` (23) · `MatrixExponential` (29) · `ContinuousToDiscrete` (30)
 
-### `optimization`
-`LevenbergMarquardt` (64)
 
 ### `control_analysis`
 `ControllabilityObservability` (26) · `TransferFunctionStateSpace` (32)
