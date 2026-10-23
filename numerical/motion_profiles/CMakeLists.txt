@@ -13,11 +13,13 @@ target_link_libraries(numerical.motion_profiles ${NUMERICAL_VISIBILITY}
 target_sources(numerical.motion_profiles PRIVATE
     MotionProfileTypes.hpp
     PolynomialProfile.hpp
+    SCurveProfile.hpp
     TrapezoidalProfile.hpp
 )
 
 numerical_add_coverage_sources(numerical.motion_profiles
     PolynomialProfile.cpp
+    SCurveProfile.cpp
     TrapezoidalProfile.cpp
 )
 

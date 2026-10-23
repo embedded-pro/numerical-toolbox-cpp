@@ -127,6 +127,12 @@ TEST_F(TestMath, Copysign_transfers_sign)
     EXPECT_FLOAT_EQ(math::Copysign(-3.0f, 1.0f), 3.0f);
 }
 
+TEST_F(TestMath, Cbrt_known_value)
+{
+    EXPECT_NEAR(math::Cbrt(27.0f), 3.0f, kEps);
+    EXPECT_NEAR(math::Cbrt(-0.001f), -0.1f, kEps);
+}
+
 TEST_F(TestMath, Fmod_known_value)
 {
     EXPECT_NEAR(math::Fmod(5.5f, 2.0f), 1.5f, kEps);
