@@ -86,7 +86,7 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 `SaturationRateLimiter` (3) · `BangBangHysteresis` (4) · `Feedforward2Dof` (7) · `GainScheduledController` (10) · `LeadLagCompensator` (17) · `LuenbergerObserver` (19) · `IntegralStateFeedbackLqi` (20)
 
 ### `motion_profiles`
-`PolynomialProfile` (55) · `TrapezoidalProfile` (56) · `SCurveProfile` (60)
+`TrapezoidalProfile` (56) · `SCurveProfile` (60)
 
 ### `robust_control`
 `SlidingModeControl` (34) · `DisturbanceObserver` (35) · `ActiveDisturbanceRejection` (36) · `HInfinityStateFeedback` (46)

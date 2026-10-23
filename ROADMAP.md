@@ -26,7 +26,6 @@ Difficulty legend:
 
 | #  | Component                                             | Target module           | Difficulty |
 |----|-------------------------------------------------------|-------------------------|------------|
-| 55 | Polynomial (cubic/quintic) point-to-point profile     | `motion_profiles` (new) | ★☆☆☆☆      |
 | 56 | Trapezoidal (LSPB) profile + duration sync            | `motion_profiles` (new) | ★☆☆☆☆      |
 | 53 | SE(3) transform, twists, wrenches, adjoint, exp/log   | `math`                  | ★★☆☆☆      |
 | 60 | S-curve (jerk-limited) profile                        | `motion_profiles` (new) | ★★☆☆☆      |
@@ -55,14 +54,6 @@ the library does not yet expose. Detailed below under
 [Evaluation & metrics primitives](#evaluation--metrics-primitives).
 
 ## Tier 1 — Trivial primitives ★☆☆☆☆
-
-### 55. Polynomial point-to-point profile
-- **What:** Cubic (position + velocity) or quintic (+ acceleration) time law between two states over a
-  fixed duration; defines the shared `TrajectoryState` / `MotionLimits` types of `motion_profiles`.
-- **Embedded value:** Coefficients solved once in closed form; each servo tick is a Horner evaluation.
-- **Algorithm / paper:** M. Spong, S. Hutchinson, M. Vidyasagar, *Robot Modeling and Control*, Ch. 5.
-- **Reuses:** Scalar templates.
-- **Spec:** [roadmap/motion_profiles/PolynomialProfile](roadmap/motion_profiles/PolynomialProfile/implementation.md).
 
 ### 56. Trapezoidal (LSPB) profile
 - **What:** Minimum-time velocity/acceleration-limited rest-to-rest move, triangular for short moves, plus
