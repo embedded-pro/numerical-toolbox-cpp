@@ -99,6 +99,32 @@ TEST_F(TestGoertzelAlgorithm, result_matches_direct_dft_bin)
     EXPECT_NEAR(result.Imaginary(), refImag, 1e-3f);
 }
 
+TEST_F(TestGoertzelAlgorithm, supplied_bin_phasor_matches_direct_dft_bin)
+{
+    constexpr std::size_t k{ 3 };
+    const float binAngle{ 2.0f * std::numbers::pi_v<float> * static_cast<float>(k) / static_cast<float>(N) };
+    analysis::GoertzelAlgorithm<float> goertzel{ math::Complex<float>{ std::cos(binAngle), std::sin(binAngle) }, N };
+
+    std::array<float, N> signal{};
+    for (std::size_t n = 0; n < N; ++n)
+        signal[n] = std::sin(binAngle * static_cast<float>(n)) + 0.5f;
+
+    for (float s : signal)
+        goertzel.Push(s);
+
+    float refReal{ 0.0f };
+    float refImag{ 0.0f };
+    for (std::size_t n = 0; n < N; ++n)
+    {
+        refReal += signal[n] * std::cos(binAngle * static_cast<float>(n));
+        refImag -= signal[n] * std::sin(binAngle * static_cast<float>(n));
+    }
+
+    math::Complex<float> result{ goertzel.Result() };
+    EXPECT_NEAR(result.Real(), refReal, 1e-3f);
+    EXPECT_NEAR(result.Imaginary(), refImag, 1e-3f);
+}
+
 TEST_F(TestGoertzelAlgorithm, magnitude_squared_equals_result_norm_squared)
 {
     constexpr std::size_t k{ 2 };

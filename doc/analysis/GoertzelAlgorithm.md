@@ -90,6 +90,8 @@ The DC bin ($k = 0$) and the Nyquist bin ($k = N/2$) are purely real; their imag
 
 The magnitude-squared form $s_1^2 + s_2^2 - c\,s_1 s_2$ avoids the square root when only power detection (threshold comparison) is needed, saving a transcendental call on platforms without hardware `sqrt`.
 
+The recurrence and the final step need only $\cos\omega$ and $\sin\omega$ of the bin, $\omega = 2\pi k/N$, evaluated once per configuration. A caller that already evaluates them by other means — a sine table refined by a short series, or an exact value for a known angle — can supply the unit bin phasor $e^{j\omega}$ directly. On targets whose sine and cosine come from a software math library, that keeps the library's general argument-reduction code, several kilobytes on a Cortex-M4, out of the image. The phasor's accuracy sets the resonator frequency: an error $\varepsilon$ in $\cos\omega$ detunes it by about $\varepsilon / \sin\omega$ radians per sample, which over a block of $N$ samples rotates the result by about $N\varepsilon / (2\sin\omega)$.
+
 When several tones must be tracked simultaneously, one independent Goertzel instance per tone runs in $O(BN)$ total with $O(B)$ state — still far cheaper than an FFT for small $B$.
 
 A sliding Goertzel variant updates one sample at a time by subtracting the oldest sample, giving a continuous output at the cost of maintaining an input ring buffer; this trades $O(1)$ memory for $O(N)$ memory and is outside the scope of the no-heap constraint here.
