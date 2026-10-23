@@ -19,6 +19,7 @@ namespace analysis
     public:
         GoertzelAlgorithm(std::size_t k, std::size_t blockLength);
         GoertzelAlgorithm(T targetHz, T sampleHz, std::size_t blockLength);
+        GoertzelAlgorithm(math::Complex<T> binPhasor, std::size_t blockLength);
 
         [[nodiscard]] static std::optional<GoertzelAlgorithm> TryCreate(std::size_t k, std::size_t blockLength);
 
@@ -31,6 +32,8 @@ namespace analysis
         static T Coefficient(std::size_t k, std::size_t blockLength);
 
     private:
+        static math::Complex<T> BinPhasor(std::size_t k, std::size_t blockLength);
+
         T coeff;
         T cosine;
         T sine;
@@ -51,9 +54,14 @@ namespace analysis
 
     template<typename T>
     GoertzelAlgorithm<T>::GoertzelAlgorithm(std::size_t k, std::size_t blockLength)
-        : coeff{ T{ 2 } * math::Cos(T{ 2 } * std::numbers::pi_v<T> * static_cast<T>(k) / static_cast<T>(blockLength)) }
-        , cosine{ math::Cos(T{ 2 } * std::numbers::pi_v<T> * static_cast<T>(k) / static_cast<T>(blockLength)) }
-        , sine{ math::Sin(T{ 2 } * std::numbers::pi_v<T> * static_cast<T>(k) / static_cast<T>(blockLength)) }
+        : GoertzelAlgorithm(BinPhasor(k, blockLength), blockLength)
+    {}
+
+    template<typename T>
+    GoertzelAlgorithm<T>::GoertzelAlgorithm(math::Complex<T> binPhasor, std::size_t blockLength)
+        : coeff{ T{ 2 } * binPhasor.Real() }
+        , cosine{ binPhasor.Real() }
+        , sine{ binPhasor.Imaginary() }
         , blockSize{ blockLength }
     {
         really_assert(blockLength > 0);
@@ -104,6 +112,13 @@ namespace analysis
         s1 = T{ 0 };
         s2 = T{ 0 };
         sampleCount = 0;
+    }
+
+    template<typename T>
+    math::Complex<T> GoertzelAlgorithm<T>::BinPhasor(std::size_t k, std::size_t blockLength)
+    {
+        const T angle{ T{ 2 } * std::numbers::pi_v<T> * static_cast<T>(k) / static_cast<T>(blockLength) };
+        return math::Complex<T>{ math::Cos(angle), math::Sin(angle) };
     }
 
     template<typename T>
