@@ -26,7 +26,12 @@ namespace math
         Vector3<T> translation{};
 
         static SE3Transform Identity();
-        OPTIMIZE_FOR_SPEED SE3Transform operator*(const SE3Transform& rhs) const;
+
+        [[nodiscard]] OPTIMIZE_FOR_SPEED friend SE3Transform operator*(const SE3Transform& lhs, const SE3Transform& rhs)
+        {
+            return { lhs.rotation * rhs.rotation, lhs.rotation * rhs.translation + lhs.translation };
+        }
+
         SE3Transform Inverse() const;
         OPTIMIZE_FOR_SPEED Vector3<T> Apply(const Vector3<T>& point) const;
         Vector3<T> Rotate(const Vector3<T>& direction) const;
@@ -53,12 +58,6 @@ namespace math
     SE3Transform<T> SE3Transform<T>::Identity()
     {
         return {};
-    }
-
-    template<typename T>
-    OPTIMIZE_FOR_SPEED SE3Transform<T> SE3Transform<T>::operator*(const SE3Transform& rhs) const
-    {
-        return { rotation * rhs.rotation, rotation * rhs.translation + translation };
     }
 
     template<typename T>
