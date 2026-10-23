@@ -2,9 +2,9 @@
 
 ## Overview & Motivation
 
-The singular value decomposition (SVD) factors any $m \times n$ matrix $A$ ($m \geq n$) into
+The singular value decomposition (SVD) factors any $m \times n$ matrix $A$ into
 two orthonormal rotation factors and a non-negative diagonal, revealing the fundamental geometric
-action of $A$ as a stretch along $n$ orthogonal directions. It is the most numerically stable
+action of $A$ as a stretch along $k = \min(m, n)$ orthogonal directions. It is the most numerically stable
 matrix factorization available and exposes rank, condition number, and the pseudo-inverse directly
 from its output. In embedded systems, SVD powers robust least-squares solvers for sensor calibration,
 redundant-actuator control allocation, and low-rank model reduction — all applications where the
@@ -14,15 +14,22 @@ matrix $A$ may be ill-conditioned or rank-deficient and normal-equation approach
 
 ### Factorization
 
-For $A \in \mathbb{R}^{m \times n}$ with $m \geq n$, the thin SVD is
+For $A \in \mathbb{R}^{m \times n}$ and $k = \min(m, n)$, the thin SVD is
 
 $$A = U \Sigma V^\top,$$
 
-where $U \in \mathbb{R}^{m \times n}$ has orthonormal columns ($U^\top U = I_n$),
-$\Sigma = \mathrm{diag}(\sigma_1, \ldots, \sigma_n)$ with $\sigma_1 \geq \cdots \geq \sigma_n \geq 0$,
-and $V \in \mathbb{R}^{n \times n}$ is orthogonal ($V^\top V = V V^\top = I_n$).
+where $U \in \mathbb{R}^{m \times k}$ and $V \in \mathbb{R}^{n \times k}$ have orthonormal columns
+($U^\top U = V^\top V = I_k$) and $\Sigma = \mathrm{diag}(\sigma_1, \ldots, \sigma_k)$ with
+$\sigma_1 \geq \cdots \geq \sigma_k \geq 0$. For a tall or square matrix ($m \geq n$) $V$ is square
+and orthogonal; for a wide matrix ($m < n$) $U$ is.
 The scalars $\sigma_i$ are the **singular values** of $A$; the columns of $U$ and $V$ are
 the left and right **singular vectors**.
+
+### Wide Matrices
+
+The Golub–Kahan bidiagonalization below runs on a tall matrix. A wide $A$ is handled through its
+transpose: factor $A^\top = U' \Sigma V'^\top$ (tall), then $A = V' \Sigma U'^\top$, so $U = V'$ and
+$V = U'$. The singular values are shared, and no extra storage is needed beyond the tall factors.
 
 ### Connection to the Symmetric Eigenproblem
 
@@ -43,7 +50,7 @@ or numerical noise.
 
 ### Rank and Condition Number
 
-$$\mathrm{rank}(A) = \#\{i : \sigma_i > \tau\}, \quad \kappa(A) = \sigma_1 / \sigma_n.$$
+$$\mathrm{rank}(A) = \#\{i : \sigma_i > \tau\}, \quad \kappa(A) = \sigma_1 / \sigma_k.$$
 
 The condition number $\kappa$ measures sensitivity: a system with $\kappa \gg 1$ amplifies
 input perturbations by a factor of $\kappa$ in the least-squares solution.
@@ -52,10 +59,12 @@ input perturbations by a factor of $\kappa$ in the least-squares solution.
 
 | Phase             | Time                                            | Space    | Notes                                        |
 |-------------------|-------------------------------------------------|----------|----------------------------------------------|
-| Bidiagonalization | $O(mn^2 - n^3/3)$                               | $O(mn)$  | Two-sided Householder reflectors             |
-| QR sweeps         | $O(n^2)$ per iteration, $O(n)$ total iterations | $O(n^2)$ | Golub-Reinsch implicit-shift; converges fast |
-| Pseudo-inverse    | $O(n^2 m)$                                      | $O(nm)$  | Matrix triple product $V \Sigma^+ U^\top$    |
-| Total             | $O(mn^2 + n^3)$                                 | $O(mn)$  | Dominated by bidiagonalization               |
+| Bidiagonalization | $O(Mk^2 - k^3/3)$                               | $O(mn)$  | Two-sided Householder reflectors             |
+| QR sweeps         | $O(k^2)$ per iteration, $O(k)$ total iterations | $O(k^2)$ | Golub-Reinsch implicit-shift; converges fast |
+| Pseudo-inverse    | $O(k\,mn)$                                      | $O(nm)$  | Matrix triple product $V \Sigma^+ U^\top$    |
+| Total             | $O(Mk^2 + k^3)$                                 | $O(mn)$  | Dominated by bidiagonalization               |
+
+Here $M = \max(m, n)$ and $k = \min(m, n)$: a wide matrix costs the same as its transpose.
 
 All storage is stack-allocated; no heap is used. The bidiagonal form is stored implicitly in
 the working copy of $A$ alongside the Householder reflector scalars.
@@ -86,13 +95,14 @@ negated. After descending sort: $\sigma = (3, 2, 1)$.
   diagonal entries into the sign of the corresponding $U$ column so that all $\sigma_i \geq 0$.
 - **Repeated singular values:** the corresponding singular-vector subspaces are correct but the
   individual vectors are not unique; tests should check subspace properties, not individual vectors.
-- **Condition number with zero $\sigma_{\min}$:** a rank-deficient matrix has $\sigma_n = 0$;
+- **Condition number with zero $\sigma_{\min}$:** a rank-deficient matrix has $\sigma_k = 0$;
   `ConditionNumber()` returns zero as a sentinel in this case rather than dividing by zero.
 
 ## Variants & Generalizations
 
-- **Full SVD:** $U \in \mathbb{R}^{m \times m}$ (all $m$ left singular vectors); the extra
-  $m - n$ columns span the left null space of $A$. The thin SVD suffices for least squares.
+- **Full SVD:** $U \in \mathbb{R}^{m \times m}$ and $V \in \mathbb{R}^{n \times n}$; the extra columns
+  span the left and right null spaces of $A$. The thin SVD suffices for least squares; a null-space
+  projector $I - V V^\top$ needs only the thin $V$.
 - **Truncated SVD:** retain only the $k$ largest singular values for low-rank approximation
   $A \approx U_k \Sigma_k V_k^\top$; the approximation error in Frobenius norm equals
   $\sqrt{\sigma_{k+1}^2 + \cdots + \sigma_n^2}$ (Eckart-Young theorem).
@@ -105,7 +115,8 @@ negated. After descending sort: $\sigma = (3, 2, 1)$.
 ## Applications
 
 - **Least-squares regression:** $x = A^+ b$ minimises $\|Ax - b\|_2$ and is unique among
-  minimum-norm solutions when $A$ is rank-deficient.
+  minimum-norm solutions when $A$ is rank-deficient. For a wide, full-row-rank $A$ (an
+  underdetermined system) it is the minimum-norm exact solution $A^\top (A A^\top)^{-1} b$.
 - **Control allocation:** maps actuator space to output space; the pseudo-inverse distributes
   effort across redundant actuators while respecting the null space.
 - **System identification:** SVD of a Hankel matrix (Ho-Kalman) recovers system order (rank)

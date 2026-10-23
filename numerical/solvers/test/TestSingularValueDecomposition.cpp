@@ -10,6 +10,7 @@ namespace
     protected:
         solvers::SingularValueDecomposition<float, 4, 3> svd{};
         solvers::SingularValueDecomposition<float, 3, 3> svdSquare{};
+        solvers::SingularValueDecomposition<float, 3, 4> svdWide{};
 
         math::Matrix<float, 4, 3> a43{
             { 1.0f, 2.0f, 3.0f },
@@ -17,6 +18,8 @@ namespace
             { 7.0f, 8.0f, 10.0f },
             { 1.0f, 0.0f, 2.0f }
         };
+
+        math::Matrix<float, 3, 4> a34{ a43.Transpose() };
     };
 }
 
@@ -269,4 +272,64 @@ TEST_F(TestSingularValueDecomposition, trailing_zero_diagonal_block_is_deflated_
     EXPECT_NEAR(svd.SingularValues().at(0, 0), 3.0f, 1e-4f);
     EXPECT_NEAR(svd.SingularValues().at(1, 0), 2.0f, 1e-4f);
     EXPECT_NEAR(svd.SingularValues().at(2, 0), 0.0f, 1e-4f);
+}
+
+TEST_F(TestSingularValueDecomposition, wide_matrix_reconstructs_A)
+{
+    ASSERT_TRUE(svdWide.Decompose(a34));
+
+    math::Matrix<float, 3, 3> sigMat{};
+    for (std::size_t i = 0; i < 3; ++i)
+        sigMat.at(i, i) = svdWide.SingularValues().at(i, 0);
+
+    auto reconstructed = svdWide.U() * sigMat * svdWide.V().Transpose();
+
+    for (std::size_t i = 0; i < 3; ++i)
+        for (std::size_t j = 0; j < 4; ++j)
+            EXPECT_NEAR(reconstructed.at(i, j), a34.at(i, j), 1e-4f);
+}
+
+TEST_F(TestSingularValueDecomposition, wide_matrix_U_and_V_orthonormal)
+{
+    ASSERT_TRUE(svdWide.Decompose(a34));
+
+    auto utu = svdWide.U().Transpose() * svdWide.U();
+    auto vtv = svdWide.V().Transpose() * svdWide.V();
+
+    for (std::size_t i = 0; i < 3; ++i)
+        for (std::size_t j = 0; j < 3; ++j)
+        {
+            float expected = (i == j) ? 1.0f : 0.0f;
+            EXPECT_NEAR(utu.at(i, j), expected, 1e-4f);
+            EXPECT_NEAR(vtv.at(i, j), expected, 1e-4f);
+        }
+}
+
+TEST_F(TestSingularValueDecomposition, wide_pseudo_inverse_is_right_inverse)
+{
+    ASSERT_TRUE(svdWide.Decompose(a34));
+
+    auto aaPlus = a34 * svdWide.PseudoInverse(1e-6f);
+
+    for (std::size_t i = 0; i < 3; ++i)
+        for (std::size_t j = 0; j < 3; ++j)
+            EXPECT_NEAR(aaPlus.at(i, j), (i == j) ? 1.0f : 0.0f, 1e-4f);
+}
+
+TEST_F(TestSingularValueDecomposition, wide_least_squares_returns_minimum_norm_solution)
+{
+    math::Matrix<float, 3, 4> underdetermined{
+        { 1.0f, 1.0f, 0.0f, 0.0f },
+        { 0.0f, 1.0f, 1.0f, 0.0f },
+        { 0.0f, 0.0f, 1.0f, 1.0f }
+    };
+    math::Vector<float, 3> b{ { 1.0f }, { 2.0f }, { 3.0f } };
+
+    ASSERT_TRUE(svdWide.Decompose(underdetermined));
+    auto x = svdWide.SolveLeastSquares(b);
+
+    EXPECT_NEAR(x.at(0, 0), 0.5f, 1e-4f);
+    EXPECT_NEAR(x.at(1, 0), 0.5f, 1e-4f);
+    EXPECT_NEAR(x.at(2, 0), 1.5f, 1e-4f);
+    EXPECT_NEAR(x.at(3, 0), 1.5f, 1e-4f);
 }
