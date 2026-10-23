@@ -1,9 +1,8 @@
 #pragma once
 
+#include "numerical/math/AngleUtilities.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
-#include "numerical/math/Math.hpp"
 #include <cassert>
-#include <numbers>
 #include <type_traits>
 
 namespace filters
@@ -28,8 +27,6 @@ namespace filters
         T Ts;
         T angle;
         bool wrapAngle;
-
-        static T WrapToPi(T x) noexcept;
     };
 
     ////    Implementation    ////
@@ -59,8 +56,8 @@ namespace filters
         T predicted{ angle + rate * measuredTs };
         if (wrapAngle)
         {
-            T delta{ WrapToPi(measuredAngle - predicted) };
-            angle = WrapToPi(predicted + (T{ 1 } - alpha) * delta);
+            T delta{ math::AngleDifference(measuredAngle, predicted) };
+            angle = math::WrapToPi(predicted + (T{ 1 } - alpha) * delta);
         }
         else
         {
@@ -86,17 +83,6 @@ namespace filters
     T ComplementaryFilter<T>::AlphaFromTau(T tau, T Ts) noexcept
     {
         return tau / (tau + Ts);
-    }
-
-    template<typename T>
-    T ComplementaryFilter<T>::WrapToPi(T x) noexcept
-    {
-        constexpr T pi{ std::numbers::pi_v<T> };
-        constexpr T twoPi{ T{ 2 } * std::numbers::pi_v<T> };
-        T wrapped{ math::Fmod(x + pi, twoPi) };
-        if (wrapped < T{})
-            wrapped += twoPi;
-        return wrapped - pi;
     }
 
 #ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD

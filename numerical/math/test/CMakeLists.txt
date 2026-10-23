@@ -11,6 +11,7 @@ target_link_libraries(numerical.math_test PUBLIC
 numerical_link_qemu_runtime(numerical.math_test)
 
 target_sources(numerical.math_test PRIVATE
+    TestAngleUtilities.cpp
     TestCholeskyDecomposition.cpp
     TestComplexNumber.cpp
     TestGradientCheck.cpp
@@ -32,4 +33,5 @@ target_sources(numerical.math_test PRIVATE
     TestStepResponseMetrics.cpp
     TestToeplitz.cpp
     TestTriangularSolve.cpp
+    TestTridiagonalSolver.cpp
 )

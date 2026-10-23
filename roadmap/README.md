@@ -83,10 +83,8 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 `AlphaBetaFilter` (8) · `ComplementaryFilter` (9) · `AhrsMadgwickMahony` (33) · `SquareRootKalmanFilter` (39)
 
 ### `controllers`
-`SaturationRateLimiter` (3) · `BangBangHysteresis` (4) · `Feedforward2Dof` (7) · `GainScheduledController` (10) · `LeadLagCompensator` (17) · `LuenbergerObserver` (19) · `IntegralStateFeedbackLqi` (20) · `FrictionCompensation` (57)
+`SaturationRateLimiter` (3) · `BangBangHysteresis` (4) · `Feedforward2Dof` (7) · `GainScheduledController` (10) · `LeadLagCompensator` (17) · `LuenbergerObserver` (19) · `IntegralStateFeedbackLqi` (20)
 
-### `motion_profiles`
-`PolynomialProfile` (55) · `TrapezoidalProfile` (56) · `SCurveProfile` (60)
 
 ### `robust_control`
 `SlidingModeControl` (34) · `DisturbanceObserver` (35) · `ActiveDisturbanceRejection` (36) · `HInfinityStateFeedback` (46)
@@ -104,7 +102,7 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 `LmsAdaptiveFilter` (21)
 
 ### `math`
-`Quaternion` (18) · `Cordic` (23) · `MatrixExponential` (29) · `ContinuousToDiscrete` (30) · `SE3Transform` (53) · `AngleUtilities` (54) · `TridiagonalSolver` (59) · `CubicSpline` (61)
+`Quaternion` (18) · `Cordic` (23) · `MatrixExponential` (29) · `ContinuousToDiscrete` (30) · `SE3Transform` (53) · `CubicSpline` (61)
 
 ### `optimization`
 `LevenbergMarquardt` (64)
@@ -113,4 +111,4 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 `ControllabilityObservability` (26) · `TransferFunctionStateSpace` (32)
 
 ### `solvers`
-`RungeKuttaIntegrators` (24) · `QrDecomposition` (27) · `LuDecomposition` (28) · `LyapunovSylvester` (31) · `JacobiEigenSolver` (42) · `SingularValueDecomposition` (43) · `SymplecticIntegrators` (58) · `DampedPseudoInverse` (62) · `ActiveSetQp` (65)
+`RungeKuttaIntegrators` (24) · `QrDecomposition` (27) · `LuDecomposition` (28) · `LyapunovSylvester` (31) · `JacobiEigenSolver` (42) · `SingularValueDecomposition` (43) · `DampedPseudoInverse` (62) · `ActiveSetQp` (65)

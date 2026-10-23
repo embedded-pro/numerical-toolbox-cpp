@@ -16,6 +16,7 @@ if (NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS)
 endif()
 
 target_sources(numerical.math PRIVATE
+    AngleUtilities.hpp
     CholeskyDecomposition.hpp
     ConstexprMath.hpp
     ComplexNumber.hpp
@@ -36,12 +37,14 @@ target_sources(numerical.math PRIVATE
     StepResponseMetrics.hpp
     Toeplitz.hpp
     Tolerance.hpp
+    TridiagonalSolver.hpp
     Math.hpp
     TriangularSolve.hpp
 )
 
 numerical_add_coverage_sources(numerical.math
     Math.cpp
+    AngleUtilities.cpp
     CholeskyDecomposition.cpp
     ComplexNumber.cpp
     ConsistencyMetrics.cpp
@@ -52,6 +55,7 @@ numerical_add_coverage_sources(numerical.math
     Quaternion.cpp
     RecursiveBuffer.cpp
     Toeplitz.cpp
+    TridiagonalSolver.cpp
 )
 
 add_subdirectory(test)

@@ -8,6 +8,9 @@ template float math::Abs<float>(float);
 #ifndef MATH_SQRT_OVERRIDE
 template float math::Sqrt<float>(float);
 #endif
+#ifndef MATH_CBRT_OVERRIDE
+template float math::Cbrt<float>(float);
+#endif
 #ifndef MATH_SIN_OVERRIDE
 template float math::Sin<float>(float);
 #endif

@@ -50,7 +50,7 @@ the seam. Instead the blend is performed along the shortest arc:
 $$\delta = \mathrm{WrapToPi}(\theta_{acc} - \hat{\theta})$$
 $$\theta_{k+1} = \mathrm{WrapToPi}\!\left(\hat{\theta} + (1-\alpha)\,\delta\right)$$
 
-where $\mathrm{WrapToPi}(x) = \bigl((x + \pi) \bmod 2\pi\bigr) - \pi$.
+where $\mathrm{WrapToPi}$ reduces an angle into $(-\pi, \pi]$ — the library-wide angle convention, so an angle of exactly $-\pi$ is reported as $+\pi$ (see [Angle Utilities](../../math/AngleUtilities.md)).
 
 ## Complexity Analysis
 

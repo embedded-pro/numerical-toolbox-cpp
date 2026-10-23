@@ -22,4 +22,5 @@ target_sources(numerical.solvers_test PRIVATE
     TestRungeKuttaIntegrators.cpp
     TestSingularValueDecomposition.cpp
     TestSpectralRadius.cpp
+    TestSymplecticIntegrators.cpp
 )

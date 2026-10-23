@@ -26,14 +26,7 @@ Difficulty legend:
 
 | #  | Component                                             | Target module           | Difficulty |
 |----|-------------------------------------------------------|-------------------------|------------|
-| 54 | Angle utilities (wrap, shortest difference, unwrap)   | `math`                  | ★☆☆☆☆      |
-| 55 | Polynomial (cubic/quintic) point-to-point profile     | `motion_profiles` (new) | ★☆☆☆☆      |
-| 56 | Trapezoidal (LSPB) profile + duration sync            | `motion_profiles` (new) | ★☆☆☆☆      |
-| 57 | Friction compensation (Coulomb + viscous + Stribeck)  | `controllers`           | ★☆☆☆☆      |
-| 58 | Symplectic integrators (semi-implicit Euler, Verlet)  | `solvers`               | ★☆☆☆☆      |
-| 59 | Tridiagonal (Thomas) solver                           | `math`                  | ★☆☆☆☆      |
 | 53 | SE(3) transform, twists, wrenches, adjoint, exp/log   | `math`                  | ★★☆☆☆      |
-| 60 | S-curve (jerk-limited) profile                        | `motion_profiles` (new) | ★★☆☆☆      |
 | 61 | Cubic spline interpolation (vector-valued)            | `math`                  | ★★☆☆☆      |
 | 62 | Damped pseudo-inverse + null-space projector          | `solvers`               | ★★☆☆☆      |
 | 66 | SE(2) transform, twists, exp/log, pose error          | `math`                  | ★★☆☆☆      |
@@ -58,60 +51,6 @@ unit-test reference [`TESTING.md`](TESTING.md) depends on but which
 the library does not yet expose. Detailed below under
 [Evaluation & metrics primitives](#evaluation--metrics-primitives).
 
-## Tier 1 — Trivial primitives ★☆☆☆☆
-
-### 54. Angle utilities
-- **What:** `WrapToPi` `(−π, π]`, `WrapToTwoPi` `[0, 2π)`, shortest signed `AngleDifference`, and
-  `UnwrapAngle` for continuous signals.
-- **Embedded value:** One convention for every angle consumer — heading controllers, odometry, encoder
-  unwrapping, analytical IK; replaces `ComplementaryFilter`'s private wrap.
-- **Algorithm / paper:** range reduction with `fmod`; D. Goldberg, *ACM Computing Surveys*, 23(1), 1991.
-- **Reuses:** `math::Fmod`.
-- **Spec:** [roadmap/math/AngleUtilities](roadmap/math/AngleUtilities/implementation.md).
-
-### 55. Polynomial point-to-point profile
-- **What:** Cubic (position + velocity) or quintic (+ acceleration) time law between two states over a
-  fixed duration; defines the shared `TrajectoryState` / `MotionLimits` types of `motion_profiles`.
-- **Embedded value:** Coefficients solved once in closed form; each servo tick is a Horner evaluation.
-- **Algorithm / paper:** M. Spong, S. Hutchinson, M. Vidyasagar, *Robot Modeling and Control*, Ch. 5.
-- **Reuses:** Scalar templates.
-- **Spec:** [roadmap/motion_profiles/PolynomialProfile](roadmap/motion_profiles/PolynomialProfile/implementation.md).
-
-### 56. Trapezoidal (LSPB) profile
-- **What:** Minimum-time velocity/acceleration-limited rest-to-rest move, triangular for short moves, plus
-  a fixed-duration plan for multi-axis synchronization.
-- **Embedded value:** The standard servo-axis move (robot joints, CNC, conveyors, motor position loops).
-- **Algorithm / paper:** L. Biagiotti, C. Melchiorri, *Trajectory Planning for Automatic Machines and
-  Robots* (2008), Ch. 3.
-- **Reuses:** Item 55 types.
-- **Spec:** [roadmap/motion_profiles/TrapezoidalProfile](roadmap/motion_profiles/TrapezoidalProfile/implementation.md).
-
-### 57. Friction compensation
-- **What:** Feedforward Coulomb + viscous + Stribeck friction per axis with a `tanh` zero-crossing and an
-  output clamp.
-- **Embedded value:** Removes stick-slip and tracking lag in geared drives and joints for one `exp` and one
-  `tanh` per axis.
-- **Algorithm / paper:** B. Armstrong-Hélouvry, P. Dupont, C. Canudas de Wit, *Automatica*, 30(7), 1994.
-- **Reuses:** `math::Vector`.
-- **Spec:** [roadmap/controllers/FrictionCompensation](roadmap/controllers/FrictionCompensation/implementation.md).
-
-### 58. Symplectic integrators
-- **What:** Semi-implicit Euler and velocity Verlet for second-order systems `q̈ = a(q, q̇, u)`.
-- **Embedded value:** Bounded energy error for simulated mechanical plants at one or two evaluations per
-  step (RK4 needs four and still drifts).
-- **Algorithm / paper:** E. Hairer, C. Lubich, G. Wanner, *Geometric Numerical Integration* (2006).
-- **Reuses:** `math::Vector`; complements `RungeKuttaIntegrators`.
-- **Spec:** [roadmap/solvers/SymplecticIntegrators](roadmap/solvers/SymplecticIntegrators/implementation.md).
-
-### 59. Tridiagonal solver
-- **What:** Thomas algorithm, factor once / solve many, pivot-failure reporting.
-- **Embedded value:** `O(n)` instead of `O(n³)` for splines and implicit difference schemes.
-- **Algorithm / paper:** L. H. Thomas (1949); G. Golub, C. Van Loan, *Matrix Computations*, §4.3.
-- **Reuses:** Bounded `std::array` bands.
-- **Spec:** [roadmap/math/TridiagonalSolver](roadmap/math/TridiagonalSolver/implementation.md).
-
----
-
 ## Tier 2 — Easy ★★☆☆☆
 
 ### 53. SE(3) transform, twists and wrenches
@@ -125,13 +64,6 @@ the library does not yet expose. Detailed below under
   S. Sastry (1994), Ch. 2; J. Solà et al., "A micro Lie theory for state estimation in robotics" (2018).
 - **Reuses:** `Geometry3D` (`RotationAboutAxis`, `SkewSymmetric`), `Quaternion`.
 - **Spec:** [roadmap/math/SE3Transform](roadmap/math/SE3Transform/implementation.md).
-
-### 60. S-curve (jerk-limited) profile
-- **What:** Seven-segment jerk-bounded rest-to-rest move with all short-move cases in closed form.
-- **Embedded value:** Continuous acceleration — far less vibration than a trapezoid for precision axes.
-- **Algorithm / paper:** L. Biagiotti, C. Melchiorri (2008), §3.4.
-- **Reuses:** Items 55 (types) and 56 (synchronization scheme).
-- **Spec:** [roadmap/motion_profiles/SCurveProfile](roadmap/motion_profiles/SCurveProfile/implementation.md).
 
 ### 61. Cubic spline interpolation
 - **What:** C² vector-valued spline through `K` knots, clamped or natural ends, shared factorization across

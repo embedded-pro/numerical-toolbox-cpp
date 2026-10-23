@@ -25,6 +25,15 @@ namespace math
     }
 #endif
 
+#ifndef MATH_CBRT_OVERRIDE
+    template<typename T>
+    constexpr T Cbrt(T x)
+    {
+        static_assert(std::is_floating_point_v<T>, "T must be a floating-point type");
+        return std::cbrt(x);
+    }
+#endif
+
 #ifndef MATH_SIN_OVERRIDE
     template<typename T>
     constexpr T Sin(T x)
@@ -251,6 +260,9 @@ namespace math
 #endif
 #ifndef MATH_SQRT_OVERRIDE
     extern template float Sqrt<float>(float);
+#endif
+#ifndef MATH_CBRT_OVERRIDE
+    extern template float Cbrt<float>(float);
 #endif
 #ifndef MATH_SIN_OVERRIDE
     extern template float Sin<float>(float);
