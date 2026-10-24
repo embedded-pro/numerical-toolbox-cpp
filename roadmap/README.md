@@ -80,7 +80,7 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 `ExponentialMovingAverage` (1) · `MovingAverage` (2) · `MedianFilter` (6) · `CicFilter` (14) · `BiquadCascade` (15) · `NotchCombFilter` (16) · `SavitzkyGolayFilter` (22) · `IirFilterDesign` (45)
 
 ### `filters/active`
-`AlphaBetaFilter` (8) · `ComplementaryFilter` (9) · `AhrsMadgwickMahony` (33) · `SquareRootKalmanFilter` (39)
+`AlphaBetaFilter` (8) · `ComplementaryFilter` (9) · `AhrsMadgwickMahony` (33) · `SquareRootKalmanFilter` (39) · `ParticleFilter` (70) · `ResidualKalmanUpdate` (74)
 
 ### `controllers`
 `SaturationRateLimiter` (3) · `BangBangHysteresis` (4) · `Feedforward2Dof` (7) · `GainScheduledController` (10) · `LeadLagCompensator` (17) · `LuenbergerObserver` (19) · `IntegralStateFeedbackLqi` (20)
@@ -107,4 +107,4 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 `ControllabilityObservability` (26) · `TransferFunctionStateSpace` (32)
 
 ### `solvers`
-`RungeKuttaIntegrators` (24) · `QrDecomposition` (27) · `LuDecomposition` (28) · `LyapunovSylvester` (31) · `JacobiEigenSolver` (42) · `SingularValueDecomposition` (43)
+`RungeKuttaIntegrators` (24) · `QrDecomposition` (27) · `LuDecomposition` (28) · `LyapunovSylvester` (31) · `JacobiEigenSolver` (42) · `SingularValueDecomposition` (43) · `PointSetAlignment` (67)
