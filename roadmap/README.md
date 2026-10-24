@@ -101,7 +101,7 @@ with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 `LmsAdaptiveFilter` (21)
 
 ### `math`
-`Quaternion` (18) · `Cordic` (23) · `MatrixExponential` (29) · `ContinuousToDiscrete` (30)
+`Quaternion` (18) · `Cordic` (23) · `MatrixExponential` (29) · `ContinuousToDiscrete` (30) · `SE2Transform` (66)
 
 ### `control_analysis`
 `ControllabilityObservability` (26) · `TransferFunctionStateSpace` (32)

@@ -37,7 +37,8 @@ Difficulty legend:
 
 Items 66–73 are generic building blocks of robotics-toolbox-cpp's roadmap (referenced there as
 NT66–NT73; NT53–NT65 are deployed). They serve its mobile, aerial, legged, marine and localization
-families, also have non-robotics consumers, and have no spec yet. All are *(float-first)*.
+families and also have non-robotics consumers. Item 66 has a spec under [`roadmap/`](roadmap/README.md);
+items 67–73 have none yet. All are *(float-first)*.
 
 Items 48–52 are the **evaluation & metrics primitives** — reusable quantities the per-family
 unit-test reference [`TESTING.md`](TESTING.md) depends on but which
@@ -53,7 +54,8 @@ the library does not yet expose. Detailed below under
   tracking, scan matching — at a fraction of SE(3)'s cost.
 - **Algorithm / paper:** J. Solà, J. Deray, D. Atchuthan, "A micro Lie theory for state estimation in
   robotics" (2018), Appendix C.
-- **Reuses:** Item 54 (angle wrapping).
+- **Reuses:** Item 53 (ordering convention, `ToSE3`).
+- **Spec:** [roadmap/math/SE2Transform](roadmap/math/SE2Transform/implementation.md).
 
 ### 67. Kabsch / Umeyama alignment
 - **What:** Least-squares rotation, translation and optional scale between two corresponding point sets
