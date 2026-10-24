@@ -28,6 +28,7 @@ Difficulty legend:
 |----|-------------------------------------------------------|-------------------------|------------|
 | 66 | SE(2) transform, twists, exp/log, pose error          | `math`                  | ★★☆☆☆      |
 | 67 | Kabsch / Umeyama point-set alignment                  | `solvers`               | ★★☆☆☆      |
+| 74 | Residual-form Kalman update with χ² gating            | `filters/active`        | ★★☆☆☆      |
 | 68 | Lie-group Jacobians and ⊕/⊖ for SO(3), SE(3), SE(2)   | `math`                  | ★★★☆☆      |
 | 69 | Control allocation (redistributed pseudo-inverse, QP) | `controllers`           | ★★★☆☆      |
 | 70 | Particle filter (bounded, systematic resampling)      | `filters/active`        | ★★★☆☆      |
@@ -35,10 +36,10 @@ Difficulty legend:
 | 72 | Minimum-derivative (min-snap) piecewise polynomials   | `motion_profiles` (new) | ★★★★☆      |
 | 73 | Online jerk-limited trajectory from arbitrary state   | `motion_profiles` (new) | ★★★★★      |
 
-Items 66–73 are generic building blocks of robotics-toolbox-cpp's roadmap (referenced there as
-NT66–NT73; NT53–NT65 are deployed). They serve its mobile, aerial, legged, marine and localization
-families and also have non-robotics consumers. Item 66 has a spec under [`roadmap/`](roadmap/README.md);
-items 67–73 have none yet. All are *(float-first)*.
+Items 66–74 are generic building blocks of robotics-toolbox-cpp's roadmap (referenced there as
+NT66–NT74; NT53–NT65 are deployed). They serve its mobile, aerial, legged, marine and localization
+families and also have non-robotics consumers. Items 66, 67, 70 and 74 have specs under
+[`roadmap/`](roadmap/README.md); items 68, 69 and 71–73 have none yet. All are *(float-first)*.
 
 Items 48–52 are the **evaluation & metrics primitives** — reusable quantities the per-family
 unit-test reference [`TESTING.md`](TESTING.md) depends on but which
@@ -64,6 +65,20 @@ the library does not yet expose. Detailed below under
   and fiducial registration.
 - **Algorithm / paper:** W. Kabsch, *Acta Cryst.* A32, 1976; S. Umeyama, *IEEE T-PAMI*, 13(4), 1991.
 - **Reuses:** `SingularValueDecomposition`.
+- **Spec:** [roadmap/solvers/PointSetAlignment](roadmap/solvers/PointSetAlignment/implementation.md).
+
+### 74. Residual-form Kalman update with χ² gating
+- **What:** Stateless Kalman measurement update from a caller-formed residual `z ⊖ h(x)`, Jacobian and
+  noise: Joseph-form correction, normalised innovation squared, and a χ² gate that rejects outliers
+  without touching the state.
+- **Embedded value:** Covers what `ExtendedKalmanFilter` cannot: wrapped angle residuals (bearings,
+  headings), a measurement model chosen per observation (landmarks), and gating and data association
+  by Mahalanobis distance.
+- **Algorithm / paper:** P. Maybeck, *Stochastic Models, Estimation, and Control*, Vol. 1 (1979), Ch. 5;
+  Y. Bar-Shalom, X.-R. Li, T. Kirubarajan, *Estimation with Applications to Tracking and Navigation*
+  (2001), Ch. 5.
+- **Reuses:** `CholeskyDecomposition`, `ConsistencyMetrics`, `MatrixOperations`; item 54 for angle residuals.
+- **Spec:** [roadmap/filters/active/ResidualKalmanUpdate](roadmap/filters/active/ResidualKalmanUpdate/implementation.md).
 
 ---
 
@@ -93,7 +108,8 @@ the library does not yet expose. Detailed below under
   navigation, fault detection — on fixed memory.
 - **Algorithm / paper:** N. Gordon, D. Salmond, A. Smith, *IEE Proc. F*, 140(2), 1993; A. Doucet,
   A. Johansen, "A tutorial on particle filtering and smoothing" (2009).
-- **Reuses:** A caller-injected deterministic PRNG; `math::Statistics`.
+- **Reuses:** A caller-injected uniform number for resampling; caller-supplied motion and likelihood callables.
+- **Spec:** [roadmap/filters/active/ParticleFilter](roadmap/filters/active/ParticleFilter/implementation.md).
 
 ---
 
