@@ -26,7 +26,6 @@ Difficulty legend:
 
 | #  | Component                                             | Target module           | Difficulty |
 |----|-------------------------------------------------------|-------------------------|------------|
-| 66 | SE(2) transform, twists, exp/log, pose error          | `math`                  | ★★☆☆☆      |
 | 67 | Kabsch / Umeyama point-set alignment                  | `solvers`               | ★★☆☆☆      |
 | 74 | Residual-form Kalman update with χ² gating            | `filters/active`        | ★★☆☆☆      |
 | 68 | Lie-group Jacobians and ⊕/⊖ for SO(3), SE(3), SE(2)   | `math`                  | ★★★☆☆      |
@@ -36,9 +35,9 @@ Difficulty legend:
 | 72 | Minimum-derivative (min-snap) piecewise polynomials   | `motion_profiles` (new) | ★★★★☆      |
 | 73 | Online jerk-limited trajectory from arbitrary state   | `motion_profiles` (new) | ★★★★★      |
 
-Items 66–74 are generic building blocks of robotics-toolbox-cpp's roadmap (referenced there as
-NT66–NT74; NT53–NT65 are deployed). They serve its mobile, aerial, legged, marine and localization
-families and also have non-robotics consumers. Items 66, 67, 70 and 74 have specs under
+Items 67–74 are generic building blocks of robotics-toolbox-cpp's roadmap (referenced there as
+NT67–NT74; NT53–NT66 are deployed). They serve its mobile, aerial, legged, marine and localization
+families and also have non-robotics consumers. Items 67, 70 and 74 have specs under
 [`roadmap/`](roadmap/README.md); items 68, 69 and 71–73 have none yet. All are *(float-first)*.
 
 Items 48–52 are the **evaluation & metrics primitives** — reusable quantities the per-family
@@ -47,16 +46,6 @@ the library does not yet expose. Detailed below under
 [Evaluation & metrics primitives](#evaluation--metrics-primitives).
 
 ## Tier 2 — Easy ★★☆☆☆
-
-### 66. SE(2) transform
-- **What:** Planar rigid transform `(R(θ), p)` with composition, closed-form inverse, adjoint, exp/log of
-  planar twists `(vx, vy, ω)` and a pose error, ordered linear part first like item 53.
-- **Embedded value:** The pose type of every ground vehicle and planar mechanism — odometry, path
-  tracking, scan matching — at a fraction of SE(3)'s cost.
-- **Algorithm / paper:** J. Solà, J. Deray, D. Atchuthan, "A micro Lie theory for state estimation in
-  robotics" (2018), Appendix C.
-- **Reuses:** Item 53 (ordering convention, `ToSE3`).
-- **Spec:** [roadmap/math/SE2Transform](roadmap/math/SE2Transform/implementation.md).
 
 ### 67. Kabsch / Umeyama alignment
 - **What:** Least-squares rotation, translation and optional scale between two corresponding point sets
