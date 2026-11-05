@@ -34,6 +34,7 @@ target_sources(numerical.math PRIVATE
     QNumber.hpp
     Quaternion.hpp
     RecursiveBuffer.hpp
+    SE2Transform.hpp
     SE3Transform.hpp
     Statistics.hpp
     StepResponseMetrics.hpp
@@ -57,6 +58,7 @@ numerical_add_coverage_sources(numerical.math
     QNumber.cpp
     Quaternion.cpp
     RecursiveBuffer.cpp
+    SE2Transform.cpp
     SE3Transform.cpp
     Toeplitz.cpp
     TridiagonalSolver.cpp
