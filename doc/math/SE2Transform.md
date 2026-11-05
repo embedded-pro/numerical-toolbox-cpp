@@ -2,7 +2,8 @@
 
 ## Overview & Motivation
 
-Ground robots, warehouse vehicles, mobile bases and planar mechanisms all work with poses in a plane. Odometry integrates wheel speeds into a pose, path trackers compare the vehicle pose with a reference, and landmark and scan-matching localization correct the pose from measurements. Every one of them needs the same few operations: compose two poses, invert a pose, move a velocity or a force into another frame, and turn a constant velocity held for some time into the finite motion it produces.
+Ground robots, warehouse vehicles, mobile bases and planar mechanisms all work with poses in a plane. Odometry integrates wheel speeds into a pose, path trackers compare the vehicle pose with a reference, and landmark and scan-matching localization correct the pose from measurements.
+Every one of them needs the same few operations: compose two poses, invert a pose, move a velocity or a force into another frame, and turn a constant velocity held for some time into the finite motion it produces.
 
 The planar special Euclidean group SE(2) provides exactly these. A planar pose costs four numbers instead of the twelve of a spatial transform. Composition and inversion need no trigonometry when the heading is stored as its cosine and sine.
 Using the same linear-first ordering as the spatial transform keeps planar and spatial code consistent, for example when a mobile base carries an arm.
@@ -43,7 +44,8 @@ A constant twist $\xi = (v_x, v_y, \omega)$ held for a time $t$ turns by $\varph
 
 $$\exp(\xi t) = \left(z(\varphi),\; V(\varphi)\,u\right), \qquad u = (v_x t, v_y t), \qquad V(\varphi) = \begin{pmatrix} A & -B \\ B & A \end{pmatrix},$$
 
-with $A = \sin\varphi / \varphi$ and $B = (1 - \cos\varphi)/\varphi$. For $|\varphi| < 0.1$ both are replaced by their Taylor series, $A \approx 1 - \varphi^2/6 + \varphi^4/120$ and $B \approx \varphi/2 - \varphi^3/24 + \varphi^5/720$. This removes the $0/0$ at $\varphi = 0$ and the cancellation in $1 - \cos\varphi$. The truncation error at the switch is below single-precision resolution. Away from it, $B$ uses the half-angle form $2\sin^2(\varphi/2)/\varphi$.
+with $A = \sin\varphi / \varphi$ and $B = (1 - \cos\varphi)/\varphi$. For $|\varphi| < 0.1$ both are replaced by their Taylor series, $A \approx 1 - \varphi^2/6 + \varphi^4/120$ and $B \approx \varphi/2 - \varphi^3/24 + \varphi^5/720$. This removes the $0/0$ at $\varphi = 0$ and the cancellation in $1 - \cos\varphi$. The truncation error at the switch is below single-precision resolution.
+Away from it, $B$ uses the half-angle form $2\sin^2(\varphi/2)/\varphi$.
 
 ### Logarithm
 
