@@ -26,7 +26,6 @@ Difficulty legend:
 
 | #  | Component                                             | Target module           | Difficulty |
 |----|-------------------------------------------------------|-------------------------|------------|
-| 67 | Kabsch / Umeyama point-set alignment                  | `solvers`               | ★★☆☆☆      |
 | 68 | Lie-group Jacobians and ⊕/⊖ for SO(3), SE(3), SE(2)   | `math`                  | ★★★☆☆      |
 | 69 | Control allocation (redistributed pseudo-inverse, QP) | `controllers`           | ★★★☆☆      |
 | 70 | Particle filter (bounded, systematic resampling)      | `filters/active`        | ★★★☆☆      |
@@ -34,9 +33,9 @@ Difficulty legend:
 | 72 | Minimum-derivative (min-snap) piecewise polynomials   | `motion_profiles` (new) | ★★★★☆      |
 | 73 | Online jerk-limited trajectory from arbitrary state   | `motion_profiles` (new) | ★★★★★      |
 
-Items 67–73 are generic building blocks of robotics-toolbox-cpp's roadmap (referenced there as
-NT67–NT73; NT53–NT66 and NT74 are deployed). They serve its mobile, aerial, legged, marine and
-localization families and also have non-robotics consumers. Items 67 and 70 have specs under
+Items 68–73 are generic building blocks of robotics-toolbox-cpp's roadmap (referenced there as
+NT68–NT73; NT53–NT67 and NT74 are deployed). They serve its mobile, aerial, legged, marine and
+localization families and also have non-robotics consumers. Item 70 has a spec under
 [`roadmap/`](roadmap/README.md); items 68, 69 and 71–73 have none yet. All are *(float-first)*.
 
 Items 48–52 are the **evaluation & metrics primitives** — reusable quantities the per-family
@@ -46,14 +45,7 @@ the library does not yet expose. Detailed below under
 
 ## Tier 2 — Easy ★★☆☆☆
 
-### 67. Kabsch / Umeyama alignment
-- **What:** Least-squares rotation, translation and optional scale between two corresponding point sets
-  (orthogonal Procrustes), with the reflection fix, in 2-D and 3-D.
-- **Embedded value:** The inner step of ICP scan matching, hand-eye and frame calibration, motion-capture
-  and fiducial registration.
-- **Algorithm / paper:** W. Kabsch, *Acta Cryst.* A32, 1976; S. Umeyama, *IEEE T-PAMI*, 13(4), 1991.
-- **Reuses:** `SingularValueDecomposition`.
-- **Spec:** [roadmap/solvers/PointSetAlignment](roadmap/solvers/PointSetAlignment/implementation.md).
+All Tier 2 items are deployed.
 
 ---
 

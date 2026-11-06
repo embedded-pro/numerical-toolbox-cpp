@@ -20,6 +20,7 @@ target_sources(numerical.solvers_test PRIVATE
     TestLevinsonDurbin.cpp
     TestLuDecomposition.cpp
     TestLyapunovSylvester.cpp
+    TestPointSetAlignment.cpp
     TestQrDecomposition.cpp
     TestRungeKuttaIntegrators.cpp
     TestSingularValueDecomposition.cpp
