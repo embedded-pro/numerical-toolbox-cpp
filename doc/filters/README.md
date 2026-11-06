@@ -8,14 +8,15 @@ Digital filtering algorithms for noise reduction, state estimation, and signal c
 
 Filters that incorporate feedback and a dynamic internal model of the system.
 
-| Algorithm                                                     | Description                                                                                                                               |
-|---------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
-| [Kalman Filter](active/KalmanFilter.md)                       | Optimal recursive state estimator for linear systems with Gaussian noise                                                                  |
-| [Extended Kalman Filter](active/ExtendedKalmanFilter.md)      | Nonlinear state estimator using first-order linearization (Jacobians)                                                                     |
-| [Unscented Kalman Filter](active/UnscentedKalmanFilter.md)    | Nonlinear state estimator using sigma points; no Jacobians required                                                                       |
-| [Kalman Smoother](active/KalmanSmoother.md)                   | Offline RTS smoother providing MMSE estimates over the full observation sequence                                                          |
-| [Square-Root Kalman Filter](active/SquareRootKalmanFilter.md) | Numerically robust Kalman filter propagating a Cholesky factor to guarantee positive-definiteness                                         |
-| [Residual-Form Kalman Update](active/ResidualKalmanUpdate.md) | Stateless Joseph-form update from a caller-formed residual, with normalised innovation squared and a χ² gate for outliers and association |
+| Algorithm                                                     | Description                                                                                                                                                                  |
+|---------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [Kalman Filter](active/KalmanFilter.md)                       | Optimal recursive state estimator for linear systems with Gaussian noise                                                                                                     |
+| [Extended Kalman Filter](active/ExtendedKalmanFilter.md)      | Nonlinear state estimator using first-order linearization (Jacobians)                                                                                                        |
+| [Unscented Kalman Filter](active/UnscentedKalmanFilter.md)    | Nonlinear state estimator using sigma points; no Jacobians required                                                                                                          |
+| [Kalman Smoother](active/KalmanSmoother.md)                   | Offline RTS smoother providing MMSE estimates over the full observation sequence                                                                                             |
+| [Square-Root Kalman Filter](active/SquareRootKalmanFilter.md) | Numerically robust Kalman filter propagating a Cholesky factor to guarantee positive-definiteness                                                                            |
+| [Residual-Form Kalman Update](active/ResidualKalmanUpdate.md) | Stateless Joseph-form update from a caller-formed residual, with normalised innovation squared and a χ² gate for outliers and association                                    |
+| [Particle Filter](active/ParticleFilter.md)                   | Bounded sequential importance resampling with caller-supplied motion and log-likelihood callables, log-domain weights and systematic resampling on low effective sample size |
 
 ### Passive Filters
 
