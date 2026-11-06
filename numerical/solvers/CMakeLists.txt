@@ -23,6 +23,7 @@ target_sources(numerical.solver PRIVATE
     LuDecomposition.hpp
     LyapunovSylvester.hpp
     OdeSystem.hpp
+    PointSetAlignment.hpp
     QrDecomposition.hpp
     RungeKuttaIntegrators.hpp
     SecondOrderSystem.hpp
@@ -42,6 +43,7 @@ numerical_add_coverage_sources(numerical.solver
     LevinsonDurbin.cpp
     LuDecomposition.cpp
     LyapunovSylvester.cpp
+    PointSetAlignment.cpp
     QrDecomposition.cpp
     RungeKuttaIntegrators.cpp
     SingularValueDecomposition.cpp
