@@ -28,15 +28,14 @@ Difficulty legend:
 |----|-------------------------------------------------------|-------------------------|------------|
 | 68 | Lie-group Jacobians and ⊕/⊖ for SO(3), SE(3), SE(2)   | `math`                  | ★★★☆☆      |
 | 69 | Control allocation (redistributed pseudo-inverse, QP) | `controllers`           | ★★★☆☆      |
-| 70 | Particle filter (bounded, systematic resampling)      | `filters/active`        | ★★★☆☆      |
 | 71 | Error-state (multiplicative) EKF on Lie groups        | `filters/active`        | ★★★★☆      |
 | 72 | Minimum-derivative (min-snap) piecewise polynomials   | `motion_profiles` (new) | ★★★★☆      |
 | 73 | Online jerk-limited trajectory from arbitrary state   | `motion_profiles` (new) | ★★★★★      |
 
-Items 68–73 are generic building blocks of robotics-toolbox-cpp's roadmap (referenced there as
-NT68–NT73; NT53–NT67 and NT74 are deployed). They serve its mobile, aerial, legged, marine and
-localization families and also have non-robotics consumers. Item 70 has a spec under
-[`roadmap/`](roadmap/README.md); items 68, 69 and 71–73 have none yet. All are *(float-first)*.
+Items 68, 69 and 71–73 are generic building blocks of robotics-toolbox-cpp's roadmap (referenced there
+as NT68, NT69 and NT71–NT73; NT53–NT67, NT70 and NT74 are deployed). They serve its aerial, legged and
+marine families and also have non-robotics consumers. None has a spec under
+[`roadmap/`](roadmap/README.md) yet. All are *(float-first)*.
 
 Items 48–52 are the **evaluation & metrics primitives** — reusable quantities the per-family
 unit-test reference [`TESTING.md`](TESTING.md) depends on but which
@@ -67,16 +66,6 @@ All Tier 2 items are deployed.
 - **Algorithm / paper:** T. A. Johansen, T. I. Fossen, "Control allocation — A survey," *Automatica*,
   49(5), 2013; J. Bordignon, *Constrained control allocation* (PhD thesis, Virginia Tech, 1996).
 - **Reuses:** Items 62 and 65.
-
-### 70. Particle filter
-- **What:** Sequential importance resampling with a compile-time particle count, systematic resampling
-  triggered by the effective sample size, and weighted-mean / MAP estimates.
-- **Embedded value:** Multimodal, non-Gaussian estimation — Monte Carlo localization, terrain-aided
-  navigation, fault detection — on fixed memory.
-- **Algorithm / paper:** N. Gordon, D. Salmond, A. Smith, *IEE Proc. F*, 140(2), 1993; A. Doucet,
-  A. Johansen, "A tutorial on particle filtering and smoothing" (2009).
-- **Reuses:** A caller-injected uniform number for resampling; caller-supplied motion and likelihood callables.
-- **Spec:** [roadmap/filters/active/ParticleFilter](roadmap/filters/active/ParticleFilter/implementation.md).
 
 ---
 
