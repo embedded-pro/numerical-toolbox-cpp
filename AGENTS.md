@@ -30,6 +30,9 @@ resource-constrained embedded systems. Real-time, deterministic, no heap.
   into an out-of-line call.
 - The optimization level and floating-point model belong to the consumer and apply to whole
   translation units. For embedded targets: `-O2` or `-O3` with `-ffast-math -fno-finite-math-only`.
+  Consumers get the floating-point flags from `numerical_toolbox_enable_embedded_optimizations([TARGETS ...])`
+  (`cmake/NumericalCompilerOptions.cmake`). Opt-in only: never a usage requirement of a `numerical.*` target.
+  `NUMERICAL_TOOLBOX_EMBEDDED_OPTIMIZATIONS` applies it to the toolbox's own targets (QEMU presets).
 - `OPTIMIZE_FOR_SPEED` on hot paths (`Filter/Compute/Update/Solve/Step`). Pure interfaces exempt.
   With `NumericalToolbox_ENABLE_OPTIMIZATIONS` it forces inlining (`always_inline`, `hot`, `inline`);
   without it, it expands to nothing.

@@ -10,6 +10,7 @@ option(NUMERICAL_TOOLBOX_BUILD_SIMULATOR "Enable build of the Qt simulator appli
 option(NUMERICAL_TOOLBOX_BUILD_TESTS "Enable build of the tests" Off)
 option(NUMERICAL_TOOLBOX_BUILD_INTEGRATION_TESTS "Enable build of the cucumber integration tests" Off)
 option(NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS "Enable compiler optimizations for numerical routines" On)
+option(NUMERICAL_TOOLBOX_EMBEDDED_OPTIMIZATIONS "Build the toolbox's own targets with the embedded floating-point model (-ffast-math -fno-finite-math-only)" Off)
 option(NUMERICAL_TOOLBOX_ENABLE_CUSTOM_MATH "Enable platform-specific math overrides (e.g. MathArm.hpp for ARM targets)" Off)
 
 if (NUMERICAL_TOOLBOX_BUILD_TESTS)
@@ -25,6 +26,7 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(NumericalHeaderLibrary)
+include(NumericalCompilerOptions)
 
 add_definitions(-DEMIL_ENABLE_TRACING=1)
 
@@ -98,6 +100,10 @@ elseif (NUMERICAL_TOOLBOX_BUILD_INTEGRATION_TESTS)
 endif()
 
 include(QemuHelpers)
+
+if (NUMERICAL_TOOLBOX_EMBEDDED_OPTIMIZATIONS)
+    numerical_toolbox_enable_embedded_optimizations()
+endif()
 
 add_subdirectory(numerical)
 
@@ -196,6 +202,7 @@ write_basic_package_version_file(
 install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/NumericalToolboxConfig.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/NumericalToolboxConfigVersion.cmake
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/NumericalCompilerOptions.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/NumericalToolbox
 )
 

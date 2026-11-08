@@ -41,7 +41,7 @@ To replace a function with a platform-specific implementation, define the corres
 
 ## Embedded Optimizations
 
-Never use `#pragma GCC optimize` or the `optimize` attribute. GCC does not inline a callee whose optimization options differ from its caller's, so options set per header or per function turn every small helper on a hot path into an out-of-line call. Optimization level and floating-point flags are the consumer's, applied to whole translation units (embedded: `-O2`/`-O3` with `-ffast-math -fno-finite-math-only`).
+Never use `#pragma GCC optimize` or the `optimize` attribute. GCC does not inline a callee whose optimization options differ from its caller's, so options set per header or per function turn every small helper on a hot path into an out-of-line call. Optimization level and floating-point flags are the consumer's, applied to whole translation units (embedded: `-O2`/`-O3` with `-ffast-math -fno-finite-math-only` via `numerical_toolbox_enable_embedded_optimizations()`).
 
 Apply `OPTIMIZE_FOR_SPEED` (from `numerical/math/CompilerOptimizations.hpp`) on hot-path methods: `Compute()`, `Filter()`, `Calculate()`, `Solve()`, `Update()`, `Step()`. It forces inlining when `NumericalToolbox_ENABLE_OPTIMIZATIONS` is defined and expands to nothing otherwise.
 

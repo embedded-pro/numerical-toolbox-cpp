@@ -3,5 +3,6 @@
 include(CMakeFindDependencyMacro)
 
 include("${CMAKE_CURRENT_LIST_DIR}/NumericalToolboxTargets.cmake" OPTIONAL)
+include("${CMAKE_CURRENT_LIST_DIR}/NumericalCompilerOptions.cmake")
 
 check_required_components(NumericalToolbox)
