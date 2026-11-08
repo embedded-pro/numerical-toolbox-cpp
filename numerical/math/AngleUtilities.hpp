@@ -14,12 +14,15 @@ namespace math
 
         constexpr T pi{ std::numbers::pi_v<T> };
         constexpr T twoPi{ T{ 2 } * std::numbers::pi_v<T> };
+        constexpr T turnsPerRadian{ T{ 1 } / twoPi };
 
-        T wrapped{ math::Fmod(angle + pi, twoPi) };
-        if (wrapped <= T{})
+        T wrapped{ angle - twoPi * math::Round(angle * turnsPerRadian) };
+        if (wrapped > pi)
+            wrapped -= twoPi;
+        else if (wrapped <= -pi)
             wrapped += twoPi;
 
-        return wrapped - pi;
+        return wrapped;
     }
 
     template<typename T>
