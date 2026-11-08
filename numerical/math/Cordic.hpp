@@ -1,5 +1,6 @@
 #pragma once
 
+#include "numerical/math/AngleUtilities.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Math.hpp"
 #include <array>
@@ -85,14 +86,7 @@ namespace math
         const T pi{ std::numbers::pi_v<T> };
         const T halfPi{ pi / T(2) };
 
-        const T twoPi{ T(2) * pi };
-
-        T angle{ math::Fmod(angleRadians, twoPi) };
-
-        if (angle > pi)
-            angle -= twoPi;
-        else if (angle < -pi)
-            angle += twoPi;
+        T angle{ math::WrapToPi(angleRadians) };
 
         T sinSign{ T(1) };
         T cosSign{ T(1) };

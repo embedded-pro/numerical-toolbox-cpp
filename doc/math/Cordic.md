@@ -61,7 +61,7 @@ $x$ is pre-scaled by $K$; in vectoring mode the final $x$ is multiplied by $K$.
 ### Convergence Domain
 
 The convergence domain is $|z| \leq \sum_{i=0}^{N-1} \arctan(2^{-i})$. For $N = 16$ this exceeds
-$\pi/2$, so inputs outside $[-\pi/2, \pi/2]$ must be range-reduced by shifting the angle by $\pm\pi$
+$\pi/2$, so an input is first wrapped into $(-\pi, \pi]$ (see [Angle Utilities](AngleUtilities.md)), and one outside $[-\pi/2, \pi/2]$ is then range-reduced by shifting the angle by $\pm\pi$
 and inverting the output signs. Vectoring mode uses quadrant detection on the signs of $x$ and $y$
 to handle the full $[-\pi, \pi]$ range.
 

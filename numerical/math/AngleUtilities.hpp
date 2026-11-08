@@ -31,9 +31,12 @@ namespace math
         static_assert(std::is_floating_point_v<T>, "WrapToTwoPi supports floating-point types only");
 
         constexpr T twoPi{ T{ 2 } * std::numbers::pi_v<T> };
+        constexpr T turnsPerRadian{ T{ 1 } / twoPi };
 
-        T wrapped{ math::Fmod(angle, twoPi) };
-        if (wrapped < T{})
+        T wrapped{ angle - twoPi * math::Floor(angle * turnsPerRadian) };
+        if (wrapped >= twoPi)
+            wrapped -= twoPi;
+        else if (wrapped < T{})
             wrapped += twoPi;
 
         return wrapped >= twoPi ? T{} : wrapped;

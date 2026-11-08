@@ -10,11 +10,9 @@ Angles live on a circle, not a line: a heading of $179^\circ$ and one of $-179^\
 
 Two angles are equivalent when they differ by a multiple of $2\pi$. Wrapping picks the representative inside a fixed half-open interval of length $2\pi$:
 
-$$\operatorname{wrap}_{(-\pi,\pi]}(a) = a - 2\pi\,\operatorname{round}\!\left(\frac{a}{2\pi}\right) \qquad \operatorname{wrap}_{[0,2\pi)}(a) = a \bmod 2\pi$$
+$$\operatorname{wrap}_{(-\pi,\pi]}(a) = a - 2\pi\,\operatorname{round}\!\left(\frac{a}{2\pi}\right) \qquad \operatorname{wrap}_{[0,2\pi)}(a) = a - 2\pi\,\left\lfloor\frac{a}{2\pi}\right\rfloor$$
 
-The signed wrap counts the whole turns in $a$ by rounding $a/2\pi$ to the nearest integer and removes them, which leaves a value in $[-\pi, \pi]$. Rounding halves away from zero sends $+\pi$ to $-\pi$, and a rounding error in the product can leave the result an ulp outside the interval, so one corrective turn is added when the result is not above $-\pi$ and subtracted when it is above $+\pi$. The quotient is taken as a product with the constant $1/2\pi$, so no division is needed.
-
-The unsigned wrap uses the floating-point remainder (fmod), which is *truncated* — it keeps the sign of the dividend — so $2\pi$ is added when the remainder is negative.
+The signed wrap counts the whole turns in $a$ by rounding $a/2\pi$ to the nearest integer and removes them, which leaves a value in $[-\pi, \pi]$. Rounding halves away from zero sends $+\pi$ to $-\pi$, and a rounding error in the product can leave the result an ulp outside the interval, so one corrective turn is added when the result is not above $-\pi$ and subtracted when it is above $+\pi$. The unsigned wrap counts turns with the floor instead, which leaves a value in $[0, 2\pi)$; the same one-turn correction applies when a rounding error lands the result at or above $2\pi$ or below zero. Both quotients are taken as a product with the constant $1/2\pi$, so no division is needed.
 
 **Convention (normative):** the signed interval is $(-\pi, \pi]$; both $+\pi$ and $-\pi$ map to $+\pi$, so a half turn has exactly one representation. The unsigned interval is $[0, 2\pi)$ and never returns $2\pi$.
 
@@ -39,11 +37,11 @@ This recovers the true continuous angle as long as consecutive true samples diff
 | Operation            | Time   | Space  | Notes                                          |
 |----------------------|--------|--------|------------------------------------------------|
 | Wrap to $(-\pi,\pi]$ | $O(1)$ | $O(1)$ | One multiply, one round, one multiply-subtract, two compares |
-| Wrap to $[0,2\pi)$   | $O(1)$ | $O(1)$ | One fmod, two compares, one conditional add    |
+| Wrap to $[0,2\pi)$   | $O(1)$ | $O(1)$ | One multiply, one floor, one multiply-subtract, three compares |
 | Shortest difference  | $O(1)$ | $O(1)$ | One subtraction plus one signed wrap           |
 | Unwrap               | $O(1)$ | $O(1)$ | One shortest difference plus one add; no state |
 
-Cost does not depend on the magnitude of the input: the turn count and the remainder are single operations, not a loop subtracting $2\pi$. Rounding is cheaper than a remainder on targets without hardware support for either, which is why the signed wrap — the one on control-loop paths — avoids fmod.
+Cost does not depend on the magnitude of the input: the turn count is a single operation, not a loop subtracting $2\pi$. Rounding to an integer is cheaper than a floating-point remainder on targets without hardware support for either, which is why neither wrap uses fmod.
 
 ## Step-by-Step Walkthrough
 
@@ -63,9 +61,9 @@ Cost does not depend on the magnitude of the input: the turn count and the remai
 
 **Half-turn asymmetry** — because $\pm\pi$ both map to $+\pi$, the shortest difference is not antisymmetric at exactly a half turn: swapping the arguments gives $+\pi$ again, not $-\pi$.
 
-**Rounding at the unsigned boundary** — a tiny negative remainder plus $2\pi$ can round to exactly $2\pi$; the unsigned wrap detects this and returns $0$, so the result stays strictly inside $[0, 2\pi)$.
+**Rounding at the unsigned boundary** — a tiny negative result plus $2\pi$ can round to exactly $2\pi$; the unsigned wrap detects this and returns $0$, so the result stays strictly inside $[0, 2\pi)$.
 
-**Non-finite input** — infinities and NaN have no meaningful remainder; inputs must be finite.
+**Non-finite input** — infinities and NaN have no meaningful turn count; inputs must be finite.
 
 **Float-only** — floating-point types only, enforced at compile time; no fixed-point variants.
 
