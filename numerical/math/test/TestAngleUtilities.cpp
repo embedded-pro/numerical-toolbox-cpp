@@ -31,6 +31,12 @@ TEST_F(TestAngleUtilities, wrap_to_pi_sends_both_half_turns_to_plus_pi)
     EXPECT_NEAR(math::WrapToPi(-pi), pi, tolerance);
 }
 
+TEST_F(TestAngleUtilities, wrap_to_pi_removes_many_turns)
+{
+    EXPECT_NEAR(math::WrapToPi(100.0f), 100.0f - 32.0f * pi, 4.0f * tolerance);
+    EXPECT_NEAR(math::WrapToPi(-100.0f), -100.0f + 32.0f * pi, 4.0f * tolerance);
+}
+
 TEST_F(TestAngleUtilities, wrap_to_two_pi_maps_into_zero_to_two_pi)
 {
     EXPECT_NEAR(math::WrapToTwoPi(-0.5f * pi), 1.5f * pi, tolerance);
