@@ -46,8 +46,15 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--gc-sections")
 
 ```cmake
 # Aggressive floating-point optimizations for whole translation units, keeping NaN/Inf checks
-add_compile_options(-ffast-math -fno-finite-math-only)
+numerical_toolbox_enable_embedded_optimizations()                       # current directory and below
+numerical_toolbox_enable_embedded_optimizations(TARGETS app.firmware)   # selected targets only
 ```
+
+`numerical_toolbox_enable_embedded_optimizations` (`cmake/NumericalCompilerOptions.cmake`) is
+available after `add_subdirectory` or `find_package(NumericalToolbox)`, adds
+`-ffast-math -fno-finite-math-only` for GCC/Clang and nothing for other compilers. It is opt-in: no
+`numerical.*` target propagates floating-point flags. The QEMU presets build the toolbox tests with
+it (`NUMERICAL_TOOLBOX_EMBEDDED_OPTIMIZATIONS`).
 
 Effects of `-ffast-math`:
 - No `errno` from math functions, so `sqrtf` becomes a single `vsqrt.f32`
@@ -429,7 +436,7 @@ struct GoodStruct {
 ```cmake
 add_compile_options(-O3)                                 # Maximum speed
 add_compile_options(-Os)                                 # Minimum size
-add_compile_options(-ffast-math -fno-finite-math-only)   # Aggressive FP, NaN/Inf checks kept
+numerical_toolbox_enable_embedded_optimizations()       # Aggressive FP, NaN/Inf checks kept
 ```
 
 ### Function Attributes
