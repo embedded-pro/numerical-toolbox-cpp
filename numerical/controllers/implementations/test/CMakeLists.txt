@@ -23,6 +23,7 @@ target_sources(numerical.controllers_test PRIVATE
     TestLuenbergerObserver.cpp
     TestMpc.cpp
     TestPidIncremental.cpp
+    TestPiIncremental.cpp
     TestSaturationRateLimiter.cpp
     TestStateFeedbackController.cpp
 )
