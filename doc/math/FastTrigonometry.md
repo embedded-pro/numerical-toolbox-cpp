@@ -2,7 +2,9 @@
 
 ## Overview & Motivation
 
-A field-oriented motor controller evaluates a sine and a cosine of the rotor angle on every current-loop period, tens of thousands of times a second, on processors whose floating-point unit has no transcendental instructions. A library sine costs hundreds of cycles; a table lookup with linear interpolation costs a few dozen and is accurate to well under one percent, which is below the resolution of the current measurement it is used with. Calibration and identification code, which runs outside the control loop but must agree with it to float precision, needs a second, more accurate evaluation that still reuses the same table.
+A field-oriented motor controller evaluates a sine and a cosine of the rotor angle on every current-loop period, tens of thousands of times a second, on processors whose floating-point unit has no transcendental instructions.
+A library sine costs hundreds of cycles; a table lookup with linear interpolation costs a few dozen and is accurate to well under one percent, which is below the resolution of the current measurement it is used with.
+Calibration and identification code, which runs outside the control loop but must agree with it to float precision, needs a second, more accurate evaluation that still reuses the same table.
 
 ## Mathematical Theory
 
@@ -34,14 +36,15 @@ $$\sin\delta \approx \delta\left(1 - \frac{\delta^2}{6}\right), \qquad \cos\delt
 
 ### Error
 
-Linear interpolation of the sine over a step $h$ has a worst-case error of $h^2/8 \approx 1.9\times10^{-5}$; the table entries are rounded to seven decimals, which adds at most $5\times10^{-8}$, so the fast sine and cosine are within about $2\times10^{-5}$ of the true values. The truncated series for the accurate pair leave errors of order $\delta^5/120 \approx 2\times10^{-12}$ and $\delta^6/720$, far below single-precision rounding, so the accurate pair is limited by the rounding of the table entries and of the arithmetic, a few units in the last place.
+Linear interpolation of the sine over a step $h$ has a worst-case error of $h^2/8 \approx 1.9\times10^{-5}$; the table entries are rounded to seven decimals, which adds at most $5\times10^{-8}$, so the fast sine and cosine are within about $2\times10^{-5}$ of the true values.
+The truncated series for the accurate pair leave errors of order $\delta^5/120 \approx 2\times10^{-12}$ and $\delta^6/720$, far below single-precision rounding, so the accurate pair is limited by the rounding of the table entries and of the arithmetic, a few units in the last place.
 
 ## Complexity Analysis
 
-| Operation        | Time   | Space        | Notes                                                    |
-|------------------|--------|--------------|----------------------------------------------------------|
-| Fast sine/cosine | $O(1)$ | 2 KiB table  | One multiply, one floor, two table reads, one multiply-add |
-| Accurate pair    | $O(1)$ | same table   | Two table reads and two short polynomials                |
+| Operation        | Time   | Space       | Notes                                                      |
+|------------------|--------|-------------|------------------------------------------------------------|
+| Fast sine/cosine | $O(1)$ | 2 KiB table | One multiply, one floor, two table reads, one multiply-add |
+| Accurate pair    | $O(1)$ | same table  | Two table reads and two short polynomials                  |
 
 The table is shared by both and lives in read-only memory.
 
