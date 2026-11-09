@@ -2,7 +2,11 @@
 
 ## Overview & Motivation
 
-Many identification tasks reduce to fitting one straight line through a stream of points: a back-EMF constant from voltage against speed, a viscous-friction coefficient from torque against speed, a sensor gain and offset from readings against a reference. The points arrive one at a time, often far more of them than fit in memory, and the slope is wanted together with an honest measure of how well it is determined. A batch least-squares solve needs all points at once; a full recursive least-squares filter carries a covariance matrix and tuning for a problem that has only two unknowns. The running linear fit keeps five numbers, updates them in constant time per point, and answers the slope, the intercept and the relative standard error of the slope at any moment. Optional per-point weights and an exponential decay let it fold in pre-averaged runs and forget old data.
+Many identification tasks reduce to fitting one straight line through a stream of points: a back-EMF constant from voltage against speed, a viscous-friction coefficient from torque against speed, a sensor gain and offset from readings against a reference.
+The points arrive one at a time, often far more of them than fit in memory, and the slope is wanted together with an honest measure of how well it is determined.
+A batch least-squares solve needs all points at once; a full recursive least-squares filter carries a covariance matrix and tuning for a problem that has only two unknowns.
+The running linear fit keeps five numbers, updates them in constant time per point, and answers the slope, the intercept and the relative standard error of the slope at any moment.
+Optional per-point weights and an exponential decay let it fold in pre-averaged runs and forget old data.
 
 ## Mathematical Theory
 
@@ -40,11 +44,11 @@ The fit reports $\sigma_a / |a|$, the relative standard error, which is scale-fr
 
 ## Complexity Analysis
 
-| Operation      | Time   | Space  | Notes                                  |
-|----------------|--------|--------|----------------------------------------|
-| Add            | $O(1)$ | $O(1)$ | Two divisions, a few multiply-adds     |
-| Decay          | $O(1)$ | $O(1)$ | Four multiplications                   |
-| Slope, error   | $O(1)$ | $O(1)$ | One division; one square root for the error |
+| Operation    | Time   | Space  | Notes                                       |
+|--------------|--------|--------|---------------------------------------------|
+| Add          | $O(1)$ | $O(1)$ | Two divisions, a few multiply-adds          |
+| Decay        | $O(1)$ | $O(1)$ | Four multiplications                        |
+| Slope, error | $O(1)$ | $O(1)$ | One division; one square root for the error |
 
 The state is the point count, the total weight, two means and three sums, independent of the number of points.
 
