@@ -18,4 +18,5 @@ Statistical estimation algorithms for fitting models to observed data and making
 | Algorithm                                                             | Description                                                                           |
 |-----------------------------------------------------------------------|---------------------------------------------------------------------------------------|
 | [Recursive Least Squares](RecursiveLeastSquares.md)                   | Sample-by-sample parameter estimation with exponential forgetting factor              |
+| [Running Linear Fit](RunningLinearFit.md)                             | Streaming weighted line fit with forgetting, slope standard error in constant memory  |
 | [Recursive Instrumental Variables](RecursiveInstrumentalVariables.md) | Recursive least squares that stays unbiased when the regressor is measured with noise |
