@@ -23,6 +23,7 @@ target_sources(numerical.math PRIVATE
     ConsistencyMetrics.hpp
     CubicSpline.hpp
     Cordic.hpp
+    FastTrigonometry.hpp
     Geometry3D.hpp
     GivensRotation.hpp
     HouseholderTransform.hpp
@@ -53,6 +54,7 @@ numerical_add_coverage_sources(numerical.math
     ConsistencyMetrics.cpp
     CubicSpline.cpp
     Cordic.cpp
+    FastTrigonometry.cpp
     Matrix.cpp
     MatrixExponential.cpp
     QNumber.cpp
