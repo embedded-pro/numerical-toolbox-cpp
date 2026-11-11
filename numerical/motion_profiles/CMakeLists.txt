@@ -15,12 +15,14 @@ target_sources(numerical.motion_profiles PRIVATE
     PolynomialProfile.hpp
     SCurveProfile.hpp
     TrapezoidalProfile.hpp
+    TrapezoidalProfileFromState.hpp
 )
 
 numerical_add_coverage_sources(numerical.motion_profiles
     PolynomialProfile.cpp
     SCurveProfile.cpp
     TrapezoidalProfile.cpp
+    TrapezoidalProfileFromState.cpp
 )
 
 add_subdirectory(test)
