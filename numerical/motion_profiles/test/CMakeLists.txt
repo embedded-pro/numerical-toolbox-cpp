@@ -12,6 +12,7 @@ numerical_link_qemu_runtime(numerical.motion_profiles_test)
 target_sources(numerical.motion_profiles_test PRIVATE
     TestPolynomialProfile.cpp
     TestSCurveProfile.cpp
+    TestSCurveProfileFromState.cpp
     TestTrapezoidalProfile.cpp
     TestTrapezoidalProfileFromState.cpp
 )

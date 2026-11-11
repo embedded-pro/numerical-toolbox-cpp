@@ -14,6 +14,7 @@ target_sources(numerical.motion_profiles PRIVATE
     MotionProfileTypes.hpp
     PolynomialProfile.hpp
     SCurveProfile.hpp
+    SCurveProfileFromState.hpp
     TrapezoidalProfile.hpp
     TrapezoidalProfileFromState.hpp
 )
@@ -21,6 +22,7 @@ target_sources(numerical.motion_profiles PRIVATE
 numerical_add_coverage_sources(numerical.motion_profiles
     PolynomialProfile.cpp
     SCurveProfile.cpp
+    SCurveProfileFromState.cpp
     TrapezoidalProfile.cpp
     TrapezoidalProfileFromState.cpp
 )
