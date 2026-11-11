@@ -13,4 +13,5 @@ target_sources(numerical.motion_profiles_test PRIVATE
     TestPolynomialProfile.cpp
     TestSCurveProfile.cpp
     TestTrapezoidalProfile.cpp
+    TestTrapezoidalProfileFromState.cpp
 )
