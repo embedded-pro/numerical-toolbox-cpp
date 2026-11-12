@@ -1,5 +1,65 @@
 # Changelog
 
+## [4.0.0](https://github.com/embedded-pro/numerical-toolbox-cpp/compare/v3.1.2...v4.0.0) (2026-11-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* toolbox code no longer builds at O3 with fast-math on its own. Consumers that want those optimizations pass them for whole translation units, e.g. -ffast-math -fno-finite-math-only.
+
+### Features
+
+* Add angle utilities, tridiagonal solver, friction compensation, symplectic integrators and motion profiles ([#355](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/355)) ([66b81e6](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/66b81e67a581fa8671a56c01f89ed30125cb27b3))
+* Add cubic spline, damped pseudo-inverse, incremental QR least squares and SE(3) transform ([#357](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/357)) ([fd49d30](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/fd49d3001ce7463af8179a3f1c8fa12998011712))
+* Add Levenberg–Marquardt and Goldfarb–Idnani active-set QP ([#358](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/358)) ([1f6d717](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/1f6d7175ba6107627af7ad6092f973f00fb48e0b))
+* Add SetPreviousOutput to PidIncrementalBase ([#328](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/328)) ([762b59e](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/762b59ef15ea7d54bd6b703ff4bd75b25ae0c99f))
+* **analysis:** Accept the bin phasor in GoertzelAlgorithm ([#360](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/360)) ([f2e74a4](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/f2e74a49044d3f044d3858da9ae8e99ad06a5c15))
+* **analysis:** Add mel filterbank and log-mel/MFCC front end ([#345](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/345)) ([c9fedc1](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/c9fedc1d7d9ee2b924ba53b6c30d5e33451a6e4a))
+* **controllers:** Add PiIncremental, a velocity-form PI with back-calculation ([#376](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/376)) ([5852920](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/5852920f76888af42419958bca533d3380242e7e))
+* **estimators:** Add recursive instrumental variables ([#352](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/352)) ([9b37e08](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/9b37e0885d31a9e444739a5cfaa3bc004aad9d37))
+* **estimators:** Add RunningLinearFit ([#374](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/374)) ([5789718](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/57897185238180e57add531b1c6ed6cf98290808))
+* **filters:** Add ParticleFilter (NT70) ([#369](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/369)) ([bf5cc90](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/bf5cc90370575866dbddf7271fb44d46ae0954d0))
+* **filters:** Add ResidualKalmanUpdate (NT74) ([#367](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/367)) ([b93d6e0](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/b93d6e074d6aeee4f9395feb54429d55954ebd45))
+* **filters:** Let ComplementaryFilter integrate over a measured interval ([#335](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/335)) ([1225b3c](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/1225b3c422beab93e0ff8fd7231f8d7e087f6da4))
+* **math:** Add central finite-difference gradient-check test helper ([#344](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/344)) ([e024946](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/e0249466c8afc3a3aa067343882bd1be696c431b)), closes [#341](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/341)
+* **math:** Add SE2Transform (NT66) ([#366](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/366)) ([dc147fb](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/dc147fb8672e983e5935290b94cc45ff00cbee29))
+* **math:** Add table-based FastSine, FastCosine and AccurateSineAndCosine ([#373](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/373)) ([3a63ab7](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/3a63ab791e7217598b748b18942d007a6f0df59a))
+* **motion_profiles:** Plan a jerk-limited S-curve from a moving state ([#380](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/380)) ([7a73797](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/7a73797764ec35ed593a96ea3142e496fc690932))
+* **motion_profiles:** Plan a trapezoid from a moving state ([#379](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/379)) ([63218e3](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/63218e309dde86822384381a6ffa65170e7139ee))
+* **optimization:** Add stateful SGD/momentum and Adam step optimisers ([#343](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/343)) ([69ff13e](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/69ff13e719895b74b167c4742130442c6b96a857))
+* **simulator:** Render every panel and chart through ui-cpp ([#332](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/332)) ([cff9616](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/cff9616b206352cbb89e786d4fef7aaca4a6350d))
+* **simulator:** Render the FFT charts through ui-cpp ([#331](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/331)) ([09d8986](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/09d8986c7e67d6e3524b856859dcad1f222e012f))
+* **solvers:** Add PointSetAlignment (NT67) ([#368](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/368)) ([182e068](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/182e068ef3239a585eb4beb47175945a724788a6))
+* **solvers:** Support wide matrices in SVD; add roadmap items 53–65 ([#353](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/353)) ([adfc10d](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/adfc10d342591df8e46a0b1f0a91329bc76023e0))
+
+
+### Bug Fixes
+
+* **build:** Propagate NumericalToolbox_ENABLE_OPTIMIZATIONS through numerical.math ([#346](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/346)) ([a551f47](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/a551f47ab879d4728bffea3b269246807b9baa5c)), closes [#337](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/337)
+* **cmake:** Force -Og Debug flags only in standalone builds ([#381](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/381)) ([c7bff11](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/c7bff11886e828f9697ce0c121fa536d37266216))
+* Scope the O3/fast-math pragma to each header instead of leaking it ([#347](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/347)) ([fbabe8f](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/fbabe8f8bd9f56b32ed9e72789e32f4d5023ceb3)), closes [#334](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/334)
+
+
+### Build System
+
+* **cmake:** Add numerical_toolbox_enable_embedded_optimizations ([#371](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/371)) ([0bec208](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/0bec208564427612aef958c4a4df47058261d6f4))
+* **deps:** Bump gabrielfrasantos/embedded-devcontainer-cpp ([#378](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/378)) ([ceeaef1](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/ceeaef1d56360785e6b773237c6cc5444797b9de))
+* **deps:** Bump the patch-minor-action-updates group across 1 directory with 4 updates ([#351](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/351)) ([cc419d8](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/cc419d85c0d6bd8e221c93e1a615319e317c2b10))
+* **deps:** Bump the patch-minor-action-updates group with 2 updates ([#330](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/330)) ([7d1e7de](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/7d1e7de61371043eb4783834413855710292dd29))
+* **deps:** Bump the patch-minor-action-updates group with 2 updates ([#333](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/333)) ([bd29584](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/bd2958427f44847bfd5a97565af598240997bee7))
+* **deps:** Bump the patch-minor-action-updates group with 2 updates ([#336](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/336)) ([de14e02](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/de14e024dd7f5637c536e0114dbb08282107b2be))
+* **deps:** Bump the patch-minor-action-updates group with 2 updates ([#365](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/365)) ([ab6e9fd](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/ab6e9fd30e777951f21fea59fcb77375d7be8830))
+* **deps:** Bump the patch-minor-action-updates group with 3 updates ([#326](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/326)) ([c580f38](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/c580f38ccc835c0b8cd2286f3e1d9c3d99b713cd))
+* **deps:** Bump the patch-minor-action-updates group with 3 updates ([#377](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/377)) ([80146bf](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/80146bfbe26c18ddffbad18b23dccd48fa0b8ea5))
+
+
+### Performance Improvements
+
+* Make interface destructors protected and non-virtual ([#361](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/361)) ([8485c35](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/8485c35a281a0f404d550f6bfdf6c69ce9a0d519)), closes [#359](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/359)
+* **math:** Build matrix results without zero-filling them first ([#349](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/349)) ([e36d52a](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/e36d52ad0a7b478af25bc9e542920b22baa7a70b))
+* **math:** Reduce angles without fmod ([#372](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/372)) ([5c79114](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/5c7911433592336d1b29a5cd513738448cdef685))
+* Stop setting optimization options per header and per function ([#348](https://github.com/embedded-pro/numerical-toolbox-cpp/issues/348)) ([31c7ac9](https://github.com/embedded-pro/numerical-toolbox-cpp/commit/31c7ac9b46b6a89a201a59bad5fed551ba715699))
+
 ## [3.1.2](https://github.com/embedded-pro/numerical-toolbox-cpp/compare/v3.1.1...v3.1.2) (2026-09-05)
 
 
