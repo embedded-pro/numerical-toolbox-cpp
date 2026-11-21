@@ -161,3 +161,42 @@ TEST_F(MatrixOperationsTest, CongruenceTransformZeroMYieldsZeroResult)
         for (std::size_t j = 0; j < 2; ++j)
             EXPECT_NEAR(result.at(i, j), 0.0f, math::Tolerance<float>());
 }
+
+TEST_F(MatrixOperationsTest, DiagonalPlacesTheVectorOnTheDiagonalAndDiagonalOfReadsItBack)
+{
+    const math::Vector<float, 2> d{ 2.0f, -3.0f };
+
+    const auto matrix = math::Diagonal(d);
+    const auto back = math::DiagonalOf(matrix);
+
+    EXPECT_NEAR(matrix.at(0, 0), 2.0f, math::Tolerance<float>());
+    EXPECT_NEAR(matrix.at(1, 1), -3.0f, math::Tolerance<float>());
+    EXPECT_NEAR(matrix.at(0, 1), 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(matrix.at(1, 0), 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(back.at(0, 0), 2.0f, math::Tolerance<float>());
+    EXPECT_NEAR(back.at(1, 0), -3.0f, math::Tolerance<float>());
+}
+
+TEST_F(MatrixOperationsTest, ScaleColumnsMatchesTheProductWithADiagonalOnTheRight)
+{
+    const math::Vector<float, 2> d{ 2.0f, -3.0f };
+
+    const auto result = math::ScaleColumns(asymmetric, d);
+    const auto expected = asymmetric * math::Diagonal(d);
+
+    for (std::size_t i = 0; i < 2; ++i)
+        for (std::size_t j = 0; j < 2; ++j)
+            EXPECT_NEAR(result.at(i, j), expected.at(i, j), math::Tolerance<float>());
+}
+
+TEST_F(MatrixOperationsTest, DiagonalCongruenceMatchesTheProductWithADiagonalOnBothSides)
+{
+    const math::Vector<float, 2> d{ 2.0f, -3.0f };
+
+    const auto result = math::DiagonalCongruence(d, asymmetric);
+    const auto expected = math::Diagonal(d) * asymmetric * math::Diagonal(d);
+
+    for (std::size_t i = 0; i < 2; ++i)
+        for (std::size_t j = 0; j < 2; ++j)
+            EXPECT_NEAR(result.at(i, j), expected.at(i, j), math::Tolerance<float>());
+}
