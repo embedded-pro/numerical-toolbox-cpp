@@ -18,6 +18,14 @@ $$T_1 T_2 = (R_1 R_2,\; R_1 p_2 + p_1), \qquad T^{-1} = (R^T,\; -R^T p), \qquad 
 
 The composition applies $T_2$ first. The inverse follows from $R^{-1} = R^T$. A free direction is only rotated, $x \mapsto R x$; the translation is ignored.
 
+### Elementary Rotations
+
+Rotations about the coordinate axes have closed forms that need one sine and one cosine:
+
+$$R_x(\theta) = \begin{bmatrix} 1 & 0 & 0 \\ 0 & c & -s \\ 0 & s & c \end{bmatrix}, \quad R_y(\theta) = \begin{bmatrix} c & 0 & s \\ 0 & 1 & 0 \\ -s & 0 & c \end{bmatrix}, \quad R_z(\theta) = \begin{bmatrix} c & -s & 0 \\ s & c & 0 \\ 0 & 0 & 1 \end{bmatrix}$$
+
+with $c = \cos\theta$, $s = \sin\theta$. They are the axis–angle rotation for a unit coordinate axis, without its general products, and compose the fixed-axis roll–pitch–yaw orientation $R_z(\psi)\,R_y(\theta)\,R_x(\phi)$ used for mounting and tool frames.
+
 ### Ordering Convention (normative)
 
 All 6-vectors are ordered **linear part first**: twists $V = (v;\, \omega)$ and wrenches $W = (f;\, n)$. This matches a geometric Jacobian with linear rows first and the tangent ordering of Sophus and manif. Lynch & Park and Murray et al. use $(\omega;\, v)$; the two conventions differ by a block permutation, so any formula from those texts converts by swapping the blocks (for the adjoint below, the rotation blocks stay on the diagonal and the $[p]_\times R$ block moves to the lower left).

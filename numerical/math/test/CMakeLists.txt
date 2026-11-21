@@ -20,6 +20,7 @@ target_sources(numerical.math_test PRIVATE
     TestCubicSpline.cpp
     TestCordic.cpp
     TestFastTrigonometry.cpp
+    TestGeometry3D.cpp
     TestGivensRotation.cpp
     TestHouseholderTransform.cpp
     TestLinearTimeInvariant.cpp

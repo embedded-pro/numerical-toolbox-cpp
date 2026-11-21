@@ -54,6 +54,30 @@ namespace math
     }
 
     template<typename T>
+    ALWAYS_INLINE_HOT Matrix3<T> RotationX(T angle)
+    {
+        const T c{ math::Cos(angle) };
+        const T s{ math::Sin(angle) };
+        return Matrix3<T>{ { T(1), T(0), T(0) }, { T(0), c, -s }, { T(0), s, c } };
+    }
+
+    template<typename T>
+    ALWAYS_INLINE_HOT Matrix3<T> RotationY(T angle)
+    {
+        const T c{ math::Cos(angle) };
+        const T s{ math::Sin(angle) };
+        return Matrix3<T>{ { c, T(0), s }, { T(0), T(1), T(0) }, { -s, T(0), c } };
+    }
+
+    template<typename T>
+    ALWAYS_INLINE_HOT Matrix3<T> RotationZ(T angle)
+    {
+        const T c{ math::Cos(angle) };
+        const T s{ math::Sin(angle) };
+        return Matrix3<T>{ { c, -s, T(0) }, { s, c, T(0) }, { T(0), T(0), T(1) } };
+    }
+
+    template<typename T>
     ALWAYS_INLINE_HOT Matrix3<T> ScaledIdentity(T value)
     {
         Matrix3<T> result{};
