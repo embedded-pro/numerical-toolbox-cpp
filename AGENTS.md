@@ -118,4 +118,4 @@ Presets: `host`, `host-single-Debug` (no Qt), `coverage`, `integration`, `qemu-c
 
 ## Exceptions *(repo)*
 
-None.
+- No plain `TEST()`: MegaLinter's cppcheck reports a syntax error on it. Use `TEST_F`.
