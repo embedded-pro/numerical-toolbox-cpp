@@ -175,7 +175,7 @@ analytic solution to its order, a Kalman filter's covariance must stay positive-
 The per-family metric strategy — which properties to assert for each algorithm type (accuracy,
 frequency/transient response, stability, boundaries, invariants, convergence, statistical
 consistency, conditioning) — is documented in **[TESTING.md](TESTING.md)**. Mechanics and framework
-rules live in [.github/instructions/testing.instructions.md](.github/instructions/testing.instructions.md).
+rules live in [AGENTS.md](AGENTS.md).
 
 ## Contributing
 

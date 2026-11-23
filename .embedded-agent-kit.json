@@ -1,0 +1,10 @@
+{
+  "version": "0.3.0",
+  "bundles": ["core", "toolbox"],
+  "files": [
+    ".claude/agents/reviewer.md",
+    ".claude/skills/algo-implementer/SKILL.md",
+    ".claude/skills/unit-tester/SKILL.md",
+    ".github/agents/reviewer.agent.md"
+  ]
+}

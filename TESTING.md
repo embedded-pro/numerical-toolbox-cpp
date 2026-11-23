@@ -30,8 +30,8 @@ FFT needs spectral/energy metrics, a PID needs transient-response metrics, a sol
 residual/convergence metrics. Without this, tests drift toward shallow "golden output" snapshots that
 pass while the math is wrong.
 
-Canonical rules still apply ([AGENTS.md](AGENTS.md), [testing.instructions.md](.github/instructions/testing.instructions.md)):
-`TEST_F` on `float`, one behaviour per test, no redundant cases, **no heap in tests**, assert with
+Canonical rules still apply ([AGENTS.md](AGENTS.md)):
+`TEST_F` on `float`, one behaviour per test, no redundant cases, assert with
 `EXPECT_NEAR` + `math::Tolerance<float>()` against reference values.
 
 ## How the agent uses this
