@@ -12,8 +12,8 @@ Deploy one algorithm from `roadmap/<domain>/<Name>/`. `<root>` is the source fol
    `<root>/<domain>/test/Test<Name>.cpp`, `doc/<domain>/<Name>.md` and the CMake changes.
 3. Write exactly the tests that `tests.md` lists. Add no other tests.
 4. Run the *Build* commands. Fix until build and tests pass.
-5. Remove the algorithm's row from `ROADMAP.md`. Add it to the category row of the README documentation table
-   and to the algorithm table in `doc/<domain>/README.md`. CI builds the booklet from these tables.
+5. Do every bookkeeping step in `roadmap/DEPLOYMENT.md`: roadmap entries to remove, README and
+   `doc/<domain>/README.md` tables to update. CI builds the booklet from these tables.
 6. Report changed files and test pass/fail.
 
 ## Rules
