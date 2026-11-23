@@ -70,7 +70,7 @@ Tests: single-type **`TEST_F` on `float`**, `StrictMock` only, no heap; validate
 with `EXPECT_NEAR` and `math::Tolerance<float>()` (or an explicit tolerance).
 
 > **Float-only note.** This diverges from the repo's historical "all three numeric types" mandate
-> in `copilot-instructions.md` / `CLAUDE.md`. The `template<typename T>` signature is retained so
+> in the former agent instructions. The `template<typename T>` signature is retained so
 > `Q15`/`Q31` can be re-enabled per algorithm later by relaxing the `static_assert` and adding
 > instantiations.
 

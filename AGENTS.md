@@ -1,101 +1,121 @@
-# Numerical Toolbox — Agent Rules (canonical)
+# numerical-toolbox-cpp — Agent Rules
 
-Single source of truth for **Claude and Copilot**. `CLAUDE.md` and
-`.github/copilot-instructions.md` point here. Code-file specifics load on demand from
-`.github/instructions/`. Deployment recipe: `roadmap/DEPLOYMENT.md`.
+<!-- shared:begin 0.3.0 sha256:9aee198041110762 -->
+Canonical rules for Claude, Copilot and sub-agents. Sections marked *(shared)* come from embedded-pro/embedded-agent-kit:
+edit them there, not here. *(repo)* sections belong to this repository. *Exceptions* overrides a shared rule.
 
-Numerical algorithms library (DSP, control, filters, estimators, solvers) for
-resource-constrained embedded systems. Real-time, deterministic, no heap.
+## Behaviour *(shared)*
 
-## Numeric policy — FLOAT-ONLY (current)
+- **Be as terse as possible.** No preamble, summary or narration. Report file paths and pass/fail.
+- Everything you write — code, docs, agent files, PR text — uses the fewest words that stay unambiguous.
+- Prose (docs, comments, agent files, commit and PR text) follows ASD-STE100 Simplified Technical English:
+  one word, one meaning; active voice; one instruction per sentence; sentences ≤ 20 words (procedures) or ≤ 25 (descriptions).
+- Ambiguous request: ask. Clear request: act.
+- Do only what was asked. No unrelated refactors, no extra features.
+- Batch reads, don't re-read, prefer targeted edits.
+- Never change a shared section. Add a deviation to *Exceptions* only when the user approves it.
 
-- New algorithms are **float-only**. Write generic `template<typename T>`, add
-  `static_assert(std::is_floating_point_v<T>, "...")`, and **instantiate/test `float` only**.
-- Do **NOT** implement `Q15`/`Q31` now. The generic `T` keeps a fixed-point specialisation cheap later.
-- `std::numbers::pi_v<float>` — never hardcode constants.
+## Workflow *(shared)*
 
-## Memory — no heap
+1. Multi-file or architectural change: update the design document first. Get approval before you write code.
+2. Read *Domain* and *Build*. Read each `.github/instructions/*.instructions.md` whose `applyTo` matches a file you change.
+3. Find the nearest existing pattern. Follow it.
+4. Per behaviour: write a failing test, write the minimum code that passes it, refactor with all tests green.
+5. Add each new file to its `CMakeLists.txt`.
+6. Update the documentation for each behavioural change.
+7. Run the *Build* commands until build and tests pass. Never disable, skip or weaken a test to get green.
+8. Non-trivial change: run the `reviewer` agent, or ask the user to run it. Fix each CRITICAL and WARNING finding.
+9. Report changed files, build pass/fail, test pass/fail.
+
+## Memory *(shared)*
+
+Scope: production code. Tests and host tools may use the heap.
 
 - Forbidden: `new`/`delete`/`malloc`/`free`, `make_unique`/`make_shared`,
-  `std::vector`/`string`/`deque`/`list`/`map`/`set`.
+  `std::vector`/`string`/`deque`/`list`/`map`/`set`, recursion.
 - Use: `infra::BoundedVector<T>::WithMaxSize<N>`, `infra::BoundedString::WithStorage<N>`,
-  `infra::BoundedDeque<T>::WithMaxSize<N>`, `infra::BoundedList<T>::WithMaxSize<N>`,
-  `std::array<T,N>`, `std::optional<T>`. Stack/static only. No recursion. **Tests too.**
+  `infra::BoundedDeque`, `infra::BoundedList`/`IntrusiveList`, `std::array`, `std::optional`, `std::variant`.
 
-## Embedded optimizations
+## Interfaces & errors *(shared)*
 
-- **No `#pragma GCC optimize` and no `optimize` attribute**, in headers or sources. GCC does not
-  inline a callee whose optimization options differ from its caller's, so options set per header or
-  per function turn every small helper on a hot path (element access, accessors, `math::` wrappers)
-  into an out-of-line call.
-- The optimization level and floating-point model belong to the consumer and apply to whole
-  translation units. For embedded targets: `-O2` or `-O3` with `-ffast-math -fno-finite-math-only`.
-  Consumers get the floating-point flags from `numerical_toolbox_enable_embedded_optimizations([TARGETS ...])`
-  (`cmake/NumericalCompilerOptions.cmake`). Opt-in only: never a usage requirement of a `numerical.*` target.
-  `NUMERICAL_TOOLBOX_EMBEDDED_OPTIMIZATIONS` applies it to the toolbox's own targets (QEMU presets).
-- `OPTIMIZE_FOR_SPEED` on hot paths (`Filter/Compute/Update/Solve/Step`). Pure interfaces exempt.
-  With `NumericalToolbox_ENABLE_OPTIMIZATIONS` it forces inlining (`always_inline`, `hot`, `inline`);
-  without it, it expands to nothing.
-- Use `math::IsFinite` for finiteness checks: a consumer may still build with `-ffinite-math-only`.
+- No virtual destructors: each adds a deleting destructor and thunks to flash.
+  Interface = pure virtual methods + `protected: ~I() = default;` (non-virtual).
+- Public `virtual ~Base() = default;` only on a base destroyed through a base pointer:
+  `delete`/`std::unique_ptr<Base>`, `infra::PolymorphicVariant<Base, ...>`, `infra::OptionalForPolymorphicObjects<Base, ...>`.
+  Put it on that base, not on every interface.
+- Not needed for `std::variant`, `std::optional<Concrete>`, `infra::SharedPtr`: they destroy the concrete type.
+- No exceptions. `std::optional`, `bool` or status enum; `really_assert` for preconditions. Never swallow an error.
+- Constructor injection; no global state.
 
-## Style
+## Optimisation *(shared)*
 
-- Allman braces, 4-space indent, `.clang-format` authoritative.
-- Brace-init `{}` everywhere. PascalCase types/methods, camelCase members, lowercase namespaces.
-- Functions ≤ ~30 lines. `const`/`constexpr`-correct. Fixed-width ints. Full descriptive names.
-- **No comments** except license headers, `NOLINT`, and a brief note on genuinely non-obvious math.
+- No `#pragma GCC optimize`, no `optimize` attribute: GCC won't inline across differing options.
+  The consumer sets flags per translation unit.
+- `OPTIMIZE_FOR_SPEED` only on hot functions defined in a header.
+- Hot paths: no heap, no virtual dispatch, no blocking.
 
-## Interfaces & errors
+## Style *(shared)*
 
-- Interfaces = pure virtual classes with a `protected:`, non-virtual `~I() = default` — **never** a `virtual` or `= 0` destructor. A virtual one puts a deleting destructor in every vtable, which links `operator delete`/`free` into heap-free firmware.
-- Concrete classes declare no destructor unless they need one. Never own or delete through an interface pointer (no `std::unique_ptr<I>`): hold the concrete type, pass `I&`.
-- No exceptions. Use `std::optional<T>` or status enums. `assert`/`really_assert` for preconditions.
-- SOLID + DIP: constructor injection; depend on abstractions. RAII. No virtual calls in real-time paths.
+- `.clang-format` is authoritative. Allman, 4 spaces, `{}` init.
+- PascalCase types/methods; camelCase members and enum values; lowercase namespaces.
+  No `I` prefix; implementations end in `Impl`.
+- `#pragma once` only.
+- Fixed-width integers. `const`/`constexpr`-correct. Functions ≤ 30 lines (hard limit 50).
+- Comments: non-obvious *why* only, one line. No `TODO`/`FIXME`, commented-out code, or restating the code.
+  Fix or delete a comment the change makes stale.
 
-## Namespaces
+## Testing *(shared)*
 
-`analysis`, `windowing`, `control_analysis`, `controllers`, `estimators`,
-`filters` (active Kalman family — **not** `filters::active`), `filters::passive`, `math`,
-`optimization`, `regularization`, `solvers`, and new:
-`robust_control`, `nonlinear_control`, `motion_profiles`.
+- `TEST_F` for fixtures, `TYPED_TEST` for types, plain `TEST()` for stateless checks.
+- `StrictMock` only. `EXPECT_NEAR` with explicit tolerance. Fixture in an anonymous namespace, macros outside.
+- Heap allowed in tests.
 
-## Math functions
+## Documentation *(shared)*
 
-- **Production code** calls `math::Sin`, `math::Cos`, `math::Abs`, etc. from
-  `numerical/math/Math.hpp`. Never call `std::` cmath functions directly in production.
-- If a needed `<cmath>` function is missing from `Math.hpp`, add a `constexpr` wrapper there first,
-  then use `math::FunctionName` at the call site.
-- Each function is individually overridable at compile time via `#ifndef MATH_<NAME>_OVERRIDE`
-  (e.g. `MATH_SIN_OVERRIDE`). Define the macro in CMake and supply your own template definition.
-- **Unit tests** call `std::sin`, `std::cos`, `std::abs`, etc. directly. Never use `math::` in tests.
+- Update docs before or with any behavioural change.
+- One fact, one place: link, never restate.
+- Visuals: Mermaid or ASCII.
+<!-- shared:end -->
 
-## Testing
+## Domain *(repo)*
 
-- GoogleTest. **`TEST_F` on `float`** — no `TYPED_TEST`, no multi-type. **Never plain `TEST()`**.
-- **`StrictMock` only** (no `NiceMock`/bare). Fixture + aliases in an anonymous namespace; macros outside it.
-- **No redundant tests** — implement exactly the spec's enumerated cases, one behavior per test,
-  Arrange/Act/Assert, `EXPECT_NEAR` + `math::Tolerance<float>()`. No heap.
-- **Coverage ≥ 90 %** — measured by SonarQube. Every new algorithm must reach this threshold
-  before merge; CI fails below it.
+- Numerical algorithms (DSP, control, filters, estimators, solvers) for embedded targets. Source root: `numerical/`.
+- Float only: generic `template<typename T>` with `static_assert(std::is_floating_point_v<T>)`; instantiate and test
+  `float`. No `Q15`/`Q31`. Constants from `std::numbers` (`std::numbers::pi_v<float>`), never literals.
+- Production code calls the `numerical/math/Math.hpp` wrappers (`math::Sin`, `math::Abs`, ...), never `<cmath>`.
+  A missing wrapper: add a `constexpr` one with its `MATH_<NAME>_OVERRIDE` guard first. Tests call `std::` directly.
+- `math::IsFinite` for finiteness checks: a consumer may build with `-ffinite-math-only`.
+- `OPTIMIZE_FOR_SPEED` on `Filter`/`Compute`/`Update`/`Solve`/`Step`. `NumericalToolbox_ENABLE_OPTIMIZATIONS` turns it on;
+  it is a usage requirement of `numerical.math`, gated by `NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS`. Never move it to
+  `add_definitions` or rename it.
+- Optimisation flags belong to the consumer: `numerical_toolbox_enable_embedded_optimizations([TARGETS ...])`
+  (`cmake/NumericalCompilerOptions.cmake`) adds `-ffast-math -fno-finite-math-only`. Opt-in only, never a usage
+  requirement. `NUMERICAL_TOOLBOX_EMBEDDED_OPTIMIZATIONS` applies it to the toolbox's own targets (QEMU presets).
+- Namespaces: `analysis`, `windowing`, `control_analysis`, `controllers`, `estimators`, `filters` (Kalman family, not
+  `filters::active`), `filters::passive`, `math`, `optimization`, `regularization`, `solvers`, `robust_control`,
+  `nonlinear_control`, `motion_profiles`.
+- CMake: `numerical_add_header_library(<target>)`, `numerical_add_coverage_sources(<target> <Name>.cpp)`,
+  `${NUMERICAL_VISIBILITY}`. Tests: `numerical/<domain>/test/Test<Name>.cpp`.
+- Coverage: the `.cpp` holds `template class <Name><float, ...>;`; the header holds the matching `extern template`
+  inside `#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD`. Coverage ≥ 90 % (SonarQube gate).
+- Tests: `TEST_F` on `float`, no `TYPED_TEST`. Implement exactly the spec's cases. `EXPECT_NEAR` with
+  `math::Tolerance<float>()`. `TESTING.md` sets what to assert.
+- Docs: `doc/<domain>/<Name>.md` per `doc/TEMPLATE.md`: math, behaviour, complexity, pitfalls; no code, no class names.
+  New algorithm: add it to `doc/<domain>/README.md`.
+- Roadmap: `ROADMAP.md`, specs in `roadmap/<domain>/<Name>/`, deployment recipe in `roadmap/DEPLOYMENT.md`
+  (skill `algo-implementer`). Tests: skill `unit-tester`.
+- New simulator (`simulator/`): add a `cppdbg` entry to `.vscode/launch.json` before `"Linux Debug"`.
 
-## CMake (numerical/ targets)
+## Build *(repo)*
 
-- `numerical_add_header_library(<target>)`, `numerical_add_coverage_sources(<target> <Name>.cpp)`,
-  `${NUMERICAL_VISIBILITY}`.
-- Coverage `.cpp`: `template class <Name><float, ...>;`. `extern template` guarded by
-  `#ifdef NUMERICAL_TOOLBOX_COVERAGE_BUILD`.
-- `NumericalToolbox_ENABLE_OPTIMIZATIONS` (enables `OPTIMIZE_FOR_SPEED`) is a usage requirement of
-  `numerical.math`, gated by `NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS`. Never move it to
-  `add_definitions`, and downstream repos must not rename it: link `numerical.*` to inherit it.
+```bash
+cmake --preset host && cmake --build --preset host
+ctest --preset host
+cmake --preset coverage && cmake --build --preset coverage
+```
 
-## Docs
+Presets: `host`, `host-single-Debug` (no Qt), `coverage`, `integration`, `qemu-cortex-m4`, `qemu-cortex-m7`.
 
-Design-first `doc/<domain>/<Name>.md` per `doc/TEMPLATE.md`. Math/theory/complexity/pitfalls —
-no code, no class names, no usage examples. Update `doc/<domain>/README.md` when adding a new algorithm.
+## Exceptions *(repo)*
 
-## Assistant behavior — be terse
-
-- Minimal prose. No preamble/postamble, no restating the plan, no summaries unless asked.
-- Report results as file paths + pass/fail. Don't narrate routine tool calls.
-- Don't re-read files already read; batch reads; prefer targeted edits.
-- Build: `cmake --preset host && cmake --build --preset host` · Test: `ctest --preset host`.
+None.
