@@ -18,7 +18,7 @@ jobs:
   sonar:
     name: SonarCloud
     runs-on: ubuntu-latest
-    container: gabrielfrasantos/embedded-devcontainer-cpp:latest@sha256:bd4f1eb7556fad821b0a2f5ba7326fed5c19c88b4ee8475ae8f8db21e7c09b64 # 5.1.4
+    container: gabrielfrasantos/embedded-devcontainer-cpp:v7.5.1@sha256:58615703161844d1b53db6342f9c962fac0a29f46bb0d457dd1a459811a97644
     env:
       SONAR_SCANNER_VERSION: 6.2.1.4610
       SONAR_SERVER_URL: "https://sonarcloud.io"
