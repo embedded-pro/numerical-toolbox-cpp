@@ -14,6 +14,7 @@ target_sources(numerical.filters.active_test PRIVATE
     TestAhrsMadgwickMahony.cpp
     TestAlphaBetaFilter.cpp
     TestComplementaryFilter.cpp
+    TestGravityTilt.cpp
     TestExtendedKalmanFilter.cpp
     TestKalmanFilter.cpp
     TestKalmanSmoother.cpp
