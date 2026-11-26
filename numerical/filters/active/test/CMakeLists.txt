@@ -15,6 +15,7 @@ target_sources(numerical.filters.active_test PRIVATE
     TestAlphaBetaFilter.cpp
     TestComplementaryFilter.cpp
     TestExtendedKalmanFilter.cpp
+    TestGravityTilt.cpp
     TestKalmanFilter.cpp
     TestKalmanSmoother.cpp
     TestParticleFilter.cpp

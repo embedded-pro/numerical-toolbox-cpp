@@ -16,6 +16,7 @@ target_sources(numerical.filters.active PRIVATE
     AlphaBetaFilter.hpp
     ComplementaryFilter.hpp
     ExtendedKalmanFilter.hpp
+    GravityTilt.hpp
     KalmanFilter.hpp
     KalmanFilterBase.hpp
     KalmanSmoother.hpp
@@ -30,6 +31,7 @@ numerical_add_coverage_sources(numerical.filters.active
     AlphaBetaFilter.cpp
     ComplementaryFilter.cpp
     ExtendedKalmanFilter.cpp
+    GravityTilt.cpp
     KalmanFilter.cpp
     KalmanFilterBase.cpp
     KalmanSmoother.cpp

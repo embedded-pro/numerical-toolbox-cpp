@@ -17,6 +17,7 @@ Filters that incorporate feedback and a dynamic internal model of the system.
 | [Square-Root Kalman Filter](active/SquareRootKalmanFilter.md) | Numerically robust Kalman filter propagating a Cholesky factor to guarantee positive-definiteness                                                                            |
 | [Residual-Form Kalman Update](active/ResidualKalmanUpdate.md) | Stateless Joseph-form update from a caller-formed residual, with normalised innovation squared and a χ² gate for outliers and association                                    |
 | [Particle Filter](active/ParticleFilter.md)                   | Bounded sequential importance resampling with caller-supplied motion and log-likelihood callables, log-domain weights and systematic resampling on low effective sample size |
+| [Gravity Tilt and Trust](active/GravityTilt.md)               | Tilt in one plane from the accelerometer, with a trust weight that falls as the measured magnitude leaves gravity                                                            |
 
 ### Passive Filters
 
