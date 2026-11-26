@@ -73,4 +73,8 @@ TEST_F(TestGravityTilt, bad_input_is_rejected)
     ExpectRejected(filters::TiltFromGravity(0.0f, g, nan, g, band));
     ExpectRejected(filters::TiltFromGravity(0.0f, g, 0.0f, 0.0f, band));
     ExpectRejected(filters::TiltFromGravity(0.0f, g, 0.0f, g, -0.1f));
+    ExpectRejected(filters::TiltFromGravity(0.0f, g, 0.0f, g, 0.0f));
+    ExpectRejected(filters::TiltFromGravity(0.0f, g, 0.0f, -g, band));
+    ExpectRejected(filters::TiltFromGravity(0.0f, g, 0.0f, nan, band));
+    ExpectRejected(filters::TiltFromGravity(0.0f, g, 0.0f, g, infinity));
 }
