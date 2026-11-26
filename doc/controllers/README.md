@@ -10,6 +10,7 @@ Feedback control algorithms for regulating dynamic systems in real time.
 | [Deadbeat Control](DeadbeatControl.md)                     | Discrete-time N-step deadbeat controller — exact convergence in N samples via reachability pseudo-inverse          |
 | [PID Controller](Pid.md)                                   | Proportional-Integral-Derivative controller using a discrete recursive formulation                                 |
 | [Incremental PI with Back-Calculation](PiIncremental.md)   | Velocity-form PI whose integrator follows the value actually applied, for limits shared between several regulators |
+| [Continuous-Gain PID](PidContinuous.md)                    | Velocity-form PID with continuous-time gains and the measured step length; clamped output, no derivative kick      |
 | [LQR Controller](Lqr.md)                                   | Linear Quadratic Regulator — optimal state-feedback control minimizing a quadratic cost                            |
 | [LQI / Servo Controller](IntegralStateFeedbackLqi.md)      | Integral state feedback (LQI) — LQR augmented with integrators on the tracking error for zero steady-state offset  |
 | [LQG Controller](Lqg.md)                                   | Linear Quadratic Gaussian — output-feedback optimal control via LQR + Kalman Filter                                |
