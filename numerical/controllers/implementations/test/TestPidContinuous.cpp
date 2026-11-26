@@ -1,8 +1,9 @@
 #include "numerical/controllers/implementations/PidContinuous.hpp"
 #include "numerical/controllers/implementations/PidIncremental.hpp"
+#include "numerical/math/Tolerance.hpp"
 #include "gtest/gtest.h"
 #include <array>
-#include <cmath>
+#include <cstddef>
 #include <limits>
 
 namespace
@@ -13,7 +14,7 @@ namespace
     public:
         using Gains = controllers::PidContinuous<float>::Gains;
 
-        static constexpr float tolerance{ 1e-4f };
+        const float tolerance{ math::Tolerance<float>() };
 
         controllers::PidContinuous<float> pid{ -10.0f, 10.0f };
     };
@@ -68,18 +69,41 @@ TEST_F(TestPidContinuous, the_clamped_output_does_not_wind_up)
     for (int step = 0; step != 200; ++step)
         pid.Update(1.0f, 0.0f, gains, 0.01f);
     EXPECT_NEAR(pid.Output(), 10.0f, tolerance);
-
     EXPECT_LT(pid.Update(-1.0f, 0.0f, gains, 0.01f), 10.0f);
+
+    for (int step = 0; step != 400; ++step)
+        pid.Update(-1.0f, 0.0f, gains, 0.01f);
+    EXPECT_NEAR(pid.Output(), -10.0f, tolerance);
+    EXPECT_GT(pid.Update(1.0f, 0.0f, gains, 0.01f), -10.0f);
 }
 
-TEST_F(TestPidContinuous, an_interval_that_is_not_positive_and_finite_is_ignored)
+TEST_F(TestPidContinuous, bad_input_is_ignored_and_leaves_the_state_unchanged)
 {
     const Gains gains{ 1.0f, 1.0f, 1.0f };
+    controllers::PidContinuous<float> fresh{ -10.0f, 10.0f };
     const float output{ pid.Update(1.0f, 0.0f, gains, 0.01f) };
+    fresh.Update(1.0f, 0.0f, gains, 0.01f);
+    const float nan{ std::numeric_limits<float>::quiet_NaN() };
+    const float infinity{ std::numeric_limits<float>::infinity() };
 
     EXPECT_NEAR(pid.Update(5.0f, 0.0f, gains, 0.0f), output, tolerance);
     EXPECT_NEAR(pid.Update(5.0f, 0.0f, gains, -1.0f), output, tolerance);
-    EXPECT_NEAR(pid.Update(5.0f, 0.0f, gains, std::numeric_limits<float>::quiet_NaN()), output, tolerance);
+    EXPECT_NEAR(pid.Update(5.0f, 0.0f, gains, nan), output, tolerance);
+    EXPECT_NEAR(pid.Update(5.0f, 0.0f, gains, infinity), output, tolerance);
+    EXPECT_NEAR(pid.Update(nan, 0.0f, gains, 0.01f), output, tolerance);
+    EXPECT_NEAR(pid.Update(1.0f, infinity, gains, 0.01f), output, tolerance);
+    EXPECT_NEAR(pid.Update(1.0f, 0.0f, Gains{ nan, 1.0f, 1.0f }, 0.01f), output, tolerance);
+
+    EXPECT_NEAR(pid.Update(2.0f, 0.0f, gains, 0.01f), fresh.Update(2.0f, 0.0f, gains, 0.01f), tolerance);
+}
+
+TEST_F(TestPidContinuous, the_derivative_uses_each_measured_interval)
+{
+    const Gains gains{ 0.0f, 0.0f, 0.1f };
+
+    pid.Update(0.0f, 0.0f, gains, 0.01f);
+    EXPECT_NEAR(pid.Update(0.2f, 0.0f, gains, 0.02f), 1.0f, tolerance);
+    EXPECT_NEAR(pid.Update(0.5f, 0.0f, gains, 0.05f), 0.6f, tolerance);
 }
 
 TEST_F(TestPidContinuous, reset_clears_the_state)
@@ -94,17 +118,16 @@ TEST_F(TestPidContinuous, reset_clears_the_state)
     EXPECT_NEAR(pid.Update(1.0f, 0.0f, gains, 0.01f), 1.01f, tolerance);
 }
 
-TEST_F(TestPidContinuous, matches_the_per_sample_pid_at_a_fixed_step_after_the_first_step)
+TEST_F(TestPidContinuous, matches_the_per_sample_pid_at_a_fixed_step_except_for_the_first_step_kick)
 {
     const Gains gains{ 1.5f, 4.0f, 0.02f };
     const float interval{ 0.01f };
     controllers::PidIncrementalSynchronous<float> reference{ { gains.kp, gains.ki * interval, gains.kd / interval }, { -10.0f, 10.0f } };
     reference.SetPoint(0.0f);
-    const std::array<float, 6> measured{ 0.0f, 0.3f, 0.5f, 0.4f, 0.1f, -0.2f };
+    const std::array<float, 6> measured{ 0.2f, 0.3f, 0.5f, 0.4f, 0.1f, -0.2f };
 
-    const float firstReference{ reference.Process(measured[0]) };
-    const float first{ pid.Update(0.0f, measured[0], gains, interval) };
-    EXPECT_NEAR(first, firstReference, tolerance);
+    const float kick{ gains.kd / interval * -measured[0] };
+    EXPECT_NEAR(pid.Update(0.0f, measured[0], gains, interval) + kick, reference.Process(measured[0]), tolerance);
 
     for (std::size_t i = 1; i != measured.size(); ++i)
         EXPECT_NEAR(pid.Update(0.0f, measured[i], gains, interval), reference.Process(measured[i]), tolerance);

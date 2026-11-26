@@ -4,7 +4,6 @@
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Math.hpp"
 #include <algorithm>
-#include <cstdint>
 #include <type_traits>
 
 namespace controllers
@@ -34,7 +33,7 @@ namespace controllers
         T output{};
         T previousError{};
         T previousDerivative{};
-        uint8_t steps{ 0 };
+        bool started{ false };
     };
 
     template<typename T>
@@ -51,7 +50,7 @@ namespace controllers
         output = T{};
         previousError = T{};
         previousDerivative = T{};
-        steps = 0;
+        started = false;
     }
 
     template<typename T>
@@ -61,14 +60,16 @@ namespace controllers
             return output;
 
         const T error{ setpoint - measured };
-        const T derivative{ steps == 0 ? T{} : (error - previousError) / interval };
-        const T derivativeStep{ steps < 2 ? derivative : derivative - previousDerivative };
-        const T increment{ gains.kp * (error - previousError) + gains.ki * interval * error + gains.kd * derivativeStep };
+        const T derivative{ started ? (error - previousError) / interval : T{} };
+        const T increment{ gains.kp * (error - previousError) + gains.ki * interval * error + gains.kd * (derivative - previousDerivative) };
+
+        if (!math::IsFinite(increment))
+            return output;
 
         output = std::clamp(output + increment, minimum, maximum);
         previousError = error;
         previousDerivative = derivative;
-        steps = static_cast<uint8_t>(std::min<uint8_t>(steps + 1, 2));
+        started = true;
         return output;
     }
 

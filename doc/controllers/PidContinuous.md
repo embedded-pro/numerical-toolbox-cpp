@@ -35,21 +35,21 @@ $K_p\,e_0$. The first step has no derivative estimate, so $d_0 = 0$: a set-point
 
 ### Anti-windup
 
-The clamp acts on the accumulated output. While the output stays on a limit, each step adds at most one increment
-past it. The integral part therefore cannot grow without bound, and the output leaves the limit on the first step
-whose increment points back.
+The clamp acts on the accumulated output, so the stored output stops at the limit. The integral part therefore
+cannot grow past it, and the first increment that points back moves the output off the limit at once.
 
 ### Equivalence
 
-At a fixed step $h$, from the second step on, the law equals the per-sample velocity PID with gains $K_p$,
-$K_i h$ and $K_d / h$.
+At a fixed step $h$ and while neither output is clamped, the law equals the per-sample velocity PID with gains
+$K_p$, $K_i h$ and $K_d / h$, except for that PID's derivative kick $K_d\,e_0 / h$ on the first step. From the
+second step on the two outputs are equal.
 
 ## Complexity Analysis
 
-| Operation | Time   | Space  | Notes                                        |
-|-----------|--------|--------|----------------------------------------------|
-| Step      | $O(1)$ | $O(1)$ | One division, a few multiply-adds, a clamp   |
-| State     | —      | $O(1)$ | Output, last error, last derivative, a count |
+| Operation | Time   | Space  | Notes                                       |
+|-----------|--------|--------|---------------------------------------------|
+| Step      | $O(1)$ | $O(1)$ | One division, a few multiply-adds, a clamp  |
+| State     | —      | $O(1)$ | Output, last error, last derivative, a flag |
 
 ## Step-by-Step Walkthrough
 
@@ -61,8 +61,8 @@ Gains $K_p = 0$, $K_i = 1$, $K_d = 0$, a constant error of 1 and steps of 0.01, 
 
 ## Pitfalls & Edge Cases
 
-- **Bad interval**: a step length that is zero, negative or not finite leaves the state unchanged. A stalled or
-  restarted clock therefore cannot divide by zero.
+- **Bad input**: a step length that is zero, negative or not finite leaves the state unchanged, and so does any
+  input that makes the increment not finite. A stalled clock or a failed sensor read therefore cannot poison the state.
 - **Derivative noise**: the backward difference amplifies measurement noise as the step gets shorter. Filter the
   measurement, or keep $K_d$ small.
 - **Gain changes**: new gains act from the next step. The velocity form keeps the integral part, so a gain change
