@@ -140,7 +140,7 @@ Scope: host tools that people install and run, GUI or console.
 ## Build *(repo)*
 
 ```bash
-cmake --preset host && cmake --build --preset host
+cmake --preset host && cmake --build --preset host-Debug
 ctest --preset host
 cmake --preset coverage && cmake --build --preset coverage
 ```
